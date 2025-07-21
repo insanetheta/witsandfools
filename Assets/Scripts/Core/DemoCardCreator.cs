@@ -61,51 +61,93 @@ namespace WitsAndFools.Demo
                 }
             }
             
-            // Find all Players and assign to DeckManager
-            Core.Player[] allPlayers = FindObjectsByType<Core.Player>(FindObjectsSortMode.None);
-            if (allPlayers.Length > 0 && deckManager != null)
+            // Find Players by specific GameObject names to ensure correct ID assignment
+            List<Core.Player> validPlayers = new List<Core.Player>();
+            
+            // Find Player0 GameObject and assign ID 0
+            GameObject player0GameObject = GameObject.Find("Player0");
+            if (player0GameObject != null)
             {
-                List<Core.Player> validPlayers = new List<Core.Player>();
-                
-                foreach (Core.Player player in allPlayers)
+                Core.Player player0 = player0GameObject.GetComponent<Core.Player>();
+                if (player0 != null)
                 {
-                    // Always initialize/update player data to ensure correct assignment
-                    int playerId = validPlayers.Count; // This will be 0 for first player, 1 for second
-                    string playerName = $"Player {playerId}";
-                    Core.PlayerType playerType = playerId == 0 ? Core.PlayerType.Human : Core.PlayerType.AI;
-                    player.Initialize(playerId, playerName, playerType);
+                    player0.Initialize(0, "Player 0", Core.PlayerType.Human);
                     
-                    // Set up HandManager for this player
-                    Core.HandManager playerHandManager = player.GetComponent<Core.HandManager>();
-                    if (playerHandManager != null)
+                    // Set up HandManager for Player 0
+                    Core.HandManager player0HandManager = player0.GetComponent<Core.HandManager>();
+                    if (player0HandManager != null)
                     {
-                        // Assign appropriate hand area based on current validPlayers count
-                        string handAreaName = validPlayers.Count == 0 ? "PlayerHandArea" : "Player1HandArea";
-                        Transform handContainer = GameObject.Find(handAreaName)?.transform;
+                        Transform handContainer = GameObject.Find("PlayerHandArea")?.transform;
                         if (handContainer != null)
                         {
-                            playerHandManager.handContainer = handContainer;
-                            UnityEngine.Debug.Log($"Hand container {handAreaName} assigned to {player.playerName}");
-                        }
-                        else
-                        {
-                            UnityEngine.Debug.LogWarning($"Hand container {handAreaName} not found for {player.playerName}!");
+                            player0HandManager.handContainer = handContainer;
+                            UnityEngine.Debug.Log("Hand container PlayerHandArea assigned to Player 0");
                         }
                         
-                        // Assign card prefab
                         GameObject cardPrefab = GameObject.Find("CardPrefab");
                         if (cardPrefab != null)
                         {
-                            playerHandManager.cardPrefab = cardPrefab;
+                            player0HandManager.cardPrefab = cardPrefab;
                         }
                     }
                     
-                    validPlayers.Add(player);
-                    UnityEngine.Debug.Log($"Player {player.playerName} (ID: {player.playerID}) initialized as {player.playerType}");
+                    validPlayers.Add(player0);
+                    UnityEngine.Debug.Log($"Player {player0.playerName} (ID: {player0.playerID}) initialized as {player0.playerType}");
                 }
-                
+            }
+            
+            // Find Player1 GameObject and assign ID 1
+            GameObject player1GameObject = GameObject.Find("Player1");
+            if (player1GameObject != null)
+            {
+                Core.Player player1 = player1GameObject.GetComponent<Core.Player>();
+                if (player1 != null)
+                {
+                    player1.Initialize(1, "Player 1", Core.PlayerType.AI);
+                    
+                    // Set up HandManager for Player 1
+                    Core.HandManager player1HandManager = player1.GetComponent<Core.HandManager>();
+                    if (player1HandManager != null)
+                    {
+                        Transform handContainer = GameObject.Find("Player1HandArea")?.transform;
+                        if (handContainer != null)
+                        {
+                            player1HandManager.handContainer = handContainer;
+                            UnityEngine.Debug.Log("Hand container Player1HandArea assigned to Player 1");
+                        }
+                        
+                        GameObject cardPrefab = GameObject.Find("CardPrefab");
+                        if (cardPrefab != null)
+                        {
+                            player1HandManager.cardPrefab = cardPrefab;
+                        }
+                    }
+                    
+                    validPlayers.Add(player1);
+                    UnityEngine.Debug.Log($"Player {player1.playerName} (ID: {player1.playerID}) initialized as {player1.playerType}");
+                }
+            }
+            
+            // Assign players to DeckManager
+            if (validPlayers.Count > 0 && deckManager != null)
+            {
                 deckManager.players = validPlayers.ToArray();
                 UnityEngine.Debug.Log($"All {validPlayers.Count} players assigned to DeckManager");
+            }
+            
+            // Assign players to TurnManager
+            Core.TurnManager turnManager = FindFirstObjectByType<Core.TurnManager>();
+            if (turnManager != null && validPlayers.Count > 0)
+            {
+                turnManager.players = validPlayers;
+                UnityEngine.Debug.Log($"All {validPlayers.Count} players assigned to TurnManager");
+                
+                // Initialize the turn order immediately
+                turnManager.InitializeTurnOrder();
+            }
+            else if (turnManager == null)
+            {
+                UnityEngine.Debug.LogError("TurnManager not found! Cannot assign players.");
             }
         }
         
