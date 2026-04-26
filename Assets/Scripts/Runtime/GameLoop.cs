@@ -1,33 +1,34 @@
 namespace WitsAndFools
 {
-    // Wires a GameEngine to two IPlayerControllers and drives the request-action flow on each event.
-    // The UI layer subscribes to engine events for visuals; this class only coordinates "whose turn is it".
+    // Wires a GameEngine to two IPlayerControllers. Coordinates "whose turn is it" without
+    // re-entering the engine inside an event handler — the host (GameManager) calls
+    // PumpDeferred() once per frame so all UI subscribers get to run their visuals before
+    // the AI takes its turn.
     public sealed class GameLoop
     {
         public readonly GameEngine Engine;
         public readonly IPlayerController[] Controllers;
 
+        bool _pumpRequested;
+
         public GameLoop(IPlayerController p0, IPlayerController p1, int? seed = null)
         {
             Engine = new GameEngine(seed);
             Controllers = new[] { p0, p1 };
-            Engine.OnTurnBegan += OnTurnBegan;
-            Engine.OnAttackPlayed += (_, _) => Pump();
-            Engine.OnDefensePlayed += (_, _, _) => Pump();
-            Engine.OnBoutResolved += _ => { /* OnTurnBegan fires next inside ResolveBout */ };
+            Engine.OnTurnBegan += _ => RequestPump();
+            Engine.OnAttackPlayed += (_, _) => RequestPump();
+            Engine.OnDefensePlayed += (_, _, _) => RequestPump();
         }
 
         public void Start() => Engine.StartNewGame();
 
-        void OnTurnBegan(int playerIndex)
-        {
-            Pump();
-        }
+        void RequestPump() => _pumpRequested = true;
 
-        // Ask the active controller to act. For the AI side, that triggers immediate actions.
-        // For human, it's a no-op; the UI handles input directly.
-        void Pump()
+        // Called by GameManager on Update.
+        public void Tick()
         {
+            if (!_pumpRequested) return;
+            _pumpRequested = false;
             if (Engine.Phase == Phase.GameOver) return;
             int active = Engine.Phase == Phase.Defense ? Engine.DefenderIndex : Engine.AttackerIndex;
             Controllers[active].RequestAction(Engine, active);

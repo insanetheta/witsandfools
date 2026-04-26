@@ -1,0 +1,6 @@
+{
+    "server_url": "http://internal-af0453c4242e64384954e00703754fa5-1098238329.us-east-1.elb.amazonaws.com:7860/",
+    "server_host": "internal-af0453c4242e64384954e00703754fa5-1098238329.us-east-1.elb.amazonaws.com",
+    "server_port": 7860,
+    "ping_interval_minutes": 30
+}

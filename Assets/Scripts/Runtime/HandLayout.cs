@@ -40,6 +40,10 @@ namespace WitsAndFools
 
         public void Apply()
         {
+            // Drop any destroyed views first.
+            for (int i = _cards.Count - 1; i >= 0; i--)
+                if (!_cards[i]) _cards.RemoveAt(i);
+
             int n = _cards.Count;
             if (n == 0) return;
 

@@ -37,6 +37,24 @@ namespace WitsAndFools
             BeginNewGame();
         }
 
+        float _earliestNextAiAct;
+
+        void Update()
+        {
+            if (_loop == null) return;
+            if (_loop.Engine.Phase == Phase.GameOver) return;
+
+            int active = _loop.Engine.Phase == Phase.Defense ? _loop.Engine.DefenderIndex : _loop.Engine.AttackerIndex;
+            bool aiTurn = _loop.Controllers[active].Kind == PlayerKind.AI;
+
+            // Delay AI ticks so play feels deliberate; human ticks are instant (humans wait on the UI anyway).
+            if (aiTurn && Time.time < _earliestNextAiAct) return;
+
+            _loop.Tick();
+
+            if (aiTurn) _earliestNextAiAct = Time.time + AiThinkSeconds;
+        }
+
         public void BeginNewGame()
         {
             ClearAllVisuals();
@@ -69,10 +87,11 @@ namespace WitsAndFools
 
         void OnSetupComplete()
         {
-            // Build trump card visual (face-up, under the deck)
+            // Build trump card visual (face-up, peeking out from under the deck, rotated 90°)
             _trumpView = SpawnCardView(Engine.TrumpCard, faceUp: true, parent: Table.TrumpSlot);
-            _trumpView.transform.localPosition = Vector3.zero;
-            _trumpView.transform.localRotation = Quaternion.Euler(0, 0, 90);
+            var trumpRT = (RectTransform)_trumpView.transform;
+            trumpRT.anchoredPosition = Vector2.zero;
+            trumpRT.localRotation = Quaternion.Euler(0, 0, 90);
 
             // Build hands
             foreach (var c in Engine.HandOf(HumanPlayerIndex).Cards)
@@ -81,26 +100,13 @@ namespace WitsAndFools
                 AddOpponentCardView();
 
             UpdateHud();
+            ApplyHighlightForPhase();
         }
 
         void OnTurnBegan(int playerIndex)
         {
             UpdateHud();
             ApplyHighlightForPhase();
-            // AI thinks briefly before its action.
-            if (Engine.Phase != Phase.GameOver && _loop.CurrentController.Kind == PlayerKind.AI)
-                StartCoroutine(AiThink());
-        }
-
-        IEnumerator AiThink()
-        {
-            yield return new WaitForSeconds(AiThinkSeconds);
-            // GameLoop already pumped on OnTurnBegan; the AI controller acted synchronously.
-            // But because we're using events for everything, an immediate AI act has already happened.
-            // This delay gives the player time to read the table.
-            // We still want UI updates to keep flowing — re-apply highlights after delay.
-            ApplyHighlightForPhase();
-            UpdateHud();
         }
 
         void OnAttackPlayed(int attackerIndex, Card card)
@@ -121,18 +127,17 @@ namespace WitsAndFools
                 view.Bind(card, faceUp: true);
             }
 
-            view.transform.SetParent(Table.BoutArea, true);
+            view.transform.SetParent(Table.BoutArea, false);
             view.SetHighlight(CardView.Highlight.None);
             EnsureSlotList(_attackViews, slot + 1);
             _attackViews[slot] = view;
             view.OnClicked = null;
             view.transform.localRotation = Quaternion.identity;
-            StartCoroutine(MoveTo(view, Table.BoutAttackSlotPos(slot), MoveSeconds));
+            ((RectTransform)view.transform).anchoredPosition = Vector2.zero; // start at center, then animate
+            RelayoutBout();
 
             UpdateHud();
             ApplyHighlightForPhase();
-            if (Engine.Phase != Phase.GameOver && _loop.CurrentController.Kind == PlayerKind.AI)
-                StartCoroutine(AiThink());
         }
 
         void OnDefensePlayed(int defenderIndex, int slot, Card card)
@@ -152,18 +157,29 @@ namespace WitsAndFools
                 view.Bind(card, faceUp: true);
             }
 
-            view.transform.SetParent(Table.BoutArea, true);
+            view.transform.SetParent(Table.BoutArea, false);
             view.SetHighlight(CardView.Highlight.None);
             EnsureSlotList(_defenseViews, slot + 1);
             _defenseViews[slot] = view;
             view.OnClicked = null;
             view.transform.localRotation = Quaternion.Euler(0, 0, -8f);
-            StartCoroutine(MoveTo(view, Table.BoutDefenseSlotPos(slot), MoveSeconds));
+            ((RectTransform)view.transform).anchoredPosition = Vector2.zero;
+            RelayoutBout();
 
             UpdateHud();
             ApplyHighlightForPhase();
-            if (Engine.Phase != Phase.GameOver && _loop.CurrentController.Kind == PlayerKind.AI)
-                StartCoroutine(AiThink());
+        }
+
+        void RelayoutBout()
+        {
+            int n = _attackViews.Count;
+            for (int i = 0; i < n; i++)
+            {
+                if (_attackViews[i])
+                    StartCoroutine(MoveTo(_attackViews[i], Table.BoutAttackSlotPos(i, n), MoveSeconds));
+                if (i < _defenseViews.Count && _defenseViews[i])
+                    StartCoroutine(MoveTo(_defenseViews[i], Table.BoutDefenseSlotPos(i, n), MoveSeconds));
+            }
         }
 
         void OnBoutResolved(BoutOutcome outcome)
@@ -379,9 +395,12 @@ namespace WitsAndFools
 
         void ClearAllVisuals()
         {
-            foreach (var kv in _humanCardViews) if (kv.Value) Destroy(kv.Value.gameObject);
+            if (Table)
+            {
+                if (Table.PlayerHand) Table.PlayerHand.Clear();
+                if (Table.OpponentHand) Table.OpponentHand.Clear();
+            }
             _humanCardViews.Clear();
-            foreach (var v in _opponentCardViews) if (v) Destroy(v.gameObject);
             _opponentCardViews.Clear();
             foreach (var v in _attackViews) if (v) Destroy(v.gameObject);
             _attackViews.Clear();

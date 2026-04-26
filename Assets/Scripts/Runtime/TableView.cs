@@ -23,16 +23,18 @@ namespace WitsAndFools
         public float BoutSlotSpacing = 130f;
         public float DefenseOffset = 28f;     // defense card offsets down-right relative to its attack
 
-        public Vector2 BoutAttackSlotPos(int slot)
+        // Position assumes the bout pivots around BoutArea center (0,0)
+        // and grows symmetrically as cards are added. Caller passes total slot count.
+        public Vector2 BoutAttackSlotPos(int slot, int totalSlots)
         {
-            int n = Mathf.Max(1, slot + 1);
-            float baseX = (slot - 2.5f) * BoutSlotSpacing; // up to 6 slots; centered roughly
-            return new Vector2(baseX, 0);
+            int n = Mathf.Max(1, totalSlots);
+            float startX = -(n - 1) * 0.5f * BoutSlotSpacing;
+            return new Vector2(startX + slot * BoutSlotSpacing, 0);
         }
 
-        public Vector2 BoutDefenseSlotPos(int slot)
+        public Vector2 BoutDefenseSlotPos(int slot, int totalSlots)
         {
-            var atk = BoutAttackSlotPos(slot);
+            var atk = BoutAttackSlotPos(slot, totalSlots);
             return new Vector2(atk.x + DefenseOffset, atk.y - DefenseOffset);
         }
     }

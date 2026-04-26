@@ -1,32 +1,16 @@
 {
-  "servers": {
-    "UnityMCP": {
-      "command": "python3.12",
-      "args": [
-        "-m",
-        "uv",
-        "run",
-        "--directory",
-        "C:\\Users\\greg\\AppData\\Local\\Programs\\UnityMCP\\UnityMcpServer\\src",
-        "server.py"
-      ]
-    },
-    "filesystem": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "c:\\Projects\\wits\\witsandfools"
-      ]
-    },
-    "git": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-git",
-        "--repository",
-        "c:\\Projects\\wits\\witsandfools"
-      ]
+    "servers": {
+        "UnityMCP": {
+            "command": "uv",
+            "args": ["run", "--directory", "/Users/greg/unity-mcp/UnityMcpServer/src", "server.py"]
+        },
+        "filesystem": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/greg/projects/witsandfools"]
+        },
+        "git": {
+            "command": "npx",
+            "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "/Users/greg/projects/witsandfools"]
+        }
     }
-  }
 }

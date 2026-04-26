@@ -133,34 +133,54 @@ namespace WitsAndFools.EditorTools
             endBoutBtn.sizeDelta = new Vector2(220, 70);
             endBoutBtn.anchoredPosition = new Vector2(-30, 30);
 
-            // ----- Center area: deck, trump, discard, bout area -----
+            // ----- Center band: deck/trump anchored to LEFT edge, discard anchored to RIGHT edge,
+            // bout area in the middle. Anchoring to edges keeps everything visible at narrow aspect ratios.
             var deckSlot = NewChild(canvasRT, "DeckSlot");
-            deckSlot.sizeDelta = new Vector2(120, 170);
-            deckSlot.anchoredPosition = new Vector2(-260, 0);
+            deckSlot.anchorMin = new Vector2(0, 0.5f);
+            deckSlot.anchorMax = new Vector2(0, 0.5f);
+            deckSlot.pivot = new Vector2(0, 0.5f);
+            deckSlot.sizeDelta = new Vector2(110, 160);
+            deckSlot.anchoredPosition = new Vector2(120, 0);
             var deckImg = deckSlot.gameObject.AddComponent<Image>();
             deckImg.color = new Color(0.20f, 0.06f, 0.06f, 1f);
-            // simple "deck" stack visual: rectangles offset
+            // Deck "stack" visual using offset rectangles
             for (int i = 0; i < 6; i++)
             {
                 var stack = NewChild(deckSlot, $"DeckStack{i}");
                 stack.sizeDelta = new Vector2(110, 160);
-                stack.anchoredPosition = new Vector2(-2 - i * 0.5f, 2 + i * 0.5f);
+                stack.anchoredPosition = new Vector2(55 - i * 0.5f, i * 0.6f); // pivot is left so center is +55
                 var img = stack.gameObject.AddComponent<Image>();
                 img.color = new Color(0.55f, 0.10f, 0.10f);
                 img.raycastTarget = false;
             }
 
+            // Trump card sits to the right of the deck, rotated 90° (handled by GameManager) so it peeks out.
             var trumpSlot = NewChild(canvasRT, "TrumpSlot");
-            trumpSlot.sizeDelta = new Vector2(170, 120);
-            trumpSlot.anchoredPosition = new Vector2(-260 + 70, 0);
+            trumpSlot.anchorMin = new Vector2(0, 0.5f);
+            trumpSlot.anchorMax = new Vector2(0, 0.5f);
+            trumpSlot.pivot = new Vector2(0, 0.5f);
+            trumpSlot.sizeDelta = new Vector2(160, 110);
+            trumpSlot.anchoredPosition = new Vector2(180, 0);
 
+            // Discard pile on the right edge.
             var discardSlot = NewChild(canvasRT, "DiscardSlot");
-            discardSlot.sizeDelta = new Vector2(120, 170);
-            discardSlot.anchoredPosition = new Vector2(260, 0);
+            discardSlot.anchorMin = new Vector2(1, 0.5f);
+            discardSlot.anchorMax = new Vector2(1, 0.5f);
+            discardSlot.pivot = new Vector2(1, 0.5f);
+            discardSlot.sizeDelta = new Vector2(110, 160);
+            discardSlot.anchoredPosition = new Vector2(-120, 0);
             var discardImg = discardSlot.gameObject.AddComponent<Image>();
-            discardImg.color = new Color(1, 1, 1, 0.04f);
+            discardImg.color = new Color(1, 1, 1, 0.05f);
+            // Add a "Discard" label
+            AddText(discardSlot, "DiscardLabel", "Discard",
+                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(0.5f, 0),
+                alignment: TextAlignmentOptions.Center, fontSize: 18,
+                color: new Color(1, 1, 1, 0.5f));
 
             var boutArea = NewChild(canvasRT, "BoutArea");
+            boutArea.anchorMin = new Vector2(0.5f, 0.5f);
+            boutArea.anchorMax = new Vector2(0.5f, 0.5f);
             boutArea.sizeDelta = new Vector2(900, 240);
             boutArea.anchoredPosition = new Vector2(0, 0);
 

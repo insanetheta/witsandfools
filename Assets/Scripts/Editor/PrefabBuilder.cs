@@ -60,19 +60,14 @@ namespace WitsAndFools.EditorTools
             var rankTL = CreateChildText(faceRoot.transform, "RankTopLeft", "A♥",
                 anchorMin: new Vector2(0, 1), anchorMax: new Vector2(0, 1),
                 pivot: new Vector2(0, 1),
-                position: new Vector2(6, -4),
-                size: new Vector2(50, 32),
+                position: new Vector2(8, -6),
+                size: new Vector2(60, 32),
                 alignment: TextAlignmentOptions.TopLeft,
-                fontSize: 24);
+                fontSize: 22);
 
-            var rankBR = CreateChildText(faceRoot.transform, "RankBottomRight", "A♥",
-                anchorMin: new Vector2(1, 0), anchorMax: new Vector2(1, 0),
-                pivot: new Vector2(1, 0),
-                position: new Vector2(-6, 4),
-                size: new Vector2(50, 32),
-                alignment: TextAlignmentOptions.BottomRight,
-                fontSize: 24);
-            rankBR.transform.localRotation = Quaternion.Euler(0, 0, 180);
+            // Skip a rotated bottom-right rank label (real cards have one but rotation causes
+            // visible overflow when cards are fanned). Top-left rank + center pip is enough.
+            TMP_Text rankBR = null;
 
             var center = CreateChildText(faceRoot.transform, "CenterPip", "♥",
                 anchorMin: new Vector2(0.5f, 0.5f), anchorMax: new Vector2(0.5f, 0.5f),
