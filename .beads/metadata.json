@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "witsandfools",
+  "project_id": "d71f57ce-dde7-4e4f-8a35-593962712789"
+}
