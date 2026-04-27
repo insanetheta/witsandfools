@@ -259,19 +259,32 @@ namespace WitsAndFools
         {
             bool humanAttack = Engine.Phase == Phase.Attack && Engine.AttackerIndex == HumanPlayerIndex;
             bool humanDefense = Engine.Phase == Phase.Defense && Engine.DefenderIndex == HumanPlayerIndex;
+            bool humanActive = humanAttack || humanDefense;
 
             int defendSlot = humanDefense ? Engine.Bout.FirstUndefendedSlot() : -1;
 
             foreach (var kv in _humanCardViews)
             {
                 var view = kv.Value;
-                view.OnClicked = OnHumanCardClicked;
-                if (humanAttack && Rules.CanAttackWith(Engine.Bout, view.Card))
+                bool playable =
+                    (humanAttack && Rules.CanAttackWith(Engine.Bout, view.Card)) ||
+                    (humanDefense && defendSlot >= 0 && Rules.CanDefendSlotWith(Engine.Bout, defendSlot, view.Card, Engine.Trump));
+
+                if (playable)
+                {
                     view.SetHighlight(CardView.Highlight.Playable);
-                else if (humanDefense && defendSlot >= 0 && Rules.CanDefendSlotWith(Engine.Bout, defendSlot, view.Card, Engine.Trump))
-                    view.SetHighlight(CardView.Highlight.Playable);
+                    view.OnClicked = OnHumanCardClicked;
+                }
+                else if (humanActive)
+                {
+                    view.SetHighlight(CardView.Highlight.Disabled);
+                    view.OnClicked = null;
+                }
                 else
+                {
                     view.SetHighlight(CardView.Highlight.None);
+                    view.OnClicked = null;
+                }
             }
 
             // End-bout / Eat button enable

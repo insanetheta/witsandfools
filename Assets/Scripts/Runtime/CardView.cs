@@ -28,11 +28,13 @@ namespace WitsAndFools
         public Color OutlinePlayable = new Color(0.20f, 0.85f, 0.30f, 1f);
         public Color OutlineHover = new Color(1f, 1f, 1f, 1f);
         public Color OutlineDisabled = new Color(0.3f, 0.3f, 0.3f, 1f);
+        public float DisabledAlpha = 0.45f;
 
         Card _card;
         bool _faceUp = true;
         bool _hover;
         Highlight _highlight = Highlight.None;
+        CanvasGroup _canvasGroup;
 
         public Card Card => _card;
         public bool FaceUp => _faceUp;
@@ -41,6 +43,12 @@ namespace WitsAndFools
 
         // Click delegate so HUD/Hand wiring can route clicks through one funnel.
         public System.Action<CardView> OnClicked;
+
+        void Awake()
+        {
+            _canvasGroup = GetComponent<CanvasGroup>();
+            if (!_canvasGroup) _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
 
         public void Bind(Card card, bool faceUp)
         {
@@ -82,14 +90,18 @@ namespace WitsAndFools
 
         void ApplyOutline()
         {
-            if (!Outline) return;
-            if (_hover && _highlight == Highlight.Playable) { Outline.color = OutlineHover; return; }
-            switch (_highlight)
+            if (Outline)
             {
-                case Highlight.Playable: Outline.color = OutlinePlayable; break;
-                case Highlight.Disabled: Outline.color = OutlineDisabled; break;
-                default: Outline.color = OutlineDefault; break;
+                if (_hover && _highlight == Highlight.Playable) Outline.color = OutlineHover;
+                else switch (_highlight)
+                {
+                    case Highlight.Playable: Outline.color = OutlinePlayable; break;
+                    case Highlight.Disabled: Outline.color = OutlineDisabled; break;
+                    default: Outline.color = OutlineDefault; break;
+                }
             }
+            if (_canvasGroup)
+                _canvasGroup.alpha = _highlight == Highlight.Disabled ? DisabledAlpha : 1f;
         }
 
         public void OnPointerClick(PointerEventData eventData) => OnClicked?.Invoke(this);
