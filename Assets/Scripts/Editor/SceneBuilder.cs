@@ -276,6 +276,19 @@ namespace WitsAndFools.EditorTools
             hud.UseAbilityButton = useBtn.GetComponent<Button>();
             acPanel.gameObject.SetActive(false);
 
+            // ----- Tooltip label (bottom-left, hidden by default) -----
+            var tooltipLabel = AddText(canvasRT, "TooltipLabel", "",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 0),
+                pivot: new Vector2(0, 0),
+                alignment: TextAlignmentOptions.BottomLeft, fontSize: 18,
+                color: new Color(1, 1, 1, 0.85f));
+            var tooltipRT = (RectTransform)tooltipLabel.transform;
+            tooltipRT.sizeDelta = new Vector2(0, 50);
+            tooltipRT.anchoredPosition = new Vector2(30, 35);
+            tooltipLabel.enableWordWrapping = true;
+            tooltipLabel.gameObject.SetActive(false);
+            hud.TooltipLabel = tooltipLabel;
+
             // ----- GameManager wiring -----
             var gmGO = new GameObject("GameManager");
             var gm = gmGO.AddComponent<GameManager>();

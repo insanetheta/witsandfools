@@ -18,6 +18,7 @@ namespace WitsAndFools
         public TMP_Text RankBottomRight;
         public TMP_Text CenterPip;
         public RectTransform BackRoot;
+        public TMP_Text AbilityBadge;
 
         [Header("Visual settings")]
         public Color FaceColor = new Color(0.97f, 0.94f, 0.86f);
@@ -43,6 +44,7 @@ namespace WitsAndFools
 
         // Click delegate so HUD/Hand wiring can route clicks through one funnel.
         public System.Action<CardView> OnClicked;
+        public static System.Action<Card?> OnHoverChanged;
 
         void Awake()
         {
@@ -79,8 +81,29 @@ namespace WitsAndFools
             if (RankTopLeft) { RankTopLeft.text = label; RankTopLeft.color = color; }
             if (RankBottomRight) { RankBottomRight.text = label; RankBottomRight.color = color; }
             if (CenterPip) { CenterPip.text = _card.Suit.Glyph(); CenterPip.color = color; }
+            if (AbilityBadge)
+            {
+                if (_card.HasAbility)
+                {
+                    AbilityBadge.gameObject.SetActive(true);
+                    AbilityBadge.text = _card.Ability.Value.ShortName();
+                    AbilityBadge.color = AbilityBadgeColor(_card.Ability.Value);
+                }
+                else AbilityBadge.gameObject.SetActive(false);
+            }
             ApplyOutline();
         }
+
+        static Color AbilityBadgeColor(AbilityType ability) => ability switch
+        {
+            AbilityType.TrumpChanger => new Color(0.55f, 0.20f, 0.70f),
+            AbilityType.ExtraDraw => new Color(0.15f, 0.40f, 0.75f),
+            AbilityType.Blocker => new Color(0.85f, 0.50f, 0.10f),
+            AbilityType.DoubleTrouble => new Color(0.80f, 0.15f, 0.15f),
+            AbilityType.DoubleDefense => new Color(0.15f, 0.60f, 0.25f),
+            AbilityType.SeizeInitiative => new Color(0.75f, 0.65f, 0.10f),
+            _ => Color.gray
+        };
 
         void RenderBack()
         {
@@ -105,7 +128,7 @@ namespace WitsAndFools
         }
 
         public void OnPointerClick(PointerEventData eventData) => OnClicked?.Invoke(this);
-        public void OnPointerEnter(PointerEventData eventData) { _hover = true; ApplyOutline(); }
-        public void OnPointerExit(PointerEventData eventData) { _hover = false; ApplyOutline(); }
+        public void OnPointerEnter(PointerEventData eventData) { _hover = true; ApplyOutline(); OnHoverChanged?.Invoke(_faceUp ? (Card?)_card : null); }
+        public void OnPointerExit(PointerEventData eventData) { _hover = false; ApplyOutline(); OnHoverChanged?.Invoke(null); }
     }
 }

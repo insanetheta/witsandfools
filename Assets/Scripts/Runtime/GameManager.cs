@@ -89,6 +89,7 @@ namespace WitsAndFools
                 Hud.HideAbilityChoice();
             }
 
+            CardView.OnHoverChanged = OnCardHover;
             _loop.Start();
         }
 
@@ -308,6 +309,16 @@ namespace WitsAndFools
             }
             UpdateHud();
             ApplyHighlightForPhase();
+        }
+
+        void OnCardHover(Card? card)
+        {
+            if (card.HasValue && card.Value.HasAbility)
+            {
+                var a = card.Value.Ability.Value;
+                Hud?.ShowTooltip($"{a.DisplayName()} — {a.Description()}");
+            }
+            else Hud?.HideTooltip();
         }
 
         void OnTrumpChanged(Suit newSuit)

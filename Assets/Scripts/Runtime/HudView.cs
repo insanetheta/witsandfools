@@ -15,6 +15,9 @@ namespace WitsAndFools
         public GameObject GameOverPanel;
         public TMP_Text GameOverLabel;
 
+        [Header("Tooltip")]
+        public TMP_Text TooltipLabel;
+
         [Header("Ability Choice")]
         public GameObject AbilityChoicePanel;
         public TMP_Text AbilityChoiceLabel;
@@ -45,5 +48,8 @@ namespace WitsAndFools
 
         public void HideAbilityChoice() { if (AbilityChoicePanel) AbilityChoicePanel.SetActive(false); }
         public bool AbilityChoiceVisible => AbilityChoicePanel && AbilityChoicePanel.activeSelf;
+
+        public void ShowTooltip(string text) { if (TooltipLabel) { TooltipLabel.gameObject.SetActive(true); TooltipLabel.text = text; } }
+        public void HideTooltip() { if (TooltipLabel) TooltipLabel.gameObject.SetActive(false); }
     }
 }

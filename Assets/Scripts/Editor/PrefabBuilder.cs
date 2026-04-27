@@ -77,6 +77,17 @@ namespace WitsAndFools.EditorTools
                 alignment: TextAlignmentOptions.Center,
                 fontSize: 56);
 
+            // Ability badge at bottom of face
+            var abilityBadge = CreateChildText(faceRoot.transform, "AbilityBadge", "",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(1, 0),
+                pivot: new Vector2(0.5f, 0),
+                position: new Vector2(0, 4),
+                size: new Vector2(0, 20),
+                alignment: TextAlignmentOptions.Center,
+                fontSize: 11);
+            abilityBadge.fontStyle = FontStyles.Bold;
+            abilityBadge.gameObject.SetActive(false);
+
             // Back
             var backRoot = new GameObject("Back", typeof(RectTransform));
             backRoot.transform.SetParent(go.transform, false);
@@ -110,6 +121,7 @@ namespace WitsAndFools.EditorTools
             view.RankBottomRight = rankBR;
             view.CenterPip = center;
             view.BackRoot = backRT;
+            view.AbilityBadge = abilityBadge;
 
             // Save as prefab
             System.IO.Directory.CreateDirectory("Assets/Prefabs");

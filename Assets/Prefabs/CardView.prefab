@@ -626,6 +626,7 @@ MonoBehaviour:
   OutlinePlayable: {r: 0.2, g: 0.85, b: 0.3, a: 1}
   OutlineHover: {r: 1, g: 1, b: 1, a: 1}
   OutlineDisabled: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+  DisabledAlpha: 0.45
 --- !u!1 &8011585925318436928
 GameObject:
   m_ObjectHideFlags: 0
