@@ -29,6 +29,8 @@ namespace WitsAndFools
         public Card TrumpCard { get; private set; }     // the visible bottom card
         bool _trumpStillInDeck = true;
         bool _trumpChangerUsed;
+        int? _seizeInitiativePlayer;
+        bool _doubleTroubleActive;
         public int AttackerIndex { get; private set; }
         public int DefenderIndex => 1 - AttackerIndex;  // 2-player only
         public Phase Phase { get; private set; } = Phase.Setup;
@@ -70,6 +72,8 @@ namespace WitsAndFools
             FoolIndex = null;
             _trumpStillInDeck = true;
             _trumpChangerUsed = false;
+            _seizeInitiativePlayer = null;
+            _doubleTroubleActive = false;
 
             _deck.Shuffle();
 
@@ -119,14 +123,15 @@ namespace WitsAndFools
             if (Phase != Phase.Attack) return false;
             if (playerIndex != AttackerIndex) return false;
             if (!_hands[playerIndex].Contains(card)) return false;
-            if (!Rules.CanAttackWith(_bout, card)) return false;
-            // Can't add an attack the defender has no cards to cover.
+            if (_bout.AttacksCapped) return false;
+            bool rankBypass = _doubleTroubleActive;
+            if (!rankBypass && !Rules.CanAttackWith(_bout, card)) return false;
             if (_bout.AttackCount - CountDefended() >= _hands[DefenderIndex].Count) return false;
-            // Hard cap: max attacks per bout (rules say defender's starting hand size).
             if (_bout.AttackCount >= Rules.MaxAttacksPerBout) return false;
 
             _hands[playerIndex].Remove(card);
             _bout.AddAttack(card);
+            if (rankBypass) _doubleTroubleActive = false;
             // Phase must flip BEFORE firing the event: handlers (UpdateHud,
             // ApplyHighlightForPhase) read Engine.Phase synchronously and would
             // otherwise see the pre-attack Phase, leaving the UI stuck.
@@ -194,7 +199,7 @@ namespace WitsAndFools
 
             var ability = card.Ability.Value;
 
-            if (!ValidateAbility(ability)) return false;
+            if (!ValidateAbility(ability, card, defenseSlot)) return false;
 
             _hands[playerIndex].Remove(card);
             _discard.Add(card);
@@ -203,7 +208,7 @@ namespace WitsAndFools
             return true;
         }
 
-        bool ValidateAbility(AbilityType ability)
+        bool ValidateAbility(AbilityType ability, Card card, int defenseSlot)
         {
             switch (ability)
             {
@@ -211,6 +216,15 @@ namespace WitsAndFools
                     return !_trumpChangerUsed;
                 case AbilityType.ExtraDraw:
                     return Phase == Phase.Attack && _deck.Count > 0;
+                case AbilityType.DoubleTrouble:
+                    return Phase == Phase.Attack;
+                case AbilityType.Blocker:
+                    return Phase == Phase.Defense;
+                case AbilityType.DoubleDefense:
+                    int slot = defenseSlot >= 0 ? defenseSlot : _bout.FirstUndefendedSlot();
+                    return Phase == Phase.Defense && slot >= 0 && Rules.Beats(card, _bout.Attacks[slot], Trump);
+                case AbilityType.SeizeInitiative:
+                    return true;
                 default:
                     return true;
             }
@@ -226,8 +240,30 @@ namespace WitsAndFools
                     OnTrumpChanged?.Invoke(Trump);
                     break;
                 case AbilityType.ExtraDraw:
-                    int target = _hands[DefenderIndex].Count + 2;
-                    DrawTo(DefenderIndex, target);
+                    int drawTarget = _hands[DefenderIndex].Count + 2;
+                    DrawTo(DefenderIndex, drawTarget);
+                    break;
+                case AbilityType.Blocker:
+                    _bout.AttacksCapped = true;
+                    break;
+                case AbilityType.SeizeInitiative:
+                    _seizeInitiativePlayer = playerIndex;
+                    break;
+                case AbilityType.DoubleTrouble:
+                    _doubleTroubleActive = true;
+                    break;
+                case AbilityType.DoubleDefense:
+                    _discard.Remove(card);
+                    int slot1 = defenseSlot >= 0 ? defenseSlot : _bout.FirstUndefendedSlot();
+                    if (slot1 >= 0)
+                    {
+                        _bout.TryDefend(slot1, card);
+                        Phase = Phase.Attack;
+                        OnDefensePlayed?.Invoke(playerIndex, slot1, card);
+                    }
+                    int slot2 = _bout.FirstUndefendedSlot();
+                    if (slot2 >= 0)
+                        _bout.AutoDefend(slot2);
                     break;
             }
         }
@@ -252,10 +288,19 @@ namespace WitsAndFools
             DrawTo(attackerBefore, Rules.HandSizeTwoPlayer);
             DrawTo(defenderBefore, Rules.HandSizeTwoPlayer);
 
+            _doubleTroubleActive = false;
+
             if (CheckGameOver(attackerBefore, defenderBefore, outcome)) return;
 
-            // Switch attacker on a successful defense; same attacker continues if defender ate.
-            AttackerIndex = outcome == BoutOutcome.DefenderWonAllDiscarded ? defenderBefore : attackerBefore;
+            if (_seizeInitiativePlayer.HasValue)
+            {
+                AttackerIndex = _seizeInitiativePlayer.Value;
+                _seizeInitiativePlayer = null;
+            }
+            else
+            {
+                AttackerIndex = outcome == BoutOutcome.DefenderWonAllDiscarded ? defenderBefore : attackerBefore;
+            }
 
             Phase = Phase.Attack;
             OnTurnBegan?.Invoke(AttackerIndex);

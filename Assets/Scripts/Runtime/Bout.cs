@@ -6,6 +6,8 @@ namespace WitsAndFools
     {
         readonly List<Card> _attacks = new();
         readonly List<Card?> _defenses = new();
+        readonly HashSet<int> _autoDefended = new();
+        public bool AttacksCapped { get; set; }
 
         public IReadOnlyList<Card> Attacks => _attacks;
         public IReadOnlyList<Card?> Defenses => _defenses;
@@ -18,7 +20,7 @@ namespace WitsAndFools
             {
                 if (_attacks.Count == 0) return false;
                 for (int i = 0; i < _defenses.Count; i++)
-                    if (_defenses[i] == null) return false;
+                    if (_defenses[i] == null && !_autoDefended.Contains(i)) return false;
                 return true;
             }
         }
@@ -40,8 +42,13 @@ namespace WitsAndFools
         public int FirstUndefendedSlot()
         {
             for (int i = 0; i < _defenses.Count; i++)
-                if (_defenses[i] == null) return i;
+                if (_defenses[i] == null && !_autoDefended.Contains(i)) return i;
             return -1;
+        }
+
+        public void AutoDefend(int slot)
+        {
+            if (slot >= 0 && slot < _defenses.Count) _autoDefended.Add(slot);
         }
 
         public IEnumerable<Card> AllCards()
@@ -62,6 +69,8 @@ namespace WitsAndFools
         {
             _attacks.Clear();
             _defenses.Clear();
+            _autoDefended.Clear();
+            AttacksCapped = false;
         }
     }
 }
