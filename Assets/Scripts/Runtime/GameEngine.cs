@@ -50,9 +50,9 @@ namespace WitsAndFools
         public event Action<int, int> OnDrew;             // playerIndex, drawnCount
         public event Action<int> OnGameOver;              // foolIndex
 
-        public GameEngine(int? seed = null)
+        public GameEngine(int? seed = null, IReadOnlyDictionary<(Suit, Rank), AbilityType> abilities = null)
         {
-            _deck = new Deck(seed);
+            _deck = new Deck(seed, abilities ?? DeckConfig.DefaultAbilities);
             _hands = new[] { new Hand(), new Hand() };
         }
 

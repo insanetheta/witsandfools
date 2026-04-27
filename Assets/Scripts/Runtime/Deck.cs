@@ -11,12 +11,17 @@ namespace WitsAndFools
         public int Count => _cards.Count;
         public bool IsEmpty => _cards.Count == 0;
 
-        public Deck(int? seed = null)
+        public Deck(int? seed = null, IReadOnlyDictionary<(Suit, Rank), AbilityType> abilities = null)
         {
             _rng = seed.HasValue ? new Random(seed.Value) : new Random();
             foreach (Suit suit in Enum.GetValues(typeof(Suit)))
                 for (Rank rank = Rank.Six; rank <= Rank.Ace; rank++)
-                    _cards.Add(new Card(suit, rank));
+                {
+                    AbilityType? ability = null;
+                    if (abilities != null && abilities.TryGetValue((suit, rank), out var a))
+                        ability = a;
+                    _cards.Add(new Card(suit, rank, ability));
+                }
         }
 
         public void Shuffle()
@@ -36,8 +41,6 @@ namespace WitsAndFools
             return top;
         }
 
-        // Trump card lives at the bottom of the deck (index 0), visible under the stack.
-        // Other players draw from the top first; trump is drawn last.
         public Card PeekBottom() => _cards[0];
 
         public IReadOnlyList<Card> AsReadOnly() => _cards;
