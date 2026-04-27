@@ -49,6 +49,8 @@ namespace WitsAndFools.EditorTools
 
         static void StepGreedy(GameEngine engine)
         {
+            if (TryUseFirstAbility(engine)) return;
+
             switch (engine.Phase)
             {
                 case Phase.Attack:
@@ -58,6 +60,20 @@ namespace WitsAndFools.EditorTools
                     StepDefense(engine);
                     return;
             }
+        }
+
+        static bool TryUseFirstAbility(GameEngine engine)
+        {
+            int p = engine.Phase == Phase.Defense ? engine.DefenderIndex : engine.AttackerIndex;
+            var hand = engine.HandOf(p);
+            if (hand.Count <= 2) return false;
+            foreach (var c in hand.Cards)
+            {
+                if (!c.HasAbility) continue;
+                int slot = engine.Phase == Phase.Defense ? engine.Bout.FirstUndefendedSlot() : -1;
+                if (engine.TryUseAbility(p, c, slot)) return true;
+            }
+            return false;
         }
 
         static void StepAttack(GameEngine engine)

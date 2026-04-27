@@ -18,6 +18,7 @@ namespace WitsAndFools
             Engine.OnTurnBegan += _ => RequestPump();
             Engine.OnAttackPlayed += (_, _) => RequestPump();
             Engine.OnDefensePlayed += (_, _, _) => RequestPump();
+            Engine.OnAbilityUsed += (_, _, _) => RequestPump();
         }
 
         public void Start() => Engine.StartNewGame();

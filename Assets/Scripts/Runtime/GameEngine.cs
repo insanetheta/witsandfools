@@ -55,6 +55,7 @@ namespace WitsAndFools
         public event Action<int, Card, AbilityType> OnAbilityUsed; // playerIndex, card, ability
         public event Action<Suit> OnTrumpChanged;                    // newTrumpSuit
         public bool TrumpChangerUsed => _trumpChangerUsed;
+        public bool DoubleTroubleActive => _doubleTroubleActive;
 
         public GameEngine(int? seed = null, IReadOnlyDictionary<(Suit, Rank), AbilityType> abilities = null)
         {
