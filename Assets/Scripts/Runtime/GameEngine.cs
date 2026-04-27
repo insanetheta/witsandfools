@@ -28,6 +28,7 @@ namespace WitsAndFools
         public Suit Trump { get; private set; }
         public Card TrumpCard { get; private set; }     // the visible bottom card
         bool _trumpStillInDeck = true;
+        bool _trumpChangerUsed;
         public int AttackerIndex { get; private set; }
         public int DefenderIndex => 1 - AttackerIndex;  // 2-player only
         public Phase Phase { get; private set; } = Phase.Setup;
@@ -50,6 +51,8 @@ namespace WitsAndFools
         public event Action<int, int> OnDrew;             // playerIndex, drawnCount
         public event Action<int> OnGameOver;              // foolIndex
         public event Action<int, Card, AbilityType> OnAbilityUsed; // playerIndex, card, ability
+        public event Action<Suit> OnTrumpChanged;                    // newTrumpSuit
+        public bool TrumpChangerUsed => _trumpChangerUsed;
 
         public GameEngine(int? seed = null, IReadOnlyDictionary<(Suit, Rank), AbilityType> abilities = null)
         {
@@ -66,6 +69,7 @@ namespace WitsAndFools
             WinnerIndex = null;
             FoolIndex = null;
             _trumpStillInDeck = true;
+            _trumpChangerUsed = false;
 
             _deck.Shuffle();
 
@@ -190,14 +194,42 @@ namespace WitsAndFools
 
             var ability = card.Ability.Value;
 
+            if (!ValidateAbility(ability)) return false;
+
             _hands[playerIndex].Remove(card);
             _discard.Add(card);
+            ApplyAbility(ability, playerIndex, card, defenseSlot);
             OnAbilityUsed?.Invoke(playerIndex, card, ability);
-
-            // Individual ability effects are implemented in later tasks (zqm.3, zqm.4).
-            // For now the card is consumed with no gameplay effect.
-
             return true;
+        }
+
+        bool ValidateAbility(AbilityType ability)
+        {
+            switch (ability)
+            {
+                case AbilityType.TrumpChanger:
+                    return !_trumpChangerUsed;
+                case AbilityType.ExtraDraw:
+                    return Phase == Phase.Attack && _deck.Count > 0;
+                default:
+                    return true;
+            }
+        }
+
+        void ApplyAbility(AbilityType ability, int playerIndex, Card card, int defenseSlot)
+        {
+            switch (ability)
+            {
+                case AbilityType.TrumpChanger:
+                    Trump = card.Suit;
+                    _trumpChangerUsed = true;
+                    OnTrumpChanged?.Invoke(Trump);
+                    break;
+                case AbilityType.ExtraDraw:
+                    int target = _hands[DefenderIndex].Count + 2;
+                    DrawTo(DefenderIndex, target);
+                    break;
+            }
         }
 
         int CountDefended()

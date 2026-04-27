@@ -73,6 +73,7 @@ namespace WitsAndFools
             Engine.OnDrew += OnDrew;
             Engine.OnGameOver += OnGameOver;
             Engine.OnAbilityUsed += OnAbilityUsed;
+            Engine.OnTrumpChanged += OnTrumpChanged;
 
             if (Hud)
             {
@@ -309,6 +310,12 @@ namespace WitsAndFools
             ApplyHighlightForPhase();
         }
 
+        void OnTrumpChanged(Suit newSuit)
+        {
+            UpdateHud();
+            ApplyHighlightForPhase();
+        }
+
         void OnEndBoutClicked()
         {
             if (Hud && Hud.AbilityChoiceVisible) return;
@@ -334,8 +341,9 @@ namespace WitsAndFools
                 bool playable =
                     (humanAttack && Rules.CanAttackWith(Engine.Bout, view.Card)) ||
                     (humanDefense && defendSlot >= 0 && Rules.CanDefendSlotWith(Engine.Bout, defendSlot, view.Card, Engine.Trump));
+                bool abilityUsable = humanActive && view.Card.HasAbility;
 
-                if (playable)
+                if (playable || abilityUsable)
                 {
                     view.SetHighlight(CardView.Highlight.Playable);
                     view.OnClicked = OnHumanCardClicked;
