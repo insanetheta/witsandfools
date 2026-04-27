@@ -122,9 +122,11 @@ namespace WitsAndFools
 
             _hands[playerIndex].Remove(card);
             _bout.AddAttack(card);
-            OnAttackPlayed?.Invoke(playerIndex, card);
-
+            // Phase must flip BEFORE firing the event: handlers (UpdateHud,
+            // ApplyHighlightForPhase) read Engine.Phase synchronously and would
+            // otherwise see the pre-attack Phase, leaving the UI stuck.
             Phase = Phase.Defense;
+            OnAttackPlayed?.Invoke(playerIndex, card);
             return true;
         }
 
@@ -137,10 +139,10 @@ namespace WitsAndFools
 
             _hands[playerIndex].Remove(card);
             _bout.TryDefend(slot, card);
-            OnDefensePlayed?.Invoke(playerIndex, slot, card);
-
             // After defense, control returns to attacker who may add another card or end bout.
+            // Set Phase before the event so handlers read the new state.
             Phase = Phase.Attack;
+            OnDefensePlayed?.Invoke(playerIndex, slot, card);
             return true;
         }
 
