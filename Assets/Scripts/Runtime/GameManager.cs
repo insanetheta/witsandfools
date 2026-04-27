@@ -72,6 +72,7 @@ namespace WitsAndFools
             Engine.OnBoutResolved += OnBoutResolved;
             Engine.OnDrew += OnDrew;
             Engine.OnGameOver += OnGameOver;
+            Engine.OnAbilityUsed += OnAbilityUsed;
 
             if (Hud)
             {
@@ -79,7 +80,12 @@ namespace WitsAndFools
                 if (Hud.EndBoutButton) Hud.EndBoutButton.onClick.AddListener(OnEndBoutClicked);
                 if (Hud.RestartButton) Hud.RestartButton.onClick.RemoveAllListeners();
                 if (Hud.RestartButton) Hud.RestartButton.onClick.AddListener(BeginNewGame);
+                if (Hud.PlayNormallyButton) Hud.PlayNormallyButton.onClick.RemoveAllListeners();
+                if (Hud.PlayNormallyButton) Hud.PlayNormallyButton.onClick.AddListener(OnAbilityChoiceNormal);
+                if (Hud.UseAbilityButton) Hud.UseAbilityButton.onClick.RemoveAllListeners();
+                if (Hud.UseAbilityButton) Hud.UseAbilityButton.onClick.AddListener(OnAbilityChoiceUse);
                 Hud.SetEndBoutEnabled(false);
+                Hud.HideAbilityChoice();
             }
 
             _loop.Start();
@@ -232,7 +238,24 @@ namespace WitsAndFools
 
         // ---------- Input ----------
 
+        CardView _pendingAbilityView;
+
         void OnHumanCardClicked(CardView view)
+        {
+            if (Hud && Hud.AbilityChoiceVisible) return;
+
+            if (view.Card.HasAbility)
+            {
+                _pendingAbilityView = view;
+                var ability = view.Card.Ability.Value;
+                Hud?.ShowAbilityChoice(ability.DisplayName(), ability.Description(), $"Use {ability.ShortName()}");
+                return;
+            }
+
+            PlayCardNormally(view);
+        }
+
+        void PlayCardNormally(CardView view)
         {
             if (Engine.Phase == Phase.Attack && Engine.AttackerIndex == HumanPlayerIndex)
             {
@@ -245,8 +268,50 @@ namespace WitsAndFools
             }
         }
 
+        void OnAbilityChoiceNormal()
+        {
+            Hud?.HideAbilityChoice();
+            if (_pendingAbilityView)
+            {
+                PlayCardNormally(_pendingAbilityView);
+                _pendingAbilityView = null;
+            }
+        }
+
+        void OnAbilityChoiceUse()
+        {
+            Hud?.HideAbilityChoice();
+            if (_pendingAbilityView)
+            {
+                int slot = Engine.Phase == Phase.Defense ? Engine.Bout.FirstUndefendedSlot() : -1;
+                Engine.TryUseAbility(HumanPlayerIndex, _pendingAbilityView.Card, slot);
+                _pendingAbilityView = null;
+            }
+        }
+
+        void OnAbilityUsed(int playerIndex, Card card, AbilityType ability)
+        {
+            if (playerIndex == HumanPlayerIndex && _humanCardViews.TryGetValue(card, out var view))
+            {
+                _humanCardViews.Remove(card);
+                Table.PlayerHand.Remove(view);
+                StartCoroutine(MoveAndDestroy(view, Table.DiscardSlot.position, MoveSeconds));
+            }
+            else if (playerIndex != HumanPlayerIndex && _opponentCardViews.Count > 0)
+            {
+                var view2 = _opponentCardViews[0];
+                _opponentCardViews.RemoveAt(0);
+                Table.OpponentHand.Remove(view2);
+                view2.Bind(card, faceUp: true);
+                StartCoroutine(MoveAndDestroy(view2, Table.DiscardSlot.position, MoveSeconds));
+            }
+            UpdateHud();
+            ApplyHighlightForPhase();
+        }
+
         void OnEndBoutClicked()
         {
+            if (Hud && Hud.AbilityChoiceVisible) return;
             if (Engine.Phase == Phase.Attack && Engine.AttackerIndex == HumanPlayerIndex)
                 Engine.TryEndBout(HumanPlayerIndex);
             else if (Engine.Phase == Phase.Defense && Engine.DefenderIndex == HumanPlayerIndex)

@@ -49,6 +49,7 @@ namespace WitsAndFools
         public event Action<BoutOutcome> OnBoutResolved;
         public event Action<int, int> OnDrew;             // playerIndex, drawnCount
         public event Action<int> OnGameOver;              // foolIndex
+        public event Action<int, Card, AbilityType> OnAbilityUsed; // playerIndex, card, ability
 
         public GameEngine(int? seed = null, IReadOnlyDictionary<(Suit, Rank), AbilityType> abilities = null)
         {
@@ -173,6 +174,29 @@ namespace WitsAndFools
             _bout.Clear();
 
             ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
+            return true;
+        }
+
+        // Activate a card's ability instead of playing it normally.
+        // The card is consumed (removed from hand, discarded).
+        // defenseSlot is used by defense-phase abilities (Double Defense, Blocker).
+        public bool TryUseAbility(int playerIndex, Card card, int defenseSlot = -1)
+        {
+            if (Phase != Phase.Attack && Phase != Phase.Defense) return false;
+            int active = Phase == Phase.Defense ? DefenderIndex : AttackerIndex;
+            if (playerIndex != active) return false;
+            if (!_hands[playerIndex].Contains(card)) return false;
+            if (!card.HasAbility) return false;
+
+            var ability = card.Ability.Value;
+
+            _hands[playerIndex].Remove(card);
+            _discard.Add(card);
+            OnAbilityUsed?.Invoke(playerIndex, card, ability);
+
+            // Individual ability effects are implemented in later tasks (zqm.3, zqm.4).
+            // For now the card is consumed with no gameplay effect.
+
             return true;
         }
 

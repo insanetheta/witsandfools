@@ -246,6 +246,36 @@ namespace WitsAndFools.EditorTools
             hud.GameOverLabel = goLabel;
             goPanel.gameObject.SetActive(false);
 
+            // ----- Ability choice panel -----
+            var acPanel = NewChild(canvasRT, "AbilityChoicePanel");
+            acPanel.anchorMin = new Vector2(0.5f, 0.5f);
+            acPanel.anchorMax = new Vector2(0.5f, 0.5f);
+            acPanel.sizeDelta = new Vector2(480, 220);
+            var acBg = acPanel.gameObject.AddComponent<Image>();
+            acBg.color = new Color(0.05f, 0.05f, 0.12f, 0.92f);
+            var acLabel = AddText(acPanel, "AbilityChoiceLabel", "Ability",
+                anchorMin: new Vector2(0.05f, 0.45f), anchorMax: new Vector2(0.95f, 0.95f),
+                pivot: new Vector2(0.5f, 1f), alignment: TextAlignmentOptions.Center,
+                fontSize: 24, color: Color.white);
+            acLabel.enableWordWrapping = true;
+            var normalBtn = AddButton(acPanel, "PlayNormallyButton", "Play normally");
+            normalBtn.anchorMin = new Vector2(0.05f, 0);
+            normalBtn.anchorMax = new Vector2(0.48f, 0);
+            normalBtn.pivot = new Vector2(0.5f, 0);
+            normalBtn.sizeDelta = new Vector2(0, 60);
+            normalBtn.anchoredPosition = new Vector2(0, 20);
+            var useBtn = AddButton(acPanel, "UseAbilityButton", "Use ability");
+            useBtn.anchorMin = new Vector2(0.52f, 0);
+            useBtn.anchorMax = new Vector2(0.95f, 0);
+            useBtn.pivot = new Vector2(0.5f, 0);
+            useBtn.sizeDelta = new Vector2(0, 60);
+            useBtn.anchoredPosition = new Vector2(0, 20);
+            hud.AbilityChoicePanel = acPanel.gameObject;
+            hud.AbilityChoiceLabel = acLabel;
+            hud.PlayNormallyButton = normalBtn.GetComponent<Button>();
+            hud.UseAbilityButton = useBtn.GetComponent<Button>();
+            acPanel.gameObject.SetActive(false);
+
             // ----- GameManager wiring -----
             var gmGO = new GameObject("GameManager");
             var gm = gmGO.AddComponent<GameManager>();

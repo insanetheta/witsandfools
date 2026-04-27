@@ -15,6 +15,12 @@ namespace WitsAndFools
         public GameObject GameOverPanel;
         public TMP_Text GameOverLabel;
 
+        [Header("Ability Choice")]
+        public GameObject AbilityChoicePanel;
+        public TMP_Text AbilityChoiceLabel;
+        public Button PlayNormallyButton;
+        public Button UseAbilityButton;
+
         public void SetTurn(string text) { if (TurnLabel) TurnLabel.text = text; }
         public void SetDeckCount(int n) { if (DeckCountLabel) DeckCountLabel.text = $"Deck: {n}"; }
         public void SetTrump(Suit suit) { if (TrumpLabel) { TrumpLabel.text = $"Trump: {suit.Glyph()}"; TrumpLabel.color = suit.IsRed() ? new Color(0.85f, 0.20f, 0.20f) : Color.black; } }
@@ -25,5 +31,19 @@ namespace WitsAndFools
             if (GameOverLabel) GameOverLabel.text = message;
         }
         public void HideGameOver() { if (GameOverPanel) GameOverPanel.SetActive(false); }
+
+        public void ShowAbilityChoice(string abilityName, string description, string useLabel)
+        {
+            if (AbilityChoicePanel) AbilityChoicePanel.SetActive(true);
+            if (AbilityChoiceLabel) AbilityChoiceLabel.text = $"<b>{abilityName}</b>\n{description}";
+            if (UseAbilityButton)
+            {
+                var lbl = UseAbilityButton.GetComponentInChildren<TMP_Text>();
+                if (lbl) lbl.text = useLabel;
+            }
+        }
+
+        public void HideAbilityChoice() { if (AbilityChoicePanel) AbilityChoicePanel.SetActive(false); }
+        public bool AbilityChoiceVisible => AbilityChoicePanel && AbilityChoicePanel.activeSelf;
     }
 }
