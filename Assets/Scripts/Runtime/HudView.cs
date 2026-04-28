@@ -12,6 +12,7 @@ namespace WitsAndFools
         public TMP_Text TrumpLabel;
         public Button EndBoutButton;
         public Button RestartButton;
+        public Button AutoPlayButton;
         public GameObject GameOverPanel;
         public TMP_Text GameOverLabel;
 

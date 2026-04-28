@@ -38,21 +38,51 @@ namespace WitsAndFools
         }
 
         float _earliestNextAiAct;
+        bool _autoPlay;
+        AIPlayer _autoPlayAI;
 
         void Update()
         {
             if (_loop == null) return;
-            if (_loop.Engine.Phase == Phase.GameOver) return;
 
-            int active = _loop.Engine.Phase == Phase.Defense ? _loop.Engine.DefenderIndex : _loop.Engine.AttackerIndex;
+            if (Input.GetKeyDown(KeyCode.A) && Engine.Phase != Phase.GameOver)
+                ToggleAutoPlay();
+
+            if (Engine.Phase == Phase.GameOver) return;
+
+            int active = Engine.Phase == Phase.Defense ? Engine.DefenderIndex : Engine.AttackerIndex;
             bool aiTurn = _loop.Controllers[active].Kind == PlayerKind.AI;
+            bool autoPlayTurn = _autoPlay && active == HumanPlayerIndex;
 
-            // Delay AI ticks so play feels deliberate; human ticks are instant (humans wait on the UI anyway).
-            if (aiTurn && Time.time < _earliestNextAiAct) return;
+            if ((aiTurn || autoPlayTurn) && Time.time < _earliestNextAiAct) return;
 
-            _loop.Tick();
+            if (autoPlayTurn)
+            {
+                if (_autoPlayAI == null) _autoPlayAI = new AIPlayer("AutoPlay");
+                _autoPlayAI.RequestAction(Engine, active);
+                _earliestNextAiAct = Time.time + AiThinkSeconds;
+            }
+            else
+            {
+                _loop.Tick();
+                if (aiTurn) _earliestNextAiAct = Time.time + AiThinkSeconds;
+            }
+        }
 
-            if (aiTurn) _earliestNextAiAct = Time.time + AiThinkSeconds;
+        void ToggleAutoPlay()
+        {
+            _autoPlay = !_autoPlay;
+            if (_autoPlay && Hud && Hud.AbilityChoiceVisible)
+                Hud.HideAbilityChoice();
+            UpdateAutoPlayLabel();
+            if (_autoPlay) ApplyHighlightForPhase();
+        }
+
+        void UpdateAutoPlayLabel()
+        {
+            if (!Hud || !Hud.AutoPlayButton) return;
+            var lbl = Hud.AutoPlayButton.GetComponentInChildren<TMPro.TMP_Text>();
+            if (lbl) lbl.text = _autoPlay ? "Auto: ON" : "Auto: OFF";
         }
 
         public void BeginNewGame()
@@ -88,6 +118,14 @@ namespace WitsAndFools
                 Hud.SetEndBoutEnabled(false);
                 Hud.HideAbilityChoice();
             }
+
+            if (Hud && Hud.AutoPlayButton)
+            {
+                Hud.AutoPlayButton.onClick.RemoveAllListeners();
+                Hud.AutoPlayButton.onClick.AddListener(ToggleAutoPlay);
+            }
+            _autoPlay = false;
+            UpdateAutoPlayLabel();
 
             CardView.OnHoverChanged = OnCardHover;
             _loop.Start();
@@ -246,7 +284,7 @@ namespace WitsAndFools
         {
             if (Hud && Hud.AbilityChoiceVisible) return;
 
-            if (view.Card.HasAbility)
+            if (view.Card.HasAbility && AbilityValidForPhase(view.Card.Ability.Value))
             {
                 _pendingAbilityView = view;
                 var ability = view.Card.Ability.Value;
@@ -311,6 +349,17 @@ namespace WitsAndFools
             ApplyHighlightForPhase();
         }
 
+        bool AbilityValidForPhase(AbilityType ability) => ability switch
+        {
+            AbilityType.TrumpChanger => !Engine.TrumpChangerUsed,
+            AbilityType.ExtraDraw => Engine.Phase == Phase.Attack && Engine.DeckCount > 0,
+            AbilityType.DoubleTrouble => Engine.Phase == Phase.Attack,
+            AbilityType.Blocker => Engine.Phase == Phase.Defense,
+            AbilityType.DoubleDefense => Engine.Phase == Phase.Defense,
+            AbilityType.SeizeInitiative => true,
+            _ => false
+        };
+
         void OnCardHover(Card? card)
         {
             if (card.HasValue && card.Value.HasAbility)
@@ -352,7 +401,7 @@ namespace WitsAndFools
                 bool playable =
                     (humanAttack && Rules.CanAttackWith(Engine.Bout, view.Card)) ||
                     (humanDefense && defendSlot >= 0 && Rules.CanDefendSlotWith(Engine.Bout, defendSlot, view.Card, Engine.Trump));
-                bool abilityUsable = humanActive && view.Card.HasAbility;
+                bool abilityUsable = humanActive && view.Card.HasAbility && AbilityValidForPhase(view.Card.Ability.Value);
 
                 if (playable || abilityUsable)
                 {

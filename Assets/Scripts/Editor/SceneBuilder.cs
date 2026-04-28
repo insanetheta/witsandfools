@@ -276,6 +276,15 @@ namespace WitsAndFools.EditorTools
             hud.UseAbilityButton = useBtn.GetComponent<Button>();
             acPanel.gameObject.SetActive(false);
 
+            // ----- Auto-play button (bottom-left) -----
+            var autoPlayBtn = AddButton(canvasRT, "AutoPlayButton", "Auto: OFF");
+            autoPlayBtn.anchorMin = new Vector2(0, 0);
+            autoPlayBtn.anchorMax = new Vector2(0, 0);
+            autoPlayBtn.pivot = new Vector2(0, 0);
+            autoPlayBtn.sizeDelta = new Vector2(180, 55);
+            autoPlayBtn.anchoredPosition = new Vector2(30, 30);
+            hud.AutoPlayButton = autoPlayBtn.GetComponent<Button>();
+
             // ----- Tooltip label (bottom-left, hidden by default) -----
             var tooltipLabel = AddText(canvasRT, "TooltipLabel", "",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 0),
@@ -284,7 +293,7 @@ namespace WitsAndFools.EditorTools
                 color: new Color(1, 1, 1, 0.85f));
             var tooltipRT = (RectTransform)tooltipLabel.transform;
             tooltipRT.sizeDelta = new Vector2(0, 50);
-            tooltipRT.anchoredPosition = new Vector2(30, 35);
+            tooltipRT.anchoredPosition = new Vector2(30, 95);
             tooltipLabel.enableWordWrapping = true;
             tooltipLabel.gameObject.SetActive(false);
             hud.TooltipLabel = tooltipLabel;
