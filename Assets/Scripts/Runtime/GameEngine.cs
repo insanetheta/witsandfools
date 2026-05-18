@@ -51,6 +51,25 @@ namespace WitsAndFools
         public Bout Bout => _bout;
         public IReadOnlyList<Card> Discard => _discard;
         public int DeckCount => _deck.Count;
+        public Card? DeckTopCard => _deck.Count > 0 ? _deck.PeekTop(1)[0] : null;
+
+        public List<Card> GetMarkedCards(int playerIndex, int count)
+        {
+            int opponent = 1 - playerIndex;
+            var hand = _hands[opponent];
+            var result = new List<Card>();
+            if (hand.Count == 0) return result;
+            var indices = new List<int>();
+            for (int i = 0; i < hand.Count; i++) indices.Add(i);
+            int picks = System.Math.Min(count, hand.Count);
+            for (int i = 0; i < picks; i++)
+            {
+                int idx = _deck.Count > 0 ? (_deck.Count + i) % indices.Count : i % indices.Count;
+                result.Add(hand.Cards[indices[idx]]);
+                indices.RemoveAt(idx);
+            }
+            return result;
+        }
         public int PlayerCount => _hands.Length;
         public Hand HandOf(int playerIndex) => _hands[playerIndex];
         public MatchConfig Config => _config;

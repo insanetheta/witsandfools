@@ -16,6 +16,10 @@ namespace WitsAndFools
         public GameObject GameOverPanel;
         public TMP_Text GameOverLabel;
 
+        [Header("Trinket Info")]
+        public TMP_Text DeckTopLabel;
+        public TMP_Text InfoLabel;
+
         [Header("Tooltip")]
         public TMP_Text TooltipLabel;
 
@@ -49,6 +53,30 @@ namespace WitsAndFools
 
         public void HideAbilityChoice() { if (AbilityChoicePanel) AbilityChoicePanel.SetActive(false); }
         public bool AbilityChoiceVisible => AbilityChoicePanel && AbilityChoicePanel.activeSelf;
+
+        public void SetDeckTop(Card? card)
+        {
+            if (!DeckTopLabel) return;
+            if (card.HasValue)
+            {
+                DeckTopLabel.gameObject.SetActive(true);
+                DeckTopLabel.text = $"Top: {card.Value}";
+            }
+            else
+                DeckTopLabel.gameObject.SetActive(false);
+        }
+
+        public void SetInfo(string text)
+        {
+            if (!InfoLabel) return;
+            if (string.IsNullOrEmpty(text))
+                InfoLabel.gameObject.SetActive(false);
+            else
+            {
+                InfoLabel.gameObject.SetActive(true);
+                InfoLabel.text = text;
+            }
+        }
 
         public void ShowTooltip(string text) { if (TooltipLabel) { TooltipLabel.gameObject.SetActive(true); TooltipLabel.text = text; } }
         public void HideTooltip() { if (TooltipLabel) TooltipLabel.gameObject.SetActive(false); }

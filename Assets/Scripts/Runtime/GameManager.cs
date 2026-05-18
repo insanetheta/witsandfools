@@ -203,6 +203,17 @@ namespace WitsAndFools
 
             UpdateHud();
             ApplyHighlightForPhase();
+
+            if (Engine.Config.MarkedDeck[HumanPlayerIndex])
+            {
+                var marked = Engine.GetMarkedCards(HumanPlayerIndex, 3);
+                if (marked.Count > 0)
+                {
+                    var names = new System.Collections.Generic.List<string>();
+                    foreach (var c in marked) names.Add(c.ToString());
+                    Hud.SetInfo($"Marked: {string.Join(", ", names)}");
+                }
+            }
         }
 
         void OnTurnBegan(int playerIndex)
@@ -541,6 +552,11 @@ namespace WitsAndFools
                 phase = Engine.DefenderIndex == HumanPlayerIndex ? "Defend!" : $"{OpponentName} defends";
             else phase = "...";
             Hud.SetTurn(phase);
+
+            if (Engine.Config.SpysMonocle[HumanPlayerIndex])
+                Hud.SetDeckTop(Engine.DeckTopCard);
+            else
+                Hud.SetDeckTop(null);
         }
 
         // ---------- Visual helpers ----------

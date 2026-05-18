@@ -298,6 +298,31 @@ namespace WitsAndFools.EditorTools
             tooltipLabel.gameObject.SetActive(false);
             hud.TooltipLabel = tooltipLabel;
 
+            // ----- Deck top label for Spy's Monocle (right side, above deck) -----
+            var deckTopLabel = AddText(canvasRT, "DeckTopLabel", "",
+                anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1f, 0),
+                pivot: new Vector2(1, 0),
+                alignment: TextAlignmentOptions.BottomRight, fontSize: 18,
+                color: new Color(0.9f, 0.8f, 0.4f));
+            var deckTopRT = (RectTransform)deckTopLabel.transform;
+            deckTopRT.sizeDelta = new Vector2(0, 40);
+            deckTopRT.anchoredPosition = new Vector2(-20, 95);
+            deckTopLabel.gameObject.SetActive(false);
+            hud.DeckTopLabel = deckTopLabel;
+
+            // ----- Info label for Marked Deck (top-right, below HUD bar) -----
+            var infoLabel = AddText(canvasRT, "InfoLabel", "",
+                anchorMin: new Vector2(0.4f, 1), anchorMax: new Vector2(1f, 1),
+                pivot: new Vector2(1, 1),
+                alignment: TextAlignmentOptions.TopRight, fontSize: 16,
+                color: new Color(0.8f, 0.6f, 0.3f));
+            var infoRT = (RectTransform)infoLabel.transform;
+            infoRT.sizeDelta = new Vector2(0, 35);
+            infoRT.anchoredPosition = new Vector2(-20, -70);
+            infoLabel.enableWordWrapping = true;
+            infoLabel.gameObject.SetActive(false);
+            hud.InfoLabel = infoLabel;
+
             // ----- Wrap existing match UI in a MatchPanel group -----
             var matchPanel = NewChild(canvasRT, "MatchPanel");
             FillParent(matchPanel);
@@ -317,6 +342,8 @@ namespace WitsAndFools.EditorTools
             acPanel.SetParent(matchPanel, true);
             autoPlayBtn.SetParent(matchPanel, true);
             ((RectTransform)tooltipLabel.transform).SetParent(matchPanel, true);
+            ((RectTransform)deckTopLabel.transform).SetParent(matchPanel, true);
+            ((RectTransform)infoLabel.transform).SetParent(matchPanel, true);
             matchPanel.gameObject.SetActive(false);
 
             // ----- Map Panel -----
