@@ -56,6 +56,27 @@ namespace WitsAndFools
         public static readonly Color HudOverlay   = new Color(0, 0, 0, 0.45f);
         public static readonly Color RunHudOverlay = new Color(0, 0, 0, 0.60f);
 
+        // Archetype card backgrounds
+        public static readonly Color ArchRogue    = new Color(0.25f, 0.35f, 0.45f);
+        public static readonly Color ArchBrute    = new Color(0.50f, 0.20f, 0.15f);
+        public static readonly Color ArchDiplomat = new Color(0.20f, 0.40f, 0.30f);
+        public static readonly Color ArchGambler  = new Color(0.45f, 0.35f, 0.15f);
+        public static readonly Color LockedGray   = new Color(0.20f, 0.20f, 0.20f);
+
+        // Rarity background tints
+        public static readonly Color RarityCommonBg   = new Color(0.18f, 0.30f, 0.40f);
+        public static readonly Color RarityUncommonBg = new Color(0.25f, 0.35f, 0.18f);
+        public static readonly Color RarityRareBg     = new Color(0.40f, 0.22f, 0.45f);
+
+        // Shop item backgrounds
+        public static readonly Color ShopTrinketBg    = new Color(0.18f, 0.35f, 0.45f);
+        public static readonly Color ShopConsumableBg = new Color(0.45f, 0.25f, 0.18f);
+        public static readonly Color ShopAbilityBg    = new Color(0.45f, 0.30f, 0.15f);
+
+        // General UI text
+        public static readonly Color DescGray    = new Color(0.75f, 0.75f, 0.75f);
+        public static readonly Color DisabledText = new Color(0.5f, 0.5f, 0.5f);
+
         // Map node backgrounds
         public static readonly Color NodeMatch    = Hex("#7A3030");
         public static readonly Color NodeElite    = Hex("#8A6020");

@@ -79,7 +79,9 @@ namespace WitsAndFools
         public Image TableFrameImage;
         public Image VignetteImage;
         public Sprite[] TableSurfaceSprites;
+        public Sprite[] VenueBackgroundSprites;
         public Sprite VignetteSprite;
+        public Image MapVenueBgImage;
 
         RunState _run;
         RunPhase _phase;
@@ -383,12 +385,12 @@ namespace WitsAndFools
             var img = btnGO.GetComponent<Image>();
             img.color = unlocked ? archetype switch
             {
-                ArchetypeType.Rogue => new Color(0.25f, 0.35f, 0.45f),
-                ArchetypeType.Brute => new Color(0.50f, 0.20f, 0.15f),
-                ArchetypeType.Diplomat => new Color(0.20f, 0.40f, 0.30f),
-                ArchetypeType.Gambler => new Color(0.45f, 0.35f, 0.15f),
+                ArchetypeType.Rogue => ThemePalette.ArchRogue,
+                ArchetypeType.Brute => ThemePalette.ArchBrute,
+                ArchetypeType.Diplomat => ThemePalette.ArchDiplomat,
+                ArchetypeType.Gambler => ThemePalette.ArchGambler,
                 _ => Color.gray
-            } : new Color(0.20f, 0.20f, 0.20f);
+            } : ThemePalette.LockedGray;
 
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 100;
@@ -407,7 +409,7 @@ namespace WitsAndFools
                 : $"{archetype.DisplayName()} — Locked (requires {repNeeded} Rep)";
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
             nameTMP.fontSize = 20;
-            nameTMP.color = unlocked ? Color.white : new Color(0.4f, 0.4f, 0.4f);
+            nameTMP.color = unlocked ? Color.white : ThemePalette.DisabledText;
             nameTMP.raycastTarget = false;
 
             var descGO = new GameObject("Abilities", typeof(RectTransform));
@@ -421,7 +423,7 @@ namespace WitsAndFools
             descTMP.text = unlocked ? $"Starts with: {abilityList}" : "???";
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.fontSize = 16;
-            descTMP.color = new Color(0.75f, 0.75f, 0.75f);
+            descTMP.color = ThemePalette.DescGray;
             descTMP.raycastTarget = false;
             descTMP.enableWordWrapping = true;
 
@@ -514,12 +516,12 @@ namespace WitsAndFools
 
         Color NodeColor(MapNodeType type) => type switch
         {
-            MapNodeType.RivalMatch => new Color(0.55f, 0.20f, 0.20f),
-            MapNodeType.EliteMatch => new Color(0.70f, 0.50f, 0.10f),
-            MapNodeType.BossMatch => new Color(0.60f, 0.10f, 0.10f),
-            MapNodeType.Shop => new Color(0.20f, 0.45f, 0.55f),
-            MapNodeType.Rumor => new Color(0.40f, 0.35f, 0.55f),
-            MapNodeType.Rest => new Color(0.20f, 0.50f, 0.30f),
+            MapNodeType.RivalMatch => ThemePalette.NodeMatch,
+            MapNodeType.EliteMatch => ThemePalette.NodeElite,
+            MapNodeType.BossMatch => ThemePalette.NodeBoss,
+            MapNodeType.Shop => ThemePalette.NodeShop,
+            MapNodeType.Rumor => ThemePalette.NodeRumor,
+            MapNodeType.Rest => ThemePalette.NodeRest,
             _ => Color.gray
         };
 
@@ -738,10 +740,10 @@ namespace WitsAndFools
             var img = btnGO.GetComponent<Image>();
             img.color = def.Rarity switch
             {
-                AbilityRarity.Common => new Color(0.18f, 0.30f, 0.40f),
-                AbilityRarity.Uncommon => new Color(0.25f, 0.35f, 0.18f),
-                AbilityRarity.Rare => new Color(0.40f, 0.22f, 0.45f),
-                _ => new Color(0.25f, 0.25f, 0.25f)
+                AbilityRarity.Common => ThemePalette.RarityCommonBg,
+                AbilityRarity.Uncommon => ThemePalette.RarityUncommonBg,
+                AbilityRarity.Rare => ThemePalette.RarityRareBg,
+                _ => ThemePalette.LockedGray
             };
 
             var le = btnGO.GetComponent<LayoutElement>();
@@ -775,7 +777,7 @@ namespace WitsAndFools
             descTMP.text = abilityType.Description();
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.fontSize = 15;
-            descTMP.color = new Color(0.75f, 0.75f, 0.75f);
+            descTMP.color = ThemePalette.DescGray;
             descTMP.raycastTarget = false;
             descTMP.enableWordWrapping = true;
 
@@ -904,7 +906,7 @@ namespace WitsAndFools
             btnGO.transform.SetParent(ShopItemContainer, false);
 
             var img = btnGO.GetComponent<Image>();
-            img.color = canBuy ? new Color(0.18f, 0.35f, 0.45f) : new Color(0.25f, 0.25f, 0.25f);
+            img.color = canBuy ? ThemePalette.ShopTrinketBg : ThemePalette.LockedGray;
 
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 90;
@@ -921,7 +923,7 @@ namespace WitsAndFools
             nameTMP.text = label;
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
             nameTMP.fontSize = 22;
-            nameTMP.color = canBuy ? Color.white : new Color(0.5f, 0.5f, 0.5f);
+            nameTMP.color = canBuy ? Color.white : ThemePalette.DisabledText;
             nameTMP.raycastTarget = false;
 
             var descGO = new GameObject("Desc", typeof(RectTransform));
@@ -935,7 +937,7 @@ namespace WitsAndFools
             descTMP.text = desc;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.fontSize = 16;
-            descTMP.color = new Color(0.7f, 0.7f, 0.7f);
+            descTMP.color = ThemePalette.DescGray;
             descTMP.raycastTarget = false;
             descTMP.enableWordWrapping = true;
 
@@ -964,7 +966,7 @@ namespace WitsAndFools
             btnGO.transform.SetParent(ShopItemContainer, false);
 
             var img = btnGO.GetComponent<Image>();
-            img.color = canBuy ? new Color(0.45f, 0.25f, 0.18f) : new Color(0.25f, 0.25f, 0.25f);
+            img.color = canBuy ? ThemePalette.ShopConsumableBg : ThemePalette.LockedGray;
 
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 70;
@@ -981,7 +983,7 @@ namespace WitsAndFools
             lbl.text = $"Remove {burden.DisplayName()}  —  {price}f";
             lbl.alignment = TextAlignmentOptions.Center;
             lbl.fontSize = 20;
-            lbl.color = canBuy ? Color.white : new Color(0.5f, 0.5f, 0.5f);
+            lbl.color = canBuy ? Color.white : ThemePalette.DisabledText;
             lbl.raycastTarget = false;
 
             var btn = btnGO.GetComponent<Button>();
@@ -1013,7 +1015,7 @@ namespace WitsAndFools
 
             var btnGO = new GameObject("TrinketItem", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(ShopItemContainer, false);
-            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.45f, 0.30f, 0.15f) : new Color(0.25f, 0.25f, 0.25f);
+            btnGO.GetComponent<Image>().color = canBuy ? ThemePalette.ShopAbilityBg : ThemePalette.LockedGray;
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 90;
             le.preferredWidth = 550;
@@ -1029,7 +1031,7 @@ namespace WitsAndFools
             nameTMP.text = label;
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
             nameTMP.fontSize = 22;
-            nameTMP.color = canBuy ? new Color(1f, 0.85f, 0.55f) : new Color(0.5f, 0.5f, 0.5f);
+            nameTMP.color = canBuy ? ThemePalette.Gold : ThemePalette.DisabledText;
             nameTMP.raycastTarget = false;
 
             var descGO = new GameObject("Desc", typeof(RectTransform));
@@ -1043,7 +1045,7 @@ namespace WitsAndFools
             descTMP.text = desc;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.fontSize = 16;
-            descTMP.color = new Color(0.7f, 0.7f, 0.7f);
+            descTMP.color = ThemePalette.DescGray;
             descTMP.raycastTarget = false;
             descTMP.enableWordWrapping = true;
 
@@ -1469,6 +1471,8 @@ namespace WitsAndFools
                 VignetteImage.sprite = VignetteSprite;
                 VignetteImage.color = Color.white;
             }
+            if (MapVenueBgImage && VenueBackgroundSprites != null && act < VenueBackgroundSprites.Length)
+                MapVenueBgImage.sprite = VenueBackgroundSprites[act];
             if (Camera.main)
                 Camera.main.backgroundColor = ThemePalette.ActBackgroundTint[act];
         }

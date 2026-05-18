@@ -373,8 +373,15 @@ namespace WitsAndFools.EditorTools
             // ----- Map Panel -----
             var mapPanel = NewChild(canvasRT, "MapPanel");
             FillParent(mapPanel);
-            var mapBg = mapPanel.gameObject.AddComponent<Image>();
-            mapBg.color = ThemePalette.DeepNavy;
+            var mapBgImg = mapPanel.gameObject.AddComponent<Image>();
+            mapBgImg.color = ThemePalette.DeepNavy;
+            // Venue background (dimmed, set at runtime by RunManager)
+            var mapVenueBg = NewChild(mapPanel.GetComponent<RectTransform>(), "MapVenueBg");
+            var mapVenueBgImg = mapVenueBg.gameObject.AddComponent<Image>();
+            mapVenueBgImg.color = new Color(1, 1, 1, 0.15f);
+            mapVenueBgImg.raycastTarget = false;
+            FillParent(mapVenueBg);
+            mapVenueBg.SetAsFirstSibling();
 
             var mapTitle = AddText(mapPanel, "MapTitle", "Act 1 — The Bilge Rat Tavern",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
@@ -486,6 +493,15 @@ namespace WitsAndFools.EditorTools
             FillParent(shopPanel);
             var shopBg = shopPanel.gameObject.AddComponent<Image>();
             shopBg.color = ThemePalette.DeepNavy;
+            // Scene background
+            var shopSceneBg = NewChild(shopPanel.GetComponent<RectTransform>(), "ShopSceneBg");
+            var shopSceneBgImg = shopSceneBg.gameObject.AddComponent<Image>();
+            var shopSceneSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Scenes/scene_shop.png");
+            if (shopSceneSprite) { shopSceneBgImg.sprite = shopSceneSprite; shopSceneBgImg.color = new Color(1, 1, 1, 0.2f); }
+            else shopSceneBgImg.color = new Color(0, 0, 0, 0);
+            shopSceneBgImg.raycastTarget = false;
+            FillParent(shopSceneBg);
+            shopSceneBg.SetAsFirstSibling();
 
             var shopTitle = AddText(shopPanel, "ShopTitle", "The Fence",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
@@ -523,6 +539,15 @@ namespace WitsAndFools.EditorTools
             FillParent(eventPanel);
             var eventBg = eventPanel.gameObject.AddComponent<Image>();
             eventBg.color = ThemePalette.Midnight;
+            // Scene background
+            var eventSceneBg = NewChild(eventPanel.GetComponent<RectTransform>(), "EventSceneBg");
+            var eventSceneBgImg = eventSceneBg.gameObject.AddComponent<Image>();
+            var eventSceneSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Scenes/scene_rumor.png");
+            if (eventSceneSprite) { eventSceneBgImg.sprite = eventSceneSprite; eventSceneBgImg.color = new Color(1, 1, 1, 0.2f); }
+            else eventSceneBgImg.color = new Color(0, 0, 0, 0);
+            eventSceneBgImg.raycastTarget = false;
+            FillParent(eventSceneBg);
+            eventSceneBg.SetAsFirstSibling();
 
             var eventTitle = AddText(eventPanel, "EventTitle", "Event",
                 anchorMin: new Vector2(0.1f, 0.78f), anchorMax: new Vector2(0.9f, 0.92f),
@@ -663,6 +688,18 @@ namespace WitsAndFools.EditorTools
                 AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Tables/table_salon.png"),
             };
             rm.TableSurfaceSprites = tableSurfaces;
+            rm.MapVenueBgImage = mapVenueBgImg;
+
+            // Load venue background sprites for per-act theming
+            var venueBackgrounds = new[]
+            {
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Backgrounds/bg_tavern.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Backgrounds/bg_merchant.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Backgrounds/bg_guild.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Backgrounds/bg_library.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Backgrounds/bg_salon.png"),
+            };
+            rm.VenueBackgroundSprites = venueBackgrounds;
 
             // Save scene
             EditorSceneManager.SaveScene(scene, ScenePath);
