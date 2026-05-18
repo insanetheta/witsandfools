@@ -31,7 +31,7 @@ namespace WitsAndFools
 
         public void SetTurn(string text) { if (TurnLabel) TurnLabel.text = text; }
         public void SetDeckCount(int n) { if (DeckCountLabel) DeckCountLabel.text = $"Deck: {n}"; }
-        public void SetTrump(Suit suit) { if (TrumpLabel) { TrumpLabel.text = $"Trump: {suit.Glyph()}"; TrumpLabel.color = suit.IsRed() ? new Color(0.85f, 0.20f, 0.20f) : Color.black; } }
+        public void SetTrump(Suit suit) { if (TrumpLabel) { TrumpLabel.text = $"Trump: {suit.Glyph()}"; TrumpLabel.color = suit.IsRed() ? ThemePalette.RedSuit : ThemePalette.BlackSuit; } }
         public void SetEndBoutEnabled(bool enabled) { if (EndBoutButton) EndBoutButton.interactable = enabled; }
         public void ShowGameOver(string message)
         {

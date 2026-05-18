@@ -21,13 +21,13 @@ namespace WitsAndFools
         public TMP_Text AbilityBadge;
 
         [Header("Visual settings")]
-        public Color FaceColor = new Color(0.97f, 0.94f, 0.86f);
-        public Color BackColor = new Color(0.30f, 0.10f, 0.10f);
-        public Color RedSuitColor = new Color(0.75f, 0.10f, 0.10f);
+        public Color FaceColor = new Color(0.96f, 0.94f, 0.88f);
+        public Color BackColor = new Color(0.55f, 0.13f, 0.13f);
+        public Color RedSuitColor = new Color(0.75f, 0.13f, 0.13f);
         public Color BlackSuitColor = new Color(0.05f, 0.05f, 0.05f);
         public Color OutlineDefault = new Color(0, 0, 0, 0);
-        public Color OutlinePlayable = new Color(0.20f, 0.85f, 0.30f, 1f);
-        public Color OutlineHover = new Color(1f, 1f, 1f, 1f);
+        public Color OutlinePlayable = new Color(0.27f, 0.67f, 0.27f, 1f);
+        public Color OutlineHover = new Color(0.83f, 0.66f, 0.27f, 1f);
         public Color OutlineDisabled = new Color(0.3f, 0.3f, 0.3f, 1f);
         public float DisabledAlpha = 0.45f;
 
@@ -94,16 +94,7 @@ namespace WitsAndFools
             ApplyOutline();
         }
 
-        static Color AbilityBadgeColor(AbilityType ability) => ability switch
-        {
-            AbilityType.TrumpChanger => new Color(0.55f, 0.20f, 0.70f),
-            AbilityType.ExtraDraw => new Color(0.15f, 0.40f, 0.75f),
-            AbilityType.Blocker => new Color(0.85f, 0.50f, 0.10f),
-            AbilityType.DoubleTrouble => new Color(0.80f, 0.15f, 0.15f),
-            AbilityType.DoubleDefense => new Color(0.15f, 0.60f, 0.25f),
-            AbilityType.SeizeInitiative => new Color(0.75f, 0.65f, 0.10f),
-            _ => Color.gray
-        };
+        static Color AbilityBadgeColor(AbilityType ability) => ThemePalette.AbilityBadgeColor(ability);
 
         void RenderBack()
         {

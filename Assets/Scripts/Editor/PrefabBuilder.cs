@@ -42,11 +42,11 @@ namespace WitsAndFools.EditorTools
 
             // Outline (slightly larger background, sits behind the card)
             var outline = CreateChildImage(go.transform, "Outline", new Vector2(CardWidth + OutlineThickness, CardHeight + OutlineThickness));
-            outline.color = new Color(0, 0, 0, 0);
+            outline.color = ThemePalette.OutlineNone;
 
             // Background (the card face area)
             var background = CreateChildImage(go.transform, "Background", new Vector2(CardWidth, CardHeight));
-            background.color = new Color(0.97f, 0.94f, 0.86f);
+            background.color = ThemePalette.CardCream;
 
             // Face
             var faceRoot = new GameObject("Face", typeof(RectTransform));
@@ -98,7 +98,7 @@ namespace WitsAndFools.EditorTools
             backRT.offsetMax = new Vector2(-8, -8);
 
             var backImage = backRoot.AddComponent<Image>();
-            backImage.color = new Color(0.55f, 0.10f, 0.10f);
+            backImage.color = ThemePalette.CrimsonCard;
 
             var backLabel = CreateChildText(backRoot.transform, "BackPattern", "W&F",
                 anchorMin: new Vector2(0.5f, 0.5f), anchorMax: new Vector2(0.5f, 0.5f),
@@ -107,7 +107,7 @@ namespace WitsAndFools.EditorTools
                 size: new Vector2(80, 40),
                 alignment: TextAlignmentOptions.Center,
                 fontSize: 20);
-            backLabel.color = new Color(0.95f, 0.85f, 0.55f);
+            backLabel.color = ThemePalette.CardBackAccent;
             backLabel.fontStyle = FontStyles.Bold;
 
             backRoot.SetActive(false);
@@ -166,7 +166,7 @@ namespace WitsAndFools.EditorTools
             tmp.text = text;
             tmp.alignment = alignment;
             tmp.fontSize = fontSize;
-            tmp.color = new Color(0.05f, 0.05f, 0.05f);
+            tmp.color = ThemePalette.BlackSuit;
             tmp.enableWordWrapping = false;
             tmp.raycastTarget = false;
             return tmp;

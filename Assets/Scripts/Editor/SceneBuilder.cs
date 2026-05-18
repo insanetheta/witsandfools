@@ -61,7 +61,7 @@ namespace WitsAndFools.EditorTools
             cam.transform.position = new Vector3(0, 0, -10);
             var c = cam.GetComponent<Camera>();
             c.clearFlags = CameraClearFlags.SolidColor;
-            c.backgroundColor = new Color(0.10f, 0.18f, 0.10f); // pub-table green
+            c.backgroundColor = ThemePalette.TableBg;
             c.orthographic = true;
 
             // ----- EventSystem -----
@@ -81,14 +81,14 @@ namespace WitsAndFools.EditorTools
             // ----- Felt background (full-screen image) -----
             var felt = NewChild(canvasRT, "TableFelt");
             var feltImg = felt.gameObject.AddComponent<Image>();
-            feltImg.color = new Color(0.13f, 0.30f, 0.18f);
+            feltImg.color = ThemePalette.TableFelt;
             feltImg.raycastTarget = false;
             FillParent(felt);
 
             // Decorative inner frame
             var frame = NewChild(canvasRT, "TableFrame");
             var frameImg = frame.gameObject.AddComponent<Image>();
-            frameImg.color = new Color(0.40f, 0.20f, 0.10f, 1f);
+            frameImg.color = ThemePalette.ActFrameColor[0];
             frameImg.raycastTarget = false;
             frame.anchorMin = new Vector2(0, 0);
             frame.anchorMax = new Vector2(1, 1);
@@ -97,7 +97,7 @@ namespace WitsAndFools.EditorTools
             // Hollow it out by adding a slightly smaller felt panel on top
             var inner = NewChild(canvasRT, "TableInner");
             var innerImg = inner.gameObject.AddComponent<Image>();
-            innerImg.color = new Color(0.10f, 0.24f, 0.14f);
+            innerImg.color = ThemePalette.TableFeltInner;
             innerImg.raycastTarget = false;
             inner.anchorMin = new Vector2(0, 0);
             inner.anchorMax = new Vector2(1, 1);
@@ -107,7 +107,7 @@ namespace WitsAndFools.EditorTools
             // ----- HUD bar (top) -----
             var hudBar = NewChild(canvasRT, "HudBar");
             var hudBarImg = hudBar.gameObject.AddComponent<Image>();
-            hudBarImg.color = new Color(0, 0, 0, 0.45f);
+            hudBarImg.color = ThemePalette.HudOverlay;
             hudBar.anchorMin = new Vector2(0, 1);
             hudBar.anchorMax = new Vector2(1, 1);
             hudBar.pivot = new Vector2(0.5f, 1);
@@ -142,7 +142,7 @@ namespace WitsAndFools.EditorTools
             deckSlot.sizeDelta = new Vector2(110, 160);
             deckSlot.anchoredPosition = new Vector2(120, 0);
             var deckImg = deckSlot.gameObject.AddComponent<Image>();
-            deckImg.color = new Color(0.20f, 0.06f, 0.06f, 1f);
+            deckImg.color = ThemePalette.DeckSlotDark;
             // Deck "stack" visual using offset rectangles
             for (int i = 0; i < 6; i++)
             {
@@ -150,7 +150,7 @@ namespace WitsAndFools.EditorTools
                 stack.sizeDelta = new Vector2(110, 160);
                 stack.anchoredPosition = new Vector2(55 - i * 0.5f, i * 0.6f); // pivot is left so center is +55
                 var img = stack.gameObject.AddComponent<Image>();
-                img.color = new Color(0.55f, 0.10f, 0.10f);
+                img.color = ThemePalette.CrimsonCard;
                 img.raycastTarget = false;
             }
 
@@ -241,7 +241,7 @@ namespace WitsAndFools.EditorTools
             goPanel.anchorMax = new Vector2(0.5f, 0.5f);
             goPanel.sizeDelta = new Vector2(600, 280);
             var goBg = goPanel.gameObject.AddComponent<Image>();
-            goBg.color = new Color(0, 0, 0, 0.85f);
+            goBg.color = ThemePalette.ModalOverlay;
             var goLabel = AddText(goPanel, "GameOverLabel", "Game over",
                 anchorMin: new Vector2(0, 0.5f), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
@@ -263,7 +263,7 @@ namespace WitsAndFools.EditorTools
             acPanel.anchorMax = new Vector2(0.5f, 0.5f);
             acPanel.sizeDelta = new Vector2(480, 220);
             var acBg = acPanel.gameObject.AddComponent<Image>();
-            acBg.color = new Color(0.05f, 0.05f, 0.12f, 0.92f);
+            acBg.color = ThemePalette.ModalOverlay;
             var acLabel = AddText(acPanel, "AbilityChoiceLabel", "Ability",
                 anchorMin: new Vector2(0.05f, 0.45f), anchorMax: new Vector2(0.95f, 0.95f),
                 pivot: new Vector2(0.5f, 1f), alignment: TextAlignmentOptions.Center,
@@ -314,7 +314,7 @@ namespace WitsAndFools.EditorTools
                 anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1f, 0),
                 pivot: new Vector2(1, 0),
                 alignment: TextAlignmentOptions.BottomRight, fontSize: 18,
-                color: new Color(0.9f, 0.8f, 0.4f));
+                color: ThemePalette.Gold);
             var deckTopRT = (RectTransform)deckTopLabel.transform;
             deckTopRT.sizeDelta = new Vector2(0, 40);
             deckTopRT.anchoredPosition = new Vector2(-20, 95);
@@ -326,7 +326,7 @@ namespace WitsAndFools.EditorTools
                 anchorMin: new Vector2(0.4f, 1), anchorMax: new Vector2(1f, 1),
                 pivot: new Vector2(1, 1),
                 alignment: TextAlignmentOptions.TopRight, fontSize: 16,
-                color: new Color(0.8f, 0.6f, 0.3f));
+                color: ThemePalette.Amber);
             var infoRT = (RectTransform)infoLabel.transform;
             infoRT.sizeDelta = new Vector2(0, 35);
             infoRT.anchoredPosition = new Vector2(-20, -70);
@@ -361,17 +361,17 @@ namespace WitsAndFools.EditorTools
             var mapPanel = NewChild(canvasRT, "MapPanel");
             FillParent(mapPanel);
             var mapBg = mapPanel.gameObject.AddComponent<Image>();
-            mapBg.color = new Color(0.08f, 0.12f, 0.18f);
+            mapBg.color = ThemePalette.DeepNavy;
 
             var mapTitle = AddText(mapPanel, "MapTitle", "Act 1 — The Bilge Rat Tavern",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 36, color: new Color(0.95f, 0.85f, 0.55f));
+                fontSize: 36, color: ThemePalette.Gold);
 
             var mapSubtitle = AddText(mapPanel, "MapSubtitle", "Choose your path:",
                 anchorMin: new Vector2(0.1f, 0.74f), anchorMax: new Vector2(0.9f, 0.82f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 24, color: new Color(0.7f, 0.7f, 0.7f));
+                fontSize: 24, color: ThemePalette.DustyTan);
 
             var mapNodeContainer = NewChild(mapPanel, "MapNodeContainer");
             mapNodeContainer.anchorMin = new Vector2(0.25f, 0.15f);
@@ -392,12 +392,12 @@ namespace WitsAndFools.EditorTools
             var resultPanel = NewChild(canvasRT, "ResultPanel");
             FillParent(resultPanel);
             var resultBg = resultPanel.gameObject.AddComponent<Image>();
-            resultBg.color = new Color(0.06f, 0.06f, 0.10f, 0.95f);
+            resultBg.color = ThemePalette.ResultOverlay;
 
             var resultTitle = AddText(resultPanel, "ResultTitle", "Victory!",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 42, color: new Color(0.95f, 0.85f, 0.55f));
+                fontSize: 42, color: ThemePalette.Gold);
 
             var resultDetails = AddText(resultPanel, "ResultDetails", "",
                 anchorMin: new Vector2(0.15f, 0.72f), anchorMax: new Vector2(0.85f, 0.82f),
@@ -408,13 +408,13 @@ namespace WitsAndFools.EditorTools
             var resultReward = AddText(resultPanel, "ResultReward", "",
                 anchorMin: new Vector2(0.15f, 0.64f), anchorMax: new Vector2(0.85f, 0.72f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 26, color: new Color(0.4f, 0.85f, 0.4f));
+                fontSize: 26, color: ThemePalette.Sage);
 
             // Ability pick area
             var abilityPickLabel = AddText(resultPanel, "AbilityPickLabel", "Choose an ability:",
                 anchorMin: new Vector2(0.15f, 0.56f), anchorMax: new Vector2(0.85f, 0.64f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 24, color: new Color(0.85f, 0.75f, 0.45f));
+                fontSize: 24, color: ThemePalette.Gold);
 
             var abilityPickContainer = NewChild(resultPanel, "AbilityPickContainer");
             abilityPickContainer.anchorMin = new Vector2(0.15f, 0.18f);
@@ -447,12 +447,12 @@ namespace WitsAndFools.EditorTools
             var runOverPanel = NewChild(canvasRT, "RunOverPanel");
             FillParent(runOverPanel);
             var runOverBg = runOverPanel.gameObject.AddComponent<Image>();
-            runOverBg.color = new Color(0.04f, 0.04f, 0.08f);
+            runOverBg.color = ThemePalette.Midnight;
 
             var runOverTitle = AddText(runOverPanel, "RunOverTitle", "Run Over",
                 anchorMin: new Vector2(0.1f, 0.60f), anchorMax: new Vector2(0.9f, 0.85f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 52, color: new Color(0.95f, 0.85f, 0.55f));
+                fontSize: 52, color: ThemePalette.Gold);
 
             var runOverStats = AddText(runOverPanel, "RunOverStats", "",
                 anchorMin: new Vector2(0.2f, 0.30f), anchorMax: new Vector2(0.8f, 0.58f),
@@ -472,17 +472,17 @@ namespace WitsAndFools.EditorTools
             var shopPanel = NewChild(canvasRT, "ShopPanel");
             FillParent(shopPanel);
             var shopBg = shopPanel.gameObject.AddComponent<Image>();
-            shopBg.color = new Color(0.08f, 0.14f, 0.20f);
+            shopBg.color = ThemePalette.DeepNavy;
 
             var shopTitle = AddText(shopPanel, "ShopTitle", "The Fence",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 36, color: new Color(0.95f, 0.85f, 0.55f));
+                fontSize: 36, color: ThemePalette.Gold);
 
             var shopFlorins = AddText(shopPanel, "ShopFlorins", "Your purse: 0 Florins",
                 anchorMin: new Vector2(0.1f, 0.74f), anchorMax: new Vector2(0.9f, 0.82f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 22, color: new Color(0.95f, 0.85f, 0.40f));
+                fontSize: 22, color: ThemePalette.Gold);
 
             var shopItemContainer = NewChild(shopPanel, "ShopItemContainer");
             shopItemContainer.anchorMin = new Vector2(0.20f, 0.15f);
@@ -509,12 +509,12 @@ namespace WitsAndFools.EditorTools
             var eventPanel = NewChild(canvasRT, "EventPanel");
             FillParent(eventPanel);
             var eventBg = eventPanel.gameObject.AddComponent<Image>();
-            eventBg.color = new Color(0.10f, 0.08f, 0.14f);
+            eventBg.color = ThemePalette.Midnight;
 
             var eventTitle = AddText(eventPanel, "EventTitle", "Event",
                 anchorMin: new Vector2(0.1f, 0.78f), anchorMax: new Vector2(0.9f, 0.92f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 36, color: new Color(0.95f, 0.85f, 0.55f));
+                fontSize: 36, color: ThemePalette.Gold);
 
             var eventDesc = AddText(eventPanel, "EventDesc", "",
                 anchorMin: new Vector2(0.15f, 0.52f), anchorMax: new Vector2(0.85f, 0.76f),
@@ -525,7 +525,7 @@ namespace WitsAndFools.EditorTools
             var eventOutcome = AddText(eventPanel, "EventOutcome", "",
                 anchorMin: new Vector2(0.15f, 0.35f), anchorMax: new Vector2(0.85f, 0.50f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 26, color: new Color(0.4f, 0.85f, 0.4f));
+                fontSize: 26, color: ThemePalette.Sage);
             eventOutcome.enableWordWrapping = true;
             eventOutcome.gameObject.SetActive(false);
 
@@ -559,18 +559,18 @@ namespace WitsAndFools.EditorTools
             runHudPanel.pivot = new Vector2(0.5f, 0);
             runHudPanel.sizeDelta = new Vector2(0, 50);
             var runHudBg = runHudPanel.gameObject.AddComponent<Image>();
-            runHudBg.color = new Color(0, 0, 0, 0.6f);
+            runHudBg.color = ThemePalette.RunHudOverlay;
 
             var prestigeLabel = AddText(runHudPanel, "PrestigeLabel", "Prestige: ♥♥♥♥",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.25f, 1),
                 pivot: new Vector2(0, 0.5f), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 22, color: new Color(1f, 0.4f, 0.4f));
+                fontSize: 22, color: ThemePalette.PrestigeRed);
             ((RectTransform)prestigeLabel.transform).offsetMin = new Vector2(16, 0);
 
             var florinsLabel = AddText(runHudPanel, "FlorinsLabel", "Florins: 0",
                 anchorMin: new Vector2(0.25f, 0), anchorMax: new Vector2(0.5f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 22, color: new Color(0.95f, 0.85f, 0.40f));
+                fontSize: 22, color: ThemePalette.Gold);
 
             var actLabel = AddText(runHudPanel, "ActLabel", "Act 1 of 5",
                 anchorMin: new Vector2(0.5f, 0), anchorMax: new Vector2(0.75f, 1),
@@ -580,7 +580,7 @@ namespace WitsAndFools.EditorTools
             var abilitiesLabel = AddText(runHudPanel, "AbilitiesLabel", "Abilities: 4/5",
                 anchorMin: new Vector2(0.75f, 0), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(1, 0.5f), alignment: TextAlignmentOptions.MidlineRight,
-                fontSize: 22, color: new Color(0.6f, 0.8f, 1f));
+                fontSize: 22, color: ThemePalette.AbilityBlue);
             ((RectTransform)abilitiesLabel.transform).offsetMax = new Vector2(-16, 0);
 
             runHudPanel.gameObject.SetActive(false);
@@ -698,11 +698,11 @@ namespace WitsAndFools.EditorTools
             go.transform.SetParent(parent, false);
             var rt = (RectTransform)go.transform;
             var img = go.GetComponent<Image>();
-            img.color = new Color(0.85f, 0.78f, 0.55f);
+            img.color = ThemePalette.ButtonGoldBg;
             var btn = go.GetComponent<Button>();
             var colors = btn.colors;
-            colors.highlightedColor = new Color(1f, 0.95f, 0.7f);
-            colors.disabledColor = new Color(0.55f, 0.50f, 0.40f, 1f);
+            colors.highlightedColor = ThemePalette.ButtonGoldHover;
+            colors.disabledColor = ThemePalette.ButtonGoldDisabled;
             btn.colors = colors;
 
             var lblGO = new GameObject("Label", typeof(RectTransform));
@@ -714,7 +714,7 @@ namespace WitsAndFools.EditorTools
             lbl.text = label;
             lbl.alignment = TextAlignmentOptions.Center;
             lbl.fontSize = 28;
-            lbl.color = new Color(0.15f, 0.10f, 0.05f);
+            lbl.color = ThemePalette.ButtonGoldText;
             lbl.raycastTarget = false;
             return rt;
         }
