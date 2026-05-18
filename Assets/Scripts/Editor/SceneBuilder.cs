@@ -384,26 +384,51 @@ namespace WitsAndFools.EditorTools
             resultBg.color = new Color(0.06f, 0.06f, 0.10f, 0.95f);
 
             var resultTitle = AddText(resultPanel, "ResultTitle", "Victory!",
-                anchorMin: new Vector2(0.1f, 0.65f), anchorMax: new Vector2(0.9f, 0.85f),
+                anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 48, color: new Color(0.95f, 0.85f, 0.55f));
+                fontSize: 42, color: new Color(0.95f, 0.85f, 0.55f));
 
             var resultDetails = AddText(resultPanel, "ResultDetails", "",
-                anchorMin: new Vector2(0.15f, 0.40f), anchorMax: new Vector2(0.85f, 0.62f),
+                anchorMin: new Vector2(0.15f, 0.72f), anchorMax: new Vector2(0.85f, 0.82f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 26, color: Color.white);
+                fontSize: 22, color: Color.white);
             resultDetails.enableWordWrapping = true;
 
             var resultReward = AddText(resultPanel, "ResultReward", "",
-                anchorMin: new Vector2(0.15f, 0.28f), anchorMax: new Vector2(0.85f, 0.40f),
+                anchorMin: new Vector2(0.15f, 0.64f), anchorMax: new Vector2(0.85f, 0.72f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 30, color: new Color(0.4f, 0.85f, 0.4f));
+                fontSize: 26, color: new Color(0.4f, 0.85f, 0.4f));
+
+            // Ability pick area
+            var abilityPickLabel = AddText(resultPanel, "AbilityPickLabel", "Choose an ability:",
+                anchorMin: new Vector2(0.15f, 0.56f), anchorMax: new Vector2(0.85f, 0.64f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 24, color: new Color(0.85f, 0.75f, 0.45f));
+
+            var abilityPickContainer = NewChild(resultPanel, "AbilityPickContainer");
+            abilityPickContainer.anchorMin = new Vector2(0.15f, 0.18f);
+            abilityPickContainer.anchorMax = new Vector2(0.85f, 0.56f);
+            abilityPickContainer.offsetMin = Vector2.zero;
+            abilityPickContainer.offsetMax = Vector2.zero;
+            var pickLayout = abilityPickContainer.gameObject.AddComponent<VerticalLayoutGroup>();
+            pickLayout.spacing = 6;
+            pickLayout.childAlignment = TextAnchor.UpperCenter;
+            pickLayout.childControlWidth = true;
+            pickLayout.childControlHeight = false;
+            pickLayout.childForceExpandWidth = false;
+            pickLayout.childForceExpandHeight = false;
+
+            var abilityPickSkipBtn = AddButton(resultPanel, "AbilityPickSkipButton", "Skip");
+            abilityPickSkipBtn.anchorMin = new Vector2(0.65f, 0.10f);
+            abilityPickSkipBtn.anchorMax = new Vector2(0.65f, 0.10f);
+            abilityPickSkipBtn.pivot = new Vector2(0.5f, 0);
+            abilityPickSkipBtn.sizeDelta = new Vector2(180, 55);
 
             var resultContinueBtn = AddButton(resultPanel, "ResultContinueButton", "Continue");
-            resultContinueBtn.anchorMin = new Vector2(0.5f, 0.08f);
-            resultContinueBtn.anchorMax = new Vector2(0.5f, 0.08f);
+            resultContinueBtn.anchorMin = new Vector2(0.35f, 0.10f);
+            resultContinueBtn.anchorMax = new Vector2(0.35f, 0.10f);
             resultContinueBtn.pivot = new Vector2(0.5f, 0);
-            resultContinueBtn.sizeDelta = new Vector2(260, 70);
+            resultContinueBtn.sizeDelta = new Vector2(200, 55);
 
             resultPanel.gameObject.SetActive(false);
 
@@ -572,6 +597,9 @@ namespace WitsAndFools.EditorTools
             rm.ResultDetailsLabel = resultDetails;
             rm.ResultRewardLabel = resultReward;
             rm.ResultContinueButton = resultContinueBtn.GetComponent<Button>();
+            rm.AbilityPickLabel = abilityPickLabel;
+            rm.AbilityPickContainer = abilityPickContainer;
+            rm.AbilityPickSkipButton = abilityPickSkipBtn.GetComponent<Button>();
             rm.RunOverTitleLabel = runOverTitle;
             rm.RunOverStatsLabel = runOverStats;
             rm.RunOverRestartButton = runOverRestartBtn.GetComponent<Button>();

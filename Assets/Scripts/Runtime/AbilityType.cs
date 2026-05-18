@@ -75,12 +75,12 @@ namespace WitsAndFools
             AbilityType.PileOn => "Raise the max attacks this bout by 2.",
             AbilityType.Feint => "Play the top deck card as a phantom attack.",
             AbilityType.Deflect => "Swap attacker/defender roles mid-bout.",
-            AbilityType.SlipAway => "Discard undefended attacks instead of eating them.",
+            AbilityType.SlipAway => "Once per match, discard undefended attacks instead of eating them.",
             AbilityType.Peek => "Reveal and rearrange the top 3 cards of the deck.",
             AbilityType.Gambit => "Discard your entire hand and draw the same number of cards.",
             AbilityType.TrumpAffinity => "When you draw a trump card, draw 1 extra then discard 1.",
             AbilityType.EndgameSpecialist => "When deck has 6 or fewer cards, defend with any suit.",
-            AbilityType.CardCounter => "See how many cards of each rank remain in the deck.",
+            AbilityType.CardCounter => "After drawing, peek at deck top and swap your worst card for it if better.",
             AbilityType.QuickHands => "After a successful defense, draw 1 extra then discard 1.",
             _ => ""
         };

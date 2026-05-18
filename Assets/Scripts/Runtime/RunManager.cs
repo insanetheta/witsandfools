@@ -42,6 +42,9 @@ namespace WitsAndFools
         public TMP_Text ResultDetailsLabel;
         public TMP_Text ResultRewardLabel;
         public Button ResultContinueButton;
+        public TMP_Text AbilityPickLabel;
+        public Transform AbilityPickContainer;
+        public Button AbilityPickSkipButton;
 
         [Header("Run Over Panel Refs")]
         public TMP_Text RunOverTitleLabel;
@@ -175,6 +178,8 @@ namespace WitsAndFools
                     AutoSelectNode();
                     break;
                 case RunPhase.PostMatch:
+                    if (_abilityPickOfferings != null && _abilityPickOfferings.Count > 0)
+                        OnAbilityPicked(_abilityPickOfferings[_rng.Next(_abilityPickOfferings.Count)]);
                     OnResultContinue();
                     break;
                 case RunPhase.Shop:
@@ -610,6 +615,8 @@ namespace WitsAndFools
             ShowResult(won, florinsEarned);
         }
 
+        List<AbilityType> _abilityPickOfferings;
+
         void ShowResult(bool won, int florinsEarned)
         {
             SetPhase(RunPhase.PostMatch);
@@ -637,11 +644,161 @@ namespace WitsAndFools
                     ResultRewardLabel.text = "";
             }
 
+            _abilityPickOfferings = null;
+            if (won)
+            {
+                _abilityPickOfferings = PickAbilityOfferings(3);
+                if (_abilityPickOfferings.Count > 0)
+                    ShowAbilityPick();
+                else
+                    HideAbilityPick();
+            }
+            else
+                HideAbilityPick();
+
             if (ResultContinueButton)
             {
                 ResultContinueButton.onClick.RemoveAllListeners();
                 ResultContinueButton.onClick.AddListener(OnResultContinue);
+                ResultContinueButton.gameObject.SetActive(_abilityPickOfferings == null || _abilityPickOfferings.Count == 0);
             }
+        }
+
+        List<AbilityType> PickAbilityOfferings(int count)
+        {
+            var pool = new List<AbilityDefinition>();
+            bool isElite = _currentNode?.Type == MapNodeType.EliteMatch || _currentNode?.Type == MapNodeType.BossMatch;
+            foreach (var def in AbilityPool.All)
+            {
+                if (_run.PlayerAbilities.Contains(def.Type)) continue;
+                if (!isElite && def.Rarity == AbilityRarity.Rare && _rng.Next(100) >= 30) continue;
+                pool.Add(def);
+            }
+            var result = new List<AbilityType>();
+            for (int i = 0; i < count && pool.Count > 0; i++)
+            {
+                int idx = _rng.Next(pool.Count);
+                result.Add(pool[idx].Type);
+                pool.RemoveAt(idx);
+            }
+            return result;
+        }
+
+        void ShowAbilityPick()
+        {
+            if (AbilityPickLabel) AbilityPickLabel.text = "Choose an ability:";
+            if (AbilityPickLabel) AbilityPickLabel.gameObject.SetActive(true);
+            ClearAbilityPickButtons();
+
+            if (AbilityPickContainer)
+            {
+                foreach (var abilityType in _abilityPickOfferings)
+                    CreateAbilityPickButton(abilityType);
+            }
+
+            if (AbilityPickSkipButton)
+            {
+                AbilityPickSkipButton.gameObject.SetActive(true);
+                AbilityPickSkipButton.onClick.RemoveAllListeners();
+                AbilityPickSkipButton.onClick.AddListener(OnAbilityPickSkip);
+            }
+        }
+
+        void HideAbilityPick()
+        {
+            if (AbilityPickLabel) AbilityPickLabel.gameObject.SetActive(false);
+            ClearAbilityPickButtons();
+            if (AbilityPickSkipButton) AbilityPickSkipButton.gameObject.SetActive(false);
+        }
+
+        void ClearAbilityPickButtons()
+        {
+            if (!AbilityPickContainer) return;
+            for (int i = AbilityPickContainer.childCount - 1; i >= 0; i--)
+                Destroy(AbilityPickContainer.GetChild(i).gameObject);
+        }
+
+        void CreateAbilityPickButton(AbilityType abilityType)
+        {
+            var def = AbilityPool.Get(abilityType);
+            bool slotsFull = _run.PlayerAbilities.Count >= _run.MaxAbilitySlots;
+
+            var btnGO = new GameObject($"Pick_{abilityType}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            btnGO.transform.SetParent(AbilityPickContainer, false);
+
+            var img = btnGO.GetComponent<Image>();
+            img.color = def.Rarity switch
+            {
+                AbilityRarity.Common => new Color(0.18f, 0.30f, 0.40f),
+                AbilityRarity.Uncommon => new Color(0.25f, 0.35f, 0.18f),
+                AbilityRarity.Rare => new Color(0.40f, 0.22f, 0.45f),
+                _ => new Color(0.25f, 0.25f, 0.25f)
+            };
+
+            var le = btnGO.GetComponent<LayoutElement>();
+            le.preferredHeight = 80;
+            le.preferredWidth = 500;
+
+            var nameGO = new GameObject("Name", typeof(RectTransform));
+            nameGO.transform.SetParent(btnGO.transform, false);
+            var nameRT = (RectTransform)nameGO.transform;
+            nameRT.anchorMin = new Vector2(0, 0.5f);
+            nameRT.anchorMax = new Vector2(1, 1);
+            nameRT.offsetMin = new Vector2(12, 0);
+            nameRT.offsetMax = new Vector2(-12, -2);
+            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            string rarityTag = def.Rarity != AbilityRarity.Common ? $"  [{def.Rarity}]" : "";
+            string bindTag = def.IsPassive ? " (Passive)" : $" ({def.BindingCount} cards)";
+            nameTMP.text = $"{abilityType.DisplayName()}{rarityTag}{bindTag}";
+            nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            nameTMP.fontSize = 20;
+            nameTMP.color = Color.white;
+            nameTMP.raycastTarget = false;
+
+            var descGO = new GameObject("Desc", typeof(RectTransform));
+            descGO.transform.SetParent(btnGO.transform, false);
+            var descRT = (RectTransform)descGO.transform;
+            descRT.anchorMin = Vector2.zero;
+            descRT.anchorMax = new Vector2(1, 0.5f);
+            descRT.offsetMin = new Vector2(12, 2);
+            descRT.offsetMax = new Vector2(-12, 0);
+            var descTMP = descGO.AddComponent<TextMeshProUGUI>();
+            descTMP.text = abilityType.Description();
+            descTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            descTMP.fontSize = 15;
+            descTMP.color = new Color(0.75f, 0.75f, 0.75f);
+            descTMP.raycastTarget = false;
+            descTMP.enableWordWrapping = true;
+
+            var btn = btnGO.GetComponent<Button>();
+            var captured = abilityType;
+            btn.onClick.AddListener(() => OnAbilityPicked(captured));
+        }
+
+        void OnAbilityPicked(AbilityType type)
+        {
+            if (_run.PlayerAbilities.Count >= _run.MaxAbilitySlots)
+            {
+                var worst = _run.PlayerAbilities[0];
+                _run.PlayerAbilities.RemoveAt(0);
+                Debug.Log($"[RunManager] Replaced {worst.DisplayName()} with {type.DisplayName()}");
+            }
+            _run.PlayerAbilities.Add(type);
+            _run.RecordAbilityPicked(type);
+            UpdateRunHud();
+            FinishAbilityPick();
+        }
+
+        void OnAbilityPickSkip()
+        {
+            FinishAbilityPick();
+        }
+
+        void FinishAbilityPick()
+        {
+            _abilityPickOfferings = null;
+            HideAbilityPick();
+            if (ResultContinueButton) ResultContinueButton.gameObject.SetActive(true);
         }
 
         void OnResultContinue()

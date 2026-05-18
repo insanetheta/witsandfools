@@ -39,6 +39,7 @@ namespace WitsAndFools
         bool[] _courtiersFanUsed = new bool[2];
         bool[] _clumsyFingersTriggered = new bool[2];
         bool[] _quicksilverUsed = new bool[2];
+        bool[] _slipAwayUsed = new bool[2];
         bool[] _jugglersBallsUsed = new bool[2];
         readonly List<Rank> _pendingBonusRanks = new();
 
@@ -120,6 +121,7 @@ namespace WitsAndFools
 
             _deck.Shuffle();
             _quicksilverUsed = new bool[2];
+            _slipAwayUsed = new bool[2];
             _jugglersBallsUsed = new bool[2];
 
             for (int p = 0; p < 2; p++)
@@ -252,7 +254,24 @@ namespace WitsAndFools
 
             Phase = Phase.Defense;
             OnAttackPlayed?.Invoke(playerIndex, card);
+            TryShieldBrooch();
             return true;
+        }
+
+        void TryShieldBrooch()
+        {
+            int defender = DefenderIndex;
+            if (!_config.ShieldBrooch[defender] || _shieldBroochUsed[defender]) return;
+            int slot = _bout.FirstUndefendedSlot();
+            if (slot < 0) return;
+            _shieldBroochUsed[defender] = true;
+            var attack = _bout.Attacks[slot];
+            var ghost = new Card(attack.Suit, attack.Rank == Rank.Ace ? Rank.Ace : attack.Rank + 1, null);
+            if (ghost.Suit != Trump && attack.Suit != Trump)
+                ghost = new Card(Trump, Rank.Six, null);
+            _bout.TryDefend(slot, ghost);
+            if (_bout.FullyDefended) Phase = Phase.Attack;
+            OnDefensePlayed?.Invoke(defender, slot, ghost);
         }
 
         public bool TryDefend(int playerIndex, int slot, Card card)
@@ -357,7 +376,7 @@ namespace WitsAndFools
                 return true;
             }
 
-            if (!ValidateAbility(ability, card, defenseSlot)) return false;
+            if (!ValidateAbility(ability, card, defenseSlot, playerIndex)) return false;
 
             bool keepCard = _config.QuicksilverVial[playerIndex] && !_quicksilverUsed[playerIndex];
             if (keepCard)
@@ -372,7 +391,7 @@ namespace WitsAndFools
             return true;
         }
 
-        bool ValidateAbility(AbilityType ability, Card card, int defenseSlot)
+        bool ValidateAbility(AbilityType ability, Card card, int defenseSlot, int playerIndex)
         {
             switch (ability)
             {
@@ -396,7 +415,7 @@ namespace WitsAndFools
                 case AbilityType.Deflect:
                     return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
                 case AbilityType.SlipAway:
-                    return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
+                    return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0 && !_slipAwayUsed[playerIndex];
                 case AbilityType.Peek:
                     return _deck.Count > 0;
                 case AbilityType.Gambit:
@@ -464,6 +483,7 @@ namespace WitsAndFools
                     break;
 
                 case AbilityType.SlipAway:
+                    _slipAwayUsed[playerIndex] = true;
                     for (int i = 0; i < _bout.Attacks.Count; i++)
                     {
                         if (_bout.Defenses[i] == null)

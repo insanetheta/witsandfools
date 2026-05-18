@@ -77,18 +77,31 @@ namespace WitsAndFools
         bool ShouldUseAbility(GameEngine engine, int playerIndex, Card card)
         {
             var hand = engine.HandOf(playerIndex);
+            bool wants = WantsToUseAbility(engine, playerIndex, card, hand);
+            if (!wants) return false;
 
+            if (AbilityEagerness < 1f && _rng.NextDouble() > AbilityEagerness)
+                return false;
+
+            return true;
+        }
+
+        bool WantsToUseAbility(GameEngine engine, int playerIndex, Card card, Hand hand)
+        {
             switch (card.Ability.Value)
             {
                 case AbilityType.TrumpChanger:
                     if (card.Suit == engine.Trump) return false;
-                    return CountSuit(hand, card.Suit) >= 3 && CountSuit(hand, engine.Trump) <= 1;
+                    int suitThreshold = AbilityEagerness >= 1.2f ? 2 : 3;
+                    return CountSuit(hand, card.Suit) >= suitThreshold && CountSuit(hand, engine.Trump) <= 1;
 
                 case AbilityType.ExtraDraw:
-                    return engine.Phase == Phase.Attack && engine.DeckCount >= 6;
+                    int deckThreshold = AbilityEagerness >= 1.2f ? 3 : 6;
+                    return engine.Phase == Phase.Attack && engine.DeckCount >= deckThreshold;
 
                 case AbilityType.Blocker:
-                    return engine.Phase == Phase.Defense && engine.Bout.AttackCount >= 2;
+                    int attackThreshold = AbilityEagerness >= 1.2f ? 1 : 2;
+                    return engine.Phase == Phase.Defense && engine.Bout.AttackCount >= attackThreshold;
 
                 case AbilityType.DoubleTrouble:
                     if (engine.Phase != Phase.Attack || engine.Bout.IsEmpty) return false;
@@ -98,7 +111,8 @@ namespace WitsAndFools
                     return engine.Phase == Phase.Defense && CanCoverTwoSlots(engine, card);
 
                 case AbilityType.SeizeInitiative:
-                    return engine.Phase == Phase.Defense && hand.Count >= 4;
+                    int handReq = AbilityEagerness >= 1.2f ? 3 : 4;
+                    return engine.Phase == Phase.Defense && hand.Count >= handReq;
 
                 case AbilityType.PileOn:
                     return engine.Phase == Phase.Attack && engine.Bout.AttackCount >= 1 && hand.Count >= 4;
@@ -109,7 +123,8 @@ namespace WitsAndFools
                 case AbilityType.Deflect:
                     if (engine.Phase != Phase.Defense) return false;
                     int undefended = CountUndefended(engine.Bout);
-                    return undefended >= 2 && hand.Count <= 3;
+                    int desperation = AbilityEagerness >= 1.2f ? 4 : 3;
+                    return undefended >= 2 && hand.Count <= desperation;
 
                 case AbilityType.SlipAway:
                     if (engine.Phase != Phase.Defense) return false;
@@ -120,7 +135,8 @@ namespace WitsAndFools
 
                 case AbilityType.Gambit:
                     int trumpCount = CountSuit(hand, engine.Trump);
-                    return trumpCount <= 0 && hand.Count >= 4 && engine.DeckCount >= hand.Count;
+                    int trumpReq = AbilityEagerness >= 1.2f ? 1 : 0;
+                    return trumpCount <= trumpReq && hand.Count >= 4 && engine.DeckCount >= hand.Count;
 
                 default:
                     return false;
