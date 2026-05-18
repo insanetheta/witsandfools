@@ -168,8 +168,8 @@ namespace WitsAndFools
             switch (_phase)
             {
                 case RunPhase.ArchetypeSelect:
-                    var archetypes = ArchetypeDefinitions.AllArchetypes;
-                    OnArchetypeSelected(archetypes[_rng.Next(archetypes.Length)]);
+                    var allArch = ArchetypeDefinitions.AllArchetypes;
+                    OnArchetypeSelected(allArch[_rng.Next(allArch.Length)]);
                     break;
                 case RunPhase.MapSelect:
                     AutoSelectNode();
@@ -337,31 +337,44 @@ namespace WitsAndFools
 
         void ShowArchetypeSelect()
         {
-            if (MapTitleLabel) MapTitleLabel.text = "Choose Your Archetype";
+            var repData = ReputationSystem.Load();
+            if (MapTitleLabel)
+                MapTitleLabel.text = $"Choose Your Archetype  (Rep: {repData.TotalReputation})";
             ClearMapNodes();
             if (!MapNodeContainer) return;
 
             foreach (var archetype in ArchetypeDefinitions.AllArchetypes)
-                CreateArchetypeButton(archetype);
+            {
+                bool unlocked = repData.UnlockedArchetypes.Contains(archetype);
+                CreateArchetypeButton(archetype, unlocked);
+            }
         }
 
-        void CreateArchetypeButton(ArchetypeType archetype)
+        void CreateArchetypeButton(ArchetypeType archetype, bool unlocked)
         {
             var abilities = archetype.StartingAbilities();
             string abilityList = string.Join(", ", abilities.ConvertAll(a => a.DisplayName()));
+
+            int repNeeded = archetype switch
+            {
+                ArchetypeType.Brute => 25,
+                ArchetypeType.Diplomat => 100,
+                ArchetypeType.Gambler => 300,
+                _ => 0
+            };
 
             var btnGO = new GameObject($"Archetype_{archetype}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(MapNodeContainer, false);
 
             var img = btnGO.GetComponent<Image>();
-            img.color = archetype switch
+            img.color = unlocked ? archetype switch
             {
                 ArchetypeType.Rogue => new Color(0.25f, 0.35f, 0.45f),
                 ArchetypeType.Brute => new Color(0.50f, 0.20f, 0.15f),
                 ArchetypeType.Diplomat => new Color(0.20f, 0.40f, 0.30f),
                 ArchetypeType.Gambler => new Color(0.45f, 0.35f, 0.15f),
                 _ => Color.gray
-            };
+            } : new Color(0.20f, 0.20f, 0.20f);
 
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 100;
@@ -375,10 +388,12 @@ namespace WitsAndFools
             nameRT.offsetMin = new Vector2(16, 0);
             nameRT.offsetMax = new Vector2(-16, -4);
             var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
-            nameTMP.text = $"{archetype.DisplayName()} — {archetype.Description()}";
+            nameTMP.text = unlocked
+                ? $"{archetype.DisplayName()} — {archetype.Description()}"
+                : $"{archetype.DisplayName()} — Locked (requires {repNeeded} Rep)";
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
             nameTMP.fontSize = 20;
-            nameTMP.color = Color.white;
+            nameTMP.color = unlocked ? Color.white : new Color(0.4f, 0.4f, 0.4f);
             nameTMP.raycastTarget = false;
 
             var descGO = new GameObject("Abilities", typeof(RectTransform));
@@ -389,7 +404,7 @@ namespace WitsAndFools
             descRT.offsetMin = new Vector2(16, 4);
             descRT.offsetMax = new Vector2(-16, 0);
             var descTMP = descGO.AddComponent<TextMeshProUGUI>();
-            descTMP.text = $"Starts with: {abilityList}";
+            descTMP.text = unlocked ? $"Starts with: {abilityList}" : "???";
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.fontSize = 16;
             descTMP.color = new Color(0.75f, 0.75f, 0.75f);
@@ -397,6 +412,7 @@ namespace WitsAndFools
             descTMP.enableWordWrapping = true;
 
             var btn = btnGO.GetComponent<Button>();
+            btn.interactable = unlocked;
             var captured = archetype;
             btn.onClick.AddListener(() => OnArchetypeSelected(captured));
         }
@@ -1273,6 +1289,16 @@ namespace WitsAndFools
 
         void ShowRunOver()
         {
+            int repEarned = 0;
+            ReputationData repData;
+            if (!_autoRun)
+            {
+                repEarned = ReputationSystem.RecordRunEnd(_run, _selectedArchetype);
+                repData = ReputationSystem.Load();
+            }
+            else
+                repData = ReputationSystem.Load();
+
             if (RunOverTitleLabel)
                 RunOverTitleLabel.text = _run.RunWon ? "The Circuit is Yours!" : "Your Reputation Crumbles...";
             if (RunOverStatsLabel)
@@ -1283,7 +1309,8 @@ namespace WitsAndFools
                     $"Matches won: {_run.MatchesWon}/{_run.MatchesPlayed}\n" +
                     $"Florins earned: {_run.Florins}\n" +
                     $"Abilities: {_run.PlayerAbilities.Count}\n" +
-                    $"Trinkets: {_run.PlayerTrinkets.Count}";
+                    $"Trinkets: {_run.PlayerTrinkets.Count}\n" +
+                    $"\n+{repEarned} Reputation  (Total: {repData.TotalReputation})";
                 RunOverStatsLabel.text = stats;
             }
             if (RunOverRestartButton)
