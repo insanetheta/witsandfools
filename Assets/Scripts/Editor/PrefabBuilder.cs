@@ -12,26 +12,7 @@ namespace WitsAndFools.EditorTools
         const float CardHeight = 160f;
         const float OutlineThickness = 4f;
 
-        static TMP_FontAsset s_font;
-        static TMP_FontAsset DefaultFont
-        {
-            get
-            {
-                if (s_font) return s_font;
-                try { s_font = TMP_Settings.defaultFontAsset; } catch { s_font = null; }
-                if (!s_font)
-                {
-                    var guids = AssetDatabase.FindAssets("LiberationSans SDF t:TMP_FontAsset");
-                    foreach (var g in guids)
-                    {
-                        var p = AssetDatabase.GUIDToAssetPath(g);
-                        s_font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(p);
-                        if (s_font) break;
-                    }
-                }
-                return s_font;
-            }
-        }
+        static TMP_FontAsset DefaultFont => FontAssets.Mono;
 
         [MenuItem("Wits and Fools/Build/Card Prefab")]
         public static void BuildCardPrefab()

@@ -13,36 +13,26 @@ namespace WitsAndFools.EditorTools
         const string ScenePath = "Assets/Scenes/GameScene.unity";
         const string CardPrefabPath = "Assets/Prefabs/CardView.prefab";
 
-        static TMP_FontAsset s_font;
-        static TMP_FontAsset DefaultFont
-        {
-            get
-            {
-                if (s_font) return s_font;
-                try { s_font = TMP_Settings.defaultFontAsset; } catch { s_font = null; }
-                if (!s_font)
-                {
-                    var guids = AssetDatabase.FindAssets("LiberationSans SDF t:TMP_FontAsset");
-                    foreach (var g in guids)
-                    {
-                        var p = AssetDatabase.GUIDToAssetPath(g);
-                        s_font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(p);
-                        if (s_font) break;
-                    }
-                }
-                return s_font;
-            }
-        }
+        static TMP_FontAsset HeadingFont => FontAssets.Heading;
+        static TMP_FontAsset MonoFont => FontAssets.Mono;
+        static TMP_FontAsset DefaultFont => FontAssets.Body;
 
         [MenuItem("Wits and Fools/Build/Scene (GameScene)")]
         public static void BuildScene()
         {
             // Ensure TMP Essentials are imported (so text renders)
-            if (DefaultFont == null)
+            if (FontAssets.Fallback == null)
             {
                 Debug.LogWarning("TMP Essentials not yet imported — importing now. You may need to re-run 'Build/Scene' after the import completes.");
                 TmpEssentialsImporter.EnsureImported();
                 AssetDatabase.Refresh();
+            }
+
+            // Generate SDF font assets if not yet created
+            if (FontAssets.Heading == FontAssets.Fallback)
+            {
+                Debug.Log("Custom font assets not found — building SDF assets from TTFs...");
+                FontAssetBuilder.BuildFontAssets();
             }
 
             // Make sure card prefab exists
@@ -119,10 +109,12 @@ namespace WitsAndFools.EditorTools
             turnLabel.margin = new Vector4(20, 0, 0, 0);
 
             var trumpLabel = AddText(hudBar, "TrumpLabel", "Trump: ♥", anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(0.7f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center, fontSize: 28, color: Color.white);
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center, fontSize: 28, color: Color.white,
+                font: MonoFont);
 
             var deckLabel = AddText(hudBar, "DeckCountLabel", "Deck: 0", anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineRight, fontSize: 28, color: Color.white);
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineRight, fontSize: 28, color: Color.white,
+                font: MonoFont);
             deckLabel.margin = new Vector4(0, 0, 20, 0);
 
             // ----- End-bout button (bottom-right) -----
@@ -158,7 +150,7 @@ namespace WitsAndFools.EditorTools
             var deckCountLabel = AddText(deckSlot, "DeckCountLabel", "0",
                 anchorMin: Vector2.zero, anchorMax: Vector2.one,
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 32, color: Color.white);
+                fontSize: 32, color: Color.white, font: MonoFont);
             var deckCountRT = (RectTransform)deckCountLabel.transform;
             deckCountRT.anchoredPosition = new Vector2(55, 0);
             deckCountLabel.outlineWidth = 0.3f;
@@ -245,7 +237,7 @@ namespace WitsAndFools.EditorTools
             var goLabel = AddText(goPanel, "GameOverLabel", "Game over",
                 anchorMin: new Vector2(0, 0.5f), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 44, color: Color.white);
+                fontSize: 44, color: Color.white, font: HeadingFont);
             var restartBtn = AddButton(goPanel, "RestartButton", "Play again");
             restartBtn.anchorMin = new Vector2(0.5f, 0);
             restartBtn.anchorMax = new Vector2(0.5f, 0);
@@ -314,7 +306,7 @@ namespace WitsAndFools.EditorTools
                 anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1f, 0),
                 pivot: new Vector2(1, 0),
                 alignment: TextAlignmentOptions.BottomRight, fontSize: 18,
-                color: ThemePalette.Gold);
+                color: ThemePalette.Gold, font: MonoFont);
             var deckTopRT = (RectTransform)deckTopLabel.transform;
             deckTopRT.sizeDelta = new Vector2(0, 40);
             deckTopRT.anchoredPosition = new Vector2(-20, 95);
@@ -326,7 +318,7 @@ namespace WitsAndFools.EditorTools
                 anchorMin: new Vector2(0.4f, 1), anchorMax: new Vector2(1f, 1),
                 pivot: new Vector2(1, 1),
                 alignment: TextAlignmentOptions.TopRight, fontSize: 16,
-                color: ThemePalette.Amber);
+                color: ThemePalette.Amber, font: MonoFont);
             var infoRT = (RectTransform)infoLabel.transform;
             infoRT.sizeDelta = new Vector2(0, 35);
             infoRT.anchoredPosition = new Vector2(-20, -70);
@@ -366,7 +358,7 @@ namespace WitsAndFools.EditorTools
             var mapTitle = AddText(mapPanel, "MapTitle", "Act 1 — The Bilge Rat Tavern",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 36, color: ThemePalette.Gold);
+                fontSize: 36, color: ThemePalette.Gold, font: HeadingFont);
 
             var mapSubtitle = AddText(mapPanel, "MapSubtitle", "Choose your path:",
                 anchorMin: new Vector2(0.1f, 0.74f), anchorMax: new Vector2(0.9f, 0.82f),
@@ -397,7 +389,7 @@ namespace WitsAndFools.EditorTools
             var resultTitle = AddText(resultPanel, "ResultTitle", "Victory!",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 42, color: ThemePalette.Gold);
+                fontSize: 42, color: ThemePalette.Gold, font: HeadingFont);
 
             var resultDetails = AddText(resultPanel, "ResultDetails", "",
                 anchorMin: new Vector2(0.15f, 0.72f), anchorMax: new Vector2(0.85f, 0.82f),
@@ -452,12 +444,12 @@ namespace WitsAndFools.EditorTools
             var runOverTitle = AddText(runOverPanel, "RunOverTitle", "Run Over",
                 anchorMin: new Vector2(0.1f, 0.60f), anchorMax: new Vector2(0.9f, 0.85f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 52, color: ThemePalette.Gold);
+                fontSize: 52, color: ThemePalette.Gold, font: HeadingFont);
 
             var runOverStats = AddText(runOverPanel, "RunOverStats", "",
                 anchorMin: new Vector2(0.2f, 0.30f), anchorMax: new Vector2(0.8f, 0.58f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 26, color: Color.white);
+                fontSize: 26, color: Color.white, font: MonoFont);
             runOverStats.enableWordWrapping = true;
 
             var runOverRestartBtn = AddButton(runOverPanel, "RunOverRestartButton", "New Run");
@@ -477,12 +469,12 @@ namespace WitsAndFools.EditorTools
             var shopTitle = AddText(shopPanel, "ShopTitle", "The Fence",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 36, color: ThemePalette.Gold);
+                fontSize: 36, color: ThemePalette.Gold, font: HeadingFont);
 
             var shopFlorins = AddText(shopPanel, "ShopFlorins", "Your purse: 0 Florins",
                 anchorMin: new Vector2(0.1f, 0.74f), anchorMax: new Vector2(0.9f, 0.82f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 22, color: ThemePalette.Gold);
+                fontSize: 22, color: ThemePalette.Gold, font: MonoFont);
 
             var shopItemContainer = NewChild(shopPanel, "ShopItemContainer");
             shopItemContainer.anchorMin = new Vector2(0.20f, 0.15f);
@@ -514,7 +506,7 @@ namespace WitsAndFools.EditorTools
             var eventTitle = AddText(eventPanel, "EventTitle", "Event",
                 anchorMin: new Vector2(0.1f, 0.78f), anchorMax: new Vector2(0.9f, 0.92f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 36, color: ThemePalette.Gold);
+                fontSize: 36, color: ThemePalette.Gold, font: HeadingFont);
 
             var eventDesc = AddText(eventPanel, "EventDesc", "",
                 anchorMin: new Vector2(0.15f, 0.52f), anchorMax: new Vector2(0.85f, 0.76f),
@@ -564,13 +556,13 @@ namespace WitsAndFools.EditorTools
             var prestigeLabel = AddText(runHudPanel, "PrestigeLabel", "Prestige: ♥♥♥♥",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.25f, 1),
                 pivot: new Vector2(0, 0.5f), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 22, color: ThemePalette.PrestigeRed);
+                fontSize: 22, color: ThemePalette.PrestigeRed, font: MonoFont);
             ((RectTransform)prestigeLabel.transform).offsetMin = new Vector2(16, 0);
 
             var florinsLabel = AddText(runHudPanel, "FlorinsLabel", "Florins: 0",
                 anchorMin: new Vector2(0.25f, 0), anchorMax: new Vector2(0.5f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 22, color: ThemePalette.Gold);
+                fontSize: 22, color: ThemePalette.Gold, font: MonoFont);
 
             var actLabel = AddText(runHudPanel, "ActLabel", "Act 1 of 5",
                 anchorMin: new Vector2(0.5f, 0), anchorMax: new Vector2(0.75f, 1),
@@ -580,7 +572,7 @@ namespace WitsAndFools.EditorTools
             var abilitiesLabel = AddText(runHudPanel, "AbilitiesLabel", "Abilities: 4/5",
                 anchorMin: new Vector2(0.75f, 0), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(1, 0.5f), alignment: TextAlignmentOptions.MidlineRight,
-                fontSize: 22, color: ThemePalette.AbilityBlue);
+                fontSize: 22, color: ThemePalette.AbilityBlue, font: MonoFont);
             ((RectTransform)abilitiesLabel.transform).offsetMax = new Vector2(-16, 0);
 
             runHudPanel.gameObject.SetActive(false);
@@ -671,7 +663,8 @@ namespace WitsAndFools.EditorTools
 
         static TMP_Text AddText(RectTransform parent, string name, string text,
             Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot,
-            TextAlignmentOptions alignment, float fontSize, Color color)
+            TextAlignmentOptions alignment, float fontSize, Color color,
+            TMP_FontAsset font = null)
         {
             var go = new GameObject(name, typeof(RectTransform));
             go.transform.SetParent(parent, false);
@@ -682,7 +675,8 @@ namespace WitsAndFools.EditorTools
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
             var t = go.AddComponent<TextMeshProUGUI>();
-            if (DefaultFont) t.font = DefaultFont;
+            var f = font ? font : DefaultFont;
+            if (f) t.font = f;
             t.text = text;
             t.alignment = alignment;
             t.fontSize = fontSize;
@@ -710,7 +704,8 @@ namespace WitsAndFools.EditorTools
             var lblRT = (RectTransform)lblGO.transform;
             FillParent(lblRT);
             var lbl = lblGO.AddComponent<TextMeshProUGUI>();
-            if (DefaultFont) lbl.font = DefaultFont;
+            var btnFont = HeadingFont ? HeadingFont : DefaultFont;
+            if (btnFont) lbl.font = btnFont;
             lbl.text = label;
             lbl.alignment = TextAlignmentOptions.Center;
             lbl.fontSize = 28;
