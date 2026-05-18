@@ -18,6 +18,7 @@ namespace WitsAndFools
         public TMP_Text RankBottomRight;
         public TMP_Text CenterPip;
         public RectTransform BackRoot;
+        public Image BackImage;
         public TMP_Text AbilityBadge;
 
         [Header("Visual settings")]
@@ -25,11 +26,6 @@ namespace WitsAndFools
         public Color BackColor = new Color(0.55f, 0.13f, 0.13f);
         public Color RedSuitColor = new Color(0.75f, 0.13f, 0.13f);
         public Color BlackSuitColor = new Color(0.05f, 0.05f, 0.05f);
-        public Color OutlineDefault = new Color(0, 0, 0, 0);
-        public Color OutlinePlayable = new Color(0.27f, 0.67f, 0.27f, 1f);
-        public Color OutlineHover = new Color(0.83f, 0.66f, 0.27f, 1f);
-        public Color OutlineDisabled = new Color(0.3f, 0.3f, 0.3f, 1f);
-        public float DisabledAlpha = 0.45f;
 
         Card _card;
         bool _faceUp = true;
@@ -98,7 +94,13 @@ namespace WitsAndFools
 
         void RenderBack()
         {
-            if (Background) Background.color = BackColor;
+            if (Background)
+            {
+                if (BackImage && BackImage.sprite)
+                    Background.color = Color.white;
+                else
+                    Background.color = BackColor;
+            }
             ApplyOutline();
         }
 
@@ -106,16 +108,16 @@ namespace WitsAndFools
         {
             if (Outline)
             {
-                if (_hover && _highlight == Highlight.Playable) Outline.color = OutlineHover;
+                if (_hover && _highlight == Highlight.Playable) Outline.color = ThemePalette.SelectedGlow;
                 else switch (_highlight)
                 {
-                    case Highlight.Playable: Outline.color = OutlinePlayable; break;
-                    case Highlight.Disabled: Outline.color = OutlineDisabled; break;
-                    default: Outline.color = OutlineDefault; break;
+                    case Highlight.Playable: Outline.color = ThemePalette.PlayableGlow; break;
+                    case Highlight.Disabled: Outline.color = ThemePalette.DisabledOutline; break;
+                    default: Outline.color = ThemePalette.OutlineNone; break;
                 }
             }
             if (_canvasGroup)
-                _canvasGroup.alpha = _highlight == Highlight.Disabled ? DisabledAlpha : 1f;
+                _canvasGroup.alpha = _highlight == Highlight.Disabled ? ThemePalette.DisabledAlpha : 1f;
         }
 
         public void OnPointerClick(PointerEventData eventData) => OnClicked?.Invoke(this);

@@ -14,9 +14,15 @@ namespace WitsAndFools.EditorTools
 
         static TMP_FontAsset DefaultFont => FontAssets.Mono;
 
+        static Sprite LoadSprite(string path)
+        {
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
         [MenuItem("Wits and Fools/Build/Card Prefab")]
         public static void BuildCardPrefab()
         {
+            var cardBackSprite = LoadSprite("Assets/Art/Cards/card_back.png");
             var go = new GameObject("CardView", typeof(RectTransform));
             var rt = go.GetComponent<RectTransform>();
             rt.sizeDelta = new Vector2(CardWidth, CardHeight);
@@ -75,21 +81,29 @@ namespace WitsAndFools.EditorTools
             var backRT = backRoot.GetComponent<RectTransform>();
             backRT.anchorMin = Vector2.zero;
             backRT.anchorMax = Vector2.one;
-            backRT.offsetMin = new Vector2(8, 8);
-            backRT.offsetMax = new Vector2(-8, -8);
+            backRT.offsetMin = new Vector2(4, 4);
+            backRT.offsetMax = new Vector2(-4, -4);
 
             var backImage = backRoot.AddComponent<Image>();
-            backImage.color = ThemePalette.CrimsonCard;
-
-            var backLabel = CreateChildText(backRoot.transform, "BackPattern", "W&F",
-                anchorMin: new Vector2(0.5f, 0.5f), anchorMax: new Vector2(0.5f, 0.5f),
-                pivot: new Vector2(0.5f, 0.5f),
-                position: Vector2.zero,
-                size: new Vector2(80, 40),
-                alignment: TextAlignmentOptions.Center,
-                fontSize: 20);
-            backLabel.color = ThemePalette.CardBackAccent;
-            backLabel.fontStyle = FontStyles.Bold;
+            if (cardBackSprite)
+            {
+                backImage.sprite = cardBackSprite;
+                backImage.color = Color.white;
+                backImage.preserveAspect = true;
+            }
+            else
+            {
+                backImage.color = ThemePalette.CrimsonCard;
+                var backLabel = CreateChildText(backRoot.transform, "BackPattern", "W&F",
+                    anchorMin: new Vector2(0.5f, 0.5f), anchorMax: new Vector2(0.5f, 0.5f),
+                    pivot: new Vector2(0.5f, 0.5f),
+                    position: Vector2.zero,
+                    size: new Vector2(80, 40),
+                    alignment: TextAlignmentOptions.Center,
+                    fontSize: 20);
+                backLabel.color = ThemePalette.CardBackAccent;
+                backLabel.fontStyle = FontStyles.Bold;
+            }
 
             backRoot.SetActive(false);
 
@@ -102,6 +116,7 @@ namespace WitsAndFools.EditorTools
             view.RankBottomRight = rankBR;
             view.CenterPip = center;
             view.BackRoot = backRT;
+            view.BackImage = backImage;
             view.AbilityBadge = abilityBadge;
 
             // Save as prefab
