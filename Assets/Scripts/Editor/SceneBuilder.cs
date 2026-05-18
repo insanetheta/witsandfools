@@ -68,10 +68,20 @@ namespace WitsAndFools.EditorTools
 
             var canvasRT = (RectTransform)canvasGO.transform;
 
-            // ----- Felt background (full-screen image) -----
+            // ----- Table background (venue surface sprite, per-act) -----
+            var tableBg = NewChild(canvasRT, "TableBackground");
+            var tableBgImg = tableBg.gameObject.AddComponent<Image>();
+            var tableBgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Tables/table_tavern.png");
+            if (tableBgSprite) { tableBgImg.sprite = tableBgSprite; tableBgImg.color = Color.white; }
+            else tableBgImg.color = ThemePalette.TableBg;
+            tableBgImg.raycastTarget = false;
+            tableBgImg.preserveAspect = false;
+            FillParent(tableBg);
+
+            // ----- Felt overlay (tinted per-act) -----
             var felt = NewChild(canvasRT, "TableFelt");
             var feltImg = felt.gameObject.AddComponent<Image>();
-            feltImg.color = ThemePalette.TableFelt;
+            feltImg.color = ThemePalette.ActFeltTint[0];
             feltImg.raycastTarget = false;
             FillParent(felt);
 
@@ -326,10 +336,20 @@ namespace WitsAndFools.EditorTools
             infoLabel.gameObject.SetActive(false);
             hud.InfoLabel = infoLabel;
 
+            // ----- Vignette overlay (on top of all game elements) -----
+            var vignette = NewChild(canvasRT, "VignetteOverlay");
+            var vignetteImg = vignette.gameObject.AddComponent<Image>();
+            var vignetteSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Textures/vignette_overlay.png");
+            if (vignetteSprite) { vignetteImg.sprite = vignetteSprite; vignetteImg.color = Color.white; }
+            else vignetteImg.color = new Color(0, 0, 0, 0);
+            vignetteImg.raycastTarget = false;
+            FillParent(vignette);
+
             // ----- Wrap existing match UI in a MatchPanel group -----
             var matchPanel = NewChild(canvasRT, "MatchPanel");
             FillParent(matchPanel);
             // Reparent all match-specific UI under MatchPanel
+            tableBg.SetParent(matchPanel, true);
             felt.SetParent(matchPanel, true);
             frame.SetParent(matchPanel, true);
             inner.SetParent(matchPanel, true);
@@ -347,6 +367,7 @@ namespace WitsAndFools.EditorTools
             ((RectTransform)tooltipLabel.transform).SetParent(matchPanel, true);
             ((RectTransform)deckTopLabel.transform).SetParent(matchPanel, true);
             ((RectTransform)infoLabel.transform).SetParent(matchPanel, true);
+            vignette.SetParent(matchPanel, true);
             matchPanel.gameObject.SetActive(false);
 
             // ----- Map Panel -----
@@ -624,6 +645,24 @@ namespace WitsAndFools.EditorTools
             rm.EventChoice2Button = eventChoice2Btn.GetComponent<Button>();
             rm.EventChoice2Label = eventChoice2Label;
             rm.EventContinueButton = eventContinueBtn.GetComponent<Button>();
+
+            // Match table theme
+            rm.TableBackgroundImage = tableBgImg;
+            rm.TableFeltImage = feltImg;
+            rm.TableFrameImage = frameImg;
+            rm.VignetteImage = vignetteImg;
+            rm.VignetteSprite = vignetteSprite;
+
+            // Load table surface sprites for per-act theming
+            var tableSurfaces = new[]
+            {
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Tables/table_tavern.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Tables/table_merchant.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Tables/table_guild.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Tables/table_library.png"),
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Tables/table_salon.png"),
+            };
+            rm.TableSurfaceSprites = tableSurfaces;
 
             // Save scene
             EditorSceneManager.SaveScene(scene, ScenePath);

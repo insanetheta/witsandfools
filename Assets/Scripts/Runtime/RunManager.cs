@@ -73,6 +73,14 @@ namespace WitsAndFools
         public TMP_Text EventChoice2Label;
         public Button EventContinueButton;
 
+        [Header("Match Table Theme")]
+        public Image TableBackgroundImage;
+        public Image TableFeltImage;
+        public Image TableFrameImage;
+        public Image VignetteImage;
+        public Sprite[] TableSurfaceSprites;
+        public Sprite VignetteSprite;
+
         RunState _run;
         RunPhase _phase;
         int _currentColumn;
@@ -286,6 +294,7 @@ namespace WitsAndFools
             _run.CurrentAct = 0;
             _run.CurrentMap = MapGenerator.Generate(0, _rng);
             _currentColumn = 0;
+            ApplyActTheme(0);
 
             SetPhase(RunPhase.ArchetypeSelect);
         }
@@ -1439,7 +1448,29 @@ namespace WitsAndFools
             }
             _run.CurrentMap = MapGenerator.Generate(_run.CurrentAct, _rng);
             _currentColumn = 0;
+            ApplyActTheme(_run.CurrentAct);
             SetPhase(RunPhase.MapSelect);
+        }
+
+        void ApplyActTheme(int act)
+        {
+            act = Mathf.Clamp(act, 0, 4);
+            if (TableBackgroundImage && TableSurfaceSprites != null && act < TableSurfaceSprites.Length)
+            {
+                TableBackgroundImage.sprite = TableSurfaceSprites[act];
+                TableBackgroundImage.color = Color.white;
+            }
+            if (TableFeltImage)
+                TableFeltImage.color = ThemePalette.ActFeltTint[act];
+            if (TableFrameImage)
+                TableFrameImage.color = ThemePalette.ActFrameColor[act];
+            if (VignetteImage && VignetteSprite)
+            {
+                VignetteImage.sprite = VignetteSprite;
+                VignetteImage.color = Color.white;
+            }
+            if (Camera.main)
+                Camera.main.backgroundColor = ThemePalette.ActBackgroundTint[act];
         }
 
         // ---------- Run Over ----------
