@@ -135,6 +135,12 @@ namespace WitsAndFools
                 case TrinketType.DevilsBargain:
                     config.HandSize = Math.Max(config.HandSize - 1, 4);
                     break;
+                case TrinketType.FoolsGold:
+                    config.FoolsGold[player] = true;
+                    break;
+                case TrinketType.VentriloquistsDummy:
+                    config.VentriloquistsDummy[player] = true;
+                    break;
             }
         }
 

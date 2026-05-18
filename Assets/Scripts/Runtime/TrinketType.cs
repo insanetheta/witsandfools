@@ -93,6 +93,8 @@ namespace WitsAndFools
             TrinketType.QuicksilverVial => true,
             TrinketType.CrownOfThorns => true,
             TrinketType.DevilsBargain => true,
+            TrinketType.FoolsGold => true,
+            TrinketType.VentriloquistsDummy => true,
             _ => false
         };
     }

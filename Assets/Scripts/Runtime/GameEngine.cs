@@ -133,6 +133,14 @@ namespace WitsAndFools
             else
                 Trump = TrumpCard.Suit;
 
+            for (int p = 0; p < 2; p++)
+            {
+                if (_config.FoolsGold[p])
+                    _hands[p].Add(new Card(Trump, Rank.Seven, null));
+            }
+
+            ApplyVentriloquistsDummy();
+
             AttackerIndex = ChooseFirstAttacker();
             Phase = Phase.Attack;
 
@@ -160,6 +168,37 @@ namespace WitsAndFools
                 if (!best.HasValue || (int)c.Rank < best.Value) best = (int)c.Rank;
             }
             return best;
+        }
+
+        void ApplyVentriloquistsDummy()
+        {
+            for (int p = 0; p < 2; p++)
+            {
+                if (!_config.VentriloquistsDummy[p]) continue;
+                int opponent = 1 - p;
+                var opponentAbilities = new List<AbilityType>();
+                if (_config.Abilities == null || _config.AbilityOwners == null) continue;
+                foreach (var kv in _config.AbilityOwners)
+                {
+                    if (kv.Value == opponent && _config.Abilities.ContainsKey(kv.Key))
+                        opponentAbilities.Add(_config.Abilities[kv.Key]);
+                }
+                if (opponentAbilities.Count == 0) continue;
+
+                var pick = opponentAbilities[_deck.Count % opponentAbilities.Count];
+                for (int i = 0; i < _hands[p].Cards.Count; i++)
+                {
+                    var card = _hands[p].Cards[i];
+                    if (card.HasAbility) continue;
+                    var newCard = new Card(card.Suit, card.Rank, pick);
+                    _hands[p].Remove(card);
+                    _hands[p].Add(newCard);
+                    _config.Abilities[(card.Suit, card.Rank)] = pick;
+                    if (_config.AbilityOwners != null)
+                        _config.AbilityOwners[(card.Suit, card.Rank)] = p;
+                    break;
+                }
+            }
         }
 
         // ---------- Actions ----------

@@ -28,6 +28,9 @@ namespace WitsAndFools
         public bool[] MarkedDeck = new bool[2];
         public bool[] CrownOfThorns = new bool[2];
 
+        public bool[] FoolsGold = new bool[2];
+        public bool[] VentriloquistsDummy = new bool[2];
+
         public bool[] RattledNerves = new bool[2];
         public bool[] ClumsyFingers = new bool[2];
 
