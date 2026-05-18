@@ -160,6 +160,20 @@ namespace WitsAndFools.EditorTools
             int safety = 0;
             while (engine.Phase != Phase.GameOver && safety++ < 5000)
             {
+                if (safety > 3000)
+                {
+                    int p = engine.Phase == Phase.Defense ? engine.DefenderIndex : engine.AttackerIndex;
+                    if (engine.Phase == Phase.Defense)
+                        engine.TryEat(p);
+                    else if (!engine.Bout.IsEmpty && engine.Bout.FullyDefended)
+                        engine.TryEndBout(p);
+                    else if (engine.Bout.IsEmpty)
+                    {
+                        var hand = engine.HandOf(p);
+                        if (hand.Count > 0) engine.TryAttack(p, hand.Cards[0]);
+                    }
+                    continue;
+                }
                 int active = engine.Phase == Phase.Defense ? engine.DefenderIndex : engine.AttackerIndex;
                 if (active == 0)
                     ai0.RequestAction(engine, 0);
@@ -187,7 +201,7 @@ namespace WitsAndFools.EditorTools
             var pool = new List<AbilityType>(AbilityPool.ActiveAbilities);
             pool.AddRange(AbilityPool.PassiveAbilities);
             var picked = new List<AbilityType>();
-            for (int i = 0; i < 3 && pool.Count > 0; i++)
+            for (int i = 0; i < 4 && pool.Count > 0; i++)
             {
                 int idx = rng.Next(pool.Count);
                 picked.Add(pool[idx]);
@@ -302,16 +316,16 @@ namespace WitsAndFools.EditorTools
             sb.AppendLine($"=== Roguelike Ladder Simulation: {runCount} runs ({elapsedMs}ms) ===");
             sb.AppendLine();
 
-            sb.AppendLine($"Run success rate: {stats.RunsWon}/{stats.TotalRuns} ({100.0 * stats.RunsWon / stats.TotalRuns:0.1}%)");
+            sb.AppendLine($"Run success rate: {stats.RunsWon}/{stats.TotalRuns} ({100.0 * stats.RunsWon / stats.TotalRuns:0.0}%)");
             sb.AppendLine($"Stalled matches: {stats.Stalls}");
-            sb.AppendLine($"Avg Florins/run: {stats.TotalFlorins / (double)stats.TotalRuns:0.1}");
+            sb.AppendLine($"Avg Florins/run: {stats.TotalFlorins / (double)stats.TotalRuns:0.0}");
             sb.AppendLine();
 
             sb.AppendLine("--- Win Rate by Act ---");
             for (int act = 0; act < 5; act++)
             {
                 if (stats.ActWinRate.TryGetValue(act, out var wr) && wr[0] > 0)
-                    sb.AppendLine($"  Act {act + 1}: {wr[1]}/{wr[0]} ({100.0 * wr[1] / wr[0]:0.1}%)");
+                    sb.AppendLine($"  Act {act + 1}: {wr[1]}/{wr[0]} ({100.0 * wr[1] / wr[0]:0.0}%)");
             }
             sb.AppendLine();
 

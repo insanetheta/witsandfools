@@ -26,7 +26,7 @@ namespace WitsAndFools
         public int Seed;
         public int CurrentAct;
         public int CurrentColumn;
-        public int Prestige = 3;
+        public int Prestige = 4;
         public int Florins;
         public int Reputation;
         public int MatchesPlayed;
@@ -35,7 +35,7 @@ namespace WitsAndFools
         public int TotalBoutsDefended;
 
         public List<AbilityType> PlayerAbilities = new();
-        public int MaxAbilitySlots = 3;
+        public int MaxAbilitySlots = 5;
         public List<TrinketType> PlayerTrinkets = new();
         public List<BurdenType> PlayerBurdens = new();
 

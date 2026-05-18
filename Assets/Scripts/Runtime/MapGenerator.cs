@@ -71,8 +71,8 @@ namespace WitsAndFools
         {
             if (col == 0) return MapNodeType.RivalMatch;
             int roll = rng.Next(100);
-            if (roll < 50) return MapNodeType.RivalMatch;
-            if (roll < 70) return MapNodeType.Shop;
+            if (roll < 40) return MapNodeType.RivalMatch;
+            if (roll < 65) return MapNodeType.Shop;
             if (roll < 85) return MapNodeType.Rumor;
             return MapNodeType.Rest;
         }
@@ -84,11 +84,11 @@ namespace WitsAndFools
 
             int abilitySlots = actIndex switch
             {
-                0 => 2,
-                1 => 3,
-                2 => 4,
-                3 => 5,
-                _ => 6
+                0 => 1,
+                1 => 2,
+                2 => 3,
+                3 => 4,
+                _ => 5
             };
             if (isElite) abilitySlots++;
 
