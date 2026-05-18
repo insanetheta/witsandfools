@@ -38,6 +38,9 @@ namespace WitsAndFools
         bool[] _shieldBroochUsed = new bool[2];
         bool[] _courtiersFanUsed = new bool[2];
         bool[] _clumsyFingersTriggered = new bool[2];
+        bool[] _quicksilverUsed = new bool[2];
+        bool[] _jugglersBallsUsed = new bool[2];
+        readonly List<Rank> _pendingBonusRanks = new();
 
         public int AttackerIndex { get; private set; }
         public int DefenderIndex => 1 - AttackerIndex;
@@ -97,6 +100,25 @@ namespace WitsAndFools
             _clumsyFingersTriggered = new bool[2];
 
             _deck.Shuffle();
+            _quicksilverUsed = new bool[2];
+            _jugglersBallsUsed = new bool[2];
+
+            for (int p = 0; p < 2; p++)
+            {
+                if (!_config.LoadedDice[p]) continue;
+                var topCards = _deck.PeekTop(3);
+                if (topCards.Length > 1)
+                {
+                    Array.Sort(topCards, (a, b) =>
+                    {
+                        bool at = a.Suit == TrumpCard.Suit, bt = b.Suit == TrumpCard.Suit;
+                        if (at != bt) return at ? 1 : -1;
+                        return (int)a.Rank - (int)b.Rank;
+                    });
+                    _deck.ReplaceTop(topCards);
+                }
+                break;
+            }
 
             int handSize = _config.HandSize;
             for (int i = 0; i < handSize; i++)
@@ -206,6 +228,7 @@ namespace WitsAndFools
             if (playerIndex != DefenderIndex) return false;
             if (_bout.IsEmpty) return false;
 
+            CollectCrownOfThornsRanks();
             foreach (var c in _bout.AllCards())
                 _hands[playerIndex].Add(c);
             _bout.Clear();
@@ -243,6 +266,7 @@ namespace WitsAndFools
             if (_bout.IsEmpty) return false;
             if (!_bout.FullyDefended) return false;
 
+            CollectCrownOfThornsRanks();
             foreach (var c in _bout.AllCards()) _discard.Add(c);
             _bout.Clear();
 
@@ -277,8 +301,14 @@ namespace WitsAndFools
 
             if (!ValidateAbility(ability, card, defenseSlot)) return false;
 
-            _hands[playerIndex].Remove(card);
-            _discard.Add(card);
+            bool keepCard = _config.QuicksilverVial[playerIndex] && !_quicksilverUsed[playerIndex];
+            if (keepCard)
+                _quicksilverUsed[playerIndex] = true;
+            else
+            {
+                _hands[playerIndex].Remove(card);
+                _discard.Add(card);
+            }
             ApplyAbility(ability, playerIndex, card, defenseSlot);
             OnAbilityUsed?.Invoke(playerIndex, card, ability);
             return true;
@@ -386,13 +416,24 @@ namespace WitsAndFools
                             _discard.Add(_bout.Defenses[i].Value);
                         }
                     }
+                    CollectCrownOfThornsRanks();
                     _bout.Clear();
                     ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
                     break;
 
                 case AbilityType.Peek:
-                    // In headless/AI mode, peek just reorders top cards favorably.
-                    // The AI benefits by having better draw order. No visual effect needed for simulation.
+                    var top = _deck.PeekTop(3);
+                    if (top.Length > 1)
+                    {
+                        // Put easiest-to-shed cards on top: non-trump low rank first
+                        Array.Sort(top, (a, b) =>
+                        {
+                            bool at = a.Suit == Trump, bt = b.Suit == Trump;
+                            if (at != bt) return at ? 1 : -1;
+                            return (int)a.Rank - (int)b.Rank;
+                        });
+                        _deck.ReplaceTop(top);
+                    }
                     break;
 
                 case AbilityType.Gambit:
@@ -417,6 +458,18 @@ namespace WitsAndFools
             for (int i = 0; i < _bout.Defenses.Count; i++)
                 if (_bout.Defenses[i] != null) n++;
             return n;
+        }
+
+        void CollectCrownOfThornsRanks()
+        {
+            _pendingBonusRanks.Clear();
+            for (int p = 0; p < 2; p++)
+            {
+                if (!_config.CrownOfThorns[p]) continue;
+                foreach (var d in _bout.Defenses)
+                    if (d.HasValue && d.Value.Suit == Trump)
+                        _pendingBonusRanks.Add(d.Value.Rank);
+            }
         }
 
         void ResolveBout(BoutOutcome outcome)
@@ -451,6 +504,20 @@ namespace WitsAndFools
                 }
             }
 
+            for (int p = 0; p < 2; p++)
+            {
+                if (_config.JugglersBalls[p] && !_jugglersBallsUsed[p] && _boutCount == 1 && _hands[p].Count > 1)
+                {
+                    _jugglersBallsUsed[p] = true;
+                    var worst = FindWorstCard(_hands[p], Trump);
+                    if (worst.HasValue)
+                    {
+                        _hands[p].Remove(worst.Value);
+                        _discard.Add(worst.Value);
+                    }
+                }
+            }
+
             _doubleTroubleActive = false;
             _pileOnBonus = 0;
             _duelistGloveUsedThisBout = new bool[2];
@@ -470,6 +537,10 @@ namespace WitsAndFools
             {
                 AttackerIndex = outcome == BoutOutcome.DefenderWonAllDiscarded ? defenderBefore : attackerBefore;
             }
+
+            foreach (var r in _pendingBonusRanks)
+                _bout.AddBonusRank(r);
+            _pendingBonusRanks.Clear();
 
             Phase = Phase.Attack;
             OnTurnBegan?.Invoke(AttackerIndex);
@@ -504,7 +575,30 @@ namespace WitsAndFools
                     }
                 }
             }
+            if (drawn > 0 && _config.CardCounter[playerIndex] && _deck.Count > 0)
+            {
+                var peeked = _deck.PeekTop(1);
+                var worst = FindWorstCard(_hands[playerIndex], Trump);
+                if (worst.HasValue && peeked.Length > 0)
+                {
+                    bool pBetter = IsBetterDraw(peeked[0], worst.Value, Trump);
+                    if (pBetter)
+                    {
+                        _hands[playerIndex].Remove(worst.Value);
+                        _hands[playerIndex].Add(_deck.Draw());
+                        _discard.Add(worst.Value);
+                    }
+                }
+            }
             if (drawn > 0) OnDrew?.Invoke(playerIndex, drawn);
+        }
+
+        static bool IsBetterDraw(Card candidate, Card current, Suit trump)
+        {
+            bool ct = candidate.Suit == trump, cu = current.Suit == trump;
+            if (cu && !ct) return true;
+            if (ct && !cu) return false;
+            return (int)candidate.Rank < (int)current.Rank;
         }
 
         static Card? FindWorstCard(Hand hand, Suit trump)

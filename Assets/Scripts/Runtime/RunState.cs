@@ -42,6 +42,7 @@ namespace WitsAndFools
         public List<List<MapNode>> CurrentMap;
         public bool RunComplete;
         public bool RunWon;
+        public bool PhoenixMedalUsed;
 
         public Dictionary<AbilityType, int> AbilityUsageCount = new();
         public Dictionary<AbilityType, int> AbilityPickCount = new();

@@ -270,11 +270,19 @@ namespace WitsAndFools
             {
                 _run.MatchesWon++;
                 florinsEarned = CalculateFlorins(_run.CurrentAct, _currentNode.Type);
+                if (_run.PlayerTrinkets.Contains(TrinketType.MerchantsPurse))
+                    florinsEarned += 3;
                 _run.Florins += florinsEarned;
             }
             else
             {
                 _run.Prestige--;
+                AssignRandomBurden();
+                if (_run.Prestige <= 0 && _run.PlayerTrinkets.Contains(TrinketType.PhoenixMedal) && !_run.PhoenixMedalUsed)
+                {
+                    _run.PhoenixMedalUsed = true;
+                    _run.Prestige = 1;
+                }
                 if (_run.Prestige <= 0)
                 {
                     _run.RunComplete = true;
@@ -295,9 +303,15 @@ namespace WitsAndFools
                 ResultTitleLabel.text = won ? "Victory!" : "Defeat...";
             if (ResultDetailsLabel)
             {
-                string details = won
-                    ? $"You defeated {_currentNode.Opponent?.Name ?? "opponent"}!"
-                    : $"{_currentNode.Opponent?.Name ?? "Opponent"} bested you.\nPrestige remaining: {_run.Prestige}";
+                string details;
+                if (won)
+                    details = $"You defeated {_currentNode.Opponent?.Name ?? "opponent"}!";
+                else
+                {
+                    details = $"{_currentNode.Opponent?.Name ?? "Opponent"} bested you.\nPrestige remaining: {_run.Prestige}";
+                    if (_run.PlayerBurdens.Count > 0)
+                        details += $"\nGained: {_run.PlayerBurdens[^1].DisplayName()}";
+                }
                 ResultDetailsLabel.text = details;
             }
             if (ResultRewardLabel)
@@ -516,11 +530,173 @@ namespace WitsAndFools
         void HandleRumor()
         {
             SetPhase(RunPhase.Event);
-            ShowEventChoices("A Whispered Lead...",
-                "You overhear a conversation in the shadows.\nA gambler's secret, or a pickpocket's trap?",
-                "Investigate", "Walk away");
-            _eventChoice1Action = DoRumorInvestigate;
-            _eventChoice2Action = DoRumorWalkAway;
+            int eventId = _rng.Next(8);
+            switch (eventId)
+            {
+                case 0:
+                    ShowEventChoices("A Whispered Lead...",
+                        "You overhear a conversation in the shadows.\nA gambler's secret, or a pickpocket's trap?",
+                        "Investigate", "Walk away");
+                    _eventChoice1Action = DoRumorInvestigate;
+                    _eventChoice2Action = DoRumorWalkAway;
+                    break;
+                case 1:
+                    ShowEventChoices("The Stranger's Wager",
+                        "A hooded figure offers you a bet:\n\"Double your coin, or lose it all.\"",
+                        "Accept the wager", "Decline politely");
+                    _eventChoice1Action = () =>
+                    {
+                        if (_rng.Next(100) < 50)
+                        {
+                            int gain = 8 + _run.CurrentAct * 2;
+                            _run.Florins += gain;
+                            ShowEventOutcome($"Lady luck smiles! +{gain} Florins.");
+                        }
+                        else
+                        {
+                            int loss = Math.Min(_run.Florins, 6);
+                            _run.Florins -= loss;
+                            ShowEventOutcome($"The stranger vanishes with your coin. -{loss} Florins.");
+                        }
+                    };
+                    _eventChoice2Action = () => ShowEventOutcome("Wise choice. You move on.");
+                    break;
+                case 2:
+                    ShowEventChoices("The Herbalist's Cart",
+                        "A traveling herbalist offers a strange tonic.\n\"Sharpen the mind, but steady the hand,\" she warns.",
+                        "Drink the tonic", "Pass");
+                    _eventChoice1Action = () =>
+                    {
+                        if (_rng.Next(100) < 65)
+                        {
+                            if (_run.PlayerAbilities.Count < _run.MaxAbilitySlots)
+                            {
+                                var reward = PickAbilityReward(false);
+                                if (reward.HasValue)
+                                {
+                                    _run.PlayerAbilities.Add(reward.Value);
+                                    _run.RecordAbilityPicked(reward.Value);
+                                    ShowEventOutcome($"Your mind sharpens! Learned {reward.Value.DisplayName()}.");
+                                    return;
+                                }
+                            }
+                            _run.Florins += 4;
+                            ShowEventOutcome("The tonic refreshes you. +4 Florins.");
+                        }
+                        else
+                        {
+                            AddBurden(BurdenType.ClumsyFingers);
+                            ShowEventOutcome("The tonic makes your hands tremble. Gained Clumsy Fingers.");
+                        }
+                    };
+                    _eventChoice2Action = DoRumorWalkAway;
+                    break;
+                case 3:
+                    ShowEventChoices("The Card Sharp's Challenge",
+                        "A notorious card sharp blocks your path.\n\"Beat me in a trick, and I'll share my secret.\"",
+                        "Accept", "Avoid");
+                    _eventChoice1Action = () =>
+                    {
+                        if (_rng.Next(100) < 55)
+                        {
+                            int gain = 6 + _run.CurrentAct;
+                            _run.Florins += gain;
+                            ShowEventOutcome($"You outplay the sharp! +{gain} Florins and bragging rights.");
+                        }
+                        else
+                        {
+                            AddBurden(BurdenType.MarkedCards);
+                            ShowEventOutcome("The sharp marks your deck. Gained Marked Cards.");
+                        }
+                    };
+                    _eventChoice2Action = () =>
+                    {
+                        _run.Florins += 1;
+                        ShowEventOutcome("You slip past. +1 Florin from a loose pocket.");
+                    };
+                    break;
+                case 4:
+                    ShowEventChoices("The Beggar's Plea",
+                        "A ragged beggar clutches your sleeve.\n\"Spare some coin? I know things about your next rival...\"",
+                        "Give 5 Florins", "Ignore");
+                    _eventChoice1Action = () =>
+                    {
+                        if (_run.Florins >= 5)
+                        {
+                            _run.Florins -= 5;
+                            int gain = 8 + _run.CurrentAct * 2;
+                            _run.Florins += gain;
+                            ShowEventOutcome($"Useful intel! The tip pays off. +{gain - 5} Florins net.");
+                        }
+                        else
+                            ShowEventOutcome("You don't have enough coin. The beggar shuffles away.");
+                    };
+                    _eventChoice2Action = () => ShowEventOutcome("You walk on. The city has no mercy.");
+                    break;
+                case 5:
+                    ShowEventChoices("The Cursed Trinket",
+                        "A vendor displays a shimmering trinket.\n\"Powerful, but not without cost,\" she whispers.",
+                        "Take it", "Leave it");
+                    _eventChoice1Action = () =>
+                    {
+                        if (_run.PlayerTrinkets.Count < 5)
+                        {
+                            var allTrinkets = (TrinketType[])Enum.GetValues(typeof(TrinketType));
+                            var trinket = allTrinkets[_rng.Next(allTrinkets.Length)];
+                            _run.PlayerTrinkets.Add(trinket);
+                            AddBurden(BurdenType.RattledNerves);
+                            ShowEventOutcome($"You gain {trinket.DisplayName()}, but your nerves fray. Gained Rattled Nerves.");
+                        }
+                        else
+                        {
+                            _run.Florins += 3;
+                            ShowEventOutcome("Your pockets are full. You take coin instead. +3 Florins.");
+                        }
+                    };
+                    _eventChoice2Action = () => ShowEventOutcome("Probably wise. You move on.");
+                    break;
+                case 6:
+                    ShowEventChoices("The Drunken Sailor",
+                        "A sailor stumbles into you, scattering cards everywhere.\n\"Sorry, friend! Take one for your trouble.\"",
+                        "Pick up a card", "Help him up");
+                    _eventChoice1Action = () =>
+                    {
+                        if (_run.PlayerAbilities.Count < _run.MaxAbilitySlots)
+                        {
+                            var reward = PickAbilityReward(false);
+                            if (reward.HasValue)
+                            {
+                                _run.PlayerAbilities.Add(reward.Value);
+                                _run.RecordAbilityPicked(reward.Value);
+                                ShowEventOutcome($"You pocket {reward.Value.DisplayName()}!");
+                                return;
+                            }
+                        }
+                        ShowEventOutcome("Nothing useful in the mess. You move on.");
+                    };
+                    _eventChoice2Action = () =>
+                    {
+                        _run.Florins += 4;
+                        ShowEventOutcome("The grateful sailor presses coin into your hand. +4 Florins.");
+                    };
+                    break;
+                default:
+                    ShowEventChoices("The Fortune Teller",
+                        "An old woman peers into a crystal ball.\n\"Your fate is not yet written. Choose your path.\"",
+                        "Ask about rivals", "Ask about treasure");
+                    _eventChoice1Action = () =>
+                    {
+                        _run.Florins += 3;
+                        ShowEventOutcome("She reveals your next opponent's weakness. The knowledge is priceless. +3 Florins.");
+                    };
+                    _eventChoice2Action = () =>
+                    {
+                        int gain = 4 + _run.CurrentAct;
+                        _run.Florins += gain;
+                        ShowEventOutcome($"She reveals a hidden cache nearby. +{gain} Florins.");
+                    };
+                    break;
+            }
         }
 
         void HandleRest()
@@ -528,20 +704,47 @@ namespace WitsAndFools
             SetPhase(RunPhase.Rest);
 
             bool hasBurdens = _run.PlayerBurdens.Count > 0;
-            string desc = "The hearth crackles. You find a quiet moment of peace.";
+            int restType = _rng.Next(3);
 
-            if (hasBurdens)
+            if (restType == 0 && hasBurdens)
             {
-                ShowEventChoices("The Hearth", desc,
+                ShowEventChoices("The Hearth",
+                    "The hearth crackles. You find a quiet moment of peace.",
                     "Mend (remove a burden)", "Rest quietly (+3 Florins)");
                 _eventChoice1Action = DoRestMend;
                 _eventChoice2Action = DoRestQuietly;
             }
+            else if (restType == 1)
+            {
+                ShowEventChoices("The Study",
+                    "You find a quiet corner with old game manuals.\nPerhaps you can learn something new.",
+                    "Study (+ability if room)", "Rest quietly (+3 Florins)");
+                _eventChoice1Action = () =>
+                {
+                    if (_run.PlayerAbilities.Count < _run.MaxAbilitySlots)
+                    {
+                        var reward = PickAbilityReward(false);
+                        if (reward.HasValue)
+                        {
+                            _run.PlayerAbilities.Add(reward.Value);
+                            _run.RecordAbilityPicked(reward.Value);
+                            ShowEventOutcome($"Studied and learned {reward.Value.DisplayName()}!");
+                            return;
+                        }
+                    }
+                    _run.Florins += 3;
+                    ShowEventOutcome("Nothing new in the books. +3 Florins from a tip jar.");
+                };
+                _eventChoice2Action = DoRestQuietly;
+            }
             else
             {
+                string desc = hasBurdens
+                    ? "The hearth crackles. You find a quiet moment of peace."
+                    : "A warm fire and a good meal. Simple comforts.";
                 ShowEventChoices("The Hearth", desc,
-                    "Rest quietly (+3 Florins)", null);
-                _eventChoice1Action = DoRestQuietly;
+                    hasBurdens ? "Mend (remove a burden)" : "Rest quietly (+3 Florins)", null);
+                _eventChoice1Action = hasBurdens ? DoRestMend : DoRestQuietly;
                 _eventChoice2Action = null;
             }
         }
@@ -635,6 +838,22 @@ namespace WitsAndFools
         {
             _run.Florins += 2;
             ShowEventOutcome("You keep your head down. +2 Florins for your trouble.");
+        }
+
+        void AddBurden(BurdenType burden)
+        {
+            if (!_run.PlayerBurdens.Contains(burden))
+                _run.PlayerBurdens.Add(burden);
+        }
+
+        void AssignRandomBurden()
+        {
+            var allBurdens = (BurdenType[])Enum.GetValues(typeof(BurdenType));
+            var available = new List<BurdenType>();
+            foreach (var b in allBurdens)
+                if (!_run.PlayerBurdens.Contains(b)) available.Add(b);
+            if (available.Count > 0)
+                _run.PlayerBurdens.Add(available[_rng.Next(available.Count)]);
         }
 
         void DoRestMend()

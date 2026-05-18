@@ -13,6 +13,7 @@ namespace WitsAndFools
         public bool[] TrumpAffinity = new bool[2];
         public bool[] EndgameSpecialist = new bool[2];
         public bool[] QuickHands = new bool[2];
+        public bool[] CardCounter = new bool[2];
 
         public bool[] DuelistGlove = new bool[2];
         public bool[] PoisonedWine = new bool[2];
@@ -20,6 +21,12 @@ namespace WitsAndFools
         public bool[] ShieldBrooch = new bool[2];
         public bool[] CourtiersFan = new bool[2];
         public int? ForcedTrumpSuit;
+        public bool[] JugglersBalls = new bool[2];
+        public bool[] LoadedDice = new bool[2];
+        public bool[] QuicksilverVial = new bool[2];
+        public bool[] SpysMonocle = new bool[2];
+        public bool[] MarkedDeck = new bool[2];
+        public bool[] CrownOfThorns = new bool[2];
 
         public bool[] RattledNerves = new bool[2];
         public bool[] ClumsyFingers = new bool[2];
@@ -28,6 +35,7 @@ namespace WitsAndFools
         public bool FixedAttacker;
         public bool AnyRankAttack;
         public bool EatDrawsExtra;
+        public bool MirrorAbilities;
 
         public static MatchConfig Default() => new()
         {

@@ -19,6 +19,8 @@ namespace WitsAndFools
 
             Shuffle(availableCards, rng);
 
+            bool hasForgers = run.PlayerTrinkets.Contains(TrinketType.ForgersKit);
+
             int idx = 0;
             foreach (var abilityType in run.PlayerAbilities)
             {
@@ -28,14 +30,20 @@ namespace WitsAndFools
                     ApplyPassive(config, 0, abilityType);
                     continue;
                 }
-                for (int b = 0; b < def.BindingCount && idx < availableCards.Count; b++, idx++)
+                int binds = def.BindingCount;
+                if (hasForgers && binds == 1) binds = 2;
+                for (int b = 0; b < binds && idx < availableCards.Count; b++, idx++)
                 {
                     abilities[availableCards[idx]] = abilityType;
                     owners[availableCards[idx]] = 0;
                 }
             }
 
-            foreach (var abilityType in opponent.Abilities)
+            var opponentAbilities = opponent.HouseRule == HouseRuleType.TheMirror
+                ? run.PlayerAbilities
+                : opponent.Abilities;
+
+            foreach (var abilityType in opponentAbilities)
             {
                 var def = AbilityPool.Get(abilityType);
                 if (def.IsPassive)
@@ -77,6 +85,7 @@ namespace WitsAndFools
                 case AbilityType.TrumpAffinity: config.TrumpAffinity[player] = true; break;
                 case AbilityType.EndgameSpecialist: config.EndgameSpecialist[player] = true; break;
                 case AbilityType.QuickHands: config.QuickHands[player] = true; break;
+                case AbilityType.CardCounter: config.CardCounter[player] = true; break;
             }
         }
 
@@ -105,8 +114,26 @@ namespace WitsAndFools
                 case TrinketType.CourtiersFan:
                     config.CourtiersFan[player] = true;
                     break;
-                case TrinketType.ScholarsTome:
-                    if (player == 0) config.HandSize = config.HandSize; // slot expansion handled at run layer
+                case TrinketType.JugglersBalls:
+                    config.JugglersBalls[player] = true;
+                    break;
+                case TrinketType.LoadedDice:
+                    config.LoadedDice[player] = true;
+                    break;
+                case TrinketType.QuicksilverVial:
+                    config.QuicksilverVial[player] = true;
+                    break;
+                case TrinketType.SpysMonocle:
+                    config.SpysMonocle[player] = true;
+                    break;
+                case TrinketType.MarkedDeck:
+                    config.MarkedDeck[player] = true;
+                    break;
+                case TrinketType.CrownOfThorns:
+                    config.CrownOfThorns[player] = true;
+                    break;
+                case TrinketType.DevilsBargain:
+                    config.HandSize = Math.Max(config.HandSize - 1, 4);
                     break;
             }
         }
@@ -146,6 +173,9 @@ namespace WitsAndFools
                     break;
                 case HouseRuleType.DoubleOrNothing:
                     config.EatDrawsExtra = true;
+                    break;
+                case HouseRuleType.TheMirror:
+                    config.MirrorAbilities = true;
                     break;
             }
         }

@@ -8,6 +8,7 @@ namespace WitsAndFools
         readonly List<Card?> _defenses = new();
         readonly HashSet<int> _autoDefended = new();
         public bool AttacksCapped { get; set; }
+        readonly HashSet<Rank> _bonusRanks = new();
 
         public IReadOnlyList<Card> Attacks => _attacks;
         public IReadOnlyList<Card?> Defenses => _defenses;
@@ -57,9 +58,12 @@ namespace WitsAndFools
             foreach (var d in _defenses) if (d.HasValue) yield return d.Value;
         }
 
+        public void AddBonusRank(Rank rank) => _bonusRanks.Add(rank);
+
         public IEnumerable<Rank> AttackRanks()
         {
             var seen = new HashSet<Rank>();
+            foreach (var r in _bonusRanks) if (seen.Add(r)) yield return r;
             foreach (var a in _attacks) if (seen.Add(a.Rank)) yield return a.Rank;
             foreach (var d in _defenses)
                 if (d.HasValue && seen.Add(d.Value.Rank)) yield return d.Value.Rank;
@@ -70,6 +74,7 @@ namespace WitsAndFools
             _attacks.Clear();
             _defenses.Clear();
             _autoDefended.Clear();
+            _bonusRanks.Clear();
             AttacksCapped = false;
         }
     }

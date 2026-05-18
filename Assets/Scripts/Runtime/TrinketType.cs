@@ -88,6 +88,11 @@ namespace WitsAndFools
             TrinketType.HereticsBrand => true,
             TrinketType.ShieldBrooch => true,
             TrinketType.CourtiersFan => true,
+            TrinketType.JugglersBalls => true,
+            TrinketType.LoadedDice => true,
+            TrinketType.QuicksilverVial => true,
+            TrinketType.CrownOfThorns => true,
+            TrinketType.DevilsBargain => true,
             _ => false
         };
     }
