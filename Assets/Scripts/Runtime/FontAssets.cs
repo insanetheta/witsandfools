@@ -39,15 +39,20 @@ namespace WitsAndFools
             foreach (var g in guids)
             {
                 var asset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(AssetDatabase.GUIDToAssetPath(g));
-                if (asset && asset.name == name) { cached = asset; return cached; }
+                if (asset && asset.name == name && HasValidAtlas(asset)) { cached = asset; return cached; }
             }
 #endif
-            cached = Resources.Load<TMP_FontAsset>(name);
-            if (cached) return cached;
+            var loaded = Resources.Load<TMP_FontAsset>(name);
+            if (loaded && HasValidAtlas(loaded)) { cached = loaded; return cached; }
 
             if (name != "LiberationSans SDF")
                 return Fallback;
             return null;
+        }
+
+        static bool HasValidAtlas(TMP_FontAsset font)
+        {
+            return font.atlasTexture != null;
         }
     }
 }

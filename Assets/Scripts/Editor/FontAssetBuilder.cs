@@ -1,11 +1,17 @@
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.TextCore.LowLevel;
 
 namespace WitsAndFools.EditorTools
 {
     public static class FontAssetBuilder
     {
+        const int SamplingPointSize = 44;
+        const int AtlasPadding = 5;
+        const int AtlasWidth = 512;
+        const int AtlasHeight = 512;
+
         static readonly (string ttfPath, string assetPath, string label)[] Fonts =
         {
             ("Assets/Fonts/Cinzel-Variable.ttf", "Assets/Fonts/Cinzel SDF.asset", "Cinzel SDF"),
@@ -32,25 +38,43 @@ namespace WitsAndFools.EditorTools
                 var existing = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(assetPath);
                 if (existing)
                 {
-                    Debug.Log($"Already exists: {assetPath}");
-                    continue;
+                    AssetDatabase.DeleteAsset(assetPath);
+                    Debug.Log($"Deleted stale: {assetPath}");
                 }
 
-                var fontAsset = TMP_FontAsset.CreateFontAsset(font);
+                var fontAsset = TMP_FontAsset.CreateFontAsset(
+                    font, SamplingPointSize, AtlasPadding,
+                    GlyphRenderMode.SDFAA, AtlasWidth, AtlasHeight);
                 fontAsset.name = label;
 
-                if (fallback && fontAsset.fallbackFontAssetTable != null)
+                if (fallback)
+                {
+                    fontAsset.fallbackFontAssetTable ??=
+                        new System.Collections.Generic.List<TMP_FontAsset>();
                     fontAsset.fallbackFontAssetTable.Add(fallback);
-                else if (fallback)
-                    fontAsset.fallbackFontAssetTable = new System.Collections.Generic.List<TMP_FontAsset> { fallback };
+                }
 
                 AssetDatabase.CreateAsset(fontAsset, assetPath);
+
+                if (fontAsset.atlasTexture)
+                {
+                    fontAsset.atlasTexture.name = $"{label} Atlas";
+                    AssetDatabase.AddObjectToAsset(fontAsset.atlasTexture, fontAsset);
+                }
+                if (fontAsset.material)
+                {
+                    fontAsset.material.name = $"{label} Material";
+                    AssetDatabase.AddObjectToAsset(fontAsset.material, fontAsset);
+                }
+
+                EditorUtility.SetDirty(fontAsset);
                 created++;
-                Debug.Log($"Created {assetPath}");
+                Debug.Log($"Created {assetPath} (atlas {AtlasWidth}x{AtlasHeight}, {fontAsset.atlasTexture != null})");
             }
 
             AssetDatabase.SaveAssets();
-            Debug.Log($"Font build complete: {created} new assets created");
+            AssetDatabase.Refresh();
+            Debug.Log($"Font build complete: {created} assets created");
         }
 
         static TMP_FontAsset FindFallbackFont()
