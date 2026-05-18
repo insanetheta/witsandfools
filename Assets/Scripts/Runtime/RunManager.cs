@@ -9,6 +9,7 @@ namespace WitsAndFools
     public enum RunPhase
     {
         Title,
+        ArchetypeSelect,
         MapSelect,
         PreMatch,
         InMatch,
@@ -74,6 +75,7 @@ namespace WitsAndFools
         int _currentColumn;
         System.Random _rng;
         MapNode _currentNode;
+        ArchetypeType? _selectedArchetype;
 
         bool _autoRun;
         float _autoStepDelay = 0.15f;
@@ -142,6 +144,10 @@ namespace WitsAndFools
 
             switch (_phase)
             {
+                case RunPhase.ArchetypeSelect:
+                    var archetypes = ArchetypeDefinitions.AllArchetypes;
+                    OnArchetypeSelected(archetypes[_rng.Next(archetypes.Length)]);
+                    break;
                 case RunPhase.MapSelect:
                     AutoSelectNode();
                     break;
@@ -156,7 +162,8 @@ namespace WitsAndFools
                     AutoHandleEvent();
                     break;
                 case RunPhase.RunOver:
-                    string runResult = $"{(_run.RunWon ? "WON" : "LOST")} | Acts: {_run.CurrentAct}/5 | W/L: {_run.MatchesWon}/{_run.MatchesPlayed} | Florins: {_run.Florins}";
+                    string archTag = _selectedArchetype.HasValue ? _selectedArchetype.Value.DisplayName() : "?";
+                    string runResult = $"{(_run.RunWon ? "WON" : "LOST")} | {archTag} | Acts: {_run.CurrentAct}/5 | W/L: {_run.MatchesWon}/{_run.MatchesPlayed} | Florins: {_run.Florins}";
                     if (_batchRemaining > 0)
                     {
                         _batchResults.Add(runResult);
@@ -245,14 +252,19 @@ namespace WitsAndFools
             int seed = Environment.TickCount;
             _rng = new System.Random(seed);
             _run = new RunState { Seed = seed };
-
-            var startingAbilities = PickStartingAbilities();
-            _run.PlayerAbilities.AddRange(startingAbilities);
+            _selectedArchetype = null;
 
             _run.CurrentAct = 0;
             _run.CurrentMap = MapGenerator.Generate(0, _rng);
             _currentColumn = 0;
 
+            SetPhase(RunPhase.ArchetypeSelect);
+        }
+
+        void OnArchetypeSelected(ArchetypeType archetype)
+        {
+            _selectedArchetype = archetype;
+            _run.PlayerAbilities.AddRange(archetype.StartingAbilities());
             SetPhase(RunPhase.MapSelect);
         }
 
@@ -260,17 +272,20 @@ namespace WitsAndFools
         {
             _phase = phase;
             if (MatchPanel) MatchPanel.SetActive(phase == RunPhase.InMatch);
-            if (MapPanel) MapPanel.SetActive(phase == RunPhase.MapSelect);
+            if (MapPanel) MapPanel.SetActive(phase == RunPhase.MapSelect || phase == RunPhase.ArchetypeSelect);
             if (ResultPanel) ResultPanel.SetActive(phase == RunPhase.PostMatch);
             if (RunOverPanel) RunOverPanel.SetActive(phase == RunPhase.RunOver);
             if (ShopPanel) ShopPanel.SetActive(phase == RunPhase.Shop);
             if (EventPanel) EventPanel.SetActive(phase == RunPhase.Event || phase == RunPhase.Rest);
-            if (RunHudPanel) RunHudPanel.SetActive(phase != RunPhase.Title && phase != RunPhase.RunOver);
+            if (RunHudPanel) RunHudPanel.SetActive(phase != RunPhase.Title && phase != RunPhase.RunOver && phase != RunPhase.ArchetypeSelect);
 
             UpdateRunHud();
 
             switch (phase)
             {
+                case RunPhase.ArchetypeSelect:
+                    ShowArchetypeSelect();
+                    break;
                 case RunPhase.MapSelect:
                     ShowMap();
                     break;
@@ -287,6 +302,74 @@ namespace WitsAndFools
             if (FlorinsLabel) FlorinsLabel.text = $"Florins: {_run.Florins}";
             if (ActLabel) ActLabel.text = $"Act {_run.CurrentAct + 1} of 5";
             if (AbilitiesLabel) AbilitiesLabel.text = $"Abilities: {_run.PlayerAbilities.Count}/{_run.MaxAbilitySlots}";
+        }
+
+        // ---------- Archetype Select ----------
+
+        void ShowArchetypeSelect()
+        {
+            if (MapTitleLabel) MapTitleLabel.text = "Choose Your Archetype";
+            ClearMapNodes();
+            if (!MapNodeContainer) return;
+
+            foreach (var archetype in ArchetypeDefinitions.AllArchetypes)
+                CreateArchetypeButton(archetype);
+        }
+
+        void CreateArchetypeButton(ArchetypeType archetype)
+        {
+            var abilities = archetype.StartingAbilities();
+            string abilityList = string.Join(", ", abilities.ConvertAll(a => a.DisplayName()));
+
+            var btnGO = new GameObject($"Archetype_{archetype}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            btnGO.transform.SetParent(MapNodeContainer, false);
+
+            var img = btnGO.GetComponent<Image>();
+            img.color = archetype switch
+            {
+                ArchetypeType.Rogue => new Color(0.25f, 0.35f, 0.45f),
+                ArchetypeType.Brute => new Color(0.50f, 0.20f, 0.15f),
+                ArchetypeType.Diplomat => new Color(0.20f, 0.40f, 0.30f),
+                ArchetypeType.Gambler => new Color(0.45f, 0.35f, 0.15f),
+                _ => Color.gray
+            };
+
+            var le = btnGO.GetComponent<LayoutElement>();
+            le.preferredHeight = 100;
+            le.preferredWidth = 550;
+
+            var nameGO = new GameObject("Name", typeof(RectTransform));
+            nameGO.transform.SetParent(btnGO.transform, false);
+            var nameRT = (RectTransform)nameGO.transform;
+            nameRT.anchorMin = new Vector2(0, 0.55f);
+            nameRT.anchorMax = new Vector2(1, 1);
+            nameRT.offsetMin = new Vector2(16, 0);
+            nameRT.offsetMax = new Vector2(-16, -4);
+            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            nameTMP.text = $"{archetype.DisplayName()} — {archetype.Description()}";
+            nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            nameTMP.fontSize = 20;
+            nameTMP.color = Color.white;
+            nameTMP.raycastTarget = false;
+
+            var descGO = new GameObject("Abilities", typeof(RectTransform));
+            descGO.transform.SetParent(btnGO.transform, false);
+            var descRT = (RectTransform)descGO.transform;
+            descRT.anchorMin = Vector2.zero;
+            descRT.anchorMax = new Vector2(1, 0.5f);
+            descRT.offsetMin = new Vector2(16, 4);
+            descRT.offsetMax = new Vector2(-16, 0);
+            var descTMP = descGO.AddComponent<TextMeshProUGUI>();
+            descTMP.text = $"Starts with: {abilityList}";
+            descTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            descTMP.fontSize = 16;
+            descTMP.color = new Color(0.75f, 0.75f, 0.75f);
+            descTMP.raycastTarget = false;
+            descTMP.enableWordWrapping = true;
+
+            var btn = btnGO.GetComponent<Button>();
+            var captured = archetype;
+            btn.onClick.AddListener(() => OnArchetypeSelected(captured));
         }
 
         // ---------- Map ----------
@@ -1165,10 +1248,13 @@ namespace WitsAndFools
                 RunOverTitleLabel.text = _run.RunWon ? "The Circuit is Yours!" : "Your Reputation Crumbles...";
             if (RunOverStatsLabel)
             {
-                string stats = $"Acts completed: {_run.CurrentAct}/5\n" +
+                string archName = _selectedArchetype.HasValue ? _selectedArchetype.Value.DisplayName() : "Unknown";
+                string stats = $"Archetype: {archName}\n" +
+                    $"Acts completed: {_run.CurrentAct}/5\n" +
                     $"Matches won: {_run.MatchesWon}/{_run.MatchesPlayed}\n" +
                     $"Florins earned: {_run.Florins}\n" +
-                    $"Abilities: {_run.PlayerAbilities.Count}";
+                    $"Abilities: {_run.PlayerAbilities.Count}\n" +
+                    $"Trinkets: {_run.PlayerTrinkets.Count}";
                 RunOverStatsLabel.text = stats;
             }
             if (RunOverRestartButton)
@@ -1179,20 +1265,6 @@ namespace WitsAndFools
         }
 
         // ---------- Helpers ----------
-
-        List<AbilityType> PickStartingAbilities()
-        {
-            var pool = new List<AbilityType>(AbilityPool.ActiveAbilities);
-            pool.AddRange(AbilityPool.PassiveAbilities);
-            var picked = new List<AbilityType>();
-            for (int i = 0; i < 4 && pool.Count > 0; i++)
-            {
-                int idx = _rng.Next(pool.Count);
-                picked.Add(pool[idx]);
-                pool.RemoveAt(idx);
-            }
-            return picked;
-        }
 
         AbilityType? PickAbilityReward(bool eliteWeighted)
         {

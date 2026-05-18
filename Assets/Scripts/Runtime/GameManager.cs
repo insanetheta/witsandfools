@@ -229,10 +229,15 @@ namespace WitsAndFools
             }
             else
             {
-                view = _opponentCardViews[0];
-                _opponentCardViews.RemoveAt(0);
-                Table.OpponentHand.Remove(view);
-                view.Bind(card, faceUp: true);
+                if (_opponentCardViews.Count > 0)
+                {
+                    view = _opponentCardViews[0];
+                    _opponentCardViews.RemoveAt(0);
+                    Table.OpponentHand.Remove(view);
+                    view.Bind(card, faceUp: true);
+                }
+                else
+                    view = SpawnCardView(card, faceUp: true, parent: Table.BoutArea);
             }
 
             view.transform.SetParent(Table.BoutArea, false);
@@ -265,10 +270,15 @@ namespace WitsAndFools
             }
             else
             {
-                view = _opponentCardViews[0];
-                _opponentCardViews.RemoveAt(0);
-                Table.OpponentHand.Remove(view);
-                view.Bind(card, faceUp: true);
+                if (_opponentCardViews.Count > 0)
+                {
+                    view = _opponentCardViews[0];
+                    _opponentCardViews.RemoveAt(0);
+                    Table.OpponentHand.Remove(view);
+                    view.Bind(card, faceUp: true);
+                }
+                else
+                    view = SpawnCardView(card, faceUp: true, parent: Table.BoutArea);
             }
 
             view.transform.SetParent(Table.BoutArea, false);
