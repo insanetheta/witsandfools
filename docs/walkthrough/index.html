@@ -111,6 +111,12 @@
     position: absolute; inset: 0; z-index: 1;
     background: radial-gradient(ellipse at center, transparent 20%, rgba(10,10,20,0.75) 100%);
   }
+  .screen::after {
+    content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    background-size: 256px 256px;
+  }
   .screen-content {
     position: relative; z-index: 2;
     max-width: 1100px; width: 100%;
@@ -350,10 +356,17 @@
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     background: rgba(10,10,20,0.94);
-    border: 1px solid var(--bronze-edge);
+    border: 2px solid var(--bronze-edge);
+    outline: 1px solid rgba(212,168,70,0.2);
+    outline-offset: 4px;
     border-radius: 10px; padding: 20px 24px;
     width: 280px; text-align: center; z-index: 10;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.7), inset 0 1px 0 rgba(212,168,70,0.1);
+  }
+  .ability-modal::before {
+    content: ''; position: absolute; inset: -8px;
+    border: 1px solid rgba(90,72,48,0.3);
+    border-radius: 14px; pointer-events: none;
   }
   .ability-modal h3 {
     font-family: 'Cinzel', serif; font-size: 16px;
@@ -451,7 +464,10 @@
   .map-node.rest { background: rgba(74,48,32,0.6); }
 
   .map-connector {
-    width: 2px; height: 16px; background: rgba(212,168,70,0.2); margin: 0 auto;
+    width: 3px; height: 20px; margin: 0 auto;
+    background: rgba(212,168,70,0.45);
+    box-shadow: 0 0 6px rgba(212,168,70,0.2);
+    border-radius: 2px;
   }
 
   /* ====== RESULT PANEL ====== */
@@ -486,11 +502,16 @@
     display: flex; gap: 12px; margin-bottom: 20px;
   }
   .ability-card {
-    width: 170px; padding: 14px;
+    width: 190px; padding: 16px 14px;
     background: var(--deep-navy);
     border: 1px solid var(--bronze-edge);
     border-radius: 8px; cursor: pointer;
     transition: all 0.2s; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .ability-card .ab-icon {
+    font-size: 28px; margin-bottom: 6px; display: block;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
   }
   .ability-card:hover {
     border-color: var(--gold);
@@ -608,6 +629,10 @@
     color: var(--parchment); text-align: center;
   }
   .event-choice:hover { border-color: var(--gold); background: rgba(42,52,66,0.7); }
+  .event-choice.safe { border-left: 3px solid var(--sage); }
+  .event-choice.risky { border-left: 3px solid var(--venetian-red); }
+  .event-choice.intel { border-left: 3px solid var(--royal-blue); }
+  .event-choice.cost { border-left: 3px solid var(--amber); }
 
   /* ====== BUTTONS ====== */
   .btn {
@@ -655,6 +680,13 @@
     font-size: 11px; color: var(--dusty-tan); margin-top: 6px;
     opacity: 0.7;
   }
+  .archetype-card.rogue { border-top: 3px solid var(--royal-blue); }
+  .archetype-card.brute { border-top: 3px solid var(--atk-color); }
+  .archetype-card.diplomat { border-top: 3px solid var(--gold); }
+  .archetype-card.gambler { border-top: 3px solid #9966CC; }
+  .archetype-card .arch-abilities .atk { color: var(--atk-color); }
+  .archetype-card .arch-abilities .def { color: var(--def-color); }
+  .archetype-card .arch-abilities .util { color: var(--util-color); }
 
   /* ====== RUN OVER ====== */
   .run-over-stats {
@@ -664,6 +696,16 @@
     font-size: 16px; color: var(--parchment); margin-bottom: 4px;
   }
   .run-over-stats .stat-highlight { color: var(--gold); font-weight: 600; }
+  .ability-chip {
+    display: inline-block; padding: 3px 10px; margin: 2px;
+    border-radius: 4px; font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+    border: 1px solid; background: rgba(0,0,0,0.3);
+  }
+  .ability-chip.atk { color: var(--atk-color); border-color: rgba(204,68,68,0.4); }
+  .ability-chip.def { color: var(--def-color); border-color: rgba(68,136,187,0.4); }
+  .ability-chip.util { color: var(--util-color); border-color: rgba(204,153,51,0.4); }
+  .ability-chip.passive { color: var(--passive-color); border-color: rgba(85,170,85,0.4); }
 
   /* ====== DIVIDER ====== */
   .section-divider {
@@ -714,8 +756,8 @@
   <div class="card-fan">
     <img src="card_back.png" alt="card">
     <img src="card_face_king.png" alt="card">
-    <img src="card_face_king.png" alt="card" style="filter: hue-rotate(30deg);">
-    <img src="card_back.png" alt="card">
+    <img src="card_face_king.png" alt="card" style="filter: hue-rotate(180deg) saturate(0.8);">
+    <img src="card_back.png" alt="card" style="filter: brightness(0.85);">
   </div>
   <div class="scroll-hint">SCROLL TO BEGIN THE JOURNEY</div>
 </section>
@@ -738,24 +780,28 @@
           <div style="font-family:'IM Fell English',serif; font-size:14px; color:var(--dusty-tan); margin-bottom:4px; font-style:italic;">The Renaissance Circuit awaits...</div>
           <div style="font-family:'Cinzel',serif; font-size:28px; color:var(--gold); margin-bottom:24px; text-shadow:0 2px 8px rgba(212,168,70,0.3);">Choose Your Archetype</div>
           <div class="archetype-grid">
-            <div class="archetype-card">
+            <div class="archetype-card rogue">
+              <div style="font-size:28px; margin-bottom:4px;">&#128065;</div>
               <div class="arch-name">The Rogue</div>
-              <div class="arch-abilities">Blocker + Seize Initiative + Peek</div>
+              <div class="arch-abilities"><span class="def">Blocker</span> + <span class="util">Seize Initiative</span> + <span class="util">Peek</span></div>
               <div class="arch-style">"Knowledge is the sharpest blade."</div>
             </div>
-            <div class="archetype-card" style="border-color:var(--gold);">
+            <div class="archetype-card brute" style="border-color:var(--gold); box-shadow: 0 0 16px rgba(212,168,70,0.15);">
+              <div style="font-size:28px; margin-bottom:4px;">&#9876;</div>
               <div class="arch-name">The Brute</div>
-              <div class="arch-abilities">Double Trouble + Pile On + Extra Draw</div>
+              <div class="arch-abilities"><span class="atk">Double Trouble</span> + <span class="atk">Pile On</span> + <span class="util">Extra Draw</span></div>
               <div class="arch-style">"Overwhelm them before they think."</div>
             </div>
-            <div class="archetype-card">
+            <div class="archetype-card diplomat">
+              <div style="font-size:28px; margin-bottom:4px;">&#9813;</div>
               <div class="arch-name">The Diplomat</div>
-              <div class="arch-abilities">Trump Changer + Deflect + Slip Away</div>
+              <div class="arch-abilities"><span class="util">Trump Changer</span> + <span class="def">Deflect</span> + <span class="def">Slip Away</span></div>
               <div class="arch-style">"Let them play your game."</div>
             </div>
-            <div class="archetype-card">
+            <div class="archetype-card gambler">
+              <div style="font-size:28px; margin-bottom:4px;">&#127922;</div>
               <div class="arch-name">The Gambler</div>
-              <div class="arch-abilities">Gambit + Feint + Card Counter</div>
+              <div class="arch-abilities"><span class="util">Gambit</span> + <span class="atk">Feint</span> + <span class="util">Card Counter</span></div>
               <div class="arch-style">"Fortune favors the bold."</div>
             </div>
           </div>
@@ -1069,7 +1115,10 @@
 
     <div class="mockup">
       <div class="mockup-inner">
-        <div class="result-panel">
+        <div class="result-panel" style="background: none;">
+          <div style="position:absolute; inset:0; background: url('bg_tavern.png') center/cover; filter: brightness(0.12) saturate(0.4);"></div>
+          <div style="position:absolute; inset:0; background: radial-gradient(ellipse at center, rgba(10,10,20,0.7) 0%, rgba(10,10,20,0.95) 80%);"></div>
+          <div style="position:relative; z-index:1; display:flex; flex-direction:column; align-items:center;">
           <div class="result-title win">Victory!</div>
           <div class="result-details">You defeated Barnacle Bill!</div>
           <div class="result-reward">+10 Florins</div>
@@ -1077,16 +1126,19 @@
           <div class="ability-pick-label">Choose an ability reward:</div>
           <div class="ability-picks">
             <div class="ability-card common">
+              <div class="ab-icon" style="color:var(--atk-color);">&#9876;&#9876;</div>
               <div class="ab-name">Pile On</div>
               <div class="ab-type atk">Attack &bull; Common</div>
               <div class="ab-desc">Raise the max attacks this bout by 2.</div>
             </div>
             <div class="ability-card uncommon" style="border-color:var(--gold); box-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+              <div class="ab-icon" style="color:var(--util-color);">&#128065;</div>
               <div class="ab-name">Peek</div>
               <div class="ab-type util">Utility &bull; Uncommon</div>
               <div class="ab-desc">Reveal and rearrange the top 3 cards of the deck.</div>
             </div>
             <div class="ability-card rare">
+              <div class="ab-icon" style="color:var(--def-color);">&#128168;</div>
               <div class="ab-name">Slip Away</div>
               <div class="ab-type def">Defense &bull; Rare</div>
               <div class="ab-desc">Once per match, discard undefended attacks instead of eating them.</div>
@@ -1097,6 +1149,7 @@
             <button class="btn gold">Continue</button>
             <button class="btn secondary">Skip</button>
           </div>
+          </div><!-- /relative wrapper -->
         </div>
       </div>
     </div>
@@ -1175,6 +1228,11 @@
         </div>
       </div>
     </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>The Fence should feel like a character, not a menu. Items are laid out on a cluttered table — each has a physical object icon (a coin purse, a monocle, a vial) rather than abstract symbols. Rare items glow faintly. Trinkets have a distinct purple tag. Items you can't afford are dimmed. The hooded figure of The Fence is suggested in the background darkness, never fully visible.</p>
+    </div>
   </div>
 </section>
 
@@ -1202,8 +1260,8 @@
               weakness," they whisper, tapping a sealed letter. "But knowledge has its price."
             </div>
             <div class="event-choices">
-              <div class="event-choice">Pay 8 Florins for the letter (Scout next opponent)</div>
-              <div class="event-choice">Challenge them to a quick game instead (Risk: lose 1 Prestige or gain ability)</div>
+              <div class="event-choice cost">Pay 8 Florins for the letter (Scout next opponent)</div>
+              <div class="event-choice risky">Challenge them to a quick game instead (Risk: lose 1 Prestige or gain ability)</div>
             </div>
           </div>
           <div class="run-hud">
@@ -1214,6 +1272,11 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>Events are the game's storytelling engine. The background illustration sets the mood — a cloaked figure in Caravaggio chiaroscuro, candlelight catching a sealed letter. Choice buttons are color-coded by consequence: amber for costs, red for risks, green for safe options, blue for intelligence. The narrative text uses IM Fell English for flavor headers and Crimson Pro for body — the voice is wry, not dramatic.</p>
     </div>
   </div>
 </section>
@@ -1242,9 +1305,9 @@
               and let the warmth seep into your bones.
             </div>
             <div class="event-choices">
-              <div class="event-choice">Rest quietly (+3 Florins)</div>
-              <div class="event-choice">Mend your spirit (Remove a Burden)</div>
-              <div class="event-choice">Eavesdrop on the patrons (Scout next opponent's abilities)</div>
+              <div class="event-choice safe">Rest quietly (+3 Florins)</div>
+              <div class="event-choice safe">Mend your spirit (Remove a Burden)</div>
+              <div class="event-choice intel">Eavesdrop on the patrons (Scout next opponent's abilities)</div>
             </div>
           </div>
           <div class="run-hud">
@@ -1255,6 +1318,11 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>The Hearth is the game's exhale. The fireplace illustration is warm and inviting — orange flames, stone hearth, a tankard of ale. The narrative text is italic, intimate, almost whispered. The three choices are all "safe" (green) or "intel" (blue) — no red options here. This screen exists to make the player feel safe before throwing them back into danger. The same hearth template reappears in every act but the room changes around it.</p>
     </div>
   </div>
 </section>
@@ -1491,7 +1559,16 @@
             <div class="stat-line">Matches Won: <span class="stat-highlight">11</span> / 14</div>
             <div class="stat-line">Florins Earned: <span class="stat-highlight">148</span></div>
             <div class="stat-line">Prestige Remaining: <span style="color:#FF6666;">&#9829;&#9829;&#9829;</span></div>
-            <div class="stat-line">Final Abilities: <span class="stat-highlight">Double Trouble, Pile On, Extra Draw, Peek, Slip Away, Endgame Specialist, Card Counter</span></div>
+            <div class="stat-line" style="margin-top:6px;">Final Abilities:</div>
+            <div style="margin-top:4px;">
+              <span class="ability-chip atk">Double Trouble</span>
+              <span class="ability-chip atk">Pile On</span>
+              <span class="ability-chip util">Extra Draw</span>
+              <span class="ability-chip util">Peek</span>
+              <span class="ability-chip def">Slip Away</span>
+              <span class="ability-chip passive">Endgame Specialist</span>
+              <span class="ability-chip passive">Card Counter</span>
+            </div>
           </div>
 
           <div style="display:flex; gap:12px;">
