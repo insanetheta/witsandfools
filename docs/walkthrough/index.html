@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wits &amp; Fools — Visual Walkthrough</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap');
+
+  :root {
+    --midnight: #0A0A14;
+    --deep-navy: #141C28;
+    --dark-slate: #1E2832;
+    --warm-slate: #2A3442;
+    --bronze-edge: #5A4830;
+    --parchment: #F0E6D2;
+    --dusty-tan: #A89B8C;
+    --gold: #D4A846;
+    --gold-dark: #B8922C;
+    --venetian-red: #B84040;
+    --royal-blue: #4477AA;
+    --sage: #66B866;
+    --amber: #CC8833;
+    --crimson-card: #8C2020;
+    --card-cream: #F5F0E0;
+    --atk-color: #CC4444;
+    --def-color: #4488BB;
+    --util-color: #CC9933;
+    --passive-color: #55AA55;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--midnight);
+    color: var(--parchment);
+    font-family: 'Crimson Pro', Georgia, serif;
+    overflow-x: hidden;
+  }
+
+  /* ====== NAVIGATION ====== */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    background: rgba(10,10,20,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--bronze-edge);
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 10px 20px; flex-wrap: wrap;
+  }
+  .nav a {
+    color: var(--dusty-tan); text-decoration: none;
+    font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.5px;
+    padding: 6px 14px; border: 1px solid transparent; border-radius: 4px;
+    transition: all 0.2s;
+  }
+  .nav a:hover { color: var(--gold); border-color: var(--bronze-edge); }
+
+  /* ====== HERO ====== */
+  .hero {
+    height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+    background: linear-gradient(180deg, #0A0A14 0%, #141828 50%, #0A0A14 100%);
+    position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.7) 100%);
+  }
+  .hero h1 {
+    font-family: 'Cinzel', serif; font-size: 72px; font-weight: 700;
+    color: var(--gold); letter-spacing: 6px;
+    text-shadow: 0 4px 20px rgba(212,168,70,0.3);
+    position: relative; z-index: 1;
+  }
+  .hero .subtitle {
+    font-family: 'IM Fell English', serif; font-style: italic;
+    font-size: 24px; color: var(--dusty-tan); margin-top: 16px;
+    position: relative; z-index: 1;
+  }
+  .hero .card-fan {
+    display: flex; gap: 0; margin-top: 48px; position: relative; z-index: 1;
+  }
+  .hero .card-fan img {
+    width: 120px; height: 180px; object-fit: cover; border-radius: 8px;
+    border: 2px solid var(--bronze-edge);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  }
+  .hero .card-fan img:nth-child(1) { transform: rotate(-12deg) translateY(10px); }
+  .hero .card-fan img:nth-child(2) { transform: rotate(-4deg) translateY(2px); z-index: 1; }
+  .hero .card-fan img:nth-child(3) { transform: rotate(4deg) translateY(2px); z-index: 1; }
+  .hero .card-fan img:nth-child(4) { transform: rotate(12deg) translateY(10px); }
+  .hero .scroll-hint {
+    position: absolute; bottom: 40px; color: var(--dusty-tan);
+    font-family: 'Cinzel', serif; font-size: 14px; letter-spacing: 2px;
+    animation: pulse 2s ease-in-out infinite; z-index: 1;
+  }
+  @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+  /* ====== SCREEN SECTIONS ====== */
+  .screen {
+    min-height: 100vh; position: relative; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 100px 40px 80px;
+  }
+  .screen-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background-size: cover; background-position: center;
+    filter: brightness(0.35) saturate(0.8);
+  }
+  .screen-vignette {
+    position: absolute; inset: 0; z-index: 1;
+    background: radial-gradient(ellipse at center, transparent 20%, rgba(10,10,20,0.75) 100%);
+  }
+  .screen-content {
+    position: relative; z-index: 2;
+    max-width: 1100px; width: 100%;
+  }
+
+  /* Section labels */
+  .screen-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 3px;
+    color: var(--gold); text-transform: uppercase; margin-bottom: 8px;
+    opacity: 0.7;
+  }
+  .screen-title {
+    font-family: 'Cinzel', serif; font-size: 42px; font-weight: 700;
+    color: var(--gold); margin-bottom: 12px;
+    text-shadow: 0 2px 12px rgba(212,168,70,0.2);
+  }
+  .screen-desc {
+    font-size: 18px; color: var(--dusty-tan); max-width: 700px;
+    line-height: 1.6; margin-bottom: 40px;
+  }
+
+  /* ====== MOCKUP FRAME ====== */
+  .mockup {
+    background: var(--midnight);
+    border: 2px solid var(--bronze-edge);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+    width: 100%; max-width: 960px; margin: 0 auto;
+    aspect-ratio: 16/10;
+    position: relative;
+  }
+  .mockup-inner {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+  }
+
+  /* ====== HUD BAR (top) ====== */
+  .hud-bar {
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    height: 42px; display: flex; align-items: center;
+    padding: 0 16px; font-family: 'JetBrains Mono', monospace;
+    font-size: 14px; flex-shrink: 0;
+    border-bottom: 1px solid rgba(90,72,48,0.3);
+  }
+  .hud-bar .phase { flex: 1; color: var(--parchment); }
+  .hud-bar .trump { flex: 1; text-align: center; }
+  .hud-bar .trump .red { color: #DD4444; }
+  .hud-bar .trump .black { color: #222; text-shadow: 0 0 2px #888; }
+  .hud-bar .deck { flex: 1; text-align: right; color: var(--parchment); }
+
+  /* ====== RUN HUD (bottom) ====== */
+  .run-hud {
+    background: rgba(0,0,0,0.65);
+    height: 36px; display: flex; align-items: center;
+    padding: 0 16px; font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; flex-shrink: 0;
+    border-top: 1px solid rgba(90,72,48,0.3);
+  }
+  .run-hud .prestige { flex: 1; color: #FF6666; }
+  .run-hud .florins { flex: 1; text-align: center; color: var(--gold); }
+  .run-hud .act { flex: 1; text-align: center; color: var(--parchment); }
+  .run-hud .abilities { flex: 1; text-align: right; color: #99CCEE; }
+
+  /* ====== TABLE AREA ====== */
+  .table-area {
+    flex: 1; position: relative; overflow: hidden;
+  }
+  .table-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+  }
+  .table-felt {
+    position: absolute; inset: 0;
+    background: rgba(16,44,24,0.7);
+  }
+  .table-frame {
+    position: absolute; inset: 12px;
+    border: 3px solid rgba(100,50,20,0.6);
+    border-radius: 4px;
+  }
+
+  /* Opponent hand */
+  .opp-hand {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: -20px;
+  }
+  .card-small {
+    width: 56px; height: 82px; border-radius: 5px;
+    border: 1.5px solid var(--bronze-edge);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    position: relative; flex-shrink: 0;
+  }
+  .card-small.back {
+    background: var(--crimson-card);
+    background-image: url('card_back.png');
+    background-size: cover;
+  }
+  .card-small.face {
+    background: var(--card-cream);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .card-small .rank {
+    position: absolute; top: 3px; left: 5px;
+    font-size: 11px; font-weight: 700;
+  }
+  .card-small .suit-big {
+    font-size: 24px; margin-top: 6px;
+  }
+  .card-small.has-ability {
+    border: 2px dashed var(--def-color);
+    box-shadow: 0 0 8px rgba(68,136,187,0.3);
+  }
+  .card-small .ability-badge {
+    position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%);
+    font-size: 7px; font-weight: 700; color: var(--def-color);
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(0,0,0,0.5); padding: 1px 4px; border-radius: 2px;
+  }
+  .card-small.playable {
+    border: 2px solid var(--sage);
+    box-shadow: 0 0 10px rgba(68,170,68,0.3);
+    cursor: pointer;
+  }
+  .card-small.disabled { opacity: 0.5; }
+
+  .opp-hand .card-small { margin-left: -18px; }
+  .opp-hand .card-small:first-child { margin-left: 0; }
+  .opp-hand .card-small:nth-child(1) { transform: rotate(-8deg); }
+  .opp-hand .card-small:nth-child(2) { transform: rotate(-4deg); }
+  .opp-hand .card-small:nth-child(3) { transform: rotate(0deg); }
+  .opp-hand .card-small:nth-child(4) { transform: rotate(4deg); }
+  .opp-hand .card-small:nth-child(5) { transform: rotate(8deg); }
+
+  .player-hand {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    display: flex;
+  }
+  .player-hand .card-small { margin-left: -14px; }
+  .player-hand .card-small:first-child { margin-left: 0; }
+  .player-hand .card-small:nth-child(1) { transform: rotate(-6deg); }
+  .player-hand .card-small:nth-child(2) { transform: rotate(-3deg); }
+  .player-hand .card-small:nth-child(3) { transform: rotate(0deg); }
+  .player-hand .card-small:nth-child(4) { transform: rotate(3deg); }
+  .player-hand .card-small:nth-child(5) { transform: rotate(6deg); }
+  .player-hand .card-small:nth-child(6) { transform: rotate(9deg); }
+
+  /* Deck & bout */
+  .deck-area {
+    position: absolute; left: 30px; top: 50%; transform: translateY(-50%);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .deck-stack {
+    width: 50px; height: 74px; position: relative;
+  }
+  .deck-stack .layer {
+    position: absolute; width: 50px; height: 74px;
+    background: var(--crimson-card); border-radius: 4px;
+    border: 1px solid rgba(100,20,20,0.6);
+  }
+  .deck-stack .layer:nth-child(1) { top: 0; left: 0; }
+  .deck-stack .layer:nth-child(2) { top: -1px; left: 1px; }
+  .deck-stack .layer:nth-child(3) { top: -2px; left: 2px; }
+  .deck-count {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700;
+    color: white; text-shadow: 0 1px 4px rgba(0,0,0,0.8); z-index: 2;
+  }
+
+  .trump-card {
+    transform: rotate(90deg);
+  }
+
+  .bout-area {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; gap: 20px; align-items: center;
+  }
+  .bout-pair { position: relative; }
+  .bout-pair .defense {
+    position: absolute; top: 14px; left: 14px;
+    transform: rotate(-8deg);
+  }
+
+  .discard-area {
+    position: absolute; right: 30px; top: 50%; transform: translateY(-50%);
+    width: 50px; height: 74px;
+    background: rgba(255,255,255,0.04);
+    border: 1px dashed rgba(255,255,255,0.15);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: rgba(255,255,255,0.3);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Action buttons on table */
+  .table-btn {
+    position: absolute;
+    font-family: 'Cinzel', serif; font-size: 13px;
+    padding: 8px 20px; border-radius: 5px; border: none; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .table-btn.primary {
+    background: var(--gold); color: #1A1408;
+    border: 1px solid var(--gold-dark);
+  }
+  .table-btn.secondary {
+    background: var(--dark-slate); color: var(--parchment);
+    border: 1px solid var(--bronze-edge);
+  }
+
+  /* Opponent nameplate */
+  .opp-nameplate {
+    position: absolute; top: 98px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(0,0,0,0.6); padding: 4px 16px 4px 4px;
+    border-radius: 20px; border: 1px solid var(--bronze-edge);
+  }
+  .opp-nameplate img {
+    width: 32px; height: 32px; border-radius: 50%;
+    object-fit: cover; border: 1px solid var(--bronze-edge);
+  }
+  .opp-nameplate .name {
+    font-family: 'Cinzel', serif; font-size: 12px; color: var(--parchment);
+  }
+  .opp-nameplate .archetype {
+    font-size: 10px; color: var(--dusty-tan);
+    font-family: 'Crimson Pro', serif; font-style: italic;
+  }
+
+  /* ====== ABILITY MODAL ====== */
+  .ability-modal {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(10,10,20,0.94);
+    border: 1px solid var(--bronze-edge);
+    border-radius: 10px; padding: 20px 24px;
+    width: 280px; text-align: center; z-index: 10;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+  }
+  .ability-modal h3 {
+    font-family: 'Cinzel', serif; font-size: 16px;
+    color: var(--gold); margin-bottom: 6px;
+  }
+  .ability-modal p {
+    font-size: 13px; color: var(--dusty-tan);
+    margin-bottom: 16px; line-height: 1.4;
+  }
+  .ability-modal .btns { display: flex; gap: 8px; }
+  .ability-modal .btns button {
+    flex: 1; padding: 8px 6px; border-radius: 5px;
+    font-family: 'Cinzel', serif; font-size: 11px;
+    cursor: pointer; border: none;
+  }
+  .ability-modal .btns .normal {
+    background: var(--dark-slate); color: var(--parchment);
+    border: 1px solid var(--bronze-edge);
+  }
+  .ability-modal .btns .use {
+    background: var(--gold); color: #1A1408;
+    border: 1px solid var(--gold-dark);
+  }
+  .ability-modal .btns .disabled {
+    background: #333; color: #666; border: 1px solid #444; cursor: default;
+  }
+
+  /* ====== MAP PANEL ====== */
+  .map-panel {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    padding: 0;
+  }
+  .map-panel .map-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    filter: brightness(0.25) saturate(0.6);
+  }
+  .map-panel .map-vignette {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 10%, rgba(10,10,20,0.8) 90%);
+  }
+  .map-content {
+    position: relative; z-index: 2; flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; padding: 40px 20px 20px;
+  }
+  .map-title {
+    font-family: 'Cinzel', serif; font-size: 26px; font-weight: 700;
+    color: var(--gold); margin-bottom: 4px;
+    text-shadow: 0 2px 8px rgba(212,168,70,0.3);
+  }
+  .map-subtitle {
+    font-family: 'IM Fell English', serif; font-style: italic;
+    font-size: 14px; color: var(--dusty-tan); margin-bottom: 24px;
+  }
+
+  /* Map node graph */
+  .map-nodes {
+    display: flex; flex-direction: column; gap: 12px;
+    align-items: center; flex: 1; justify-content: center;
+  }
+  .map-row {
+    display: flex; gap: 16px; align-items: center;
+  }
+  .map-node {
+    width: 160px; padding: 12px 14px;
+    border-radius: 8px; cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; gap: 10px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .map-node:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.6);
+    border-color: var(--gold);
+  }
+  .map-node .icon {
+    font-size: 20px; flex-shrink: 0; width: 28px; text-align: center;
+  }
+  .map-node .info { flex: 1; }
+  .map-node .node-type {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    text-transform: uppercase; letter-spacing: 1px; opacity: 0.7;
+  }
+  .map-node .node-name {
+    font-family: 'Cinzel', serif; font-size: 13px; color: var(--parchment);
+  }
+  .map-node.match { background: rgba(122,48,48,0.6); }
+  .map-node.elite { background: rgba(138,96,32,0.6); }
+  .map-node.boss { background: rgba(74,32,64,0.7); }
+  .map-node.shop { background: rgba(48,88,48,0.6); }
+  .map-node.rumor { background: rgba(58,48,96,0.6); }
+  .map-node.rest { background: rgba(74,48,32,0.6); }
+
+  .map-connector {
+    width: 2px; height: 16px; background: rgba(212,168,70,0.2); margin: 0 auto;
+  }
+
+  /* ====== RESULT PANEL ====== */
+  .result-panel {
+    position: absolute; inset: 0;
+    background: rgba(8,8,14,0.96);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .result-panel .result-title {
+    font-family: 'Cinzel', serif; font-size: 36px; font-weight: 700;
+    margin-bottom: 8px;
+    text-shadow: 0 2px 12px rgba(212,168,70,0.3);
+  }
+  .result-panel .result-title.win { color: var(--gold); }
+  .result-panel .result-title.lose { color: var(--venetian-red); }
+  .result-panel .result-details {
+    font-size: 16px; color: var(--parchment); margin-bottom: 6px;
+  }
+  .result-panel .result-reward {
+    font-size: 18px; color: var(--sage); font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  /* Ability pick */
+  .ability-pick-label {
+    font-family: 'Cinzel', serif; font-size: 16px;
+    color: var(--gold); margin-bottom: 12px;
+  }
+  .ability-picks {
+    display: flex; gap: 12px; margin-bottom: 20px;
+  }
+  .ability-card {
+    width: 170px; padding: 14px;
+    background: var(--deep-navy);
+    border: 1px solid var(--bronze-edge);
+    border-radius: 8px; cursor: pointer;
+    transition: all 0.2s; text-align: center;
+  }
+  .ability-card:hover {
+    border-color: var(--gold);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+  }
+  .ability-card .ab-name {
+    font-family: 'Cinzel', serif; font-size: 13px;
+    color: var(--parchment); margin-bottom: 4px;
+  }
+  .ability-card .ab-type {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+  }
+  .ability-card .ab-type.atk { color: var(--atk-color); }
+  .ability-card .ab-type.def { color: var(--def-color); }
+  .ability-card .ab-type.util { color: var(--util-color); }
+  .ability-card .ab-desc {
+    font-size: 11px; color: var(--dusty-tan); line-height: 1.4;
+  }
+  .ability-card.common { border-left: 3px solid #AA8855; }
+  .ability-card.uncommon { border-left: 3px solid #AABBCC; }
+  .ability-card.rare { border-left: 3px solid #DDAA33; }
+
+  /* ====== SHOP PANEL ====== */
+  .shop-panel {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+  }
+  .shop-panel .shop-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    filter: brightness(0.3) saturate(0.7);
+  }
+  .shop-panel .shop-vignette {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 10%, rgba(10,10,20,0.85) 90%);
+  }
+  .shop-content {
+    position: relative; z-index: 2; flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; padding: 30px 20px 16px;
+  }
+  .shop-title {
+    font-family: 'IM Fell English', serif; font-size: 28px;
+    color: var(--gold); margin-bottom: 4px;
+  }
+  .shop-purse {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    color: var(--gold); margin-bottom: 16px; opacity: 0.8;
+  }
+  .shop-items { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 440px; }
+  .shop-item {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(30,40,50,0.7); border: 1px solid var(--bronze-edge);
+    border-radius: 6px; padding: 10px 14px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .shop-item:hover { border-color: var(--gold); background: rgba(42,52,66,0.8); }
+  .shop-item .item-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--warm-slate); display: flex; align-items: center;
+    justify-content: center; font-size: 18px; flex-shrink: 0;
+  }
+  .shop-item .item-info { flex: 1; }
+  .shop-item .item-name {
+    font-family: 'Cinzel', serif; font-size: 13px; color: var(--parchment);
+  }
+  .shop-item .item-desc {
+    font-size: 11px; color: var(--dusty-tan); margin-top: 2px;
+  }
+  .shop-item .item-price {
+    font-family: 'JetBrains Mono', monospace; font-size: 14px;
+    color: var(--gold); font-weight: 600;
+  }
+  .shop-item .item-tag {
+    font-family: 'JetBrains Mono', monospace; font-size: 9px;
+    padding: 2px 6px; border-radius: 3px; color: white;
+  }
+  .shop-item .item-tag.rare { background: rgba(180,130,40,0.5); }
+  .shop-item .item-tag.trinket { background: rgba(90,60,120,0.5); }
+
+  /* ====== EVENT PANEL ====== */
+  .event-panel {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+  }
+  .event-panel .event-bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    filter: brightness(0.3) saturate(0.7);
+  }
+  .event-panel .event-vignette {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 10%, rgba(10,10,20,0.85) 90%);
+  }
+  .event-content {
+    position: relative; z-index: 2; flex: 1;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 24px; text-align: center;
+  }
+  .event-title {
+    font-family: 'IM Fell English', serif; font-size: 28px;
+    color: var(--gold); margin-bottom: 16px;
+  }
+  .event-desc {
+    font-size: 16px; color: var(--parchment); max-width: 420px;
+    line-height: 1.6; margin-bottom: 24px;
+  }
+  .event-choices { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 380px; }
+  .event-choice {
+    padding: 12px 20px; border-radius: 6px;
+    background: rgba(30,40,50,0.6); border: 1px solid var(--bronze-edge);
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Cinzel', serif; font-size: 13px;
+    color: var(--parchment); text-align: center;
+  }
+  .event-choice:hover { border-color: var(--gold); background: rgba(42,52,66,0.7); }
+
+  /* ====== BUTTONS ====== */
+  .btn {
+    font-family: 'Cinzel', serif; font-size: 14px;
+    padding: 10px 28px; border-radius: 6px;
+    border: none; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    transition: all 0.15s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+  .btn.gold {
+    background: var(--gold); color: #1A1408;
+    border: 1px solid var(--gold-dark);
+  }
+  .btn.gold:hover { background: #E0B850; }
+  .btn.secondary {
+    background: var(--dark-slate); color: var(--parchment);
+    border: 1px solid var(--bronze-edge);
+  }
+
+  /* ====== ARCHETYPE SELECT ====== */
+  .archetype-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; width: 100%; max-width: 500px; margin: 0 auto;
+  }
+  .archetype-card {
+    background: rgba(20,28,40,0.8);
+    border: 1px solid var(--bronze-edge);
+    border-radius: 8px; padding: 16px; cursor: pointer;
+    transition: all 0.2s; text-align: center;
+  }
+  .archetype-card:hover {
+    border-color: var(--gold); transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .archetype-card .arch-name {
+    font-family: 'Cinzel', serif; font-size: 15px;
+    color: var(--gold); margin-bottom: 4px;
+  }
+  .archetype-card .arch-abilities {
+    font-size: 11px; color: var(--dusty-tan); line-height: 1.4;
+  }
+  .archetype-card .arch-style {
+    font-family: 'IM Fell English', serif; font-style: italic;
+    font-size: 11px; color: var(--dusty-tan); margin-top: 6px;
+    opacity: 0.7;
+  }
+
+  /* ====== RUN OVER ====== */
+  .run-over-stats {
+    text-align: center; margin: 16px 0 24px;
+  }
+  .run-over-stats .stat-line {
+    font-size: 16px; color: var(--parchment); margin-bottom: 4px;
+  }
+  .run-over-stats .stat-highlight { color: var(--gold); font-weight: 600; }
+
+  /* ====== DIVIDER ====== */
+  .section-divider {
+    width: 200px; height: 1px; margin: 0 auto;
+    background: linear-gradient(90deg, transparent, var(--bronze-edge), transparent);
+  }
+
+  /* ====== COMMENTARY ====== */
+  .commentary {
+    background: linear-gradient(135deg, rgba(20,28,40,0.6) 0%, rgba(30,36,48,0.4) 100%);
+    border-left: 3px solid var(--gold);
+    border-top: 1px solid rgba(90,72,48,0.25);
+    padding: 18px 22px; margin-top: 32px;
+    border-radius: 0 8px 8px 0; max-width: 960px; width: 100%;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+  .commentary h4 {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    color: var(--gold); margin-bottom: 8px;
+    letter-spacing: 2px; text-transform: uppercase; opacity: 0.85;
+  }
+  .commentary p {
+    font-size: 15px; color: var(--dusty-tan); line-height: 1.6;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="#archetype">Archetype</a>
+  <a href="#map1">Map</a>
+  <a href="#match">Match</a>
+  <a href="#ability-choice">Ability</a>
+  <a href="#victory">Victory</a>
+  <a href="#shop">Shop</a>
+  <a href="#event">Event</a>
+  <a href="#hearth">Hearth</a>
+  <a href="#act3">Act 3</a>
+  <a href="#boss">Boss</a>
+  <a href="#runover">Finale</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>WITS &amp; FOOLS</h1>
+  <p class="subtitle">A Renaissance Card Game Roguelike</p>
+  <div class="card-fan">
+    <img src="card_back.png" alt="card">
+    <img src="card_face_king.png" alt="card">
+    <img src="card_face_king.png" alt="card" style="filter: hue-rotate(30deg);">
+    <img src="card_back.png" alt="card">
+  </div>
+  <div class="scroll-hint">SCROLL TO BEGIN THE JOURNEY</div>
+</section>
+
+<!-- ==================== SCREEN 1: ARCHETYPE SELECT ==================== -->
+<section class="screen" id="archetype">
+  <div class="screen-bg" style="background-image: url('bg_tavern.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 1</div>
+    <div class="screen-title">Choose Your Path</div>
+    <p class="screen-desc">
+      Before the first card is dealt, you choose an archetype that defines your starting abilities
+      and playstyle. Each archetype is a distinct identity that shapes how you build through the run.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner" style="background: linear-gradient(180deg, #14180A 0%, #0E1208 100%);">
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+          <div style="font-family:'IM Fell English',serif; font-size:14px; color:var(--dusty-tan); margin-bottom:4px; font-style:italic;">The Renaissance Circuit awaits...</div>
+          <div style="font-family:'Cinzel',serif; font-size:28px; color:var(--gold); margin-bottom:24px; text-shadow:0 2px 8px rgba(212,168,70,0.3);">Choose Your Archetype</div>
+          <div class="archetype-grid">
+            <div class="archetype-card">
+              <div class="arch-name">The Rogue</div>
+              <div class="arch-abilities">Blocker + Seize Initiative + Peek</div>
+              <div class="arch-style">"Knowledge is the sharpest blade."</div>
+            </div>
+            <div class="archetype-card" style="border-color:var(--gold);">
+              <div class="arch-name">The Brute</div>
+              <div class="arch-abilities">Double Trouble + Pile On + Extra Draw</div>
+              <div class="arch-style">"Overwhelm them before they think."</div>
+            </div>
+            <div class="archetype-card">
+              <div class="arch-name">The Diplomat</div>
+              <div class="arch-abilities">Trump Changer + Deflect + Slip Away</div>
+              <div class="arch-style">"Let them play your game."</div>
+            </div>
+            <div class="archetype-card">
+              <div class="arch-name">The Gambler</div>
+              <div class="arch-abilities">Gambit + Feint + Card Counter</div>
+              <div class="arch-style">"Fortune favors the bold."</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>Each archetype card shows a character silhouette and starting ability icons. The tavern background subtly pulses with warm candlelight. Hovering an archetype previews the abilities with animated icon reveals.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCREEN 2: MAP (ACT 1) ==================== -->
+<section class="screen" id="map1">
+  <div class="screen-bg" style="background-image: url('bg_tavern.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 2</div>
+    <div class="screen-title">The Branching Map</div>
+    <p class="screen-desc">
+      Each act presents a branching path of encounters. Node icons immediately communicate
+      what awaits: crossed swords for matches, a skull-crown for elites, a purse for the shop.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner">
+        <div class="map-panel">
+          <div class="map-bg" style="background-image: url('bg_tavern.png'); filter: brightness(0.2) saturate(0.5);"></div>
+          <div class="map-vignette"></div>
+          <div class="map-content">
+            <div class="map-title">Act 1 &mdash; The Bilge Rat Tavern</div>
+            <div class="map-subtitle">Choose your path through the docks...</div>
+            <div class="map-nodes">
+              <div class="map-row">
+                <div class="map-node match">
+                  <div class="icon">&#9876;</div>
+                  <div class="info">
+                    <div class="node-type">Rival Match</div>
+                    <div class="node-name">Barnacle Bill</div>
+                  </div>
+                </div>
+                <div class="map-node match">
+                  <div class="icon">&#9876;</div>
+                  <div class="info">
+                    <div class="node-type">Rival Match</div>
+                    <div class="node-name">Fishy Meg</div>
+                  </div>
+                </div>
+              </div>
+              <div class="map-connector"></div>
+              <div class="map-row">
+                <div class="map-node rest">
+                  <div class="icon">&#128293;</div>
+                  <div class="info">
+                    <div class="node-type">Rest Stop</div>
+                    <div class="node-name">The Hearth</div>
+                  </div>
+                </div>
+                <div class="map-node rumor">
+                  <div class="icon">&#128220;</div>
+                  <div class="info">
+                    <div class="node-type">Rumor</div>
+                    <div class="node-name">A Whispered Tip</div>
+                  </div>
+                </div>
+              </div>
+              <div class="map-connector"></div>
+              <div class="map-row">
+                <div class="map-node match" style="border-color:var(--gold);">
+                  <div class="icon">&#9876;</div>
+                  <div class="info">
+                    <div class="node-type">Rival Match</div>
+                    <div class="node-name">Salty Pete</div>
+                  </div>
+                </div>
+                <div class="map-node shop">
+                  <div class="icon">&#128176;</div>
+                  <div class="info">
+                    <div class="node-type">Shop</div>
+                    <div class="node-name">The Fence</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="run-hud">
+            <div class="prestige">&#9829;&#9829;&#9829;&#9829;&#9829;&#9829;&#9829;</div>
+            <div class="florins">0 Florins</div>
+            <div class="act">Act 1 of 5</div>
+            <div class="abilities">Abilities: 3/5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>The map replaces flat text lists with an illustrated node graph. Each venue background bleeds through at low opacity, giving every act a distinct sense of place. Node icons are hand-drawn in the Renaissance line-art style. Path connections show as golden threads linking your journey.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCREEN 3: MATCH (ACT 1) ==================== -->
+<section class="screen" id="match">
+  <div class="screen-bg" style="background-image: url('table_tavern.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 3</div>
+    <div class="screen-title">The Card Table</div>
+    <p class="screen-desc">
+      The heart of Wits &amp; Fools. The table surface changes with each venue &mdash; rough barrel-top in
+      the tavern, velvet-over-mahogany in the salon. Cards feel physical, lit by the room's own light.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner">
+        <!-- HUD -->
+        <div class="hud-bar">
+          <div class="phase">Defend!</div>
+          <div class="trump">Trump: <span class="red">&hearts;</span></div>
+          <div class="deck">Deck: 18</div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-area">
+          <div class="table-bg" style="background-image: url('table_tavern.png');"></div>
+          <div class="table-felt"></div>
+          <div class="table-frame"></div>
+
+          <!-- Opponent -->
+          <div class="opp-hand">
+            <div class="card-small back"></div>
+            <div class="card-small back"></div>
+            <div class="card-small back"></div>
+            <div class="card-small back"></div>
+            <div class="card-small back"></div>
+          </div>
+
+          <div class="opp-nameplate">
+            <img src="portrait_barnacle_bill.png" alt="Barnacle Bill">
+            <div>
+              <div class="name">Barnacle Bill</div>
+              <div class="archetype">The Brawler</div>
+            </div>
+          </div>
+
+          <!-- Deck -->
+          <div class="deck-area">
+            <div class="deck-stack">
+              <div class="layer"></div>
+              <div class="layer"></div>
+              <div class="layer"></div>
+              <div class="deck-count">18</div>
+            </div>
+            <div class="card-small face trump-card" style="width:48px; height:36px; border-radius:3px;">
+              <span style="font-size:16px; color:#DD4444;">&hearts;</span>
+            </div>
+          </div>
+
+          <!-- Bout area -->
+          <div class="bout-area">
+            <div class="bout-pair">
+              <div class="card-small face" style="transform:none;">
+                <div class="rank" style="color:#DD4444;">7</div>
+                <div class="suit-big" style="color:#DD4444;">&hearts;</div>
+              </div>
+            </div>
+            <div class="bout-pair">
+              <div class="card-small face" style="transform:none;">
+                <div class="rank" style="color:#DD4444;">Q</div>
+                <div class="suit-big" style="color:#DD4444;">&diams;</div>
+              </div>
+              <div class="card-small face defense" style="transform:rotate(-8deg);">
+                <div class="rank">K</div>
+                <div class="suit-big">&spades;</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="discard-area">Discard</div>
+
+          <!-- Player hand -->
+          <div class="player-hand">
+            <div class="card-small face playable">
+              <div class="rank" style="color:#DD4444;">10</div>
+              <div class="suit-big" style="color:#DD4444;">&diams;</div>
+            </div>
+            <div class="card-small face disabled">
+              <div class="rank">9</div>
+              <div class="suit-big">&spades;</div>
+            </div>
+            <div class="card-small face has-ability playable">
+              <div class="rank" style="color:#DD4444;">J</div>
+              <div class="suit-big" style="color:#DD4444;">&hearts;</div>
+              <div class="ability-badge">TRUMP</div>
+            </div>
+            <div class="card-small face disabled">
+              <div class="rank" style="color:#DD4444;">8</div>
+              <div class="suit-big" style="color:#DD4444;">&diams;</div>
+            </div>
+            <div class="card-small face playable">
+              <div class="rank" style="color:#DD4444;">A</div>
+              <div class="suit-big" style="color:#DD4444;">&hearts;</div>
+            </div>
+            <div class="card-small face disabled">
+              <div class="rank">6</div>
+              <div class="suit-big">&clubs;</div>
+            </div>
+          </div>
+
+          <!-- Action button -->
+          <div class="table-btn primary" style="bottom:10px; right:16px;">Take cards</div>
+          <div class="table-btn secondary" style="bottom:10px; left:16px; font-size:11px;">Auto: OFF</div>
+        </div>
+
+        <!-- Run HUD -->
+        <div class="run-hud">
+          <div class="prestige">&#9829;&#9829;&#9829;&#9829;&#9829;&#9829;&#9829;</div>
+          <div class="florins">8 Florins</div>
+          <div class="act">Act 1 of 5</div>
+          <div class="abilities">Abilities: 3/5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>The tavern table has visible wood grain and stains. Playable cards glow green; ability cards pulse with a blue dashed border and badge. The opponent's nameplate shows their portrait and archetype. Cards cast soft shadows on the felt. The deck count overlays directly on the deck stack.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCREEN 4: ABILITY CHOICE ==================== -->
+<section class="screen" id="ability-choice">
+  <div class="screen-bg" style="background-image: url('table_tavern.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 4</div>
+    <div class="screen-title">The Ability Choice</div>
+    <p class="screen-desc">
+      When you click a card with an ability, a modal presents your options. Buttons that aren't
+      valid for the current state are greyed out, removing guesswork.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner">
+        <div class="hud-bar">
+          <div class="phase">Your move &mdash; attack</div>
+          <div class="trump">Trump: <span class="red">&hearts;</span></div>
+          <div class="deck">Deck: 12</div>
+        </div>
+        <div class="table-area">
+          <div class="table-bg" style="background-image: url('table_tavern.png');"></div>
+          <div class="table-felt"></div>
+          <div class="table-frame"></div>
+          <div class="opp-hand" style="top:16px;">
+            <div class="card-small back"></div>
+            <div class="card-small back"></div>
+            <div class="card-small back"></div>
+          </div>
+
+          <!-- Dimmed player hand -->
+          <div class="player-hand" style="opacity:0.4;">
+            <div class="card-small face"><div class="rank" style="color:#DD4444;">9</div><div class="suit-big" style="color:#DD4444;">&hearts;</div></div>
+            <div class="card-small face has-ability" style="border-color:var(--gold); box-shadow: 0 0 16px rgba(212,168,70,0.4);">
+              <div class="rank">Q</div><div class="suit-big">&clubs;</div>
+              <div class="ability-badge" style="color:var(--def-color);">BLOCK</div>
+            </div>
+            <div class="card-small face"><div class="rank">K</div><div class="suit-big">&spades;</div></div>
+          </div>
+
+          <!-- Ability modal -->
+          <div class="ability-modal">
+            <h3>Blocker</h3>
+            <p>No more attacks can be added this bout.</p>
+            <div class="btns">
+              <button class="disabled">Play normally</button>
+              <button class="use">Use BLOCK</button>
+            </div>
+          </div>
+        </div>
+        <div class="run-hud">
+          <div class="prestige">&#9829;&#9829;&#9829;&#9829;&#9829;&#9829;&#9829;</div>
+          <div class="florins">8 Florins</div>
+          <div class="act">Act 1 of 5</div>
+          <div class="abilities">Abilities: 3/5</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>"Play normally" is greyed out because the Queen of Clubs can't attack (wrong rank for the bout). The selected card glows gold behind the modal. The modal itself has a subtle parchment border treatment, like an ornate card being presented.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCREEN 5: VICTORY + ABILITY PICK ==================== -->
+<section class="screen" id="victory">
+  <div class="screen-bg" style="background-image: url('bg_tavern.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 5</div>
+    <div class="screen-title">Victory &amp; Rewards</div>
+    <p class="screen-desc">
+      After winning a match, you earn florins and choose from three ability offerings.
+      Each card shows its type, rarity, and description. This is where builds are made.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner">
+        <div class="result-panel">
+          <div class="result-title win">Victory!</div>
+          <div class="result-details">You defeated Barnacle Bill!</div>
+          <div class="result-reward">+10 Florins</div>
+
+          <div class="ability-pick-label">Choose an ability reward:</div>
+          <div class="ability-picks">
+            <div class="ability-card common">
+              <div class="ab-name">Pile On</div>
+              <div class="ab-type atk">Attack &bull; Common</div>
+              <div class="ab-desc">Raise the max attacks this bout by 2.</div>
+            </div>
+            <div class="ability-card uncommon" style="border-color:var(--gold); box-shadow: 0 4px 16px rgba(0,0,0,0.4);">
+              <div class="ab-name">Peek</div>
+              <div class="ab-type util">Utility &bull; Uncommon</div>
+              <div class="ab-desc">Reveal and rearrange the top 3 cards of the deck.</div>
+            </div>
+            <div class="ability-card rare">
+              <div class="ab-name">Slip Away</div>
+              <div class="ab-type def">Defense &bull; Rare</div>
+              <div class="ab-desc">Once per match, discard undefended attacks instead of eating them.</div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px;">
+            <button class="btn gold">Continue</button>
+            <button class="btn secondary">Skip</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>Ability cards use rarity border colors: bronze (common), silver (uncommon), gold (rare). Type badges are color-coded: red for attack, blue for defense, amber for utility. The hovered card rises and its border glows. Victory text fades in with gold particles rising from below.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCREEN 6: SHOP ==================== -->
+<section class="screen" id="shop">
+  <div class="screen-bg" style="background-image: url('scene_shop.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 6</div>
+    <div class="screen-title">The Fence</div>
+    <p class="screen-desc">
+      A shady market stall where you spend florins on abilities, trinkets, and burden removal.
+      The Fence feels like a character, not a menu &mdash; cluttered, secretive, and dangerous.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner">
+        <div class="shop-panel">
+          <div class="shop-bg" style="background-image: url('scene_shop.png');"></div>
+          <div class="shop-vignette"></div>
+          <div class="shop-content">
+            <div class="shop-title">The Fence</div>
+            <div class="shop-purse">Your purse: 18 Florins</div>
+            <div class="shop-items">
+              <div class="shop-item">
+                <div class="item-icon" style="color:var(--atk-color);">&#9876;</div>
+                <div class="item-info">
+                  <div class="item-name">Double Trouble</div>
+                  <div class="item-desc">Play one extra attack ignoring the rank-match rule.</div>
+                </div>
+                <div class="item-price">8f</div>
+              </div>
+              <div class="shop-item">
+                <div class="item-icon" style="color:var(--def-color);">&#128737;</div>
+                <div class="item-info">
+                  <div class="item-name">Deflect <span class="item-tag rare">Rare</span></div>
+                  <div class="item-desc">Swap attacker/defender roles mid-bout.</div>
+                </div>
+                <div class="item-price">18f</div>
+              </div>
+              <div class="shop-item">
+                <div class="item-icon" style="color:#9966CC;">&#128142;</div>
+                <div class="item-info">
+                  <div class="item-name">Spy's Monocle <span class="item-tag trinket">Trinket</span></div>
+                  <div class="item-desc">See top card of deck at all times.</div>
+                </div>
+                <div class="item-price">15f</div>
+              </div>
+              <div class="shop-item">
+                <div class="item-icon" style="color:var(--sage);">&#10006;</div>
+                <div class="item-info">
+                  <div class="item-name">Remove Burden: Rattled Nerves</div>
+                  <div class="item-desc">Your hands no longer shake. Ability binding restored.</div>
+                </div>
+                <div class="item-price">6f</div>
+              </div>
+            </div>
+            <div style="margin-top:16px;">
+              <button class="btn gold">Leave</button>
+            </div>
+          </div>
+          <div class="run-hud">
+            <div class="prestige">&#9829;&#9829;&#9829;&#9829;&#9829;&#9829;</div>
+            <div class="florins">18 Florins</div>
+            <div class="act">Act 2 of 5</div>
+            <div class="abilities">Abilities: 4/5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCREEN 7: EVENT ==================== -->
+<section class="screen" id="event">
+  <div class="screen-bg" style="background-image: url('scene_rumor.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 7</div>
+    <div class="screen-title">A Whispered Rumor</div>
+    <p class="screen-desc">
+      Events are the game's storytelling moments. A cloaked figure, a gambler's proposition, a
+      mysterious offer. Choices have real consequences &mdash; risk and reward in narrative form.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner">
+        <div class="event-panel">
+          <div class="event-bg" style="background-image: url('scene_rumor.png');"></div>
+          <div class="event-vignette"></div>
+          <div class="event-content">
+            <div class="event-title">The Marked Stranger</div>
+            <div class="event-desc">
+              A hooded figure slides into the seat across from you. "I know your next opponent's
+              weakness," they whisper, tapping a sealed letter. "But knowledge has its price."
+            </div>
+            <div class="event-choices">
+              <div class="event-choice">Pay 8 Florins for the letter (Scout next opponent)</div>
+              <div class="event-choice">Challenge them to a quick game instead (Risk: lose 1 Prestige or gain ability)</div>
+            </div>
+          </div>
+          <div class="run-hud">
+            <div class="prestige">&#9829;&#9829;&#9829;&#9829;&#9829;&#9829;</div>
+            <div class="florins">22 Florins</div>
+            <div class="act">Act 2 of 5</div>
+            <div class="abilities">Abilities: 4/5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCREEN 8: HEARTH ==================== -->
+<section class="screen" id="hearth">
+  <div class="screen-bg" style="background-image: url('scene_hearth.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 8</div>
+    <div class="screen-title">The Hearth</div>
+    <p class="screen-desc">
+      A moment of warmth and safety between the tension of matches. The crackling fire is a visual
+      anchor that appears in every act but with changing surroundings.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner">
+        <div class="event-panel">
+          <div class="event-bg" style="background-image: url('scene_hearth.png');"></div>
+          <div class="event-vignette"></div>
+          <div class="event-content">
+            <div class="event-title" style="font-family:'IM Fell English',serif;">The Hearth</div>
+            <div class="event-desc" style="font-style:italic;">
+              The fire pops. For once, nobody's trying to cheat you. You settle into the chair
+              and let the warmth seep into your bones.
+            </div>
+            <div class="event-choices">
+              <div class="event-choice">Rest quietly (+3 Florins)</div>
+              <div class="event-choice">Mend your spirit (Remove a Burden)</div>
+              <div class="event-choice">Eavesdrop on the patrons (Scout next opponent's abilities)</div>
+            </div>
+          </div>
+          <div class="run-hud">
+            <div class="prestige">&#9829;&#9829;&#9829;&#9829;&#9829;</div>
+            <div class="florins">14 Florins</div>
+            <div class="act">Act 2 of 5</div>
+            <div class="abilities">Abilities: 5/5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCREEN 9: ACT 3 MAP ==================== -->
+<section class="screen" id="act3">
+  <div class="screen-bg" style="background-image: url('bg_guild.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 9</div>
+    <div class="screen-title">The Climb Continues</div>
+    <p class="screen-desc">
+      By Act 3, the world has transformed. The Guildmaster's Hall replaces rough tavern wood
+      with iron chandeliers and oil portraits. Elite opponents now carry house rules.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner">
+        <div class="map-panel">
+          <div class="map-bg" style="background-image: url('bg_guild.png'); filter: brightness(0.2) saturate(0.5);"></div>
+          <div class="map-vignette"></div>
+          <div class="map-content">
+            <div class="map-title">Act 3 &mdash; The Guildmaster's Hall</div>
+            <div class="map-subtitle">The stakes rise. The players sharpen.</div>
+            <div class="map-nodes">
+              <div class="map-row">
+                <div class="map-node elite">
+                  <div class="icon">&#9760;</div>
+                  <div class="info">
+                    <div class="node-type" style="color:var(--gold);">Elite Match</div>
+                    <div class="node-name">Lady Ashton</div>
+                  </div>
+                </div>
+                <div class="map-node match">
+                  <div class="icon">&#9876;</div>
+                  <div class="info">
+                    <div class="node-type">Rival Match</div>
+                    <div class="node-name">Fixer Tomas</div>
+                  </div>
+                </div>
+              </div>
+              <div class="map-connector"></div>
+              <div class="map-row">
+                <div class="map-node shop">
+                  <div class="icon">&#128176;</div>
+                  <div class="info">
+                    <div class="node-type">Shop</div>
+                    <div class="node-name">The Fence</div>
+                  </div>
+                </div>
+                <div class="map-node match">
+                  <div class="icon">&#9876;</div>
+                  <div class="info">
+                    <div class="node-type">Rival Match</div>
+                    <div class="node-name">Baron Kell</div>
+                  </div>
+                </div>
+              </div>
+              <div class="map-connector"></div>
+              <div class="map-row">
+                <div class="map-node match">
+                  <div class="icon">&#9876;</div>
+                  <div class="info">
+                    <div class="node-type">Rival Match</div>
+                    <div class="node-name">Guildmaster Voss</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="run-hud">
+            <div class="prestige">&#9829;&#9829;&#9829;&#9829;&#9829;</div>
+            <div class="florins">32 Florins</div>
+            <div class="act">Act 3 of 5</div>
+            <div class="abilities">Abilities: 5/6</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>Notice how the entire color temperature shifts from Act 1's warm amber to Act 3's cool burgundy-and-steel. Elite nodes glow with a golden border and skull icon. The background architecture is visibly grander. This is the same UI template, but it FEELS different.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCREEN 10: BOSS MATCH ==================== -->
+<section class="screen" id="boss">
+  <div class="screen-bg" style="background-image: url('bg_salon.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 10</div>
+    <div class="screen-title">The Final Table</div>
+    <p class="screen-desc">
+      Act 5. The Duke's Salon. Murano glass chandeliers, moonlit canals outside. Across the velvet
+      table sits The Champion &mdash; masked, inscrutable, legendary. Everything you've built leads here.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner">
+        <div class="hud-bar">
+          <div class="phase">Your move &mdash; attack</div>
+          <div class="trump">Trump: <span class="black">&spades;</span></div>
+          <div class="deck">Deck: 6</div>
+        </div>
+        <div class="table-area">
+          <div class="table-bg" style="background-image: url('table_salon.png');"></div>
+          <div class="table-felt" style="background: rgba(40,20,50,0.5);"></div>
+          <div class="table-frame" style="border-color: rgba(180,150,80,0.4);"></div>
+
+          <div class="opp-hand" style="top:12px;">
+            <div class="card-small back"></div>
+            <div class="card-small back"></div>
+            <div class="card-small back"></div>
+          </div>
+
+          <div class="opp-nameplate" style="top:94px;">
+            <img src="portrait_champion.png" alt="The Champion">
+            <div>
+              <div class="name">The Champion</div>
+              <div class="archetype" style="color:var(--gold);">House Rule: The Mirror</div>
+            </div>
+          </div>
+
+          <div class="deck-area">
+            <div class="deck-stack">
+              <div class="layer"></div>
+              <div class="layer"></div>
+              <div class="deck-count">6</div>
+            </div>
+          </div>
+
+          <div class="bout-area">
+            <div class="bout-pair">
+              <div class="card-small face" style="transform:none;">
+                <div class="rank">A</div><div class="suit-big">&spades;</div>
+              </div>
+              <div class="card-small face defense">
+                <div class="rank" style="color:#DD4444;">A</div>
+                <div class="suit-big" style="color:#DD4444;">&hearts;</div>
+              </div>
+            </div>
+            <div class="bout-pair">
+              <div class="card-small face" style="transform:none;">
+                <div class="rank">K</div><div class="suit-big">&clubs;</div>
+              </div>
+              <div class="card-small face defense">
+                <div class="rank" style="color:#DD4444;">K</div>
+                <div class="suit-big" style="color:#DD4444;">&diams;</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="discard-area">Discard</div>
+
+          <div class="player-hand">
+            <div class="card-small face playable has-ability">
+              <div class="rank" style="color:#DD4444;">K</div>
+              <div class="suit-big" style="color:#DD4444;">&hearts;</div>
+              <div class="ability-badge" style="color:var(--atk-color);">DRAW</div>
+            </div>
+            <div class="card-small face playable">
+              <div class="rank">K</div><div class="suit-big">&spades;</div>
+            </div>
+          </div>
+
+          <div class="table-btn primary" style="bottom:10px; right:16px;">End bout</div>
+        </div>
+        <div class="run-hud">
+          <div class="prestige">&#9829;&#9829;&#9829;</div>
+          <div class="florins">48 Florins</div>
+          <div class="act">Act 5 of 5</div>
+          <div class="abilities">Abilities: 7/8</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>The table surface is now rich dark velvet with gold filigree — a world away from Act 1's barrel lid. The Champion's nameplate shows "House Rule: The Mirror" in gold, warning that they've copied your abilities. Only 6 cards remain in the deck. The endgame tension is palpable. Two Kings in hand — this bout decides everything.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SCREEN 11: RUN OVER (VICTORY) ==================== -->
+<section class="screen" id="runover">
+  <div class="screen-bg" style="background-image: url('bg_salon.png');"></div>
+  <div class="screen-vignette"></div>
+  <div class="screen-content">
+    <div class="screen-label">Screen 11</div>
+    <div class="screen-title">The Renaissance Circuit</div>
+    <p class="screen-desc">
+      You've done it. From the docks to the Duke's table, your wits have carried you through.
+      The journey is complete &mdash; but the circuit never truly ends.
+    </p>
+
+    <div class="mockup">
+      <div class="mockup-inner" style="background: radial-gradient(ellipse at center, #1A1428 0%, #0A0A14 100%);">
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
+          <div style="font-family:'Cinzel',serif; font-size:36px; color:var(--gold); margin-bottom:4px; text-shadow: 0 2px 16px rgba(212,168,70,0.4);">Champion of the Circuit</div>
+          <div style="font-family:'IM Fell English',serif; font-style:italic; font-size:14px; color:var(--dusty-tan); margin-bottom:24px;">From the Bilge Rat Tavern to the Duke's own salon...</div>
+
+          <!-- Journey visualization -->
+          <div style="display:flex; gap:6px; align-items:center; margin-bottom:20px;">
+            <div style="text-align:center;">
+              <div style="width:110px; height:65px; border-radius:6px; overflow:hidden; border:1px solid var(--bronze-edge); box-shadow:0 2px 8px rgba(0,0,0,0.5);"><img src="bg_tavern.png" style="width:100%; height:100%; object-fit:cover; filter:brightness(0.65);"></div>
+              <div style="font-size:8px; color:var(--dusty-tan); margin-top:3px; font-family:'JetBrains Mono',monospace;">ACT 1</div>
+            </div>
+            <div style="color:var(--gold); font-size:14px; opacity:0.5;">&#10140;</div>
+            <div style="text-align:center;">
+              <div style="width:110px; height:65px; border-radius:6px; overflow:hidden; border:1px solid var(--bronze-edge); box-shadow:0 2px 8px rgba(0,0,0,0.5);"><img src="bg_merchant.png" style="width:100%; height:100%; object-fit:cover; filter:brightness(0.65);"></div>
+              <div style="font-size:8px; color:var(--dusty-tan); margin-top:3px; font-family:'JetBrains Mono',monospace;">ACT 2</div>
+            </div>
+            <div style="color:var(--gold); font-size:14px; opacity:0.5;">&#10140;</div>
+            <div style="text-align:center;">
+              <div style="width:110px; height:65px; border-radius:6px; overflow:hidden; border:1px solid var(--bronze-edge); box-shadow:0 2px 8px rgba(0,0,0,0.5);"><img src="bg_guild.png" style="width:100%; height:100%; object-fit:cover; filter:brightness(0.65);"></div>
+              <div style="font-size:8px; color:var(--dusty-tan); margin-top:3px; font-family:'JetBrains Mono',monospace;">ACT 3</div>
+            </div>
+            <div style="color:var(--gold); font-size:14px; opacity:0.5;">&#10140;</div>
+            <div style="text-align:center;">
+              <div style="width:110px; height:65px; border-radius:6px; overflow:hidden; border:1px solid var(--bronze-edge); box-shadow:0 2px 8px rgba(0,0,0,0.5);"><img src="bg_library.png" style="width:100%; height:100%; object-fit:cover; filter:brightness(0.65);"></div>
+              <div style="font-size:8px; color:var(--dusty-tan); margin-top:3px; font-family:'JetBrains Mono',monospace;">ACT 4</div>
+            </div>
+            <div style="color:var(--gold); font-size:14px; opacity:0.5;">&#10140;</div>
+            <div style="text-align:center;">
+              <div style="width:110px; height:65px; border-radius:6px; overflow:hidden; border:2px solid var(--gold); box-shadow:0 2px 12px rgba(212,168,70,0.3);"><img src="bg_salon.png" style="width:100%; height:100%; object-fit:cover; filter:brightness(0.7);"></div>
+              <div style="font-size:8px; color:var(--gold); margin-top:3px; font-family:'JetBrains Mono',monospace;">ACT 5</div>
+            </div>
+          </div>
+
+          <div class="run-over-stats">
+            <div class="stat-line">Archetype: <span class="stat-highlight">The Brute</span></div>
+            <div class="stat-line">Matches Won: <span class="stat-highlight">11</span> / 14</div>
+            <div class="stat-line">Florins Earned: <span class="stat-highlight">148</span></div>
+            <div class="stat-line">Prestige Remaining: <span style="color:#FF6666;">&#9829;&#9829;&#9829;</span></div>
+            <div class="stat-line">Final Abilities: <span class="stat-highlight">Double Trouble, Pile On, Extra Draw, Peek, Slip Away, Endgame Specialist, Card Counter</span></div>
+          </div>
+
+          <div style="display:flex; gap:12px;">
+            <button class="btn gold" style="font-size:16px; padding:14px 36px;">New Run</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="commentary">
+      <h4>Art Direction Notes</h4>
+      <p>The journey visualization shows thumbnail vignettes of every venue visited, creating an emotional recap of the full run. Gold particles drift upward. The salon background glows through the vignette. "New Run" beckons — the circuit never ends. This screen should make the player feel proud and immediately want to try again with a different archetype.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div style="text-align:center; padding:60px 20px; background: var(--midnight);">
+  <div style="width:200px; height:1px; margin:0 auto 30px; background: linear-gradient(90deg, transparent, var(--bronze-edge), transparent);"></div>
+  <div style="font-family:'Cinzel',serif; font-size:16px; color:var(--gold); margin-bottom:8px;">Wits &amp; Fools</div>
+  <div style="font-family:'IM Fell English',serif; font-style:italic; font-size:14px; color:var(--dusty-tan);">Visual Design Walkthrough &mdash; May 2026</div>
+  <div style="font-size:12px; color:#555; margin-top:16px;">All images generated with Gemini 3.1 Flash via OpenRouter</div>
+</div>
+
+</body>
+</html>
