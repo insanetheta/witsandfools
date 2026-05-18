@@ -26,7 +26,7 @@ namespace WitsAndFools
         public event Action<int> OnMatchComplete;
 
         GameLoop _loop;
-        GameEngine Engine => _loop.Engine;
+        public GameEngine Engine => _loop?.Engine;
         readonly Dictionary<Card, CardView> _humanCardViews = new();
         readonly List<CardView> _opponentCardViews = new();
         readonly List<CardView> _attackViews = new();   // bout slot index -> view

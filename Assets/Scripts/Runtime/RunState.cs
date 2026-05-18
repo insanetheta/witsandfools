@@ -26,7 +26,7 @@ namespace WitsAndFools
         public int Seed;
         public int CurrentAct;
         public int CurrentColumn;
-        public int Prestige = 4;
+        public int Prestige = 5;
         public int Florins;
         public int Reputation;
         public int MatchesPlayed;

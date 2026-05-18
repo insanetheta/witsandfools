@@ -105,13 +105,34 @@ namespace WitsAndFools
                 Debug.Log("[RunManager] Auto-run OFF");
         }
 
+        int _batchRemaining;
+        int _batchWins;
+        int _batchMatches;
+        int _batchMatchWins;
+        List<string> _batchResults = new();
+
         public void StartAutoRun()
         {
+            _batchRemaining = 0;
             _autoRun = true;
             Time.timeScale = 20f;
             StartNewRun();
             _nextAutoStep = Time.time + _autoStepDelay;
             Debug.Log("[RunManager] Auto-run started (fresh run, timeScale=20)");
+        }
+
+        public void StartBatchRun(int count)
+        {
+            _batchRemaining = count;
+            _batchWins = 0;
+            _batchMatches = 0;
+            _batchMatchWins = 0;
+            _batchResults = new List<string>();
+            _autoRun = true;
+            Time.timeScale = 20f;
+            StartNewRun();
+            _nextAutoStep = Time.time + _autoStepDelay;
+            Debug.Log($"[RunManager] Batch run started — {count} runs");
         }
 
         void AutoStep()
@@ -135,9 +156,30 @@ namespace WitsAndFools
                     AutoHandleEvent();
                     break;
                 case RunPhase.RunOver:
-                    _autoRun = false;
-                    Time.timeScale = 1f;
-                    Debug.Log($"[RunManager] Auto-run complete — {(_run.RunWon ? "WON" : "LOST")} | Acts: {_run.CurrentAct}/5 | W/L: {_run.MatchesWon}/{_run.MatchesPlayed} | Florins: {_run.Florins}");
+                    string runResult = $"{(_run.RunWon ? "WON" : "LOST")} | Acts: {_run.CurrentAct}/5 | W/L: {_run.MatchesWon}/{_run.MatchesPlayed} | Florins: {_run.Florins}";
+                    if (_batchRemaining > 0)
+                    {
+                        _batchResults.Add(runResult);
+                        if (_run.RunWon) _batchWins++;
+                        _batchMatches += _run.MatchesPlayed;
+                        _batchMatchWins += _run.MatchesWon;
+                        _batchRemaining--;
+                        if (_batchRemaining > 0)
+                        {
+                            StartNewRun();
+                            break;
+                        }
+                        _autoRun = false;
+                        Time.timeScale = 1f;
+                        Debug.Log($"[RunManager] Batch complete — {_batchWins}/{_batchResults.Count} runs won, {_batchMatchWins}/{_batchMatches} matches won");
+                        foreach (var r in _batchResults) Debug.Log($"  {r}");
+                    }
+                    else
+                    {
+                        _autoRun = false;
+                        Time.timeScale = 1f;
+                        Debug.Log($"[RunManager] Auto-run complete — {runResult}");
+                    }
                     break;
             }
         }
@@ -342,10 +384,13 @@ namespace WitsAndFools
 
         // ---------- Match ----------
 
+        int _boutsDefended;
+
         void StartMatch(MapNode node)
         {
             var config = MatchSetup.Build(_run, node.Opponent, _rng);
             SetPhase(RunPhase.InMatch);
+            _boutsDefended = 0;
 
             GameManager.OnMatchComplete -= OnMatchComplete;
             GameManager.OnMatchComplete += OnMatchComplete;
@@ -355,12 +400,30 @@ namespace WitsAndFools
                 GameManager.SetAutoPlay(true);
                 GameManager.AiThinkSeconds = 0.02f;
             }
+
+            var engine = GameManager.Engine;
+            if (engine != null)
+                engine.OnBoutResolved += OnBoutResolved;
+        }
+
+        void OnBoutResolved(BoutOutcome outcome)
+        {
+            _run.TotalBoutsPlayed++;
+            if (outcome == BoutOutcome.DefenderWonAllDiscarded)
+            {
+                var engine = GameManager.Engine;
+                if (engine != null && engine.DefenderIndex == 0)
+                    _boutsDefended++;
+            }
         }
 
         void OnMatchComplete(int winnerIndex)
         {
             GameManager.OnMatchComplete -= OnMatchComplete;
+            var engine = GameManager.Engine;
+            if (engine != null) engine.OnBoutResolved -= OnBoutResolved;
             _run.MatchesPlayed++;
+            _run.TotalBoutsDefended += _boutsDefended;
 
             bool won = winnerIndex == 0;
             int florinsEarned = 0;
@@ -371,6 +434,8 @@ namespace WitsAndFools
                 florinsEarned = CalculateFlorins(_run.CurrentAct, _currentNode.Type);
                 if (_run.PlayerTrinkets.Contains(TrinketType.MerchantsPurse))
                     florinsEarned += 3;
+                if (_run.PlayerTrinkets.Contains(TrinketType.MisersRing))
+                    florinsEarned += _boutsDefended;
                 _run.Florins += florinsEarned;
             }
             else
