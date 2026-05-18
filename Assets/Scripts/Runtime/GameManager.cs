@@ -375,15 +375,33 @@ namespace WitsAndFools
         {
             if (Hud && Hud.AbilityChoiceVisible) return;
 
-            if (view.Card.HasAbility && AbilityValidForPhase(view.Card.Ability.Value))
+            if (view.Card.HasAbility)
             {
-                _pendingAbilityView = view;
-                var ability = view.Card.Ability.Value;
-                Hud?.ShowAbilityChoice(ability.DisplayName(), ability.Description(), $"Use {ability.ShortName()}");
-                return;
+                bool canPlay = CanPlayCardNormally(view.Card);
+                bool canUse = AbilityValidForPhase(view.Card.Ability.Value);
+                if (canPlay || canUse)
+                {
+                    _pendingAbilityView = view;
+                    var ability = view.Card.Ability.Value;
+                    Hud?.ShowAbilityChoice(ability.DisplayName(), ability.Description(),
+                        $"Use {ability.ShortName()}", canPlay, canUse);
+                    return;
+                }
             }
 
             PlayCardNormally(view);
+        }
+
+        bool CanPlayCardNormally(Card card)
+        {
+            if (Engine.Phase == Phase.Attack && Engine.AttackerIndex == HumanPlayerIndex)
+                return Rules.CanAttackWith(Engine.Bout, card);
+            if (Engine.Phase == Phase.Defense && Engine.DefenderIndex == HumanPlayerIndex)
+            {
+                int slot = Engine.Bout.FirstUndefendedSlot();
+                return slot >= 0 && Rules.CanDefendSlotWith(Engine.Bout, slot, card, Engine.Trump);
+            }
+            return false;
         }
 
         void PlayCardNormally(CardView view)
@@ -543,6 +561,8 @@ namespace WitsAndFools
         {
             if (!Hud) return;
             Hud.SetDeckCount(Engine.DeckCount);
+            if (Table && Table.DeckCountLabel)
+                Table.DeckCountLabel.text = Engine.DeckCount.ToString();
             Hud.SetTrump(Engine.Trump);
             string phase;
             if (Engine.Phase == Phase.GameOver) phase = "Game over";

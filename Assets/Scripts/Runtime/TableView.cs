@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,7 @@ namespace WitsAndFools
 
         [Header("Center")]
         public RectTransform DeckSlot;
+        public TMP_Text DeckCountLabel;
         public RectTransform TrumpSlot;
         public RectTransform DiscardSlot;
         public RectTransform BoutArea;       // parent for attacker/defender card positions

@@ -40,7 +40,8 @@ namespace WitsAndFools
         }
         public void HideGameOver() { if (GameOverPanel) GameOverPanel.SetActive(false); }
 
-        public void ShowAbilityChoice(string abilityName, string description, string useLabel)
+        public void ShowAbilityChoice(string abilityName, string description, string useLabel,
+            bool canPlayNormally = true, bool canUseAbility = true)
         {
             if (AbilityChoicePanel) AbilityChoicePanel.SetActive(true);
             if (AbilityChoiceLabel) AbilityChoiceLabel.text = $"<b>{abilityName}</b>\n{description}";
@@ -48,7 +49,9 @@ namespace WitsAndFools
             {
                 var lbl = UseAbilityButton.GetComponentInChildren<TMP_Text>();
                 if (lbl) lbl.text = useLabel;
+                UseAbilityButton.interactable = canUseAbility;
             }
+            if (PlayNormallyButton) PlayNormallyButton.interactable = canPlayNormally;
         }
 
         public void HideAbilityChoice() { if (AbilityChoicePanel) AbilityChoicePanel.SetActive(false); }

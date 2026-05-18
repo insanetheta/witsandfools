@@ -154,6 +154,16 @@ namespace WitsAndFools.EditorTools
                 img.raycastTarget = false;
             }
 
+            // Deck count overlay
+            var deckCountLabel = AddText(deckSlot, "DeckCountLabel", "0",
+                anchorMin: Vector2.zero, anchorMax: Vector2.one,
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 32, color: Color.white);
+            var deckCountRT = (RectTransform)deckCountLabel.transform;
+            deckCountRT.anchoredPosition = new Vector2(55, 0);
+            deckCountLabel.outlineWidth = 0.3f;
+            deckCountLabel.outlineColor = Color.black;
+
             // Trump card sits to the right of the deck, rotated 90° (handled by GameManager) so it peeks out.
             var trumpSlot = NewChild(canvasRT, "TrumpSlot");
             trumpSlot.anchorMin = new Vector2(0, 0.5f);
@@ -211,6 +221,7 @@ namespace WitsAndFools.EditorTools
             table.PlayerHand = playerHandLayout;
             table.OpponentHand = opponentHandLayout;
             table.DeckSlot = deckSlot;
+            table.DeckCountLabel = deckCountLabel;
             table.TrumpSlot = trumpSlot;
             table.DiscardSlot = discardSlot;
             table.BoutArea = boutArea;
