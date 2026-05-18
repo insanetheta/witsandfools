@@ -190,9 +190,15 @@ namespace WitsAndFools
             CardView view;
             if (attackerIndex == HumanPlayerIndex)
             {
-                view = _humanCardViews[card];
-                _humanCardViews.Remove(card);
-                Table.PlayerHand.Remove(view);
+                if (_humanCardViews.TryGetValue(card, out view))
+                {
+                    _humanCardViews.Remove(card);
+                    Table.PlayerHand.Remove(view);
+                }
+                else
+                {
+                    view = SpawnCardView(card, faceUp: true, parent: Table.BoutArea);
+                }
             }
             else
             {
@@ -220,9 +226,15 @@ namespace WitsAndFools
             CardView view;
             if (defenderIndex == HumanPlayerIndex)
             {
-                view = _humanCardViews[card];
-                _humanCardViews.Remove(card);
-                Table.PlayerHand.Remove(view);
+                if (_humanCardViews.TryGetValue(card, out view))
+                {
+                    _humanCardViews.Remove(card);
+                    Table.PlayerHand.Remove(view);
+                }
+                else
+                {
+                    view = SpawnCardView(card, faceUp: true, parent: Table.BoutArea);
+                }
             }
             else
             {
