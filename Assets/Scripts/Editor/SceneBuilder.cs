@@ -336,8 +336,8 @@ namespace WitsAndFools.EditorTools
                 fontSize: 24, color: new Color(0.7f, 0.7f, 0.7f));
 
             var mapNodeContainer = NewChild(mapPanel, "MapNodeContainer");
-            mapNodeContainer.anchorMin = new Vector2(0.15f, 0.15f);
-            mapNodeContainer.anchorMax = new Vector2(0.85f, 0.72f);
+            mapNodeContainer.anchorMin = new Vector2(0.25f, 0.15f);
+            mapNodeContainer.anchorMax = new Vector2(0.75f, 0.74f);
             mapNodeContainer.offsetMin = Vector2.zero;
             mapNodeContainer.offsetMax = Vector2.zero;
             var nodeLayout = mapNodeContainer.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -347,8 +347,6 @@ namespace WitsAndFools.EditorTools
             nodeLayout.childControlHeight = false;
             nodeLayout.childForceExpandWidth = false;
             nodeLayout.childForceExpandHeight = false;
-            var nodeFitter = mapNodeContainer.gameObject.AddComponent<ContentSizeFitter>();
-            nodeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             mapPanel.gameObject.SetActive(false);
 

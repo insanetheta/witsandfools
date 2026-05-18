@@ -40,7 +40,7 @@ namespace WitsAndFools
                     }
                     else
                     {
-                        node.Type = PickNodeType(col, columns, rng);
+                        node.Type = PickNodeType(col, columns, column, rng);
                         if (node.Type == MapNodeType.RivalMatch)
                             node.Opponent = GenerateOpponent(actIndex, false, false, rng);
                     }
@@ -67,14 +67,34 @@ namespace WitsAndFools
             return map;
         }
 
-        static MapNodeType PickNodeType(int col, int totalCols, Random rng)
+        static MapNodeType PickNodeType(int col, int totalCols, List<MapNode> columnSoFar, Random rng)
         {
             if (col == 0) return MapNodeType.RivalMatch;
-            int roll = rng.Next(100);
-            if (roll < 40) return MapNodeType.RivalMatch;
-            if (roll < 65) return MapNodeType.Shop;
-            if (roll < 85) return MapNodeType.Rumor;
-            return MapNodeType.Rest;
+
+            var used = new HashSet<MapNodeType>();
+            foreach (var n in columnSoFar) used.Add(n.Type);
+
+            var candidates = new List<(MapNodeType type, int weight)>
+            {
+                (MapNodeType.RivalMatch, 40),
+                (MapNodeType.Shop, 25),
+                (MapNodeType.Rumor, 20),
+                (MapNodeType.Rest, 15),
+            };
+            candidates.RemoveAll(c => used.Contains(c.type));
+            if (candidates.Count == 0)
+                return MapNodeType.RivalMatch;
+
+            int total = 0;
+            foreach (var c in candidates) total += c.weight;
+            int roll = rng.Next(total);
+            int acc = 0;
+            foreach (var c in candidates)
+            {
+                acc += c.weight;
+                if (roll < acc) return c.type;
+            }
+            return candidates[candidates.Count - 1].type;
         }
 
         static OpponentProfile GenerateOpponent(int actIndex, bool isElite, bool isBoss, Random rng)
