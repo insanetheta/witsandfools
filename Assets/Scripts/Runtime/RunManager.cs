@@ -550,7 +550,7 @@ namespace WitsAndFools
 
             GameManager.OnMatchComplete -= OnMatchComplete;
             GameManager.OnMatchComplete += OnMatchComplete;
-            GameManager.BeginConfiguredGame(config, node.Opponent.Name, _rng.Next());
+            GameManager.BeginConfiguredGame(config, node.Opponent, _rng.Next());
             if (_autoRun)
             {
                 GameManager.SetAutoPlay(true);

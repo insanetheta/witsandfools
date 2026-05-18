@@ -116,16 +116,18 @@ namespace WitsAndFools
             if (lbl) lbl.text = _autoPlay ? "Auto: ON" : "Auto: OFF";
         }
 
-        public void BeginConfiguredGame(MatchConfig config, string opponentName, int? seed = null)
+        public void BeginConfiguredGame(MatchConfig config, OpponentProfile opponent, int? seed = null)
         {
-            OpponentName = opponentName;
+            OpponentName = opponent.Name;
             ClearAllVisuals();
             Hud?.HideGameOver();
 
             var engine = new GameEngine(seed, config);
+            var ai = new AIPlayer(opponent.Name, seed ?? 0);
+            AIArchetypes.Apply(ai, opponent.Archetype, opponent.ActIndex);
             _loop = new GameLoop(
                 p0: new HumanPlayer(PlayerName),
-                p1: new AIPlayer(opponentName),
+                p1: ai,
                 engine: engine);
             _humanIsPlayerZero = true;
             WireEngineEvents();
