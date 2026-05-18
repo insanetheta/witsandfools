@@ -182,12 +182,12 @@ namespace WitsAndFools
 
         string NodeLabel(MapNode node) => node.Type switch
         {
-            MapNodeType.RivalMatch => $"⚔ {node.Opponent?.Name ?? "Rival"}",
-            MapNodeType.EliteMatch => $"★ ELITE: {node.Opponent?.Name ?? "Elite"}",
-            MapNodeType.BossMatch => $"☠ BOSS: {node.Opponent?.Name ?? "Boss"}",
-            MapNodeType.Shop => "⚖ The Fence (Shop)",
-            MapNodeType.Rumor => "✉ Rumor",
-            MapNodeType.Rest => "♨ The Hearth (Rest)",
+            MapNodeType.RivalMatch => $"[Match] {node.Opponent?.Name ?? "Rival"}",
+            MapNodeType.EliteMatch => $"[ELITE] {node.Opponent?.Name ?? "Elite"}",
+            MapNodeType.BossMatch => $"[BOSS] {node.Opponent?.Name ?? "Boss"}",
+            MapNodeType.Shop => "[Shop] The Fence",
+            MapNodeType.Rumor => "[Rumor] A whispered lead...",
+            MapNodeType.Rest => "[Rest] The Hearth",
             _ => "???"
         };
 
