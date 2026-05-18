@@ -75,10 +75,104 @@ namespace WitsAndFools
         System.Random _rng;
         MapNode _currentNode;
 
+        bool _autoRun;
+        float _autoStepDelay = 0.15f;
+        float _nextAutoStep;
+
         void Start()
         {
             if (GameManager) GameManager.AutoStartOnAwake = false;
             StartNewRun();
+        }
+
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.R) && _phase != RunPhase.InMatch)
+                ToggleAutoRun();
+            if (!_autoRun || Time.time < _nextAutoStep) return;
+            AutoStep();
+        }
+
+        void ToggleAutoRun()
+        {
+            _autoRun = !_autoRun;
+            if (_autoRun)
+            {
+                _nextAutoStep = Time.time + _autoStepDelay;
+                Debug.Log("[RunManager] Auto-run ON");
+            }
+            else
+                Debug.Log("[RunManager] Auto-run OFF");
+        }
+
+        public void StartAutoRun()
+        {
+            _autoRun = true;
+            Time.timeScale = 20f;
+            StartNewRun();
+            _nextAutoStep = Time.time + _autoStepDelay;
+            Debug.Log("[RunManager] Auto-run started (fresh run, timeScale=20)");
+        }
+
+        void AutoStep()
+        {
+            _nextAutoStep = Time.time + _autoStepDelay;
+            if (_run == null || _run.CurrentMap == null) return;
+
+            switch (_phase)
+            {
+                case RunPhase.MapSelect:
+                    AutoSelectNode();
+                    break;
+                case RunPhase.PostMatch:
+                    OnResultContinue();
+                    break;
+                case RunPhase.Shop:
+                    OnResultContinue();
+                    break;
+                case RunPhase.Event:
+                case RunPhase.Rest:
+                    AutoHandleEvent();
+                    break;
+                case RunPhase.RunOver:
+                    _autoRun = false;
+                    Time.timeScale = 1f;
+                    Debug.Log($"[RunManager] Auto-run complete — {(_run.RunWon ? "WON" : "LOST")} | Acts: {_run.CurrentAct}/5 | W/L: {_run.MatchesWon}/{_run.MatchesPlayed} | Florins: {_run.Florins}");
+                    break;
+            }
+        }
+
+        void AutoSelectNode()
+        {
+            if (_currentColumn >= _run.CurrentMap.Count) return;
+            var column = _run.CurrentMap[_currentColumn];
+            MapNode best = column[0];
+            int bestPriority = NodePriority(best.Type);
+            for (int i = 1; i < column.Count; i++)
+            {
+                int p = NodePriority(column[i].Type);
+                if (p > bestPriority) { best = column[i]; bestPriority = p; }
+            }
+            OnNodeSelected(best);
+        }
+
+        static int NodePriority(MapNodeType t) => t switch
+        {
+            MapNodeType.BossMatch => 100,
+            MapNodeType.EliteMatch => 90,
+            MapNodeType.RivalMatch => 80,
+            MapNodeType.Rest => 30,
+            MapNodeType.Rumor => 20,
+            MapNodeType.Shop => 10,
+            _ => 0
+        };
+
+        void AutoHandleEvent()
+        {
+            if (EventContinueButton && EventContinueButton.gameObject.activeSelf)
+                OnResultContinue();
+            else if (EventChoice1Button && EventChoice1Button.gameObject.activeSelf)
+                _eventChoice1Action?.Invoke();
         }
 
         public void StartNewRun()
@@ -256,6 +350,11 @@ namespace WitsAndFools
             GameManager.OnMatchComplete -= OnMatchComplete;
             GameManager.OnMatchComplete += OnMatchComplete;
             GameManager.BeginConfiguredGame(config, node.Opponent.Name, _rng.Next());
+            if (_autoRun)
+            {
+                GameManager.SetAutoPlay(true);
+                GameManager.AiThinkSeconds = 0.02f;
+            }
         }
 
         void OnMatchComplete(int winnerIndex)

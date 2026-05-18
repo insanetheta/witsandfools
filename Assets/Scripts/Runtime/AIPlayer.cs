@@ -175,12 +175,13 @@ namespace WitsAndFools
                 return;
             }
 
-            if (attack == null) return;
-            if (!engine.TryAttack(playerIndex, attack.Value))
-            {
-                if (!engine.Bout.IsEmpty && engine.Bout.FullyDefended)
-                    engine.TryEndBout(playerIndex);
-            }
+            if (attack != null && engine.TryAttack(playerIndex, attack.Value))
+                return;
+
+            if (!engine.Bout.IsEmpty && engine.Bout.FullyDefended)
+                engine.TryEndBout(playerIndex);
+            else if (!engine.Bout.IsEmpty)
+                engine.TryEat(engine.DefenderIndex);
         }
 
         bool ShouldStopPilingOn(GameEngine engine, Card next)
@@ -218,16 +219,21 @@ namespace WitsAndFools
             if (slot < 0) return;
 
             var hand = engine.HandOf(playerIndex);
-            Card? best = null;
+            var candidates = new System.Collections.Generic.List<Card>();
             foreach (var c in hand.Cards)
             {
                 if (!Rules.CanDefendSlotWith(engine.Bout, slot, c, engine.Trump)) continue;
-                if (best == null) { best = c; continue; }
-                if (PrefersAsDefense(c, best.Value, engine.Trump)) best = c;
+                candidates.Add(c);
             }
 
-            if (best == null) { engine.TryEat(playerIndex); return; }
-            engine.TryDefend(playerIndex, slot, best.Value);
+            candidates.Sort((a, b) => PrefersAsDefense(a, b, engine.Trump) ? -1 : 1);
+
+            foreach (var c in candidates)
+            {
+                if (engine.TryDefend(playerIndex, slot, c)) return;
+            }
+
+            engine.TryEat(playerIndex);
         }
 
         static bool PrefersAsDefense(Card candidate, Card current, Suit trump)

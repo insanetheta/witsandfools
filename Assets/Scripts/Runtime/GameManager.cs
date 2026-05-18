@@ -45,6 +45,8 @@ namespace WitsAndFools
         bool _autoPlay;
         AIPlayer _autoPlayAI;
 
+        int _stallFrames;
+
         void Update()
         {
             if (_loop == null) return;
@@ -60,6 +62,11 @@ namespace WitsAndFools
 
             if ((aiTurn || autoPlayTurn) && Time.time < _earliestNextAiAct) return;
 
+            Phase prevPhase = Engine.Phase;
+            int prevDeck = Engine.DeckCount;
+            int prevH0 = Engine.HandOf(0).Count;
+            int prevH1 = Engine.HandOf(1).Count;
+
             if (autoPlayTurn)
             {
                 if (_autoPlayAI == null) _autoPlayAI = new AIPlayer("AutoPlay");
@@ -71,15 +78,35 @@ namespace WitsAndFools
                 _loop.Tick();
                 if (aiTurn) _earliestNextAiAct = Time.time + AiThinkSeconds;
             }
+
+            bool changed = Engine.Phase != prevPhase || Engine.DeckCount != prevDeck
+                || Engine.HandOf(0).Count != prevH0 || Engine.HandOf(1).Count != prevH1;
+            if (changed)
+                _stallFrames = 0;
+            else if (aiTurn || autoPlayTurn)
+            {
+                _stallFrames++;
+                if (_stallFrames > 100)
+                {
+                    Debug.LogWarning($"[GameManager] Match stalled for {_stallFrames} frames — forcing eat. Phase={Engine.Phase} active={active}");
+                    Engine.TryEat(Engine.DefenderIndex);
+                    _stallFrames = 0;
+                }
+            }
         }
 
-        void ToggleAutoPlay()
+        public void SetAutoPlay(bool on)
         {
-            _autoPlay = !_autoPlay;
+            _autoPlay = on;
             if (_autoPlay && Hud && Hud.AbilityChoiceVisible)
                 Hud.HideAbilityChoice();
             UpdateAutoPlayLabel();
             if (_autoPlay) ApplyHighlightForPhase();
+        }
+
+        void ToggleAutoPlay()
+        {
+            SetAutoPlay(!_autoPlay);
         }
 
         void UpdateAutoPlayLabel()
