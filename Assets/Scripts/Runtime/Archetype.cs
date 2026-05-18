@@ -51,12 +51,72 @@ namespace WitsAndFools
             _ => new List<AbilityType>()
         };
 
+        public static TrinketType? StartingTrinket(this ArchetypeType a) => a switch
+        {
+            ArchetypeType.Rogue => TrinketType.SpysMonocle,
+            ArchetypeType.Brute => TrinketType.DuelistsGlove,
+            ArchetypeType.Diplomat => TrinketType.CourtiersFan,
+            ArchetypeType.Gambler => TrinketType.LoadedDice,
+            _ => null
+        };
+
+        public static string PerkName(this ArchetypeType a) => a switch
+        {
+            ArchetypeType.Rogue => "Shadow Reflexes",
+            ArchetypeType.Brute => "Fury",
+            ArchetypeType.Diplomat => "Court Favor",
+            ArchetypeType.Gambler => "Lucky Draw",
+            _ => ""
+        };
+
+        public static string PerkDescription(this ArchetypeType a) => a switch
+        {
+            ArchetypeType.Rogue => "Defend with matching rank to draw 1 card.",
+            ArchetypeType.Brute => "When opponent eats your attacks, draw 1 extra.",
+            ArchetypeType.Diplomat => "At each bout, the better of the top 2 deck cards rises to the top.",
+            ArchetypeType.Gambler => "Once per match after eating, discard your worst card.",
+            _ => ""
+        };
+
         public static readonly ArchetypeType[] AllArchetypes = new[]
         {
             ArchetypeType.Rogue,
             ArchetypeType.Brute,
             ArchetypeType.Diplomat,
             ArchetypeType.Gambler
+        };
+
+        static readonly HashSet<AbilityType> RogueSynergy = new()
+        {
+            AbilityType.Blocker, AbilityType.DoubleDefense, AbilityType.SlipAway,
+            AbilityType.EndgameSpecialist, AbilityType.SeizeInitiative, AbilityType.Peek
+        };
+
+        static readonly HashSet<AbilityType> BruteSynergy = new()
+        {
+            AbilityType.DoubleTrouble, AbilityType.PileOn, AbilityType.ExtraDraw,
+            AbilityType.Feint, AbilityType.TrumpAffinity, AbilityType.QuickHands
+        };
+
+        static readonly HashSet<AbilityType> DiplomatSynergy = new()
+        {
+            AbilityType.TrumpChanger, AbilityType.Deflect, AbilityType.SeizeInitiative,
+            AbilityType.Peek, AbilityType.SlipAway, AbilityType.EndgameSpecialist
+        };
+
+        static readonly HashSet<AbilityType> GamblerSynergy = new()
+        {
+            AbilityType.Gambit, AbilityType.Feint, AbilityType.CardCounter,
+            AbilityType.QuickHands, AbilityType.ExtraDraw, AbilityType.Deflect
+        };
+
+        public static bool IsSynergy(this ArchetypeType a, AbilityType ability) => a switch
+        {
+            ArchetypeType.Rogue => RogueSynergy.Contains(ability),
+            ArchetypeType.Brute => BruteSynergy.Contains(ability),
+            ArchetypeType.Diplomat => DiplomatSynergy.Contains(ability),
+            ArchetypeType.Gambler => GamblerSynergy.Contains(ability),
+            _ => false
         };
     }
 }

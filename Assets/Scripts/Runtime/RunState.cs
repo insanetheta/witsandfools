@@ -34,6 +34,7 @@ namespace WitsAndFools
         public int TotalBoutsPlayed;
         public int TotalBoutsDefended;
 
+        public ArchetypeType? PlayerArchetype;
         public List<AbilityType> PlayerAbilities = new();
         public int MaxAbilitySlots = 5;
         public List<TrinketType> PlayerTrinkets = new();

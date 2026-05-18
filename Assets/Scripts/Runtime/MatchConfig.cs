@@ -34,6 +34,12 @@ namespace WitsAndFools
         public bool[] RattledNerves = new bool[2];
         public bool[] ClumsyFingers = new bool[2];
 
+        // Archetype passive perks
+        public bool[] ShadowReflexes = new bool[2];  // Rogue: defend with matching rank = draw 1
+        public bool[] BruteFury = new bool[2];        // Brute: when defender eats, attacker draws 1 extra
+        public bool[] CourtFavor = new bool[2];       // Diplomat: at bout start, peek top 2, put 1 on bottom
+        public bool[] LuckyDraw = new bool[2];        // Gambler: once per match after eating, discard worst card
+
         public int NoTrumpsUntilBout;
         public bool FixedAttacker;
         public bool AnyRankAttack;

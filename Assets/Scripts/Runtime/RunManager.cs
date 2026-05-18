@@ -309,7 +309,11 @@ namespace WitsAndFools
         void OnArchetypeSelected(ArchetypeType archetype)
         {
             _selectedArchetype = archetype;
+            _run.PlayerArchetype = archetype;
             _run.PlayerAbilities.AddRange(archetype.StartingAbilities());
+            var trinket = archetype.StartingTrinket();
+            if (trinket.HasValue)
+                _run.PlayerTrinkets.Add(trinket.Value);
             SetPhase(RunPhase.MapSelect);
         }
 
@@ -375,6 +379,8 @@ namespace WitsAndFools
         {
             var abilities = archetype.StartingAbilities();
             string abilityList = string.Join(", ", abilities.ConvertAll(a => a.DisplayName()));
+            var trinket = archetype.StartingTrinket();
+            string trinketStr = trinket.HasValue ? $"  |  Trinket: {trinket.Value.DisplayName()}" : "";
 
             int repNeeded = archetype switch
             {
@@ -425,7 +431,7 @@ namespace WitsAndFools
             descRT.offsetMin = new Vector2(16, 4);
             descRT.offsetMax = new Vector2(-16, 0);
             var descTMP = descGO.AddComponent<TextMeshProUGUI>();
-            descTMP.text = unlocked ? $"Starts with: {abilityList}" : "???";
+            descTMP.text = unlocked ? $"Starts with: {abilityList}{trinketStr}" : "???";
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
             descTMP.fontSize = 16;
             descTMP.color = ThemePalette.DescGray;
@@ -720,11 +726,28 @@ namespace WitsAndFools
             var result = new List<AbilityType>();
             for (int i = 0; i < count && pool.Count > 0; i++)
             {
-                int idx = _rng.Next(pool.Count);
+                int idx = WeightedPick(pool, _run.PlayerArchetype, _rng);
                 result.Add(pool[idx].Type);
                 pool.RemoveAt(idx);
             }
             return result;
+        }
+
+        static int WeightedPick(List<AbilityDefinition> pool, ArchetypeType? archetype, System.Random rng)
+        {
+            if (!archetype.HasValue || pool.Count <= 1)
+                return rng.Next(pool.Count);
+            int totalWeight = 0;
+            for (int i = 0; i < pool.Count; i++)
+                totalWeight += archetype.Value.IsSynergy(pool[i].Type) ? 3 : 1;
+            int roll = rng.Next(totalWeight);
+            int acc = 0;
+            for (int i = 0; i < pool.Count; i++)
+            {
+                acc += archetype.Value.IsSynergy(pool[i].Type) ? 3 : 1;
+                if (roll < acc) return i;
+            }
+            return pool.Count - 1;
         }
 
         void ShowAbilityPick()
@@ -912,7 +935,7 @@ namespace WitsAndFools
 
             for (int i = 0; i < count && pool.Count > 0; i++)
             {
-                int idx = _rng.Next(pool.Count);
+                int idx = WeightedPick(pool, _run.PlayerArchetype, _rng);
                 var def = pool[idx];
                 pool.RemoveAt(idx);
                 int price = def.Rarity switch

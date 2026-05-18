@@ -41,6 +41,7 @@ namespace WitsAndFools
         bool[] _quicksilverUsed = new bool[2];
         bool[] _slipAwayUsed = new bool[2];
         bool[] _jugglersBallsUsed = new bool[2];
+        bool[] _luckyDrawUsed = new bool[2];
         readonly List<Rank> _pendingBonusRanks = new();
 
         public int AttackerIndex { get; private set; }
@@ -123,6 +124,7 @@ namespace WitsAndFools
             _quicksilverUsed = new bool[2];
             _slipAwayUsed = new bool[2];
             _jugglersBallsUsed = new bool[2];
+            _luckyDrawUsed = new bool[2];
 
             for (int p = 0; p < 2; p++)
             {
@@ -163,6 +165,7 @@ namespace WitsAndFools
             ApplyVentriloquistsDummy();
 
             AttackerIndex = ChooseFirstAttacker();
+            ApplyCourtFavor(AttackerIndex);
             Phase = Phase.Attack;
 
             OnSetupComplete?.Invoke();
@@ -296,6 +299,13 @@ namespace WitsAndFools
             _bout.TryDefend(slot, card);
             Phase = Phase.Attack;
             OnDefensePlayed?.Invoke(playerIndex, slot, card);
+
+            if (_config.ShadowReflexes[playerIndex] && card.Rank == _bout.Attacks[slot].Rank && _deck.Count > 0)
+            {
+                _hands[playerIndex].Add(_deck.Draw());
+                OnDrew?.Invoke(playerIndex, 1);
+            }
+
             return true;
         }
 
@@ -330,6 +340,24 @@ namespace WitsAndFools
                     drawn++;
                 }
                 if (drawn > 0) OnDrew?.Invoke(playerIndex, drawn);
+            }
+
+            int attacker = 1 - playerIndex;
+            if (_config.BruteFury[attacker] && _deck.Count > 0)
+            {
+                _hands[attacker].Add(_deck.Draw());
+                OnDrew?.Invoke(attacker, 1);
+            }
+
+            if (_config.LuckyDraw[playerIndex] && !_luckyDrawUsed[playerIndex] && _hands[playerIndex].Count > 1)
+            {
+                _luckyDrawUsed[playerIndex] = true;
+                var worst = FindWorstCard(_hands[playerIndex], Trump);
+                if (worst.HasValue)
+                {
+                    _hands[playerIndex].Remove(worst.Value);
+                    _discard.Add(worst.Value);
+                }
             }
 
             ResolveBout(BoutOutcome.DefenderAteCards);
@@ -620,8 +648,31 @@ namespace WitsAndFools
                 _bout.AddBonusRank(r);
             _pendingBonusRanks.Clear();
 
+            ApplyCourtFavor(AttackerIndex);
+
             Phase = Phase.Attack;
             OnTurnBegan?.Invoke(AttackerIndex);
+        }
+
+        void ApplyCourtFavor(int player)
+        {
+            if (!_config.CourtFavor[player] || _deck.Count < 2) return;
+            var top2 = _deck.PeekTop(2); // [0]=top, [1]=second
+            // Keep the more useful card on top, send the other to bottom
+            int score0 = CardValue(top2[0], Trump);
+            int score1 = CardValue(top2[1], Trump);
+            if (score1 > score0)
+                _deck.SwapTopTwo(); // put the better card on top
+            // Send second-from-top (the worse card) to bottom
+            _deck.SwapTopTwo();
+            _deck.PutTopOnBottom();
+        }
+
+        static int CardValue(Card c, Suit trump)
+        {
+            int v = (int)c.Rank;
+            if (c.Suit == trump) v += 20;
+            return v;
         }
 
         void DrawTo(int playerIndex, int target)

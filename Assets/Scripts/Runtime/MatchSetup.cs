@@ -75,6 +75,9 @@ namespace WitsAndFools
 
             ApplyHouseRule(config, opponent.HouseRule);
 
+            if (run.PlayerArchetype.HasValue)
+                ApplyArchetypePerk(config, 0, run.PlayerArchetype.Value);
+
             return config;
         }
 
@@ -183,6 +186,17 @@ namespace WitsAndFools
                 case HouseRuleType.TheMirror:
                     config.MirrorAbilities = true;
                     break;
+            }
+        }
+
+        static void ApplyArchetypePerk(MatchConfig config, int player, ArchetypeType archetype)
+        {
+            switch (archetype)
+            {
+                case ArchetypeType.Rogue:    config.ShadowReflexes[player] = true; break;
+                case ArchetypeType.Brute:    config.BruteFury[player] = true; break;
+                case ArchetypeType.Diplomat: config.CourtFavor[player] = true; break;
+                case ArchetypeType.Gambler:  config.LuckyDraw[player] = true; break;
             }
         }
 

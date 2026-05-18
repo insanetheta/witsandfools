@@ -60,5 +60,20 @@ namespace WitsAndFools
             for (int i = 0; i < count; i++)
                 _cards[_cards.Count - 1 - i] = cards[i];
         }
+
+        public void SwapTopTwo()
+        {
+            if (_cards.Count < 2) return;
+            int top = _cards.Count - 1;
+            (_cards[top], _cards[top - 1]) = (_cards[top - 1], _cards[top]);
+        }
+
+        public void PutTopOnBottom()
+        {
+            if (_cards.Count < 2) return;
+            var top = _cards[_cards.Count - 1];
+            _cards.RemoveAt(_cards.Count - 1);
+            _cards.Insert(0, top);
+        }
     }
 }
