@@ -149,7 +149,7 @@ namespace WitsAndFools
                     OnResultContinue();
                     break;
                 case RunPhase.Shop:
-                    OnResultContinue();
+                    AutoHandleShop();
                     break;
                 case RunPhase.Event:
                 case RunPhase.Rest:
@@ -208,6 +208,29 @@ namespace WitsAndFools
             MapNodeType.Shop => 10,
             _ => 0
         };
+
+        void AutoHandleShop()
+        {
+            if (_run.Florins >= 8 && _run.PlayerAbilities.Count < _run.MaxAbilitySlots)
+            {
+                var offerings = PickShopOfferings(1);
+                if (offerings.Count > 0 && _run.Florins >= offerings[0].price)
+                {
+                    OnShopBuy(offerings[0].type, offerings[0].price);
+                    return;
+                }
+            }
+            if (_run.Florins >= 10 && _run.PlayerTrinkets.Count < 5)
+            {
+                var trinket = PickTrinketOffering();
+                if (trinket.HasValue && _run.Florins >= trinket.Value.price)
+                {
+                    OnShopBuyTrinket(trinket.Value.type, trinket.Value.price);
+                    return;
+                }
+            }
+            OnResultContinue();
+        }
 
         void AutoHandleEvent()
         {
@@ -530,9 +553,13 @@ namespace WitsAndFools
             ClearShopItems();
             if (!ShopItemContainer) return;
 
-            var offerings = PickShopOfferings(3);
-            foreach (var offering in offerings)
+            var abilityOfferings = PickShopOfferings(2);
+            foreach (var offering in abilityOfferings)
                 CreateShopItemButton(offering);
+
+            var trinketOffering = PickTrinketOffering();
+            if (trinketOffering.HasValue)
+                CreateTrinketShopButton(trinketOffering.Value);
 
             if (_run.PlayerBurdens.Count > 0)
                 CreateBurdenRemovalButton();
@@ -666,6 +693,81 @@ namespace WitsAndFools
             var btn = btnGO.GetComponent<Button>();
             btn.interactable = canBuy;
             btn.onClick.AddListener(() => OnShopRemoveBurden(burden, price));
+        }
+
+        (TrinketType type, int price)? PickTrinketOffering()
+        {
+            if (_run.PlayerTrinkets.Count >= 5) return null;
+            var pool = new List<TrinketType>();
+            foreach (TrinketType t in Enum.GetValues(typeof(TrinketType)))
+            {
+                if (_run.PlayerTrinkets.Contains(t)) continue;
+                if (t == TrinketType.PhoenixMedal && _run.PhoenixMedalUsed) continue;
+                pool.Add(t);
+            }
+            if (pool.Count == 0) return null;
+            var trinket = pool[_rng.Next(pool.Count)];
+            int price = trinket.AffectsEngine() ? 15 : 10;
+            return (trinket, price);
+        }
+
+        void CreateTrinketShopButton((TrinketType type, int price) offering)
+        {
+            bool canBuy = _run.Florins >= offering.price && _run.PlayerTrinkets.Count < 5;
+            string label = $"{offering.type.DisplayName()}  —  {offering.price}f  [Trinket]";
+            string desc = offering.type.Description();
+
+            var btnGO = new GameObject("TrinketItem", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            btnGO.transform.SetParent(ShopItemContainer, false);
+            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.45f, 0.30f, 0.15f) : new Color(0.25f, 0.25f, 0.25f);
+            var le = btnGO.GetComponent<LayoutElement>();
+            le.preferredHeight = 90;
+            le.preferredWidth = 550;
+
+            var nameGO = new GameObject("Name", typeof(RectTransform));
+            nameGO.transform.SetParent(btnGO.transform, false);
+            var nameRT = (RectTransform)nameGO.transform;
+            nameRT.anchorMin = new Vector2(0, 0.5f);
+            nameRT.anchorMax = new Vector2(1, 1);
+            nameRT.offsetMin = new Vector2(16, 0);
+            nameRT.offsetMax = new Vector2(-16, -4);
+            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            nameTMP.text = label;
+            nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            nameTMP.fontSize = 22;
+            nameTMP.color = canBuy ? new Color(1f, 0.85f, 0.55f) : new Color(0.5f, 0.5f, 0.5f);
+            nameTMP.raycastTarget = false;
+
+            var descGO = new GameObject("Desc", typeof(RectTransform));
+            descGO.transform.SetParent(btnGO.transform, false);
+            var descRT = (RectTransform)descGO.transform;
+            descRT.anchorMin = Vector2.zero;
+            descRT.anchorMax = new Vector2(1, 0.5f);
+            descRT.offsetMin = new Vector2(16, 4);
+            descRT.offsetMax = new Vector2(-16, 0);
+            var descTMP = descGO.AddComponent<TextMeshProUGUI>();
+            descTMP.text = desc;
+            descTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            descTMP.fontSize = 16;
+            descTMP.color = new Color(0.7f, 0.7f, 0.7f);
+            descTMP.raycastTarget = false;
+            descTMP.enableWordWrapping = true;
+
+            var btn = btnGO.GetComponent<Button>();
+            btn.interactable = canBuy;
+            var captured = offering;
+            btn.onClick.AddListener(() => OnShopBuyTrinket(captured.type, captured.price));
+        }
+
+        void OnShopBuyTrinket(TrinketType type, int price)
+        {
+            if (_run.Florins < price || _run.PlayerTrinkets.Count >= 5) return;
+            _run.Florins -= price;
+            _run.PlayerTrinkets.Add(type);
+            if (type == TrinketType.ScholarsTome) _run.MaxAbilitySlots++;
+            UpdateRunHud();
+            UpdateShopFlorins();
+            PopulateShopItems();
         }
 
         void OnShopBuy(AbilityType type, int price)
