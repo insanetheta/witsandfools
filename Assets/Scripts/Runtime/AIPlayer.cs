@@ -1,3 +1,5 @@
+using System;
+
 namespace WitsAndFools
 {
     public sealed class AIPlayer : IPlayerController
@@ -5,10 +7,23 @@ namespace WitsAndFools
         public PlayerKind Kind => PlayerKind.AI;
         public string DisplayName { get; }
 
-        public AIPlayer(string name = "Knave") { DisplayName = name; }
+        public float RandomMoveChance { get; set; }
+        public float AbilityEagerness { get; set; } = 1f;
+        Random _rng;
+
+        public AIPlayer(string name = "Knave", int? seed = null)
+        {
+            DisplayName = name;
+            _rng = seed.HasValue ? new Random(seed.Value) : new Random();
+        }
 
         public void RequestAction(GameEngine engine, int playerIndex)
         {
+            if (RandomMoveChance > 0 && _rng.NextDouble() < RandomMoveChance)
+            {
+                if (TryRandomAction(engine, playerIndex)) return;
+            }
+
             if (TryActivateAbility(engine, playerIndex)) return;
 
             switch (engine.Phase)
@@ -20,6 +35,27 @@ namespace WitsAndFools
                     DefenseStep(engine, playerIndex);
                     return;
             }
+        }
+
+        bool TryRandomAction(GameEngine engine, int playerIndex)
+        {
+            var hand = engine.HandOf(playerIndex);
+            if (hand.Count == 0) return false;
+            var card = hand.Cards[_rng.Next(hand.Count)];
+
+            if (engine.Phase == Phase.Attack)
+            {
+                if (engine.TryAttack(playerIndex, card)) return true;
+                if (!engine.Bout.IsEmpty && engine.Bout.FullyDefended)
+                    return engine.TryEndBout(playerIndex);
+            }
+            else if (engine.Phase == Phase.Defense)
+            {
+                int slot = engine.Bout.FirstUndefendedSlot();
+                if (slot >= 0 && engine.TryDefend(playerIndex, slot, card)) return true;
+                return engine.TryEat(playerIndex);
+            }
+            return false;
         }
 
         // ---------- Ability evaluation ----------
@@ -64,6 +100,28 @@ namespace WitsAndFools
                 case AbilityType.SeizeInitiative:
                     return engine.Phase == Phase.Defense && hand.Count >= 4;
 
+                case AbilityType.PileOn:
+                    return engine.Phase == Phase.Attack && engine.Bout.AttackCount >= 1 && hand.Count >= 4;
+
+                case AbilityType.Feint:
+                    return engine.Phase == Phase.Attack && engine.DeckCount > 0 && engine.Bout.AttackCount >= 1;
+
+                case AbilityType.Deflect:
+                    if (engine.Phase != Phase.Defense) return false;
+                    int undefended = CountUndefended(engine.Bout);
+                    return undefended >= 2 && hand.Count <= 3;
+
+                case AbilityType.SlipAway:
+                    if (engine.Phase != Phase.Defense) return false;
+                    return CountUndefended(engine.Bout) >= 2;
+
+                case AbilityType.Peek:
+                    return engine.DeckCount >= 3 && hand.Count >= 3;
+
+                case AbilityType.Gambit:
+                    int trumpCount = CountSuit(hand, engine.Trump);
+                    return trumpCount <= 0 && hand.Count >= 4 && engine.DeckCount >= hand.Count;
+
                 default:
                     return false;
             }
@@ -82,6 +140,14 @@ namespace WitsAndFools
             foreach (var c in hand.Cards)
                 if (!Rules.CanAttackWith(bout, c)) return true;
             return false;
+        }
+
+        static int CountUndefended(Bout bout)
+        {
+            int n = 0;
+            for (int i = 0; i < bout.Defenses.Count; i++)
+                if (bout.Defenses[i] == null) n++;
+            return n;
         }
 
         static bool CanCoverTwoSlots(GameEngine engine, Card card)

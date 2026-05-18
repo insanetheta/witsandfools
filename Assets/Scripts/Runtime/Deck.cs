@@ -44,5 +44,21 @@ namespace WitsAndFools
         public Card PeekBottom() => _cards[0];
 
         public IReadOnlyList<Card> AsReadOnly() => _cards;
+
+        public Card[] PeekTop(int n)
+        {
+            int count = System.Math.Min(n, _cards.Count);
+            var result = new Card[count];
+            for (int i = 0; i < count; i++)
+                result[i] = _cards[_cards.Count - 1 - i];
+            return result;
+        }
+
+        public void ReplaceTop(Card[] cards)
+        {
+            int count = System.Math.Min(cards.Length, _cards.Count);
+            for (int i = 0; i < count; i++)
+                _cards[_cards.Count - 1 - i] = cards[i];
+        }
     }
 }

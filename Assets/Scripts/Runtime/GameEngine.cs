@@ -6,9 +6,9 @@ namespace WitsAndFools
     public enum Phase
     {
         Setup,
-        Attack,         // attacker may add an attack card (or end the bout if at least one is defended)
-        Defense,        // defender must beat the next undefended attack, or eat
-        Resolving,      // brief moment between actions while UI animates
+        Attack,
+        Defense,
+        Resolving,
         GameOver
     }
 
@@ -20,46 +20,60 @@ namespace WitsAndFools
 
     public sealed class GameEngine
     {
-        // ----- State -----
         readonly Deck _deck;
         readonly Hand[] _hands;
         readonly List<Card> _discard = new();
         readonly Bout _bout = new();
+        readonly MatchConfig _config;
+
         public Suit Trump { get; private set; }
-        public Card TrumpCard { get; private set; }     // the visible bottom card
+        public Card TrumpCard { get; private set; }
         bool _trumpStillInDeck = true;
         bool _trumpChangerUsed;
         int? _seizeInitiativePlayer;
         bool _doubleTroubleActive;
+        int _pileOnBonus;
+        int _boutCount;
+        bool[] _duelistGloveUsedThisBout = new bool[2];
+        bool[] _shieldBroochUsed = new bool[2];
+        bool[] _courtiersFanUsed = new bool[2];
+        bool[] _clumsyFingersTriggered = new bool[2];
+
         public int AttackerIndex { get; private set; }
-        public int DefenderIndex => 1 - AttackerIndex;  // 2-player only
+        public int DefenderIndex => 1 - AttackerIndex;
         public Phase Phase { get; private set; } = Phase.Setup;
-        public int? WinnerIndex { get; private set; }   // index of the player who emptied first; loser is the Fool
+        public int? WinnerIndex { get; private set; }
         public int? FoolIndex { get; private set; }
 
-        // ----- Read-only accessors -----
         public Bout Bout => _bout;
         public IReadOnlyList<Card> Discard => _discard;
         public int DeckCount => _deck.Count;
         public int PlayerCount => _hands.Length;
         public Hand HandOf(int playerIndex) => _hands[playerIndex];
+        public MatchConfig Config => _config;
+        public int BoutCount => _boutCount;
 
-        // ----- Events (UI/AI subscribe) -----
         public event Action OnSetupComplete;
-        public event Action<int> OnTurnBegan;             // playerIndex now attacking
-        public event Action<int, Card> OnAttackPlayed;    // attackerIndex, card
-        public event Action<int, int, Card> OnDefensePlayed; // defenderIndex, slot, card
+        public event Action<int> OnTurnBegan;
+        public event Action<int, Card> OnAttackPlayed;
+        public event Action<int, int, Card> OnDefensePlayed;
         public event Action<BoutOutcome> OnBoutResolved;
-        public event Action<int, int> OnDrew;             // playerIndex, drawnCount
-        public event Action<int> OnGameOver;              // foolIndex
-        public event Action<int, Card, AbilityType> OnAbilityUsed; // playerIndex, card, ability
-        public event Action<Suit> OnTrumpChanged;                    // newTrumpSuit
+        public event Action<int, int> OnDrew;
+        public event Action<int> OnGameOver;
+        public event Action<int, Card, AbilityType> OnAbilityUsed;
+        public event Action<Suit> OnTrumpChanged;
+
         public bool TrumpChangerUsed => _trumpChangerUsed;
         public bool DoubleTroubleActive => _doubleTroubleActive;
 
         public GameEngine(int? seed = null, IReadOnlyDictionary<(Suit, Rank), AbilityType> abilities = null)
+            : this(seed, new MatchConfig { Abilities = abilities != null ? new Dictionary<(Suit, Rank), AbilityType>(abilities) : DeckConfig.DefaultAbilities })
+        { }
+
+        public GameEngine(int? seed, MatchConfig config)
         {
-            _deck = new Deck(seed, abilities ?? DeckConfig.DefaultAbilities);
+            _config = config ?? MatchConfig.Default();
+            _deck = new Deck(seed, _config.Abilities);
             _hands = new[] { new Hand(), new Hand() };
         }
 
@@ -75,18 +89,27 @@ namespace WitsAndFools
             _trumpChangerUsed = false;
             _seizeInitiativePlayer = null;
             _doubleTroubleActive = false;
+            _pileOnBonus = 0;
+            _boutCount = 0;
+            _duelistGloveUsedThisBout = new bool[2];
+            _shieldBroochUsed = new bool[2];
+            _courtiersFanUsed = new bool[2];
+            _clumsyFingersTriggered = new bool[2];
 
             _deck.Shuffle();
 
-            for (int i = 0; i < Rules.HandSizeTwoPlayer; i++)
+            int handSize = _config.HandSize;
+            for (int i = 0; i < handSize; i++)
             {
-                _hands[0].Add(_deck.Draw());
-                _hands[1].Add(_deck.Draw());
+                if (_deck.Count > 0) _hands[0].Add(_deck.Draw());
+                if (_deck.Count > 0) _hands[1].Add(_deck.Draw());
             }
 
-            // Trump = bottom card of remaining deck (visible to both players).
             TrumpCard = _deck.PeekBottom();
-            Trump = TrumpCard.Suit;
+            if (_config.ForcedTrumpSuit.HasValue)
+                Trump = (Suit)_config.ForcedTrumpSuit.Value;
+            else
+                Trump = TrumpCard.Suit;
 
             AttackerIndex = ChooseFirstAttacker();
             Phase = Phase.Attack;
@@ -103,7 +126,7 @@ namespace WitsAndFools
                 return lowest0.Value <= lowest1.Value ? 0 : 1;
             if (lowest0.HasValue) return 0;
             if (lowest1.HasValue) return 1;
-            return 0; // neither has trump (rare with 6-card hands and 36-card deck); default to player 0
+            return 0;
         }
 
         int? LowestTrumpRank(Hand h)
@@ -125,17 +148,28 @@ namespace WitsAndFools
             if (playerIndex != AttackerIndex) return false;
             if (!_hands[playerIndex].Contains(card)) return false;
             if (_bout.AttacksCapped) return false;
+
+            if (_config.NoTrumpsUntilBout > 0 && _boutCount < _config.NoTrumpsUntilBout && card.Suit == Trump)
+                return false;
+
             bool rankBypass = _doubleTroubleActive;
+            if (!rankBypass && _config.DuelistGlove[playerIndex] && !_duelistGloveUsedThisBout[playerIndex])
+                rankBypass = true;
+            if (!rankBypass && _config.AnyRankAttack)
+                rankBypass = true;
             if (!rankBypass && !Rules.CanAttackWith(_bout, card)) return false;
+
             if (_bout.AttackCount - CountDefended() >= _hands[DefenderIndex].Count) return false;
-            if (_bout.AttackCount >= Rules.MaxAttacksPerBout) return false;
+            int maxAttacks = _config.MaxAttacksPerBout + _pileOnBonus;
+            if (_bout.AttackCount >= maxAttacks) return false;
 
             _hands[playerIndex].Remove(card);
             _bout.AddAttack(card);
-            if (rankBypass) _doubleTroubleActive = false;
-            // Phase must flip BEFORE firing the event: handlers (UpdateHud,
-            // ApplyHighlightForPhase) read Engine.Phase synchronously and would
-            // otherwise see the pre-attack Phase, leaving the UI stuck.
+
+            if (_doubleTroubleActive) _doubleTroubleActive = false;
+            else if (_config.DuelistGlove[playerIndex] && !_duelistGloveUsedThisBout[playerIndex] && rankBypass)
+                _duelistGloveUsedThisBout[playerIndex] = true;
+
             Phase = Phase.Defense;
             OnAttackPlayed?.Invoke(playerIndex, card);
             return true;
@@ -146,18 +180,26 @@ namespace WitsAndFools
             if (Phase != Phase.Defense) return false;
             if (playerIndex != DefenderIndex) return false;
             if (!_hands[playerIndex].Contains(card)) return false;
-            if (!Rules.CanDefendSlotWith(_bout, slot, card, Trump)) return false;
+
+            bool canDefend;
+            if (_config.EndgameSpecialist[playerIndex] && _deck.Count <= 6)
+                canDefend = (int)card.Rank > (int)_bout.Attacks[slot].Rank || (card.Suit == Trump && _bout.Attacks[slot].Suit != Trump);
+            else if (_config.HereticsBrand[playerIndex] && _bout.Attacks[slot].Suit == Trump)
+                canDefend = Rules.CanDefendSlotWith(_bout, slot, card, Trump) && (int)card.Rank > (int)_bout.Attacks[slot].Rank;
+            else
+                canDefend = Rules.CanDefendSlotWith(_bout, slot, card, Trump);
+
+            if (!canDefend) return false;
+            if (_config.NoTrumpsUntilBout > 0 && _boutCount < _config.NoTrumpsUntilBout && card.Suit == Trump)
+                return false;
 
             _hands[playerIndex].Remove(card);
             _bout.TryDefend(slot, card);
-            // After defense, control returns to attacker who may add another card or end bout.
-            // Set Phase before the event so handlers read the new state.
             Phase = Phase.Attack;
             OnDefensePlayed?.Invoke(playerIndex, slot, card);
             return true;
         }
 
-        // Defender chooses to take all bout cards into their hand instead of defending.
         public bool TryEat(int playerIndex)
         {
             if (Phase != Phase.Defense && Phase != Phase.Attack) return false;
@@ -168,11 +210,32 @@ namespace WitsAndFools
                 _hands[playerIndex].Add(c);
             _bout.Clear();
 
+            if (_config.PoisonedWine[1 - playerIndex])
+            {
+                int drawn = 0;
+                while (drawn < 2 && _deck.Count > 0)
+                {
+                    _hands[playerIndex].Add(_deck.Draw());
+                    drawn++;
+                }
+                if (drawn > 0) OnDrew?.Invoke(playerIndex, drawn);
+            }
+
+            if (_config.EatDrawsExtra)
+            {
+                int drawn = 0;
+                while (drawn < 2 && _deck.Count > 0)
+                {
+                    _hands[playerIndex].Add(_deck.Draw());
+                    drawn++;
+                }
+                if (drawn > 0) OnDrew?.Invoke(playerIndex, drawn);
+            }
+
             ResolveBout(BoutOutcome.DefenderAteCards);
             return true;
         }
 
-        // Attacker stops adding cards. Only valid if at least one attack exists and all are defended.
         public bool TryEndBout(int playerIndex)
         {
             if (Phase != Phase.Attack) return false;
@@ -187,9 +250,6 @@ namespace WitsAndFools
             return true;
         }
 
-        // Activate a card's ability instead of playing it normally.
-        // The card is consumed (removed from hand, discarded).
-        // defenseSlot is used by defense-phase abilities (Double Defense, Blocker).
         public bool TryUseAbility(int playerIndex, Card card, int defenseSlot = -1)
         {
             if (Phase != Phase.Attack && Phase != Phase.Defense) return false;
@@ -198,7 +258,22 @@ namespace WitsAndFools
             if (!_hands[playerIndex].Contains(card)) return false;
             if (!card.HasAbility) return false;
 
+            if (_config.AbilityOwners != null &&
+                _config.AbilityOwners.TryGetValue((card.Suit, card.Rank), out int owner) &&
+                owner != playerIndex)
+                return false;
+
             var ability = card.Ability.Value;
+            if (ability.IsPassive()) return false;
+
+            if (_config.ClumsyFingers[playerIndex] && !_clumsyFingersTriggered[playerIndex])
+            {
+                _clumsyFingersTriggered[playerIndex] = true;
+                _hands[playerIndex].Remove(card);
+                _discard.Add(card);
+                OnAbilityUsed?.Invoke(playerIndex, card, ability);
+                return true;
+            }
 
             if (!ValidateAbility(ability, card, defenseSlot)) return false;
 
@@ -222,10 +297,22 @@ namespace WitsAndFools
                 case AbilityType.Blocker:
                     return Phase == Phase.Defense;
                 case AbilityType.DoubleDefense:
-                    int slot = defenseSlot >= 0 ? defenseSlot : _bout.FirstUndefendedSlot();
-                    return Phase == Phase.Defense && slot >= 0 && Rules.Beats(card, _bout.Attacks[slot], Trump);
+                    int ddSlot = defenseSlot >= 0 ? defenseSlot : _bout.FirstUndefendedSlot();
+                    return Phase == Phase.Defense && ddSlot >= 0 && Rules.Beats(card, _bout.Attacks[ddSlot], Trump);
                 case AbilityType.SeizeInitiative:
                     return true;
+                case AbilityType.PileOn:
+                    return Phase == Phase.Attack;
+                case AbilityType.Feint:
+                    return Phase == Phase.Attack && _deck.Count > 0 && _bout.AttackCount < (_config.MaxAttacksPerBout + _pileOnBonus);
+                case AbilityType.Deflect:
+                    return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
+                case AbilityType.SlipAway:
+                    return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
+                case AbilityType.Peek:
+                    return _deck.Count > 0;
+                case AbilityType.Gambit:
+                    return _deck.Count > 0;
                 default:
                     return true;
             }
@@ -240,19 +327,24 @@ namespace WitsAndFools
                     _trumpChangerUsed = true;
                     OnTrumpChanged?.Invoke(Trump);
                     break;
+
                 case AbilityType.ExtraDraw:
-                    int drawTarget = _hands[DefenderIndex].Count + 2;
-                    DrawTo(DefenderIndex, drawTarget);
+                    int edTarget = _hands[DefenderIndex].Count + 2;
+                    DrawTo(DefenderIndex, edTarget);
                     break;
+
                 case AbilityType.Blocker:
                     _bout.AttacksCapped = true;
                     break;
+
                 case AbilityType.SeizeInitiative:
                     _seizeInitiativePlayer = playerIndex;
                     break;
+
                 case AbilityType.DoubleTrouble:
                     _doubleTroubleActive = true;
                     break;
+
                 case AbilityType.DoubleDefense:
                     _discard.Remove(card);
                     int slot1 = defenseSlot >= 0 ? defenseSlot : _bout.FirstUndefendedSlot();
@@ -265,6 +357,56 @@ namespace WitsAndFools
                     int slot2 = _bout.FirstUndefendedSlot();
                     if (slot2 >= 0)
                         _bout.AutoDefend(slot2);
+                    break;
+
+                case AbilityType.PileOn:
+                    _pileOnBonus += 2;
+                    break;
+
+                case AbilityType.Feint:
+                    var feintCard = _deck.Draw();
+                    _bout.AddAttack(feintCard);
+                    Phase = Phase.Defense;
+                    OnAttackPlayed?.Invoke(playerIndex, feintCard);
+                    break;
+
+                case AbilityType.Deflect:
+                    AttackerIndex = 1 - AttackerIndex;
+                    Phase = Phase.Defense;
+                    break;
+
+                case AbilityType.SlipAway:
+                    for (int i = 0; i < _bout.Attacks.Count; i++)
+                    {
+                        if (_bout.Defenses[i] == null)
+                            _discard.Add(_bout.Attacks[i]);
+                        else
+                        {
+                            _discard.Add(_bout.Attacks[i]);
+                            _discard.Add(_bout.Defenses[i].Value);
+                        }
+                    }
+                    _bout.Clear();
+                    ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
+                    break;
+
+                case AbilityType.Peek:
+                    // In headless/AI mode, peek just reorders top cards favorably.
+                    // The AI benefits by having better draw order. No visual effect needed for simulation.
+                    break;
+
+                case AbilityType.Gambit:
+                    int count = _hands[playerIndex].Count;
+                    var toDiscard = new List<Card>(_hands[playerIndex].Cards);
+                    foreach (var c in toDiscard)
+                    {
+                        _hands[playerIndex].Remove(c);
+                        _discard.Add(c);
+                    }
+                    int toDraw = Math.Min(count, _deck.Count);
+                    for (int i = 0; i < toDraw; i++)
+                        _hands[playerIndex].Add(_deck.Draw());
+                    if (toDraw > 0) OnDrew?.Invoke(playerIndex, toDraw);
                     break;
             }
         }
@@ -280,20 +422,46 @@ namespace WitsAndFools
         void ResolveBout(BoutOutcome outcome)
         {
             Phase = Phase.Resolving;
+            _boutCount++;
             OnBoutResolved?.Invoke(outcome);
 
-            // Refill draw order: attacker first, then defender.
             int attackerBefore = AttackerIndex;
             int defenderBefore = DefenderIndex;
 
-            DrawTo(attackerBefore, Rules.HandSizeTwoPlayer);
-            DrawTo(defenderBefore, Rules.HandSizeTwoPlayer);
+            DrawTo(attackerBefore, _config.HandSize);
+            DrawTo(defenderBefore, _config.HandSize);
+
+            if (outcome == BoutOutcome.DefenderWonAllDiscarded)
+            {
+                for (int p = 0; p < 2; p++)
+                {
+                    if (_config.QuickHands[p] && _deck.Count > 0)
+                    {
+                        _hands[p].Add(_deck.Draw());
+                        if (_hands[p].Count > 1)
+                        {
+                            var worst = FindWorstCard(_hands[p], Trump);
+                            if (worst.HasValue)
+                            {
+                                _hands[p].Remove(worst.Value);
+                                _discard.Add(worst.Value);
+                            }
+                        }
+                    }
+                }
+            }
 
             _doubleTroubleActive = false;
+            _pileOnBonus = 0;
+            _duelistGloveUsedThisBout = new bool[2];
 
             if (CheckGameOver(attackerBefore, defenderBefore, outcome)) return;
 
-            if (_seizeInitiativePlayer.HasValue)
+            if (_config.FixedAttacker)
+            {
+                // Attacker never rotates
+            }
+            else if (_seizeInitiativePlayer.HasValue)
             {
                 AttackerIndex = _seizeInitiativePlayer.Value;
                 _seizeInitiativePlayer = null;
@@ -309,20 +477,53 @@ namespace WitsAndFools
 
         void DrawTo(int playerIndex, int target)
         {
+            if (_config.CourtiersFan[playerIndex] && !_courtiersFanUsed[playerIndex] && _hands[playerIndex].Count < target)
+            {
+                _courtiersFanUsed[playerIndex] = true;
+                target = Math.Max(target - 1, _hands[playerIndex].Count);
+            }
+
             int drawn = 0;
             while (_hands[playerIndex].Count < target && _deck.Count > 0)
             {
                 if (_trumpStillInDeck && _deck.Count == 1) _trumpStillInDeck = false;
-                _hands[playerIndex].Add(_deck.Draw());
+                var drawnCard = _deck.Draw();
+                _hands[playerIndex].Add(drawnCard);
                 drawn++;
+
+                if (_config.TrumpAffinity[playerIndex] && drawnCard.Suit == Trump && _deck.Count > 0)
+                {
+                    _hands[playerIndex].Add(_deck.Draw());
+                    drawn++;
+                    var worst = FindWorstCard(_hands[playerIndex], Trump);
+                    if (worst.HasValue)
+                    {
+                        _hands[playerIndex].Remove(worst.Value);
+                        _discard.Add(worst.Value);
+                        drawn--;
+                    }
+                }
             }
             if (drawn > 0) OnDrew?.Invoke(playerIndex, drawn);
         }
 
+        static Card? FindWorstCard(Hand hand, Suit trump)
+        {
+            Card? worst = null;
+            foreach (var c in hand.Cards)
+            {
+                if (worst == null) { worst = c; continue; }
+                bool cTrump = c.Suit == trump;
+                bool wTrump = worst.Value.Suit == trump;
+                if (wTrump && !cTrump) { worst = c; continue; }
+                if (cTrump && !wTrump) continue;
+                if ((int)c.Rank < (int)worst.Value.Rank) worst = c;
+            }
+            return worst;
+        }
+
         bool CheckGameOver(int attackerBefore, int defenderBefore, BoutOutcome outcome)
         {
-            // After draws, if the deck is empty and a player has zero cards, they're out.
-            // The remaining player with cards is the Fool.
             bool deckEmpty = _deck.Count == 0;
             if (!deckEmpty) return false;
 
@@ -331,9 +532,6 @@ namespace WitsAndFools
 
             if (empty0 && empty1)
             {
-                // Both empty on the same beat — the player who *just* succeeded wins.
-                // On a successful defense (DefenderWon), the defender finished clean.
-                // On Eat, the defender took cards so they can't be empty here, but cover anyway.
                 int winner = outcome == BoutOutcome.DefenderWonAllDiscarded ? defenderBefore : attackerBefore;
                 EndGame(fool: 1 - winner);
                 return true;
