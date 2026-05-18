@@ -16,10 +16,10 @@ namespace WitsAndFools
         {
             float baseRandom = actIndex switch
             {
-                0 => 0.25f,
-                1 => 0.15f,
-                2 => 0.08f,
-                3 => 0.03f,
+                0 => 0.35f,
+                1 => 0.20f,
+                2 => 0.10f,
+                3 => 0.04f,
                 _ => 0f
             };
             ai.RandomMoveChance = baseRandom;

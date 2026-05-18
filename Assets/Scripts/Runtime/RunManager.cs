@@ -1310,9 +1310,9 @@ namespace WitsAndFools
 
         int CalculateFlorins(int act, MapNodeType nodeType)
         {
-            int baseAmount = 8 + act * 2;
-            if (nodeType == MapNodeType.EliteMatch) baseAmount += 4;
-            if (nodeType == MapNodeType.BossMatch) baseAmount += 8;
+            int baseAmount = 10 + act * 2;
+            if (nodeType == MapNodeType.EliteMatch) baseAmount += 5;
+            if (nodeType == MapNodeType.BossMatch) baseAmount += 10;
             return baseAmount;
         }
     }
