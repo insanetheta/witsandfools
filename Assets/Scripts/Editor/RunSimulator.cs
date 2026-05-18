@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
+using Random = System.Random;
 
 namespace WitsAndFools.EditorTools
 {
