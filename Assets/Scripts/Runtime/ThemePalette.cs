@@ -22,7 +22,7 @@ namespace WitsAndFools
         // Match table flat fills (Act 1 defaults — replaced by per-act sprites)
         public static readonly Color TableBg         = new Color(0.10f, 0.18f, 0.10f);
         public static readonly Color TableFelt       = new Color(0.13f, 0.30f, 0.18f);
-        public static readonly Color TableFeltInner  = new Color(0.10f, 0.24f, 0.14f);
+        public static readonly Color TableFeltInner  = new Color(0.10f, 0.24f, 0.14f, 0.3f);
         public static readonly Color DeckSlotDark    = new Color(0.20f, 0.06f, 0.06f);
 
         // Card colors
@@ -113,11 +113,11 @@ namespace WitsAndFools
         // Per-act table felt tint overlays
         public static readonly Color[] ActFeltTint =
         {
-            new Color(0.13f, 0.30f, 0.18f, 0.7f), // Act 1 - green felt
-            new Color(0.20f, 0.28f, 0.16f, 0.7f), // Act 2 - warm green
-            new Color(0.12f, 0.22f, 0.18f, 0.7f), // Act 3 - cool green
-            new Color(0.15f, 0.14f, 0.22f, 0.7f), // Act 4 - purple tint
-            new Color(0.16f, 0.08f, 0.20f, 0.5f), // Act 5 - rich purple velvet
+            new Color(0.13f, 0.30f, 0.18f, 0.35f), // Act 1 - green felt
+            new Color(0.20f, 0.28f, 0.16f, 0.35f), // Act 2 - warm green
+            new Color(0.12f, 0.22f, 0.18f, 0.35f), // Act 3 - cool green
+            new Color(0.15f, 0.14f, 0.22f, 0.35f), // Act 4 - purple tint
+            new Color(0.16f, 0.08f, 0.20f, 0.25f), // Act 5 - rich purple velvet
         };
 
         // Per-act frame accent

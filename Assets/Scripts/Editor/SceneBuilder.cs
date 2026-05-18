@@ -78,62 +78,110 @@ namespace WitsAndFools.EditorTools
             tableBgImg.preserveAspect = false;
             FillParent(tableBg);
 
-            // ----- Felt overlay (tinted per-act) -----
+            // ----- Felt overlay (tinted per-act, semi-transparent) -----
             var felt = NewChild(canvasRT, "TableFelt");
             var feltImg = felt.gameObject.AddComponent<Image>();
             feltImg.color = ThemePalette.ActFeltTint[0];
             feltImg.raycastTarget = false;
             FillParent(felt);
 
-            // Decorative inner frame
+            // Thin decorative border frame (3px edges at 12px inset)
             var frame = NewChild(canvasRT, "TableFrame");
-            var frameImg = frame.gameObject.AddComponent<Image>();
-            frameImg.color = ThemePalette.ActFrameColor[0];
-            frameImg.raycastTarget = false;
             frame.anchorMin = new Vector2(0, 0);
             frame.anchorMax = new Vector2(1, 1);
-            frame.offsetMin = new Vector2(20, 20);
-            frame.offsetMax = new Vector2(-20, -20);
-            // Hollow it out by adding a slightly smaller felt panel on top
-            var inner = NewChild(canvasRT, "TableInner");
-            var innerImg = inner.gameObject.AddComponent<Image>();
-            innerImg.color = ThemePalette.TableFeltInner;
-            innerImg.raycastTarget = false;
-            inner.anchorMin = new Vector2(0, 0);
-            inner.anchorMax = new Vector2(1, 1);
-            inner.offsetMin = new Vector2(36, 36);
-            inner.offsetMax = new Vector2(-36, -36);
+            frame.offsetMin = new Vector2(12, 12);
+            frame.offsetMax = new Vector2(-12, -12);
+            var frameColor = new Color(
+                ThemePalette.ActFrameColor[0].r,
+                ThemePalette.ActFrameColor[0].g,
+                ThemePalette.ActFrameColor[0].b, 0.6f);
+            foreach (var (aMin, aMax, sd) in new[] {
+                (new Vector2(0,1), new Vector2(1,1), new Vector2(0,3)),   // top
+                (new Vector2(0,0), new Vector2(1,0), new Vector2(0,3)),   // bottom
+                (new Vector2(0,0), new Vector2(0,1), new Vector2(3,0)),   // left
+                (new Vector2(1,0), new Vector2(1,1), new Vector2(3,0)),   // right
+            })
+            {
+                var edge = NewChild(frame, "Edge");
+                var edgeImg = edge.gameObject.AddComponent<Image>();
+                edgeImg.color = frameColor;
+                edgeImg.raycastTarget = false;
+                edge.anchorMin = aMin;
+                edge.anchorMax = aMax;
+                edge.sizeDelta = sd;
+                edge.pivot = new Vector2(0.5f, 0.5f);
+            }
+            // Store first edge image for per-act color updates
+            var frameEdgeImg = frame.GetChild(0).GetComponent<Image>();
 
             // ----- HUD bar (top) -----
             var hudBar = NewChild(canvasRT, "HudBar");
             var hudBarImg = hudBar.gameObject.AddComponent<Image>();
-            hudBarImg.color = ThemePalette.HudOverlay;
+            hudBarImg.color = new Color(0, 0, 0, 0.55f);
             hudBar.anchorMin = new Vector2(0, 1);
             hudBar.anchorMax = new Vector2(1, 1);
             hudBar.pivot = new Vector2(0.5f, 1);
-            hudBar.sizeDelta = new Vector2(0, 70);
-            hudBar.anchoredPosition = new Vector2(0, -10);
+            hudBar.sizeDelta = new Vector2(0, 42);
+            hudBar.anchoredPosition = Vector2.zero;
 
             var turnLabel = AddText(hudBar, "TurnLabel", "—", anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineLeft, fontSize: 28, color: Color.white);
-            turnLabel.margin = new Vector4(20, 0, 0, 0);
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineLeft, fontSize: 16, color: Color.white);
+            turnLabel.margin = new Vector4(16, 0, 0, 0);
 
             var trumpLabel = AddText(hudBar, "TrumpLabel", "Trump: ♥", anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(0.7f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center, fontSize: 28, color: Color.white,
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center, fontSize: 16, color: Color.white,
                 font: MonoFont);
 
             var deckLabel = AddText(hudBar, "DeckCountLabel", "Deck: 0", anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineRight, fontSize: 28, color: Color.white,
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineRight, fontSize: 16, color: Color.white,
                 font: MonoFont);
-            deckLabel.margin = new Vector4(0, 0, 20, 0);
+            deckLabel.margin = new Vector4(0, 0, 16, 0);
+
+            // ----- Opponent Nameplate (top-left, below HUD bar) -----
+            var nameplate = NewChild(canvasRT, "OpponentNameplate");
+            nameplate.anchorMin = new Vector2(0, 1);
+            nameplate.anchorMax = new Vector2(0, 1);
+            nameplate.pivot = new Vector2(0, 1);
+            nameplate.sizeDelta = new Vector2(220, 48);
+            nameplate.anchoredPosition = new Vector2(16, -48);
+            var nameplateBg = nameplate.gameObject.AddComponent<Image>();
+            nameplateBg.color = new Color(0, 0, 0, 0.5f);
+            nameplateBg.raycastTarget = false;
+
+            var portraitRT = NewChild(nameplate, "Portrait");
+            portraitRT.anchorMin = new Vector2(0, 0);
+            portraitRT.anchorMax = new Vector2(0, 1);
+            portraitRT.pivot = new Vector2(0, 0.5f);
+            portraitRT.sizeDelta = new Vector2(40, 40);
+            portraitRT.anchoredPosition = new Vector2(4, 0);
+            var portraitImg = portraitRT.gameObject.AddComponent<Image>();
+            portraitImg.color = ThemePalette.WarmSlate;
+            portraitImg.preserveAspect = true;
+            portraitImg.raycastTarget = false;
+
+            var oppNameLabel = AddText(nameplate, "OpponentName", "Opponent",
+                anchorMin: new Vector2(0, 0.5f), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(0, 1), alignment: TextAlignmentOptions.MidlineLeft,
+                fontSize: 14, color: ThemePalette.Parchment, font: HeadingFont);
+            var oppNameRT = (RectTransform)oppNameLabel.transform;
+            oppNameRT.offsetMin = new Vector2(50, 0);
+            oppNameRT.offsetMax = new Vector2(-4, -2);
+
+            var oppArchLabel = AddText(nameplate, "OpponentArchetype", "The Fox",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(1, 0.5f),
+                pivot: new Vector2(0, 0), alignment: TextAlignmentOptions.MidlineLeft,
+                fontSize: 11, color: ThemePalette.DustyTan);
+            var oppArchRT = (RectTransform)oppArchLabel.transform;
+            oppArchRT.offsetMin = new Vector2(50, 2);
+            oppArchRT.offsetMax = new Vector2(-4, 0);
 
             // ----- End-bout button (bottom-right) -----
-            var endBoutBtn = AddButton(canvasRT, "EndBoutButton", "End bout");
+            var endBoutBtn = AddButton(canvasRT, "EndBoutButton", "End Bout");
             endBoutBtn.anchorMin = new Vector2(1, 0);
             endBoutBtn.anchorMax = new Vector2(1, 0);
             endBoutBtn.pivot = new Vector2(1, 0);
-            endBoutBtn.sizeDelta = new Vector2(220, 70);
-            endBoutBtn.anchoredPosition = new Vector2(-30, 30);
+            endBoutBtn.sizeDelta = new Vector2(140, 40);
+            endBoutBtn.anchoredPosition = new Vector2(-16, 52);
 
             // ----- Center band: deck/trump anchored to LEFT edge, discard anchored to RIGHT edge,
             // bout area in the middle. Anchoring to edges keeps everything visible at narrow aspect ratios.
@@ -142,7 +190,7 @@ namespace WitsAndFools.EditorTools
             deckSlot.anchorMax = new Vector2(0, 0.5f);
             deckSlot.pivot = new Vector2(0, 0.5f);
             deckSlot.sizeDelta = new Vector2(110, 160);
-            deckSlot.anchoredPosition = new Vector2(120, 0);
+            deckSlot.anchoredPosition = new Vector2(30, 0);
             var deckImg = deckSlot.gameObject.AddComponent<Image>();
             deckImg.color = ThemePalette.DeckSlotDark;
             // Deck "stack" visual using offset rectangles
@@ -163,6 +211,7 @@ namespace WitsAndFools.EditorTools
                 fontSize: 32, color: Color.white, font: MonoFont);
             var deckCountRT = (RectTransform)deckCountLabel.transform;
             deckCountRT.anchoredPosition = new Vector2(55, 0);
+            deckCountLabel.fontSize = 24;
             deckCountLabel.outlineWidth = 0.3f;
             deckCountLabel.outlineColor = Color.black;
 
@@ -172,7 +221,7 @@ namespace WitsAndFools.EditorTools
             trumpSlot.anchorMax = new Vector2(0, 0.5f);
             trumpSlot.pivot = new Vector2(0, 0.5f);
             trumpSlot.sizeDelta = new Vector2(160, 110);
-            trumpSlot.anchoredPosition = new Vector2(180, 0);
+            trumpSlot.anchoredPosition = new Vector2(100, 0);
 
             // Discard pile on the right edge.
             var discardSlot = NewChild(canvasRT, "DiscardSlot");
@@ -180,7 +229,7 @@ namespace WitsAndFools.EditorTools
             discardSlot.anchorMax = new Vector2(1, 0.5f);
             discardSlot.pivot = new Vector2(1, 0.5f);
             discardSlot.sizeDelta = new Vector2(110, 160);
-            discardSlot.anchoredPosition = new Vector2(-120, 0);
+            discardSlot.anchoredPosition = new Vector2(-30, 0);
             var discardImg = discardSlot.gameObject.AddComponent<Image>();
             discardImg.color = new Color(1, 1, 1, 0.05f);
             // Add a "Discard" label
@@ -202,7 +251,7 @@ namespace WitsAndFools.EditorTools
             playerHand.anchorMin = new Vector2(0.5f, 0);
             playerHand.anchorMax = new Vector2(0.5f, 0);
             playerHand.pivot = new Vector2(0.5f, 0);
-            playerHand.anchoredPosition = new Vector2(0, 130);
+            playerHand.anchoredPosition = new Vector2(0, 52);
             var playerHandLayout = playerHand.gameObject.AddComponent<HandLayout>();
             playerHandLayout.FaceUp = true;
             playerHandLayout.ReverseOrder = false;
@@ -212,7 +261,7 @@ namespace WitsAndFools.EditorTools
             opponentHand.anchorMin = new Vector2(0.5f, 1);
             opponentHand.anchorMax = new Vector2(0.5f, 1);
             opponentHand.pivot = new Vector2(0.5f, 1);
-            opponentHand.anchoredPosition = new Vector2(0, -100);
+            opponentHand.anchoredPosition = new Vector2(0, -50);
             var opponentHandLayout = opponentHand.gameObject.AddComponent<HandLayout>();
             opponentHandLayout.FaceUp = false;
             opponentHandLayout.ReverseOrder = true;
@@ -236,6 +285,9 @@ namespace WitsAndFools.EditorTools
             hud.DeckCountLabel = deckLabel;
             hud.TrumpLabel = trumpLabel;
             hud.EndBoutButton = endBoutBtn.GetComponent<Button>();
+            hud.OpponentPortrait = portraitImg;
+            hud.OpponentNameLabel = oppNameLabel;
+            hud.OpponentArchetypeLabel = oppArchLabel;
 
             // ----- Game-over panel -----
             var goPanel = NewChild(canvasRT, "GameOverPanel");
@@ -290,12 +342,12 @@ namespace WitsAndFools.EditorTools
             acPanel.gameObject.SetActive(false);
 
             // ----- Auto-play button (bottom-left) -----
-            var autoPlayBtn = AddButton(canvasRT, "AutoPlayButton", "Auto: OFF");
+            var autoPlayBtn = AddButton(canvasRT, "AutoPlayButton", "Auto: OFF", secondary: true);
             autoPlayBtn.anchorMin = new Vector2(0, 0);
             autoPlayBtn.anchorMax = new Vector2(0, 0);
             autoPlayBtn.pivot = new Vector2(0, 0);
-            autoPlayBtn.sizeDelta = new Vector2(180, 55);
-            autoPlayBtn.anchoredPosition = new Vector2(30, 30);
+            autoPlayBtn.sizeDelta = new Vector2(120, 36);
+            autoPlayBtn.anchoredPosition = new Vector2(16, 52);
             hud.AutoPlayButton = autoPlayBtn.GetComponent<Button>();
 
             // ----- Tooltip label (bottom-left, hidden by default) -----
@@ -306,7 +358,7 @@ namespace WitsAndFools.EditorTools
                 color: new Color(1, 1, 1, 0.85f));
             var tooltipRT = (RectTransform)tooltipLabel.transform;
             tooltipRT.sizeDelta = new Vector2(0, 50);
-            tooltipRT.anchoredPosition = new Vector2(30, 95);
+            tooltipRT.anchoredPosition = new Vector2(16, 52);
             tooltipLabel.enableWordWrapping = true;
             tooltipLabel.gameObject.SetActive(false);
             hud.TooltipLabel = tooltipLabel;
@@ -319,7 +371,7 @@ namespace WitsAndFools.EditorTools
                 color: ThemePalette.Gold, font: MonoFont);
             var deckTopRT = (RectTransform)deckTopLabel.transform;
             deckTopRT.sizeDelta = new Vector2(0, 40);
-            deckTopRT.anchoredPosition = new Vector2(-20, 95);
+            deckTopRT.anchoredPosition = new Vector2(-16, 52);
             deckTopLabel.gameObject.SetActive(false);
             hud.DeckTopLabel = deckTopLabel;
 
@@ -331,7 +383,7 @@ namespace WitsAndFools.EditorTools
                 color: ThemePalette.Amber, font: MonoFont);
             var infoRT = (RectTransform)infoLabel.transform;
             infoRT.sizeDelta = new Vector2(0, 35);
-            infoRT.anchoredPosition = new Vector2(-20, -70);
+            infoRT.anchoredPosition = new Vector2(-16, -48);
             infoLabel.enableWordWrapping = true;
             infoLabel.gameObject.SetActive(false);
             hud.InfoLabel = infoLabel;
@@ -352,8 +404,9 @@ namespace WitsAndFools.EditorTools
             tableBg.SetParent(matchPanel, true);
             felt.SetParent(matchPanel, true);
             frame.SetParent(matchPanel, true);
-            inner.SetParent(matchPanel, true);
+            vignette.SetParent(matchPanel, true); // behind HUD/cards so it doesn't obscure UI
             hudBar.SetParent(matchPanel, true);
+            nameplate.SetParent(matchPanel, true);
             endBoutBtn.SetParent(matchPanel, true);
             deckSlot.SetParent(matchPanel, true);
             trumpSlot.SetParent(matchPanel, true);
@@ -367,7 +420,6 @@ namespace WitsAndFools.EditorTools
             ((RectTransform)tooltipLabel.transform).SetParent(matchPanel, true);
             ((RectTransform)deckTopLabel.transform).SetParent(matchPanel, true);
             ((RectTransform)infoLabel.transform).SetParent(matchPanel, true);
-            vignette.SetParent(matchPanel, true);
             matchPanel.gameObject.SetActive(false);
 
             // ----- Map Panel -----
@@ -595,30 +647,30 @@ namespace WitsAndFools.EditorTools
             runHudPanel.anchorMin = new Vector2(0, 0);
             runHudPanel.anchorMax = new Vector2(1, 0);
             runHudPanel.pivot = new Vector2(0.5f, 0);
-            runHudPanel.sizeDelta = new Vector2(0, 50);
+            runHudPanel.sizeDelta = new Vector2(0, 36);
             var runHudBg = runHudPanel.gameObject.AddComponent<Image>();
-            runHudBg.color = ThemePalette.RunHudOverlay;
+            runHudBg.color = new Color(0, 0, 0, 0.65f);
 
             var prestigeLabel = AddText(runHudPanel, "PrestigeLabel", "Prestige: ♥♥♥♥",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.25f, 1),
                 pivot: new Vector2(0, 0.5f), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 22, color: ThemePalette.PrestigeRed, font: MonoFont);
+                fontSize: 13, color: ThemePalette.PrestigeRed, font: MonoFont);
             ((RectTransform)prestigeLabel.transform).offsetMin = new Vector2(16, 0);
 
             var florinsLabel = AddText(runHudPanel, "FlorinsLabel", "Florins: 0",
                 anchorMin: new Vector2(0.25f, 0), anchorMax: new Vector2(0.5f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 22, color: ThemePalette.Gold, font: MonoFont);
+                fontSize: 13, color: ThemePalette.Gold, font: MonoFont);
 
             var actLabel = AddText(runHudPanel, "ActLabel", "Act 1 of 5",
                 anchorMin: new Vector2(0.5f, 0), anchorMax: new Vector2(0.75f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 22, color: Color.white);
+                fontSize: 13, color: Color.white);
 
             var abilitiesLabel = AddText(runHudPanel, "AbilitiesLabel", "Abilities: 4/5",
                 anchorMin: new Vector2(0.75f, 0), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(1, 0.5f), alignment: TextAlignmentOptions.MidlineRight,
-                fontSize: 22, color: ThemePalette.AbilityBlue, font: MonoFont);
+                fontSize: 13, color: ThemePalette.AbilityBlue, font: MonoFont);
             ((RectTransform)abilitiesLabel.transform).offsetMax = new Vector2(-16, 0);
 
             runHudPanel.gameObject.SetActive(false);
@@ -674,7 +726,7 @@ namespace WitsAndFools.EditorTools
             // Match table theme
             rm.TableBackgroundImage = tableBgImg;
             rm.TableFeltImage = feltImg;
-            rm.TableFrameImage = frameImg;
+            rm.TableFrameImage = frameEdgeImg;
             rm.VignetteImage = vignetteImg;
             rm.VignetteSprite = vignetteSprite;
 
@@ -700,6 +752,22 @@ namespace WitsAndFools.EditorTools
                 AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Backgrounds/bg_salon.png"),
             };
             rm.VenueBackgroundSprites = venueBackgrounds;
+
+            // Load opponent portrait sprites
+            var allOpponents = new System.Collections.Generic.List<OpponentProfile>();
+            for (int act = 0; act < 5; act++)
+                allOpponents.AddRange(OpponentRoster.AllForAct(act));
+            var portraitNames = new System.Collections.Generic.List<string>();
+            var portraitSprites = new System.Collections.Generic.List<Sprite>();
+            foreach (var opp in allOpponents)
+            {
+                var slug = opp.Name.ToLower().Replace(" ", "_");
+                var sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Art/Portraits/portrait_{slug}.png");
+                portraitNames.Add(opp.Name);
+                portraitSprites.Add(sprite);
+            }
+            rm.PortraitNames = portraitNames.ToArray();
+            rm.PortraitSprites = portraitSprites.ToArray();
 
             // Save scene
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -762,16 +830,16 @@ namespace WitsAndFools.EditorTools
             return t;
         }
 
-        static RectTransform AddButton(RectTransform parent, string name, string label)
+        static RectTransform AddButton(RectTransform parent, string name, string label, bool secondary = false)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
             go.transform.SetParent(parent, false);
             var rt = (RectTransform)go.transform;
             var img = go.GetComponent<Image>();
-            img.color = ThemePalette.ButtonGoldBg;
+            img.color = secondary ? ThemePalette.DarkSlate : ThemePalette.ButtonGoldBg;
             var btn = go.GetComponent<Button>();
             var colors = btn.colors;
-            colors.highlightedColor = ThemePalette.ButtonGoldHover;
+            colors.highlightedColor = secondary ? ThemePalette.WarmSlate : ThemePalette.ButtonGoldHover;
             colors.disabledColor = ThemePalette.ButtonGoldDisabled;
             btn.colors = colors;
 
@@ -784,8 +852,8 @@ namespace WitsAndFools.EditorTools
             if (btnFont) lbl.font = btnFont;
             lbl.text = label;
             lbl.alignment = TextAlignmentOptions.Center;
-            lbl.fontSize = 28;
-            lbl.color = ThemePalette.ButtonGoldText;
+            lbl.fontSize = 15;
+            lbl.color = secondary ? ThemePalette.Parchment : ThemePalette.ButtonGoldText;
             lbl.raycastTarget = false;
             return rt;
         }

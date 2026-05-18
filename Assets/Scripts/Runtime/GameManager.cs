@@ -43,7 +43,11 @@ namespace WitsAndFools
 
         float _earliestNextAiAct;
         bool _autoPlay;
+        int _autoPlaySpeed; // 0=off, 1=1x, 2=2x
         AIPlayer _autoPlayAI;
+        float _baseAiThinkSeconds;
+        float _baseMoveSeconds;
+        float _baseDealSeconds;
 
         int _stallFrames;
 
@@ -52,7 +56,7 @@ namespace WitsAndFools
             if (_loop == null) return;
 
             if (Input.GetKeyDown(KeyCode.A) && Engine.Phase != Phase.GameOver)
-                ToggleAutoPlay();
+                CycleAutoPlay();
 
             if (Engine.Phase == Phase.GameOver) return;
 
@@ -98,22 +102,64 @@ namespace WitsAndFools
         public void SetAutoPlay(bool on)
         {
             _autoPlay = on;
+            if (!on) _autoPlaySpeed = 0;
+            else if (_autoPlaySpeed == 0) _autoPlaySpeed = 1;
             if (_autoPlay && Hud && Hud.AbilityChoiceVisible)
                 Hud.HideAbilityChoice();
             UpdateAutoPlayLabel();
             if (_autoPlay) ApplyHighlightForPhase();
         }
 
-        void ToggleAutoPlay()
+        void CycleAutoPlay()
         {
-            SetAutoPlay(!_autoPlay);
+            _autoPlaySpeed = (_autoPlaySpeed + 1) % 3;
+            _autoPlay = _autoPlaySpeed > 0;
+            if (_autoPlay && Hud && Hud.AbilityChoiceVisible)
+                Hud.HideAbilityChoice();
+            ApplyAutoPlaySpeed();
+            UpdateAutoPlayLabel();
+            if (_autoPlay) ApplyHighlightForPhase();
+        }
+
+        void ApplyAutoPlaySpeed()
+        {
+            if (_baseAiThinkSeconds == 0f) _baseAiThinkSeconds = AiThinkSeconds;
+            if (_baseMoveSeconds == 0f) _baseMoveSeconds = MoveSeconds;
+            if (_baseDealSeconds == 0f) _baseDealSeconds = DealSeconds;
+
+            switch (_autoPlaySpeed)
+            {
+                case 0:
+                    AiThinkSeconds = _baseAiThinkSeconds;
+                    MoveSeconds = _baseMoveSeconds;
+                    DealSeconds = _baseDealSeconds;
+                    Time.timeScale = 1f;
+                    break;
+                case 1:
+                    AiThinkSeconds = _baseAiThinkSeconds;
+                    MoveSeconds = _baseMoveSeconds;
+                    DealSeconds = _baseDealSeconds;
+                    Time.timeScale = 1f;
+                    break;
+                case 2:
+                    AiThinkSeconds = _baseAiThinkSeconds * 0.5f;
+                    MoveSeconds = _baseMoveSeconds * 0.5f;
+                    DealSeconds = _baseDealSeconds * 0.5f;
+                    Time.timeScale = 2f;
+                    break;
+            }
         }
 
         void UpdateAutoPlayLabel()
         {
             if (!Hud || !Hud.AutoPlayButton) return;
             var lbl = Hud.AutoPlayButton.GetComponentInChildren<TMPro.TMP_Text>();
-            if (lbl) lbl.text = _autoPlay ? "Auto: ON" : "Auto: OFF";
+            if (lbl) lbl.text = _autoPlaySpeed switch
+            {
+                1 => "Auto 1x",
+                2 => "Auto 2x",
+                _ => "Auto Off"
+            };
         }
 
         public void BeginConfiguredGame(MatchConfig config, OpponentProfile opponent, int? seed = null)
@@ -181,9 +227,10 @@ namespace WitsAndFools
             if (Hud && Hud.AutoPlayButton)
             {
                 Hud.AutoPlayButton.onClick.RemoveAllListeners();
-                Hud.AutoPlayButton.onClick.AddListener(ToggleAutoPlay);
+                Hud.AutoPlayButton.onClick.AddListener(CycleAutoPlay);
             }
             _autoPlay = false;
+            _autoPlaySpeed = 0;
             UpdateAutoPlayLabel();
 
             CardView.OnHoverChanged = OnCardHover;
@@ -321,6 +368,9 @@ namespace WitsAndFools
 
         void OnBoutResolved(BoutOutcome outcome)
         {
+            foreach (var c in _loop.Controllers)
+                if (c is AIPlayer ai) ai.NotifyBoutResolved();
+
             // Move all bout cards to discard or to the eater's hand area.
             // Engine has already updated hand state; visuals follow the data.
             if (outcome == BoutOutcome.DefenderWonAllDiscarded)

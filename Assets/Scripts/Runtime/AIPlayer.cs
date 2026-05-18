@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace WitsAndFools
 {
@@ -9,7 +10,9 @@ namespace WitsAndFools
 
         public float RandomMoveChance { get; set; }
         public float AbilityEagerness { get; set; } = 1f;
+        public AIArchetypeName Archetype { get; set; } = AIArchetypeName.Fox;
         Random _rng;
+        int _boutsPlayed;
 
         public AIPlayer(string name = "Knave", int? seed = null)
         {
@@ -36,6 +39,9 @@ namespace WitsAndFools
                     return;
             }
         }
+
+        public void NotifyBoutResolved() => _boutsPlayed++;
+        public void ResetMatchState() => _boutsPlayed = 0;
 
         bool TryRandomAction(GameEngine engine, int playerIndex)
         {
@@ -176,16 +182,19 @@ namespace WitsAndFools
             return false;
         }
 
-        // ---------- Normal attack ----------
+        // ---------- Attack step (archetype-specific) ----------
 
         void AttackStep(GameEngine engine, int playerIndex)
         {
             var hand = engine.HandOf(playerIndex);
-            Card? attack = LowestLegalAttack(engine, hand);
+            int oppIndex = 1 - playerIndex;
+            var oppHand = engine.HandOf(oppIndex);
+
+            Card? attack = SelectAttackCard(engine, hand, oppHand);
 
             if (!engine.Bout.IsEmpty && engine.Bout.FullyDefended)
             {
-                bool wantsToStop = attack == null || ShouldStopPilingOn(engine, attack.Value);
+                bool wantsToStop = attack == null || ShouldStopAttacking(engine, hand, attack.Value, oppHand);
                 if (wantsToStop || !engine.TryAttack(playerIndex, attack.Value))
                     engine.TryEndBout(playerIndex);
                 return;
@@ -200,10 +209,139 @@ namespace WitsAndFools
                 engine.TryEat(engine.DefenderIndex);
         }
 
-        bool ShouldStopPilingOn(GameEngine engine, Card next)
+        Card? SelectAttackCard(GameEngine engine, Hand hand, Hand oppHand)
         {
+            return Archetype switch
+            {
+                AIArchetypeName.Brawler => HighestLegalAttack(engine, hand),
+                AIArchetypeName.Miser => LowestLegalAttack(engine, hand),
+                AIArchetypeName.Noble => NobleAttackPick(engine, hand),
+                AIArchetypeName.Scholar => ScholarAttackPick(engine, hand),
+                AIArchetypeName.Assassin => AssassinAttackPick(engine, hand),
+                AIArchetypeName.Fox => FoxAttackPick(engine, hand, oppHand),
+                _ => LowestLegalAttack(engine, hand),
+            };
+        }
+
+        bool ShouldStopAttacking(GameEngine engine, Hand hand, Card next, Hand oppHand)
+        {
+            return Archetype switch
+            {
+                AIArchetypeName.Brawler => false, // never stops willingly
+                AIArchetypeName.Miser => engine.Bout.AttackCount >= 2 || next.Suit == engine.Trump,
+                AIArchetypeName.Noble => next.Suit == engine.Trump && engine.DeckCount >= 12,
+                AIArchetypeName.Scholar => next.Suit == engine.Trump,
+                AIArchetypeName.Assassin => _boutsPlayed < 3 && engine.Bout.AttackCount >= 1,
+                AIArchetypeName.Fox => FoxShouldStop(engine, hand, next, oppHand),
+                _ => next.Suit == engine.Trump,
+            };
+        }
+
+        // --- Brawler: plays highest card to overwhelm ---
+
+        Card? HighestLegalAttack(GameEngine engine, Hand hand)
+        {
+            Card? best = null;
+            bool bypass = engine.DoubleTroubleActive;
+            foreach (var c in hand.Cards)
+            {
+                if (!bypass && !Rules.CanAttackWith(engine.Bout, c)) continue;
+                if (best == null) { best = c; continue; }
+                if (PrefersHigherAttack(c, best.Value, engine.Trump)) best = c;
+            }
+            return best;
+        }
+
+        static bool PrefersHigherAttack(Card candidate, Card current, Suit trump)
+        {
+            bool ct = candidate.Suit == trump;
+            bool cu = current.Suit == trump;
+            if (cu && !ct) return true;  // prefer non-trump
+            if (ct && !cu) return false;
+            return (int)candidate.Rank > (int)current.Rank; // higher is better
+        }
+
+        // --- Miser: plays lowest, conserves hand ---
+        // (uses LowestLegalAttack + stops after 2 cards via ShouldStopAttacking)
+
+        // --- Noble: saves trumps for endgame ---
+
+        Card? NobleAttackPick(GameEngine engine, Hand hand)
+        {
+            Card? best = null;
+            bool bypass = engine.DoubleTroubleActive;
+            foreach (var c in hand.Cards)
+            {
+                if (!bypass && !Rules.CanAttackWith(engine.Bout, c)) continue;
+                if (c.Suit == engine.Trump && engine.DeckCount >= 12) continue; // save trumps early
+                if (best == null) { best = c; continue; }
+                if (PrefersAsAttack(c, best.Value, engine.Trump)) best = c;
+            }
+            // fall back to any legal card if all are trump
+            return best ?? LowestLegalAttack(engine, hand);
+        }
+
+        // --- Scholar: prefers ranks already in the bout (rank-locks) ---
+
+        Card? ScholarAttackPick(GameEngine engine, Hand hand)
+        {
+            Card? rankMatch = null;
+            Card? fallback = null;
+            bool bypass = engine.DoubleTroubleActive;
+
+            foreach (var c in hand.Cards)
+            {
+                if (!bypass && !Rules.CanAttackWith(engine.Bout, c)) continue;
+                bool matchesBoutRank = BoutContainsRank(engine.Bout, c.Rank);
+
+                if (matchesBoutRank)
+                {
+                    if (rankMatch == null || PrefersAsAttack(c, rankMatch.Value, engine.Trump))
+                        rankMatch = c;
+                }
+                else
+                {
+                    if (fallback == null || PrefersAsAttack(c, fallback.Value, engine.Trump))
+                        fallback = c;
+                }
+            }
+            return rankMatch ?? fallback;
+        }
+
+        static bool BoutContainsRank(Bout bout, Rank rank)
+        {
+            foreach (var a in bout.Attacks)
+                if (a.Rank == rank) return true;
+            for (int i = 0; i < bout.Defenses.Count; i++)
+                if (bout.Defenses[i] != null && bout.Defenses[i].Value.Rank == rank) return true;
+            return false;
+        }
+
+        // --- Assassin: holds back early, then plays highest ---
+
+        Card? AssassinAttackPick(GameEngine engine, Hand hand)
+        {
+            if (_boutsPlayed < 3)
+                return LowestLegalAttack(engine, hand);
+            return HighestLegalAttack(engine, hand);
+        }
+
+        // --- Fox: adapts to opponent hand size ---
+
+        Card? FoxAttackPick(GameEngine engine, Hand hand, Hand oppHand)
+        {
+            if (oppHand.Count <= 3)
+                return HighestLegalAttack(engine, hand);
+            return LowestLegalAttack(engine, hand);
+        }
+
+        bool FoxShouldStop(GameEngine engine, Hand hand, Card next, Hand oppHand)
+        {
+            if (oppHand.Count <= 3) return false; // press the advantage
             return next.Suit == engine.Trump;
         }
+
+        // --- Shared: lowest legal attack (used by Miser, default) ---
 
         Card? LowestLegalAttack(GameEngine engine, Hand hand)
         {
@@ -227,7 +365,7 @@ namespace WitsAndFools
             return (int)candidate.Rank < (int)current.Rank;
         }
 
-        // ---------- Normal defense ----------
+        // ---------- Defense step (archetype-specific) ----------
 
         void DefenseStep(GameEngine engine, int playerIndex)
         {
@@ -235,21 +373,99 @@ namespace WitsAndFools
             if (slot < 0) return;
 
             var hand = engine.HandOf(playerIndex);
-            var candidates = new System.Collections.Generic.List<Card>();
+
+            // Archetype-specific eat decisions before trying to defend
+            if (ShouldEatInstead(engine, playerIndex, hand, slot))
+            {
+                engine.TryEat(playerIndex);
+                return;
+            }
+
+            Card? defense = SelectDefenseCard(engine, hand, slot);
+
+            if (defense != null && engine.TryDefend(playerIndex, slot, defense.Value))
+                return;
+
+            engine.TryEat(playerIndex);
+        }
+
+        bool ShouldEatInstead(GameEngine engine, int playerIndex, Hand hand, int slot)
+        {
+            return Archetype switch
+            {
+                // Brawler eats freely if hand is big and cost is low
+                AIArchetypeName.Brawler => hand.Count >= 5 && CountUndefended(engine.Bout) <= 2
+                    && !HasLegalDefense(engine, hand, slot),
+                // Assassin eats in early bouts to build hand for the kill
+                AIArchetypeName.Assassin => _boutsPlayed < 3 && CountUndefended(engine.Bout) >= 3
+                    && engine.DeckCount > 6,
+                // Fox eats strategically when hand is small and defenses are bad
+                AIArchetypeName.Fox => hand.Count <= 3 && !HasGoodDefense(engine, hand, slot),
+                _ => false,
+            };
+        }
+
+        Card? SelectDefenseCard(GameEngine engine, Hand hand, int slot)
+        {
+            return Archetype switch
+            {
+                AIArchetypeName.Scholar => ScholarDefensePick(engine, hand, slot),
+                _ => DefaultDefensePick(engine, hand, slot),
+            };
+        }
+
+        // --- Scholar: won't overspend (avoids using high cards to beat low attacks) ---
+
+        Card? ScholarDefensePick(GameEngine engine, Hand hand, int slot)
+        {
+            var attack = engine.Bout.Attacks[slot];
+            var candidates = new List<Card>();
+            foreach (var c in hand.Cards)
+            {
+                if (!Rules.CanDefendSlotWith(engine.Bout, slot, c, engine.Trump)) continue;
+                // Don't use a card more than 3 ranks above the attack (wasteful)
+                int rankGap = (int)c.Rank - (int)attack.Rank;
+                if (c.Suit == engine.Trump && attack.Suit != engine.Trump)
+                    rankGap = 4; // trump vs non-trump is always "expensive"
+                if (rankGap > 3 && candidates.Count > 0) continue;
+                candidates.Add(c);
+            }
+
+            candidates.Sort((a, b) => PrefersAsDefense(a, b, engine.Trump) ? -1 : 1);
+            return candidates.Count > 0 ? candidates[0] : null;
+        }
+
+        // --- Default defense: lowest legal card ---
+
+        Card? DefaultDefensePick(GameEngine engine, Hand hand, int slot)
+        {
+            var candidates = new List<Card>();
             foreach (var c in hand.Cards)
             {
                 if (!Rules.CanDefendSlotWith(engine.Bout, slot, c, engine.Trump)) continue;
                 candidates.Add(c);
             }
-
             candidates.Sort((a, b) => PrefersAsDefense(a, b, engine.Trump) ? -1 : 1);
+            return candidates.Count > 0 ? candidates[0] : null;
+        }
 
-            foreach (var c in candidates)
+        bool HasLegalDefense(GameEngine engine, Hand hand, int slot)
+        {
+            foreach (var c in hand.Cards)
+                if (Rules.CanDefendSlotWith(engine.Bout, slot, c, engine.Trump)) return true;
+            return false;
+        }
+
+        bool HasGoodDefense(GameEngine engine, Hand hand, int slot)
+        {
+            var attack = engine.Bout.Attacks[slot];
+            foreach (var c in hand.Cards)
             {
-                if (engine.TryDefend(playerIndex, slot, c)) return;
+                if (!Rules.CanDefendSlotWith(engine.Bout, slot, c, engine.Trump)) continue;
+                if (c.Suit != engine.Trump) return true; // non-trump defense is "good"
+                if ((int)c.Rank - (int)attack.Rank <= 2) return true; // close trump is ok
             }
-
-            engine.TryEat(playerIndex);
+            return false;
         }
 
         static bool PrefersAsDefense(Card candidate, Card current, Suit trump)

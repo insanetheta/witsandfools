@@ -16,6 +16,11 @@ namespace WitsAndFools
         public GameObject GameOverPanel;
         public TMP_Text GameOverLabel;
 
+        [Header("Opponent Nameplate")]
+        public Image OpponentPortrait;
+        public TMP_Text OpponentNameLabel;
+        public TMP_Text OpponentArchetypeLabel;
+
         [Header("Trinket Info")]
         public TMP_Text DeckTopLabel;
         public TMP_Text InfoLabel;
@@ -79,6 +84,14 @@ namespace WitsAndFools
                 InfoLabel.gameObject.SetActive(true);
                 InfoLabel.text = text;
             }
+        }
+
+        public void SetOpponent(string name, string archetype, Sprite portrait, Color archetypeColor)
+        {
+            if (OpponentNameLabel) OpponentNameLabel.text = name;
+            if (OpponentArchetypeLabel) { OpponentArchetypeLabel.text = archetype; OpponentArchetypeLabel.color = archetypeColor; }
+            if (OpponentPortrait && portrait) { OpponentPortrait.sprite = portrait; OpponentPortrait.color = Color.white; }
+            else if (OpponentPortrait) OpponentPortrait.color = ThemePalette.WarmSlate;
         }
 
         public void ShowTooltip(string text) { if (TooltipLabel) { TooltipLabel.gameObject.SetActive(true); TooltipLabel.text = text; } }

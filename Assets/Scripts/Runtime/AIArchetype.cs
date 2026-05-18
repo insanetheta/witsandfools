@@ -24,6 +24,7 @@ namespace WitsAndFools
             };
             ai.RandomMoveChance = baseRandom;
             ai.AbilityEagerness = 1f;
+            ai.Archetype = archetype;
 
             switch (archetype)
             {

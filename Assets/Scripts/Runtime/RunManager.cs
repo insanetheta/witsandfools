@@ -83,8 +83,13 @@ namespace WitsAndFools
         public Sprite VignetteSprite;
         public Image MapVenueBgImage;
 
+        [Header("Opponent Portraits")]
+        public string[] PortraitNames;
+        public Sprite[] PortraitSprites;
+
         RunState _run;
         RunPhase _phase;
+        public RunPhase CurrentPhase => _phase;
         int _currentColumn;
         System.Random _rng;
         MapNode _currentNode;
@@ -568,10 +573,37 @@ namespace WitsAndFools
                 GameManager.AiThinkSeconds = 0.02f;
             }
 
+            if (GameManager.Hud && node.Opponent != null)
+            {
+                var portrait = FindPortrait(node.Opponent.Name);
+                var archName = AIArchetypes.DisplayName(node.Opponent.Archetype);
+                var archColor = ArchetypeColor(node.Opponent.Archetype);
+                GameManager.Hud.SetOpponent(node.Opponent.Name, archName, portrait, archColor);
+            }
+
             var engine = GameManager.Engine;
             if (engine != null)
                 engine.OnBoutResolved += OnBoutResolved;
         }
+
+        Sprite FindPortrait(string opponentName)
+        {
+            if (PortraitNames == null || PortraitSprites == null) return null;
+            for (int i = 0; i < PortraitNames.Length && i < PortraitSprites.Length; i++)
+                if (PortraitNames[i] == opponentName) return PortraitSprites[i];
+            return null;
+        }
+
+        static Color ArchetypeColor(AIArchetypeName arch) => arch switch
+        {
+            AIArchetypeName.Brawler => ThemePalette.AtkColor,
+            AIArchetypeName.Miser => ThemePalette.DefColor,
+            AIArchetypeName.Fox => ThemePalette.UtilColor,
+            AIArchetypeName.Noble => ThemePalette.Gold,
+            AIArchetypeName.Scholar => ThemePalette.AbilityBlue,
+            AIArchetypeName.Assassin => ThemePalette.VenetianRed,
+            _ => ThemePalette.DustyTan,
+        };
 
         void OnBoutResolved(BoutOutcome outcome)
         {
@@ -1465,7 +1497,16 @@ namespace WitsAndFools
             if (TableFeltImage)
                 TableFeltImage.color = ThemePalette.ActFeltTint[act];
             if (TableFrameImage)
-                TableFrameImage.color = ThemePalette.ActFrameColor[act];
+            {
+                var fc = ThemePalette.ActFrameColor[act];
+                fc.a = 0.6f;
+                var parent = TableFrameImage.transform.parent;
+                for (int i = 0; i < parent.childCount; i++)
+                {
+                    var edge = parent.GetChild(i).GetComponent<Image>();
+                    if (edge) edge.color = fc;
+                }
+            }
             if (VignetteImage && VignetteSprite)
             {
                 VignetteImage.sprite = VignetteSprite;
