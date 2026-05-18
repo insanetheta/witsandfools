@@ -405,6 +405,90 @@ namespace WitsAndFools.EditorTools
 
             runOverPanel.gameObject.SetActive(false);
 
+            // ----- Shop Panel -----
+            var shopPanel = NewChild(canvasRT, "ShopPanel");
+            FillParent(shopPanel);
+            var shopBg = shopPanel.gameObject.AddComponent<Image>();
+            shopBg.color = new Color(0.08f, 0.14f, 0.20f);
+
+            var shopTitle = AddText(shopPanel, "ShopTitle", "The Fence",
+                anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 36, color: new Color(0.95f, 0.85f, 0.55f));
+
+            var shopFlorins = AddText(shopPanel, "ShopFlorins", "Your purse: 0 Florins",
+                anchorMin: new Vector2(0.1f, 0.74f), anchorMax: new Vector2(0.9f, 0.82f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 22, color: new Color(0.95f, 0.85f, 0.40f));
+
+            var shopItemContainer = NewChild(shopPanel, "ShopItemContainer");
+            shopItemContainer.anchorMin = new Vector2(0.20f, 0.15f);
+            shopItemContainer.anchorMax = new Vector2(0.80f, 0.74f);
+            shopItemContainer.offsetMin = Vector2.zero;
+            shopItemContainer.offsetMax = Vector2.zero;
+            var shopLayout = shopItemContainer.gameObject.AddComponent<VerticalLayoutGroup>();
+            shopLayout.spacing = 12;
+            shopLayout.childAlignment = TextAnchor.UpperCenter;
+            shopLayout.childControlWidth = true;
+            shopLayout.childControlHeight = false;
+            shopLayout.childForceExpandWidth = false;
+            shopLayout.childForceExpandHeight = false;
+
+            var shopLeaveBtn = AddButton(shopPanel, "ShopLeaveButton", "Leave");
+            shopLeaveBtn.anchorMin = new Vector2(0.5f, 0.04f);
+            shopLeaveBtn.anchorMax = new Vector2(0.5f, 0.04f);
+            shopLeaveBtn.pivot = new Vector2(0.5f, 0);
+            shopLeaveBtn.sizeDelta = new Vector2(260, 70);
+
+            shopPanel.gameObject.SetActive(false);
+
+            // ----- Event Panel -----
+            var eventPanel = NewChild(canvasRT, "EventPanel");
+            FillParent(eventPanel);
+            var eventBg = eventPanel.gameObject.AddComponent<Image>();
+            eventBg.color = new Color(0.10f, 0.08f, 0.14f);
+
+            var eventTitle = AddText(eventPanel, "EventTitle", "Event",
+                anchorMin: new Vector2(0.1f, 0.78f), anchorMax: new Vector2(0.9f, 0.92f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 36, color: new Color(0.95f, 0.85f, 0.55f));
+
+            var eventDesc = AddText(eventPanel, "EventDesc", "",
+                anchorMin: new Vector2(0.15f, 0.52f), anchorMax: new Vector2(0.85f, 0.76f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 24, color: Color.white);
+            eventDesc.enableWordWrapping = true;
+
+            var eventOutcome = AddText(eventPanel, "EventOutcome", "",
+                anchorMin: new Vector2(0.15f, 0.35f), anchorMax: new Vector2(0.85f, 0.50f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 26, color: new Color(0.4f, 0.85f, 0.4f));
+            eventOutcome.enableWordWrapping = true;
+            eventOutcome.gameObject.SetActive(false);
+
+            var eventChoice1Btn = AddButton(eventPanel, "EventChoice1Button", "Choice 1");
+            eventChoice1Btn.anchorMin = new Vector2(0.5f, 0.22f);
+            eventChoice1Btn.anchorMax = new Vector2(0.5f, 0.22f);
+            eventChoice1Btn.pivot = new Vector2(0.5f, 0.5f);
+            eventChoice1Btn.sizeDelta = new Vector2(420, 60);
+            var eventChoice1Label = eventChoice1Btn.GetComponentInChildren<TMP_Text>();
+
+            var eventChoice2Btn = AddButton(eventPanel, "EventChoice2Button", "Choice 2");
+            eventChoice2Btn.anchorMin = new Vector2(0.5f, 0.12f);
+            eventChoice2Btn.anchorMax = new Vector2(0.5f, 0.12f);
+            eventChoice2Btn.pivot = new Vector2(0.5f, 0.5f);
+            eventChoice2Btn.sizeDelta = new Vector2(420, 60);
+            var eventChoice2Label = eventChoice2Btn.GetComponentInChildren<TMP_Text>();
+
+            var eventContinueBtn = AddButton(eventPanel, "EventContinueButton", "Continue");
+            eventContinueBtn.anchorMin = new Vector2(0.5f, 0.06f);
+            eventContinueBtn.anchorMax = new Vector2(0.5f, 0.06f);
+            eventContinueBtn.pivot = new Vector2(0.5f, 0);
+            eventContinueBtn.sizeDelta = new Vector2(260, 70);
+            eventContinueBtn.gameObject.SetActive(false);
+
+            eventPanel.gameObject.SetActive(false);
+
             // ----- Run HUD (persistent bar) -----
             var runHudPanel = NewChild(canvasRT, "RunHudPanel");
             runHudPanel.anchorMin = new Vector2(0, 0);
@@ -468,6 +552,20 @@ namespace WitsAndFools.EditorTools
             rm.FlorinsLabel = florinsLabel;
             rm.ActLabel = actLabel;
             rm.AbilitiesLabel = abilitiesLabel;
+            rm.ShopPanel = shopPanel.gameObject;
+            rm.ShopTitleLabel = shopTitle;
+            rm.ShopFlorinsLabel = shopFlorins;
+            rm.ShopItemContainer = shopItemContainer;
+            rm.ShopLeaveButton = shopLeaveBtn.GetComponent<Button>();
+            rm.EventPanel = eventPanel.gameObject;
+            rm.EventTitleLabel = eventTitle;
+            rm.EventDescLabel = eventDesc;
+            rm.EventOutcomeLabel = eventOutcome;
+            rm.EventChoice1Button = eventChoice1Btn.GetComponent<Button>();
+            rm.EventChoice1Label = eventChoice1Label;
+            rm.EventChoice2Button = eventChoice2Btn.GetComponent<Button>();
+            rm.EventChoice2Label = eventChoice2Label;
+            rm.EventContinueButton = eventContinueBtn.GetComponent<Button>();
 
             // Save scene
             EditorSceneManager.SaveScene(scene, ScenePath);

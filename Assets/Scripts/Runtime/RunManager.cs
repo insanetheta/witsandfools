@@ -28,6 +28,8 @@ namespace WitsAndFools
         public GameObject ResultPanel;
         public GameObject RunOverPanel;
         public GameObject RunHudPanel;
+        public GameObject ShopPanel;
+        public GameObject EventPanel;
 
         [Header("Map Panel Refs")]
         public TMP_Text MapTitleLabel;
@@ -50,6 +52,22 @@ namespace WitsAndFools
         public TMP_Text FlorinsLabel;
         public TMP_Text ActLabel;
         public TMP_Text AbilitiesLabel;
+
+        [Header("Shop Panel Refs")]
+        public TMP_Text ShopTitleLabel;
+        public TMP_Text ShopFlorinsLabel;
+        public Transform ShopItemContainer;
+        public Button ShopLeaveButton;
+
+        [Header("Event Panel Refs")]
+        public TMP_Text EventTitleLabel;
+        public TMP_Text EventDescLabel;
+        public TMP_Text EventOutcomeLabel;
+        public Button EventChoice1Button;
+        public TMP_Text EventChoice1Label;
+        public Button EventChoice2Button;
+        public TMP_Text EventChoice2Label;
+        public Button EventContinueButton;
 
         RunState _run;
         RunPhase _phase;
@@ -86,6 +104,8 @@ namespace WitsAndFools
             if (MapPanel) MapPanel.SetActive(phase == RunPhase.MapSelect);
             if (ResultPanel) ResultPanel.SetActive(phase == RunPhase.PostMatch);
             if (RunOverPanel) RunOverPanel.SetActive(phase == RunPhase.RunOver);
+            if (ShopPanel) ShopPanel.SetActive(phase == RunPhase.Shop);
+            if (EventPanel) EventPanel.SetActive(phase == RunPhase.Event || phase == RunPhase.Rest);
             if (RunHudPanel) RunHudPanel.SetActive(phase != RunPhase.Title && phase != RunPhase.RunOver);
 
             UpdateRunHud();
@@ -305,78 +325,334 @@ namespace WitsAndFools
             SetPhase(RunPhase.MapSelect);
         }
 
-        // ---------- Non-match encounters (simple for now) ----------
+        // ---------- Shop ----------
 
         void HandleShop()
         {
-            int florinsEarned = 0;
-            if (_run.Florins >= 12 && _run.PlayerAbilities.Count < _run.MaxAbilitySlots)
+            SetPhase(RunPhase.Shop);
+
+            if (ShopTitleLabel) ShopTitleLabel.text = "The Fence";
+            UpdateShopFlorins();
+            PopulateShopItems();
+
+            if (ShopLeaveButton)
             {
-                var reward = PickAbilityReward(false);
-                if (reward.HasValue)
-                {
-                    _run.PlayerAbilities.Add(reward.Value);
-                    _run.Florins -= 12;
-                }
+                ShopLeaveButton.onClick.RemoveAllListeners();
+                ShopLeaveButton.onClick.AddListener(OnResultContinue);
             }
-            ShowSimpleResult("The Fence", _run.Florins >= 0 ? "You browse the wares..." : "Nothing catches your eye.", "");
         }
+
+        void UpdateShopFlorins()
+        {
+            if (ShopFlorinsLabel) ShopFlorinsLabel.text = $"Your purse: {_run.Florins} Florins";
+        }
+
+        void PopulateShopItems()
+        {
+            ClearShopItems();
+            if (!ShopItemContainer) return;
+
+            var offerings = PickShopOfferings(3);
+            foreach (var offering in offerings)
+                CreateShopItemButton(offering);
+
+            if (_run.PlayerBurdens.Count > 0)
+                CreateBurdenRemovalButton();
+        }
+
+        void ClearShopItems()
+        {
+            if (!ShopItemContainer) return;
+            for (int i = ShopItemContainer.childCount - 1; i >= 0; i--)
+                Destroy(ShopItemContainer.GetChild(i).gameObject);
+        }
+
+        List<(AbilityType type, int price)> PickShopOfferings(int count)
+        {
+            var result = new List<(AbilityType, int)>();
+            var pool = new List<AbilityDefinition>();
+            foreach (var def in AbilityPool.All)
+            {
+                if (_run.PlayerAbilities.Contains(def.Type)) continue;
+                pool.Add(def);
+            }
+
+            for (int i = 0; i < count && pool.Count > 0; i++)
+            {
+                int idx = _rng.Next(pool.Count);
+                var def = pool[idx];
+                pool.RemoveAt(idx);
+                int price = def.Rarity switch
+                {
+                    AbilityRarity.Common => 8,
+                    AbilityRarity.Uncommon => 12,
+                    AbilityRarity.Rare => 18,
+                    _ => 12
+                };
+                result.Add((def.Type, price));
+            }
+            return result;
+        }
+
+        void CreateShopItemButton(( AbilityType type, int price) offering)
+        {
+            var def = AbilityPool.Get(offering.type);
+            bool canBuy = _run.Florins >= offering.price && _run.PlayerAbilities.Count < _run.MaxAbilitySlots;
+            string label = $"{offering.type.DisplayName()}  —  {offering.price}f";
+            string desc = offering.type.Description();
+
+            var btnGO = new GameObject("ShopItem", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            btnGO.transform.SetParent(ShopItemContainer, false);
+
+            var img = btnGO.GetComponent<Image>();
+            img.color = canBuy ? new Color(0.18f, 0.35f, 0.45f) : new Color(0.25f, 0.25f, 0.25f);
+
+            var le = btnGO.GetComponent<LayoutElement>();
+            le.preferredHeight = 90;
+            le.preferredWidth = 550;
+
+            var nameGO = new GameObject("Name", typeof(RectTransform));
+            nameGO.transform.SetParent(btnGO.transform, false);
+            var nameRT = (RectTransform)nameGO.transform;
+            nameRT.anchorMin = new Vector2(0, 0.5f);
+            nameRT.anchorMax = new Vector2(1, 1);
+            nameRT.offsetMin = new Vector2(16, 0);
+            nameRT.offsetMax = new Vector2(-16, -4);
+            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            nameTMP.text = label;
+            nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            nameTMP.fontSize = 22;
+            nameTMP.color = canBuy ? Color.white : new Color(0.5f, 0.5f, 0.5f);
+            nameTMP.raycastTarget = false;
+
+            var descGO = new GameObject("Desc", typeof(RectTransform));
+            descGO.transform.SetParent(btnGO.transform, false);
+            var descRT = (RectTransform)descGO.transform;
+            descRT.anchorMin = Vector2.zero;
+            descRT.anchorMax = new Vector2(1, 0.5f);
+            descRT.offsetMin = new Vector2(16, 4);
+            descRT.offsetMax = new Vector2(-16, 0);
+            var descTMP = descGO.AddComponent<TextMeshProUGUI>();
+            descTMP.text = desc;
+            descTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            descTMP.fontSize = 16;
+            descTMP.color = new Color(0.7f, 0.7f, 0.7f);
+            descTMP.raycastTarget = false;
+            descTMP.enableWordWrapping = true;
+
+            var rarityTag = def.Rarity switch
+            {
+                AbilityRarity.Common => "",
+                AbilityRarity.Uncommon => "  [Uncommon]",
+                AbilityRarity.Rare => "  [Rare]",
+                _ => ""
+            };
+            if (rarityTag.Length > 0) nameTMP.text += rarityTag;
+
+            var btn = btnGO.GetComponent<Button>();
+            btn.interactable = canBuy;
+            var captured = offering;
+            btn.onClick.AddListener(() => OnShopBuy(captured.type, captured.price));
+        }
+
+        void CreateBurdenRemovalButton()
+        {
+            int price = 6;
+            bool canBuy = _run.Florins >= price;
+            var burden = _run.PlayerBurdens[0];
+
+            var btnGO = new GameObject("BurdenRemoval", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            btnGO.transform.SetParent(ShopItemContainer, false);
+
+            var img = btnGO.GetComponent<Image>();
+            img.color = canBuy ? new Color(0.45f, 0.25f, 0.18f) : new Color(0.25f, 0.25f, 0.25f);
+
+            var le = btnGO.GetComponent<LayoutElement>();
+            le.preferredHeight = 70;
+            le.preferredWidth = 550;
+
+            var lblGO = new GameObject("Label", typeof(RectTransform));
+            lblGO.transform.SetParent(btnGO.transform, false);
+            var lblRT = (RectTransform)lblGO.transform;
+            lblRT.anchorMin = Vector2.zero;
+            lblRT.anchorMax = Vector2.one;
+            lblRT.offsetMin = new Vector2(16, 0);
+            lblRT.offsetMax = new Vector2(-16, 0);
+            var lbl = lblGO.AddComponent<TextMeshProUGUI>();
+            lbl.text = $"Remove {burden.DisplayName()}  —  {price}f";
+            lbl.alignment = TextAlignmentOptions.Center;
+            lbl.fontSize = 20;
+            lbl.color = canBuy ? Color.white : new Color(0.5f, 0.5f, 0.5f);
+            lbl.raycastTarget = false;
+
+            var btn = btnGO.GetComponent<Button>();
+            btn.interactable = canBuy;
+            btn.onClick.AddListener(() => OnShopRemoveBurden(burden, price));
+        }
+
+        void OnShopBuy(AbilityType type, int price)
+        {
+            if (_run.Florins < price || _run.PlayerAbilities.Count >= _run.MaxAbilitySlots) return;
+            _run.Florins -= price;
+            _run.PlayerAbilities.Add(type);
+            _run.RecordAbilityPicked(type);
+            UpdateRunHud();
+            UpdateShopFlorins();
+            PopulateShopItems();
+        }
+
+        void OnShopRemoveBurden(BurdenType burden, int price)
+        {
+            if (_run.Florins < price) return;
+            _run.Florins -= price;
+            _run.PlayerBurdens.Remove(burden);
+            UpdateRunHud();
+            UpdateShopFlorins();
+            PopulateShopItems();
+        }
+
+        // ---------- Event / Rumor / Rest ----------
 
         void HandleRumor()
         {
-            int roll = _rng.Next(100);
-            string desc;
-            if (roll < 40)
-            {
-                int bonus = 5;
-                _run.Florins += bonus;
-                desc = $"A whispered tip leads to a hidden purse. +{bonus} Florins.";
-            }
-            else if (roll < 70 && _run.PlayerAbilities.Count < _run.MaxAbilitySlots)
-            {
-                var reward = PickAbilityReward(false);
-                if (reward.HasValue)
-                {
-                    _run.PlayerAbilities.Add(reward.Value);
-                    desc = $"An old gambler teaches you {reward.Value.DisplayName()}.";
-                }
-                else desc = "The rumor leads nowhere.";
-            }
-            else
-            {
-                _run.Florins += 3;
-                desc = "A minor lead. +3 Florins.";
-            }
-            ShowSimpleResult("Rumor", desc, "");
+            SetPhase(RunPhase.Event);
+            ShowEventChoices("A Whispered Lead...",
+                "You overhear a conversation in the shadows.\nA gambler's secret, or a pickpocket's trap?",
+                "Investigate", "Walk away");
+            _eventChoice1Action = DoRumorInvestigate;
+            _eventChoice2Action = DoRumorWalkAway;
         }
 
         void HandleRest()
         {
-            string desc;
-            if (_run.PlayerBurdens.Count > 0 && _rng.Next(100) < 60)
+            SetPhase(RunPhase.Rest);
+
+            bool hasBurdens = _run.PlayerBurdens.Count > 0;
+            string desc = "The hearth crackles. You find a quiet moment of peace.";
+
+            if (hasBurdens)
             {
-                var removed = _run.PlayerBurdens[_rng.Next(_run.PlayerBurdens.Count)];
-                _run.PlayerBurdens.Remove(removed);
-                desc = $"You rest by the hearth. {removed.DisplayName()} fades away.";
+                ShowEventChoices("The Hearth", desc,
+                    "Mend (remove a burden)", "Rest quietly (+3 Florins)");
+                _eventChoice1Action = DoRestMend;
+                _eventChoice2Action = DoRestQuietly;
             }
             else
             {
-                desc = "You rest, but nothing changes.";
+                ShowEventChoices("The Hearth", desc,
+                    "Rest quietly (+3 Florins)", null);
+                _eventChoice1Action = DoRestQuietly;
+                _eventChoice2Action = null;
             }
-            ShowSimpleResult("The Hearth", desc, "");
         }
 
-        void ShowSimpleResult(string title, string details, string reward)
+        Action _eventChoice1Action;
+        Action _eventChoice2Action;
+
+        void ShowEventChoices(string title, string desc, string choice1, string choice2)
         {
-            SetPhase(RunPhase.PostMatch);
-            if (ResultTitleLabel) ResultTitleLabel.text = title;
-            if (ResultDetailsLabel) ResultDetailsLabel.text = details;
-            if (ResultRewardLabel) ResultRewardLabel.text = reward;
-            if (ResultContinueButton)
+            if (EventTitleLabel) EventTitleLabel.text = title;
+            if (EventDescLabel) EventDescLabel.text = desc;
+            if (EventOutcomeLabel) { EventOutcomeLabel.text = ""; EventOutcomeLabel.gameObject.SetActive(false); }
+
+            if (EventChoice1Button)
             {
-                ResultContinueButton.onClick.RemoveAllListeners();
-                ResultContinueButton.onClick.AddListener(OnResultContinue);
+                EventChoice1Button.gameObject.SetActive(true);
+                EventChoice1Button.onClick.RemoveAllListeners();
+                EventChoice1Button.onClick.AddListener(OnEventChoice1);
+                if (EventChoice1Label) EventChoice1Label.text = choice1 ?? "";
             }
+
+            if (EventChoice2Button)
+            {
+                bool show2 = choice2 != null;
+                EventChoice2Button.gameObject.SetActive(show2);
+                if (show2)
+                {
+                    EventChoice2Button.onClick.RemoveAllListeners();
+                    EventChoice2Button.onClick.AddListener(OnEventChoice2);
+                    if (EventChoice2Label) EventChoice2Label.text = choice2;
+                }
+            }
+
+            if (EventContinueButton) EventContinueButton.gameObject.SetActive(false);
+        }
+
+        void ShowEventOutcome(string outcome)
+        {
+            if (EventOutcomeLabel)
+            {
+                EventOutcomeLabel.text = outcome;
+                EventOutcomeLabel.gameObject.SetActive(true);
+            }
+            if (EventChoice1Button) EventChoice1Button.gameObject.SetActive(false);
+            if (EventChoice2Button) EventChoice2Button.gameObject.SetActive(false);
+            if (EventContinueButton)
+            {
+                EventContinueButton.gameObject.SetActive(true);
+                EventContinueButton.onClick.RemoveAllListeners();
+                EventContinueButton.onClick.AddListener(OnResultContinue);
+            }
+            UpdateRunHud();
+        }
+
+        void OnEventChoice1() => _eventChoice1Action?.Invoke();
+        void OnEventChoice2() => _eventChoice2Action?.Invoke();
+
+        void DoRumorInvestigate()
+        {
+            int roll = _rng.Next(100);
+            if (roll < 45)
+            {
+                int bonus = 5 + _run.CurrentAct;
+                _run.Florins += bonus;
+                ShowEventOutcome($"A hidden purse! +{bonus} Florins.");
+            }
+            else if (roll < 75 && _run.PlayerAbilities.Count < _run.MaxAbilitySlots)
+            {
+                var reward = PickAbilityReward(false);
+                if (reward.HasValue)
+                {
+                    _run.PlayerAbilities.Add(reward.Value);
+                    _run.RecordAbilityPicked(reward.Value);
+                    ShowEventOutcome($"An old gambler teaches you {reward.Value.DisplayName()}!");
+                }
+                else
+                    ShowEventOutcome("The lead goes cold. Nothing gained.");
+            }
+            else if (roll < 85)
+            {
+                _run.Florins += 3;
+                ShowEventOutcome("A minor tip. +3 Florins.");
+            }
+            else
+            {
+                ShowEventOutcome("It was a trap! But you escape unscathed.");
+            }
+        }
+
+        void DoRumorWalkAway()
+        {
+            _run.Florins += 2;
+            ShowEventOutcome("You keep your head down. +2 Florins for your trouble.");
+        }
+
+        void DoRestMend()
+        {
+            if (_run.PlayerBurdens.Count > 0)
+            {
+                var removed = _run.PlayerBurdens[_rng.Next(_run.PlayerBurdens.Count)];
+                _run.PlayerBurdens.Remove(removed);
+                ShowEventOutcome($"{removed.DisplayName()} fades away. You feel lighter.");
+            }
+            else
+                ShowEventOutcome("You rest, but nothing changes.");
+        }
+
+        void DoRestQuietly()
+        {
+            _run.Florins += 3;
+            ShowEventOutcome("A peaceful rest. +3 Florins.");
         }
 
         // ---------- Act progression ----------
