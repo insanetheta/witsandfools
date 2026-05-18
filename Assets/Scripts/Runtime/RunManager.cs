@@ -84,7 +84,30 @@ namespace WitsAndFools
         void Start()
         {
             if (GameManager) GameManager.AutoStartOnAwake = false;
-            StartNewRun();
+            if (!TryLoadSave())
+                StartNewRun();
+        }
+
+        bool TryLoadSave()
+        {
+            var save = RunSaveSystem.Load();
+            if (save?.Run == null) return false;
+            _run = save.Run;
+            _currentColumn = save.CurrentColumn;
+            _selectedArchetype = save.SelectedArchetype;
+            _rng = new System.Random(_run.Seed + _run.MatchesPlayed);
+            if (Enum.TryParse<RunPhase>(save.RunPhase, out var phase))
+                SetPhase(phase);
+            else
+                SetPhase(RunPhase.MapSelect);
+            Debug.Log($"[RunManager] Loaded saved run — Act {_run.CurrentAct + 1}, {_run.MatchesPlayed} matches played");
+            return true;
+        }
+
+        void AutoSave()
+        {
+            if (_run == null || _autoRun) return;
+            RunSaveSystem.Save(_run, _currentColumn, _selectedArchetype, _phase);
         }
 
         void Update()
@@ -249,6 +272,7 @@ namespace WitsAndFools
 
         public void StartNewRun()
         {
+            RunSaveSystem.Delete();
             int seed = Environment.TickCount;
             _rng = new System.Random(seed);
             _run = new RunState { Seed = seed };
@@ -291,8 +315,13 @@ namespace WitsAndFools
                     break;
                 case RunPhase.RunOver:
                     ShowRunOver();
-                    break;
+                    RunSaveSystem.Delete();
+                    return;
             }
+
+            if (phase == RunPhase.MapSelect || phase == RunPhase.Shop
+                || phase == RunPhase.Event || phase == RunPhase.Rest)
+                AutoSave();
         }
 
         void UpdateRunHud()
