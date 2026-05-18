@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -21,6 +22,9 @@ namespace WitsAndFools
         public float DealSeconds = 0.18f;
         public float MoveSeconds = 0.22f;
 
+        public bool AutoStartOnAwake = true;
+        public event Action<int> OnMatchComplete;
+
         GameLoop _loop;
         GameEngine Engine => _loop.Engine;
         readonly Dictionary<Card, CardView> _humanCardViews = new();
@@ -34,7 +38,7 @@ namespace WitsAndFools
 
         void Start()
         {
-            BeginNewGame();
+            if (AutoStartOnAwake) BeginNewGame();
         }
 
         float _earliestNextAiAct;
@@ -85,6 +89,23 @@ namespace WitsAndFools
             if (lbl) lbl.text = _autoPlay ? "Auto: ON" : "Auto: OFF";
         }
 
+        public void BeginConfiguredGame(MatchConfig config, string opponentName, int? seed = null)
+        {
+            OpponentName = opponentName;
+            ClearAllVisuals();
+            Hud?.HideGameOver();
+
+            var engine = new GameEngine(seed, config);
+            _loop = new GameLoop(
+                p0: new HumanPlayer(PlayerName),
+                p1: new AIPlayer(opponentName),
+                engine: engine);
+            _humanIsPlayerZero = true;
+            WireEngineEvents();
+            WireHudButtons();
+            _loop.Start();
+        }
+
         public void BeginNewGame()
         {
             ClearAllVisuals();
@@ -94,7 +115,13 @@ namespace WitsAndFools
                 p0: new HumanPlayer(PlayerName),
                 p1: new AIPlayer(OpponentName));
             _humanIsPlayerZero = true;
+            WireEngineEvents();
+            WireHudButtons();
+            _loop.Start();
+        }
 
+        void WireEngineEvents()
+        {
             Engine.OnSetupComplete += OnSetupComplete;
             Engine.OnTurnBegan += OnTurnBegan;
             Engine.OnAttackPlayed += OnAttackPlayed;
@@ -104,7 +131,10 @@ namespace WitsAndFools
             Engine.OnGameOver += OnGameOver;
             Engine.OnAbilityUsed += OnAbilityUsed;
             Engine.OnTrumpChanged += OnTrumpChanged;
+        }
 
+        void WireHudButtons()
+        {
             if (Hud)
             {
                 if (Hud.EndBoutButton) Hud.EndBoutButton.onClick.RemoveAllListeners();
@@ -128,7 +158,6 @@ namespace WitsAndFools
             UpdateAutoPlayLabel();
 
             CardView.OnHoverChanged = OnCardHover;
-            _loop.Start();
         }
 
         void OnSetupComplete()
@@ -270,10 +299,12 @@ namespace WitsAndFools
 
         void OnGameOver(int foolIndex)
         {
+            int winnerIndex = 1 - foolIndex;
             string msg = foolIndex == HumanPlayerIndex
                 ? "You are the Fool."
                 : $"You won! {OpponentName} is the Fool.";
             Hud?.ShowGameOver(msg);
+            OnMatchComplete?.Invoke(winnerIndex);
         }
 
         // ---------- Input ----------

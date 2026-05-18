@@ -298,12 +298,178 @@ namespace WitsAndFools.EditorTools
             tooltipLabel.gameObject.SetActive(false);
             hud.TooltipLabel = tooltipLabel;
 
+            // ----- Wrap existing match UI in a MatchPanel group -----
+            var matchPanel = NewChild(canvasRT, "MatchPanel");
+            FillParent(matchPanel);
+            // Reparent all match-specific UI under MatchPanel
+            felt.SetParent(matchPanel, true);
+            frame.SetParent(matchPanel, true);
+            inner.SetParent(matchPanel, true);
+            hudBar.SetParent(matchPanel, true);
+            endBoutBtn.SetParent(matchPanel, true);
+            deckSlot.SetParent(matchPanel, true);
+            trumpSlot.SetParent(matchPanel, true);
+            discardSlot.SetParent(matchPanel, true);
+            boutArea.SetParent(matchPanel, true);
+            playerHand.SetParent(matchPanel, true);
+            opponentHand.SetParent(matchPanel, true);
+            goPanel.SetParent(matchPanel, true);
+            acPanel.SetParent(matchPanel, true);
+            autoPlayBtn.SetParent(matchPanel, true);
+            ((RectTransform)tooltipLabel.transform).SetParent(matchPanel, true);
+            matchPanel.gameObject.SetActive(false);
+
+            // ----- Map Panel -----
+            var mapPanel = NewChild(canvasRT, "MapPanel");
+            FillParent(mapPanel);
+            var mapBg = mapPanel.gameObject.AddComponent<Image>();
+            mapBg.color = new Color(0.08f, 0.12f, 0.18f);
+
+            var mapTitle = AddText(mapPanel, "MapTitle", "Act 1 — The Bilge Rat Tavern",
+                anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 36, color: new Color(0.95f, 0.85f, 0.55f));
+
+            var mapSubtitle = AddText(mapPanel, "MapSubtitle", "Choose your path:",
+                anchorMin: new Vector2(0.1f, 0.74f), anchorMax: new Vector2(0.9f, 0.82f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 24, color: new Color(0.7f, 0.7f, 0.7f));
+
+            var mapNodeContainer = NewChild(mapPanel, "MapNodeContainer");
+            mapNodeContainer.anchorMin = new Vector2(0.15f, 0.15f);
+            mapNodeContainer.anchorMax = new Vector2(0.85f, 0.72f);
+            mapNodeContainer.offsetMin = Vector2.zero;
+            mapNodeContainer.offsetMax = Vector2.zero;
+            var nodeLayout = mapNodeContainer.gameObject.AddComponent<VerticalLayoutGroup>();
+            nodeLayout.spacing = 16;
+            nodeLayout.childAlignment = TextAnchor.UpperCenter;
+            nodeLayout.childControlWidth = true;
+            nodeLayout.childControlHeight = false;
+            nodeLayout.childForceExpandWidth = false;
+            nodeLayout.childForceExpandHeight = false;
+            var nodeFitter = mapNodeContainer.gameObject.AddComponent<ContentSizeFitter>();
+            nodeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            mapPanel.gameObject.SetActive(false);
+
+            // ----- Result Panel -----
+            var resultPanel = NewChild(canvasRT, "ResultPanel");
+            FillParent(resultPanel);
+            var resultBg = resultPanel.gameObject.AddComponent<Image>();
+            resultBg.color = new Color(0.06f, 0.06f, 0.10f, 0.95f);
+
+            var resultTitle = AddText(resultPanel, "ResultTitle", "Victory!",
+                anchorMin: new Vector2(0.1f, 0.65f), anchorMax: new Vector2(0.9f, 0.85f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 48, color: new Color(0.95f, 0.85f, 0.55f));
+
+            var resultDetails = AddText(resultPanel, "ResultDetails", "",
+                anchorMin: new Vector2(0.15f, 0.40f), anchorMax: new Vector2(0.85f, 0.62f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 26, color: Color.white);
+            resultDetails.enableWordWrapping = true;
+
+            var resultReward = AddText(resultPanel, "ResultReward", "",
+                anchorMin: new Vector2(0.15f, 0.28f), anchorMax: new Vector2(0.85f, 0.40f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 30, color: new Color(0.4f, 0.85f, 0.4f));
+
+            var resultContinueBtn = AddButton(resultPanel, "ResultContinueButton", "Continue");
+            resultContinueBtn.anchorMin = new Vector2(0.5f, 0.08f);
+            resultContinueBtn.anchorMax = new Vector2(0.5f, 0.08f);
+            resultContinueBtn.pivot = new Vector2(0.5f, 0);
+            resultContinueBtn.sizeDelta = new Vector2(260, 70);
+
+            resultPanel.gameObject.SetActive(false);
+
+            // ----- Run Over Panel -----
+            var runOverPanel = NewChild(canvasRT, "RunOverPanel");
+            FillParent(runOverPanel);
+            var runOverBg = runOverPanel.gameObject.AddComponent<Image>();
+            runOverBg.color = new Color(0.04f, 0.04f, 0.08f);
+
+            var runOverTitle = AddText(runOverPanel, "RunOverTitle", "Run Over",
+                anchorMin: new Vector2(0.1f, 0.60f), anchorMax: new Vector2(0.9f, 0.85f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 52, color: new Color(0.95f, 0.85f, 0.55f));
+
+            var runOverStats = AddText(runOverPanel, "RunOverStats", "",
+                anchorMin: new Vector2(0.2f, 0.30f), anchorMax: new Vector2(0.8f, 0.58f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 26, color: Color.white);
+            runOverStats.enableWordWrapping = true;
+
+            var runOverRestartBtn = AddButton(runOverPanel, "RunOverRestartButton", "New Run");
+            runOverRestartBtn.anchorMin = new Vector2(0.5f, 0.10f);
+            runOverRestartBtn.anchorMax = new Vector2(0.5f, 0.10f);
+            runOverRestartBtn.pivot = new Vector2(0.5f, 0);
+            runOverRestartBtn.sizeDelta = new Vector2(260, 70);
+
+            runOverPanel.gameObject.SetActive(false);
+
+            // ----- Run HUD (persistent bar) -----
+            var runHudPanel = NewChild(canvasRT, "RunHudPanel");
+            runHudPanel.anchorMin = new Vector2(0, 0);
+            runHudPanel.anchorMax = new Vector2(1, 0);
+            runHudPanel.pivot = new Vector2(0.5f, 0);
+            runHudPanel.sizeDelta = new Vector2(0, 50);
+            var runHudBg = runHudPanel.gameObject.AddComponent<Image>();
+            runHudBg.color = new Color(0, 0, 0, 0.6f);
+
+            var prestigeLabel = AddText(runHudPanel, "PrestigeLabel", "Prestige: ♥♥♥♥",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.25f, 1),
+                pivot: new Vector2(0, 0.5f), alignment: TextAlignmentOptions.MidlineLeft,
+                fontSize: 22, color: new Color(1f, 0.4f, 0.4f));
+            ((RectTransform)prestigeLabel.transform).offsetMin = new Vector2(16, 0);
+
+            var florinsLabel = AddText(runHudPanel, "FlorinsLabel", "Florins: 0",
+                anchorMin: new Vector2(0.25f, 0), anchorMax: new Vector2(0.5f, 1),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 22, color: new Color(0.95f, 0.85f, 0.40f));
+
+            var actLabel = AddText(runHudPanel, "ActLabel", "Act 1 of 5",
+                anchorMin: new Vector2(0.5f, 0), anchorMax: new Vector2(0.75f, 1),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 22, color: Color.white);
+
+            var abilitiesLabel = AddText(runHudPanel, "AbilitiesLabel", "Abilities: 4/5",
+                anchorMin: new Vector2(0.75f, 0), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(1, 0.5f), alignment: TextAlignmentOptions.MidlineRight,
+                fontSize: 22, color: new Color(0.6f, 0.8f, 1f));
+            ((RectTransform)abilitiesLabel.transform).offsetMax = new Vector2(-16, 0);
+
+            runHudPanel.gameObject.SetActive(false);
+
             // ----- GameManager wiring -----
             var gmGO = new GameObject("GameManager");
             var gm = gmGO.AddComponent<GameManager>();
             gm.Table = table;
             gm.Hud = hud;
             gm.CardViewPrefab = cardPrefab;
+            gm.AutoStartOnAwake = false;
+
+            // ----- RunManager wiring -----
+            var rmGO = new GameObject("RunManager");
+            var rm = rmGO.AddComponent<RunManager>();
+            rm.GameManager = gm;
+            rm.MatchPanel = matchPanel.gameObject;
+            rm.MapPanel = mapPanel.gameObject;
+            rm.ResultPanel = resultPanel.gameObject;
+            rm.RunOverPanel = runOverPanel.gameObject;
+            rm.RunHudPanel = runHudPanel.gameObject;
+            rm.MapTitleLabel = mapTitle;
+            rm.MapNodeContainer = mapNodeContainer;
+            rm.ResultTitleLabel = resultTitle;
+            rm.ResultDetailsLabel = resultDetails;
+            rm.ResultRewardLabel = resultReward;
+            rm.ResultContinueButton = resultContinueBtn.GetComponent<Button>();
+            rm.RunOverTitleLabel = runOverTitle;
+            rm.RunOverStatsLabel = runOverStats;
+            rm.RunOverRestartButton = runOverRestartBtn.GetComponent<Button>();
+            rm.PrestigeLabel = prestigeLabel;
+            rm.FlorinsLabel = florinsLabel;
+            rm.ActLabel = actLabel;
+            rm.AbilitiesLabel = abilitiesLabel;
 
             // Save scene
             EditorSceneManager.SaveScene(scene, ScenePath);
