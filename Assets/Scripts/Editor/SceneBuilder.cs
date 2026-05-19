@@ -739,31 +739,31 @@ namespace WitsAndFools.EditorTools
             runHudPanel.anchorMin = new Vector2(0, 0);
             runHudPanel.anchorMax = new Vector2(1, 0);
             runHudPanel.pivot = new Vector2(0.5f, 0);
-            runHudPanel.sizeDelta = new Vector2(0, 36);
+            runHudPanel.sizeDelta = new Vector2(0, 70);
             var runHudBg = runHudPanel.gameObject.AddComponent<Image>();
-            runHudBg.color = new Color(0, 0, 0, 0.65f);
+            runHudBg.color = new Color(0, 0, 0, 0.75f);
 
             var prestigeLabel = AddText(runHudPanel, "PrestigeLabel", "Prestige: ♥♥♥♥",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.25f, 1),
                 pivot: new Vector2(0, 0.5f), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 13, color: ThemePalette.PrestigeRed, font: MonoFont);
-            ((RectTransform)prestigeLabel.transform).offsetMin = new Vector2(16, 0);
+                fontSize: 26, color: ThemePalette.PrestigeRed, font: MonoFont);
+            ((RectTransform)prestigeLabel.transform).offsetMin = new Vector2(24, 0);
 
             var florinsLabel = AddText(runHudPanel, "FlorinsLabel", "Florins: 0",
                 anchorMin: new Vector2(0.25f, 0), anchorMax: new Vector2(0.5f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 13, color: ThemePalette.Gold, font: MonoFont);
+                fontSize: 26, color: ThemePalette.Gold, font: MonoFont);
 
             var actLabel = AddText(runHudPanel, "ActLabel", "Act 1 of 5",
                 anchorMin: new Vector2(0.5f, 0), anchorMax: new Vector2(0.75f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 13, color: Color.white);
+                fontSize: 26, color: Color.white);
 
             var abilitiesLabel = AddText(runHudPanel, "AbilitiesLabel", "Abilities: 4/5",
                 anchorMin: new Vector2(0.75f, 0), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(1, 0.5f), alignment: TextAlignmentOptions.MidlineRight,
-                fontSize: 13, color: ThemePalette.AbilityBlue, font: MonoFont);
-            ((RectTransform)abilitiesLabel.transform).offsetMax = new Vector2(-16, 0);
+                fontSize: 26, color: ThemePalette.AbilityBlue, font: MonoFont);
+            ((RectTransform)abilitiesLabel.transform).offsetMax = new Vector2(-24, 0);
 
             runHudPanel.gameObject.SetActive(false);
 

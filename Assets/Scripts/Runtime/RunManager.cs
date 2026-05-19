@@ -549,8 +549,8 @@ namespace WitsAndFools
             if (containerH <= 0) containerH = 600f;
 
             float colSpacing = containerW / (totalCols + 1);
-            float nodeW = 150f;
-            float nodeH = 110f;
+            float nodeW = 200f;
+            float nodeH = 140f;
             float nodeGap = 14f;
             var nodePositions = new List<List<Vector2>>();
 
@@ -598,13 +598,13 @@ namespace WitsAndFools
                 float headerX = nodePositions[col][0].x;
                 float topNodeY = nodePositions[col][0].y + nodeH / 2f;
                 headerRT.anchoredPosition = new Vector2(headerX, topNodeY + 12f);
-                headerRT.sizeDelta = new Vector2(80, 28);
+                headerRT.sizeDelta = new Vector2(80, 36);
                 var headerTMP = headerGO.AddComponent<TextMeshProUGUI>();
                 var hFont = FontAssets.Heading;
                 if (hFont) headerTMP.font = hFont;
                 headerTMP.text = numeral;
                 headerTMP.alignment = TextAlignmentOptions.Center;
-                headerTMP.fontSize = 16;
+                headerTMP.fontSize = 22;
                 headerTMP.color = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.6f);
                 headerTMP.raycastTarget = false;
             }
@@ -661,7 +661,7 @@ namespace WitsAndFools
             if (headFont) typeTMP.font = headFont;
             typeTMP.text = typeName;
             typeTMP.alignment = TextAlignmentOptions.Center;
-            typeTMP.fontSize = 14;
+            typeTMP.fontSize = 20;
             typeTMP.characterSpacing = 4;
             typeTMP.raycastTarget = false;
             if (future) typeTMP.color = new Color(typeColor.r * 1.4f, typeColor.g * 1.4f, typeColor.b * 1.4f, 0.45f);
@@ -682,7 +682,7 @@ namespace WitsAndFools
                 iconRT.anchorMin = new Vector2(0.5f, 0.3f);
                 iconRT.anchorMax = new Vector2(0.5f, 0.7f);
                 iconRT.pivot = new Vector2(0.5f, 0.5f);
-                iconRT.sizeDelta = new Vector2(36, 0);
+                iconRT.sizeDelta = new Vector2(44, 0);
                 iconRT.anchoredPosition = new Vector2(0, -2);
                 var iconImg = iconGO.GetComponent<Image>();
                 iconImg.sprite = MapNodeSprites[spriteIdx];
@@ -706,7 +706,7 @@ namespace WitsAndFools
             var labelTMP = labelGO.AddComponent<TextMeshProUGUI>();
             labelTMP.text = title;
             labelTMP.alignment = TextAlignmentOptions.Center;
-            labelTMP.fontSize = 13;
+            labelTMP.fontSize = 18;
             labelTMP.enableWordWrapping = false;
             labelTMP.overflowMode = TextOverflowModes.Ellipsis;
             labelTMP.raycastTarget = false;
