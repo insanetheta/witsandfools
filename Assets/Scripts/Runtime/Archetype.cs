@@ -118,5 +118,43 @@ namespace WitsAndFools
             ArchetypeType.Gambler => GamblerSynergy.Contains(ability),
             _ => false
         };
+
+        public static string[] BuildPaths(this ArchetypeType a) => a switch
+        {
+            ArchetypeType.Rogue => new[] { "Shadow", "Spy", "Saboteur" },
+            ArchetypeType.Brute => new[] { "Berserker", "Brawler", "Warlord" },
+            ArchetypeType.Diplomat => new[] { "Courtier", "Puppeteer", "Peacemaker" },
+            ArchetypeType.Gambler => new[] { "CardShark", "HighRoller", "Trickster" },
+            _ => System.Array.Empty<string>()
+        };
+
+        public static AbilityType WeightedPick(List<AbilityType> candidates, string targetPath,
+            int pathWeight, int archWeight, int neutralWeight, System.Random rng)
+        {
+            if (candidates.Count == 0) return default;
+            if (candidates.Count == 1) return candidates[0];
+
+            int totalWeight = 0;
+            var weights = new int[candidates.Count];
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                var def = AbilityPool.Get(candidates[i]);
+                int w;
+                if (def.BuildPath == targetPath) w = pathWeight;
+                else if (def.Owner.HasValue) w = archWeight;
+                else w = neutralWeight;
+                weights[i] = w;
+                totalWeight += w;
+            }
+
+            int roll = rng.Next(totalWeight);
+            int acc = 0;
+            for (int i = 0; i < weights.Length; i++)
+            {
+                acc += weights[i];
+                if (roll < acc) return candidates[i];
+            }
+            return candidates[^1];
+        }
     }
 }

@@ -89,6 +89,8 @@ namespace WitsAndFools.EditorTools
             var trinket = archetype.StartingTrinket();
             if (trinket.HasValue) run.PlayerTrinkets.Add(trinket.Value);
 
+            string adoptedPath = null;
+
             run.CurrentAct = 0;
             run.CurrentMap = MapGenerator.Generate(0, rng);
 
@@ -108,13 +110,13 @@ namespace WitsAndFools.EditorTools
                         case MapNodeType.BossMatch:
                             SimulateMatch(run, node, rng);
                             if (run.RunComplete) break;
-                            PickAbilityReward(run, node, rng);
+                            PickAbilityReward(run, node, rng, ref adoptedPath);
                             break;
                         case MapNodeType.Shop:
-                            SimulateShop(run, rng);
+                            SimulateShop(run, rng, ref adoptedPath);
                             break;
                         case MapNodeType.Rumor:
-                            SimulateRumor(run, rng);
+                            SimulateRumor(run, rng, ref adoptedPath);
                             break;
                         case MapNodeType.Rest:
                             SimulateRest(run, rng);
@@ -209,18 +211,29 @@ namespace WitsAndFools.EditorTools
             }
         }
 
-        static void PickAbilityReward(RunState run, MapNode node, System.Random rng)
+        static void PickAbilityReward(RunState run, MapNode node, System.Random rng, ref string adoptedPath)
         {
             if (run.RunComplete) return;
             bool isElite = node.Type == MapNodeType.EliteMatch || node.Type == MapNodeType.BossMatch;
             var offerings = PickAbilityOfferings(run, 3, isElite, rng);
             if (offerings.Count == 0) return;
 
-            var pick = offerings[rng.Next(offerings.Count)];
+            AbilityType pick;
+            if (adoptedPath != null)
+                pick = ArchetypeDefinitions.WeightedPick(offerings, adoptedPath, 5, 2, 1, rng);
+            else
+                pick = offerings[rng.Next(offerings.Count)];
+
             if (run.PlayerAbilities.Count >= run.MaxAbilitySlots)
                 run.PlayerAbilities.RemoveAt(0);
             run.PlayerAbilities.Add(pick);
             run.RecordAbilityPicked(pick);
+
+            if (adoptedPath == null)
+            {
+                var def = AbilityPool.Get(pick);
+                if (def.BuildPath != null) adoptedPath = def.BuildPath;
+            }
         }
 
         static List<AbilityType> PickAbilityOfferings(RunState run, int count, bool isElite, System.Random rng)
@@ -243,20 +256,26 @@ namespace WitsAndFools.EditorTools
             return result;
         }
 
-        static void SimulateShop(RunState run, System.Random rng)
+        static void SimulateShop(RunState run, System.Random rng, ref string adoptedPath)
         {
             if (run.Florins >= 8 && run.PlayerAbilities.Count < run.MaxAbilitySlots)
             {
-                var pool = new List<AbilityDefinition>();
+                var pool = new List<AbilityType>();
                 foreach (var def in AbilityPool.All)
                 {
                     if (run.PlayerAbilities.Contains(def.Type)) continue;
                     if (!def.IsNeutral && def.Owner != run.PlayerArchetype) continue;
-                    pool.Add(def);
+                    pool.Add(def.Type);
                 }
                 if (pool.Count > 0)
                 {
-                    var pick = pool[rng.Next(pool.Count)];
+                    AbilityType pickType;
+                    if (adoptedPath != null)
+                        pickType = ArchetypeDefinitions.WeightedPick(pool, adoptedPath, 5, 2, 1, rng);
+                    else
+                        pickType = pool[rng.Next(pool.Count)];
+
+                    var pick = AbilityPool.Get(pickType);
                     int price = pick.Rarity switch
                     {
                         AbilityRarity.Common => 8,
@@ -267,8 +286,11 @@ namespace WitsAndFools.EditorTools
                     if (run.Florins >= price)
                     {
                         run.Florins -= price;
-                        run.PlayerAbilities.Add(pick.Type);
-                        run.RecordAbilityPicked(pick.Type);
+                        run.PlayerAbilities.Add(pickType);
+                        run.RecordAbilityPicked(pickType);
+
+                        if (adoptedPath == null && pick.BuildPath != null)
+                            adoptedPath = pick.BuildPath;
                     }
                 }
             }
@@ -293,7 +315,7 @@ namespace WitsAndFools.EditorTools
             }
         }
 
-        static void SimulateRumor(RunState run, System.Random rng)
+        static void SimulateRumor(RunState run, System.Random rng, ref string adoptedPath)
         {
             int roll = rng.Next(100);
             if (roll < 40)
@@ -302,18 +324,29 @@ namespace WitsAndFools.EditorTools
             }
             else if (roll < 70 && run.PlayerAbilities.Count < run.MaxAbilitySlots)
             {
-                var pool = new List<AbilityDefinition>();
+                var pool = new List<AbilityType>();
                 foreach (var def in AbilityPool.All)
                 {
                     if (run.PlayerAbilities.Contains(def.Type)) continue;
                     if (!def.IsNeutral && def.Owner != run.PlayerArchetype) continue;
-                    pool.Add(def);
+                    pool.Add(def.Type);
                 }
                 if (pool.Count > 0)
                 {
-                    var pick = pool[rng.Next(pool.Count)];
-                    run.PlayerAbilities.Add(pick.Type);
-                    run.RecordAbilityPicked(pick.Type);
+                    AbilityType pick;
+                    if (adoptedPath != null)
+                        pick = ArchetypeDefinitions.WeightedPick(pool, adoptedPath, 5, 2, 1, rng);
+                    else
+                        pick = pool[rng.Next(pool.Count)];
+
+                    run.PlayerAbilities.Add(pick);
+                    run.RecordAbilityPicked(pick);
+
+                    if (adoptedPath == null)
+                    {
+                        var def = AbilityPool.Get(pick);
+                        if (def.BuildPath != null) adoptedPath = def.BuildPath;
+                    }
                 }
             }
             else
