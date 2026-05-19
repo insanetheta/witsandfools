@@ -640,10 +640,14 @@ namespace WitsAndFools
             stripeRT.anchorMin = new Vector2(0, 1);
             stripeRT.anchorMax = Vector2.one;
             stripeRT.pivot = new Vector2(0.5f, 1);
-            stripeRT.sizeDelta = new Vector2(0, 5);
+            stripeRT.sizeDelta = new Vector2(0, 6);
             stripeRT.anchoredPosition = Vector2.zero;
-            var stripeColor = current ? typeColor : (visited && wasChosen ? typeColor * 0.6f : typeColor * 0.4f);
-            stripeColor.a = visited && !wasChosen ? 0.3f : 0.9f;
+            var brightType = new Color(
+                Mathf.Min(typeColor.r * 1.6f, 1f),
+                Mathf.Min(typeColor.g * 1.6f, 1f),
+                Mathf.Min(typeColor.b * 1.6f, 1f));
+            var stripeColor = current ? brightType : (visited && wasChosen ? typeColor * 0.6f : typeColor * 0.4f);
+            stripeColor.a = visited && !wasChosen ? 0.3f : 1f;
             stripeGO.GetComponent<Image>().color = stripeColor;
             stripeGO.GetComponent<Image>().raycastTarget = false;
 
@@ -664,13 +668,15 @@ namespace WitsAndFools
             typeTMP.fontSize = 20;
             typeTMP.characterSpacing = 4;
             typeTMP.raycastTarget = false;
-            if (future) typeTMP.color = new Color(typeColor.r * 1.4f, typeColor.g * 1.4f, typeColor.b * 1.4f, 0.45f);
+            if (future) typeTMP.color = new Color(
+                Mathf.Min(typeColor.r * 2.2f, 1f),
+                Mathf.Min(typeColor.g * 2.2f, 1f),
+                Mathf.Min(typeColor.b * 2.2f, 1f), 0.5f);
             else if (visited && !wasChosen) typeTMP.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
             else typeTMP.color = new Color(
-                Mathf.Min(typeColor.r * 2f, 1f),
-                Mathf.Min(typeColor.g * 2f, 1f),
-                Mathf.Min(typeColor.b * 2f, 1f),
-                current ? 1f : 0.7f);
+                Mathf.Min(typeColor.r * 2.5f, 1f),
+                Mathf.Min(typeColor.g * 2.5f, 1f),
+                Mathf.Min(typeColor.b * 2.5f, 1f), 1f);
 
             // Icon sprite (smaller, between type and name)
             int spriteIdx = (int)node.Type;
@@ -1987,7 +1993,10 @@ namespace WitsAndFools
                 VignetteImage.color = Color.white;
             }
             if (MapVenueBgImage && VenueBackgroundSprites != null && act < VenueBackgroundSprites.Length)
+            {
                 MapVenueBgImage.sprite = VenueBackgroundSprites[act];
+                MapVenueBgImage.color = new Color(1, 1, 1, 0.2f);
+            }
             if (ResultVenueBgImage && VenueBackgroundSprites != null && act < VenueBackgroundSprites.Length)
                 ResultVenueBgImage.sprite = VenueBackgroundSprites[act];
             if (RunOverVenueBgImage && VenueBackgroundSprites != null && act < VenueBackgroundSprites.Length)

@@ -457,13 +457,13 @@ namespace WitsAndFools.EditorTools
             // Venue background (dimmed overlay, set at runtime by RunManager)
             var mapVenueBg = NewChild(mapPanel.GetComponent<RectTransform>(), "MapVenueBg");
             var mapVenueBgImg = mapVenueBg.gameObject.AddComponent<Image>();
-            mapVenueBgImg.color = new Color(1, 1, 1, 0.25f);
+            mapVenueBgImg.color = new Color(1, 1, 1, 0f);
             mapVenueBgImg.raycastTarget = false;
             FillParent(mapVenueBg);
             // Vignette overlay
             var mapVignette = NewChild(mapPanel, "MapVignette");
             var mapVignetteImg = mapVignette.gameObject.AddComponent<Image>();
-            if (vignetteSprite) { mapVignetteImg.sprite = vignetteSprite; mapVignetteImg.color = new Color(1, 1, 1, 0.6f); }
+            if (vignetteSprite) { mapVignetteImg.sprite = vignetteSprite; mapVignetteImg.color = new Color(1, 1, 1, 0.4f); }
             else mapVignetteImg.color = new Color(0, 0, 0, 0);
             mapVignetteImg.raycastTarget = false;
             FillParent(mapVignette);
