@@ -34,6 +34,9 @@ namespace WitsAndFools
         public bool[] RattledNerves = new bool[2];
         public bool[] ClumsyFingers = new bool[2];
 
+        // Archetype resources (one per player, null if no archetype)
+        public ResourceType?[] ArchetypeResource = new ResourceType?[2];
+
         // Archetype passive perks
         public bool[] ShadowReflexes = new bool[2];  // Rogue: defend with matching rank = draw 1
         public bool[] BruteFury = new bool[2];        // Brute: when defender eats, attacker draws 1 extra

@@ -25,6 +25,10 @@ namespace WitsAndFools
         public TMP_Text DeckTopLabel;
         public TMP_Text InfoLabel;
 
+        [Header("Resources")]
+        public TMP_Text PlayerResourceLabel;
+        public TMP_Text OpponentResourceLabel;
+
         [Header("Tooltip")]
         public TMP_Text TooltipLabel;
 
@@ -93,6 +97,30 @@ namespace WitsAndFools
             if (OpponentPortrait && portrait) { OpponentPortrait.sprite = portrait; OpponentPortrait.color = Color.white; }
             else if (OpponentPortrait) OpponentPortrait.color = ThemePalette.WarmSlate;
         }
+
+        public void SetResource(int player, ResourceType type, int amount)
+        {
+            var label = player == 0 ? PlayerResourceLabel : OpponentResourceLabel;
+            if (!label) return;
+            label.gameObject.SetActive(true);
+            label.text = $"{type.DisplayName()}: {amount}";
+            label.color = ResourceColor(type);
+        }
+
+        public void HideResource(int player)
+        {
+            var label = player == 0 ? PlayerResourceLabel : OpponentResourceLabel;
+            if (label) label.gameObject.SetActive(false);
+        }
+
+        static Color ResourceColor(ResourceType r) => r switch
+        {
+            ResourceType.Intel => ThemePalette.RoyalBlue,
+            ResourceType.Fury => ThemePalette.VenetianRed,
+            ResourceType.Favor => ThemePalette.Gold,
+            ResourceType.Luck => ThemePalette.Sage,
+            _ => Color.white
+        };
 
         public void ShowTooltip(string text) { if (TooltipLabel) { TooltipLabel.gameObject.SetActive(true); TooltipLabel.text = text; } }
         public void HideTooltip() { if (TooltipLabel) TooltipLabel.gameObject.SetActive(false); }

@@ -388,6 +388,30 @@ namespace WitsAndFools.EditorTools
             infoLabel.gameObject.SetActive(false);
             hud.InfoLabel = infoLabel;
 
+            // ----- Player resource label (bottom-left, near hand) -----
+            var playerResLabel = AddText(canvasRT, "PlayerResourceLabel", "",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.3f, 0),
+                pivot: new Vector2(0, 0),
+                alignment: TextAlignmentOptions.BottomLeft, fontSize: 18,
+                color: ThemePalette.Gold, font: MonoFont);
+            var playerResRT = (RectTransform)playerResLabel.transform;
+            playerResRT.sizeDelta = new Vector2(0, 30);
+            playerResRT.anchoredPosition = new Vector2(16, 170);
+            playerResLabel.gameObject.SetActive(false);
+            hud.PlayerResourceLabel = playerResLabel;
+
+            // ----- Opponent resource label (top-left, near opponent area) -----
+            var oppResLabel = AddText(canvasRT, "OpponentResourceLabel", "",
+                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(0.3f, 1),
+                pivot: new Vector2(0, 1),
+                alignment: TextAlignmentOptions.TopLeft, fontSize: 16,
+                color: ThemePalette.Gold, font: MonoFont);
+            var oppResRT = (RectTransform)oppResLabel.transform;
+            oppResRT.sizeDelta = new Vector2(0, 26);
+            oppResRT.anchoredPosition = new Vector2(16, -48);
+            oppResLabel.gameObject.SetActive(false);
+            hud.OpponentResourceLabel = oppResLabel;
+
             // ----- Vignette overlay (on top of all game elements) -----
             var vignette = NewChild(canvasRT, "VignetteOverlay");
             var vignetteImg = vignette.gameObject.AddComponent<Image>();

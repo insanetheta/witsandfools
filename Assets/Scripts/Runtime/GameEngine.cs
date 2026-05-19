@@ -42,6 +42,8 @@ namespace WitsAndFools
         bool[] _slipAwayUsed = new bool[2];
         bool[] _jugglersBallsUsed = new bool[2];
         bool[] _luckyDrawUsed = new bool[2];
+        readonly int[] _resource = new int[2];
+        bool[] _attackedThisBout = new bool[2];
         readonly List<Rank> _pendingBonusRanks = new();
 
         public int AttackerIndex { get; private set; }
@@ -86,9 +88,29 @@ namespace WitsAndFools
         public event Action<int> OnGameOver;
         public event Action<int, Card, AbilityType> OnAbilityUsed;
         public event Action<Suit> OnTrumpChanged;
+        public event Action<int, ResourceType, int> OnResourceChanged;
 
         public bool TrumpChangerUsed => _trumpChangerUsed;
         public bool DoubleTroubleActive => _doubleTroubleActive;
+
+        public int GetResource(int player) => _resource[player];
+        public ResourceType? GetResourceType(int player) => _config.ArchetypeResource[player];
+
+        public void GainResource(int player, int amount)
+        {
+            if (_config.ArchetypeResource[player] == null || amount <= 0) return;
+            _resource[player] += amount;
+            OnResourceChanged?.Invoke(player, _config.ArchetypeResource[player].Value, _resource[player]);
+        }
+
+        public bool SpendResource(int player, int cost)
+        {
+            if (_config.ArchetypeResource[player] == null || cost <= 0) return false;
+            if (_resource[player] < cost) return false;
+            _resource[player] -= cost;
+            OnResourceChanged?.Invoke(player, _config.ArchetypeResource[player].Value, _resource[player]);
+            return true;
+        }
 
         public GameEngine(int? seed = null, IReadOnlyDictionary<(Suit, Rank), AbilityType> abilities = null)
             : this(seed, new MatchConfig { Abilities = abilities != null ? new Dictionary<(Suit, Rank), AbilityType>(abilities) : DeckConfig.DefaultAbilities })
@@ -125,6 +147,10 @@ namespace WitsAndFools
             _slipAwayUsed = new bool[2];
             _jugglersBallsUsed = new bool[2];
             _luckyDrawUsed = new bool[2];
+            _resource[0] = 0;
+            _resource[1] = 0;
+            _attackedThisBout[0] = false;
+            _attackedThisBout[1] = false;
 
             for (int p = 0; p < 2; p++)
             {
@@ -250,6 +276,7 @@ namespace WitsAndFools
 
             _hands[playerIndex].Remove(card);
             _bout.AddAttack(card);
+            _attackedThisBout[playerIndex] = true;
 
             if (_doubleTroubleActive) _doubleTroubleActive = false;
             else if (_config.DuelistGlove[playerIndex] && !_duelistGloveUsedThisBout[playerIndex] && rankBypass)
@@ -304,6 +331,7 @@ namespace WitsAndFools
             {
                 _hands[playerIndex].Add(_deck.Draw());
                 OnDrew?.Invoke(playerIndex, 1);
+                GainResource(playerIndex, 1);
             }
 
             return true;
@@ -347,6 +375,7 @@ namespace WitsAndFools
             {
                 _hands[attacker].Add(_deck.Draw());
                 OnDrew?.Invoke(attacker, 1);
+                GainResource(attacker, 1);
             }
 
             if (_config.LuckyDraw[playerIndex] && !_luckyDrawUsed[playerIndex] && _hands[playerIndex].Count > 1)
@@ -358,6 +387,7 @@ namespace WitsAndFools
                     _hands[playerIndex].Remove(worst.Value);
                     _discard.Add(worst.Value);
                 }
+                GainResource(playerIndex, 1);
             }
 
             ResolveBout(BoutOutcome.DefenderAteCards);
@@ -628,6 +658,8 @@ namespace WitsAndFools
             _pileOnBonus = 0;
             _duelistGloveUsedThisBout = new bool[2];
 
+            ApplyResourceDecay();
+
             if (CheckGameOver(attackerBefore, defenderBefore, outcome)) return;
 
             if (_config.FixedAttacker)
@@ -654,18 +686,45 @@ namespace WitsAndFools
             OnTurnBegan?.Invoke(AttackerIndex);
         }
 
+        void ApplyResourceDecay()
+        {
+            for (int p = 0; p < 2; p++)
+            {
+                var rt = _config.ArchetypeResource[p];
+                if (rt == null) continue;
+
+                switch (rt.Value)
+                {
+                    case ResourceType.Luck:
+                        if (_resource[p] > 0)
+                        {
+                            _resource[p] = 0;
+                            OnResourceChanged?.Invoke(p, rt.Value, 0);
+                        }
+                        break;
+                    case ResourceType.Fury:
+                        if (!_attackedThisBout[p] && _resource[p] > 0)
+                        {
+                            _resource[p]--;
+                            OnResourceChanged?.Invoke(p, rt.Value, _resource[p]);
+                        }
+                        break;
+                }
+                _attackedThisBout[p] = false;
+            }
+        }
+
         void ApplyCourtFavor(int player)
         {
             if (!_config.CourtFavor[player] || _deck.Count < 2) return;
-            var top2 = _deck.PeekTop(2); // [0]=top, [1]=second
-            // Keep the more useful card on top, send the other to bottom
+            var top2 = _deck.PeekTop(2);
             int score0 = CardValue(top2[0], Trump);
             int score1 = CardValue(top2[1], Trump);
             if (score1 > score0)
-                _deck.SwapTopTwo(); // put the better card on top
-            // Send second-from-top (the worse card) to bottom
+                _deck.SwapTopTwo();
             _deck.SwapTopTwo();
             _deck.PutTopOnBottom();
+            GainResource(player, 1);
         }
 
         static int CardValue(Card c, Suit trump)

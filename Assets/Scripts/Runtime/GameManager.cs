@@ -206,6 +206,7 @@ namespace WitsAndFools
             Engine.OnGameOver += OnGameOver;
             Engine.OnAbilityUsed += OnAbilityUsed;
             Engine.OnTrumpChanged += OnTrumpChanged;
+            Engine.OnResourceChanged += OnResourceChanged;
         }
 
         void WireHudButtons()
@@ -252,6 +253,15 @@ namespace WitsAndFools
 
             UpdateHud();
             ApplyHighlightForPhase();
+
+            for (int p = 0; p < 2; p++)
+            {
+                var rt = Engine.GetResourceType(p);
+                if (rt.HasValue)
+                    Hud.SetResource(p, rt.Value, 0);
+                else
+                    Hud.HideResource(p);
+            }
 
             if (Engine.Config.MarkedDeck[HumanPlayerIndex])
             {
@@ -535,6 +545,11 @@ namespace WitsAndFools
         {
             UpdateHud();
             ApplyHighlightForPhase();
+        }
+
+        void OnResourceChanged(int playerIndex, ResourceType type, int amount)
+        {
+            if (Hud) Hud.SetResource(playerIndex, type, amount);
         }
 
         void OnEndBoutClicked()

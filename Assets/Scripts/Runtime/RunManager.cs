@@ -715,39 +715,30 @@ namespace WitsAndFools
 
         List<AbilityType> PickAbilityOfferings(int count)
         {
-            var pool = new List<AbilityDefinition>();
-            bool isElite = _currentNode?.Type == MapNodeType.EliteMatch || _currentNode?.Type == MapNodeType.BossMatch;
-            foreach (var def in AbilityPool.All)
-            {
-                if (_run.PlayerAbilities.Contains(def.Type)) continue;
-                if (!isElite && def.Rarity == AbilityRarity.Rare && _rng.Next(100) >= 30) continue;
-                pool.Add(def);
-            }
+            var pool = BuildAbilityPool(_run.PlayerArchetype, _run.PlayerAbilities,
+                _currentNode?.Type == MapNodeType.EliteMatch || _currentNode?.Type == MapNodeType.BossMatch, _rng);
             var result = new List<AbilityType>();
             for (int i = 0; i < count && pool.Count > 0; i++)
             {
-                int idx = WeightedPick(pool, _run.PlayerArchetype, _rng);
+                int idx = _rng.Next(pool.Count);
                 result.Add(pool[idx].Type);
                 pool.RemoveAt(idx);
             }
             return result;
         }
 
-        static int WeightedPick(List<AbilityDefinition> pool, ArchetypeType? archetype, System.Random rng)
+        static List<AbilityDefinition> BuildAbilityPool(ArchetypeType? archetype,
+            List<AbilityType> owned, bool isElite, System.Random rng)
         {
-            if (!archetype.HasValue || pool.Count <= 1)
-                return rng.Next(pool.Count);
-            int totalWeight = 0;
-            for (int i = 0; i < pool.Count; i++)
-                totalWeight += archetype.Value.IsSynergy(pool[i].Type) ? 3 : 1;
-            int roll = rng.Next(totalWeight);
-            int acc = 0;
-            for (int i = 0; i < pool.Count; i++)
+            var pool = new List<AbilityDefinition>();
+            foreach (var def in AbilityPool.All)
             {
-                acc += archetype.Value.IsSynergy(pool[i].Type) ? 3 : 1;
-                if (roll < acc) return i;
+                if (owned.Contains(def.Type)) continue;
+                if (!def.IsNeutral && def.Owner != archetype) continue;
+                if (!isElite && def.Rarity == AbilityRarity.Rare && rng.Next(100) >= 30) continue;
+                pool.Add(def);
             }
-            return pool.Count - 1;
+            return pool;
         }
 
         void ShowAbilityPick()
@@ -926,16 +917,11 @@ namespace WitsAndFools
         List<(AbilityType type, int price)> PickShopOfferings(int count)
         {
             var result = new List<(AbilityType, int)>();
-            var pool = new List<AbilityDefinition>();
-            foreach (var def in AbilityPool.All)
-            {
-                if (_run.PlayerAbilities.Contains(def.Type)) continue;
-                pool.Add(def);
-            }
+            var pool = BuildAbilityPool(_run.PlayerArchetype, _run.PlayerAbilities, true, _rng);
 
             for (int i = 0; i < count && pool.Count > 0; i++)
             {
-                int idx = WeightedPick(pool, _run.PlayerArchetype, _rng);
+                int idx = _rng.Next(pool.Count);
                 var def = pool[idx];
                 pool.RemoveAt(idx);
                 int price = def.Rarity switch

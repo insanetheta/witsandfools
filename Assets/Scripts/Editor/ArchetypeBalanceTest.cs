@@ -327,33 +327,18 @@ namespace WitsAndFools.EditorTools
             foreach (var def in AbilityPool.All)
             {
                 if (run.PlayerAbilities.Contains(def.Type)) continue;
+                if (!def.IsNeutral && def.Owner != archetype) continue;
                 if (!isElite && def.Rarity == AbilityRarity.Rare && rng.Next(100) >= 30) continue;
                 pool.Add(def);
             }
             var result = new List<AbilityType>();
             for (int i = 0; i < count && pool.Count > 0; i++)
             {
-                int idx = WeightedPick(pool, archetype, rng);
+                int idx = rng.Next(pool.Count);
                 result.Add(pool[idx].Type);
                 pool.RemoveAt(idx);
             }
             return result;
-        }
-
-        static int WeightedPick(List<AbilityDefinition> pool, ArchetypeType archetype, System.Random rng)
-        {
-            if (pool.Count <= 1) return 0;
-            int totalWeight = 0;
-            for (int i = 0; i < pool.Count; i++)
-                totalWeight += archetype.IsSynergy(pool[i].Type) ? 3 : 1;
-            int roll = rng.Next(totalWeight);
-            int acc = 0;
-            for (int i = 0; i < pool.Count; i++)
-            {
-                acc += archetype.IsSynergy(pool[i].Type) ? 3 : 1;
-                if (roll < acc) return i;
-            }
-            return pool.Count - 1;
         }
 
         static void SimulateShop(RunState run, ArchetypeType archetype, Playstyle style, System.Random rng)
@@ -369,10 +354,14 @@ namespace WitsAndFools.EditorTools
             {
                 var pool = new List<AbilityDefinition>();
                 foreach (var def in AbilityPool.All)
-                    if (!run.PlayerAbilities.Contains(def.Type)) pool.Add(def);
+                {
+                    if (run.PlayerAbilities.Contains(def.Type)) continue;
+                    if (!def.IsNeutral && def.Owner != archetype) continue;
+                    pool.Add(def);
+                }
                 if (pool.Count > 0)
                 {
-                    int idx = WeightedPick(pool, archetype, rng);
+                    int idx = rng.Next(pool.Count);
                     var pick = pool[idx];
                     int price = pick.Rarity switch
                     {
@@ -426,11 +415,14 @@ namespace WitsAndFools.EditorTools
             {
                 var pool = new List<AbilityDefinition>();
                 foreach (var def in AbilityPool.All)
-                    if (!run.PlayerAbilities.Contains(def.Type)) pool.Add(def);
+                {
+                    if (run.PlayerAbilities.Contains(def.Type)) continue;
+                    if (!def.IsNeutral && def.Owner != archetype) continue;
+                    pool.Add(def);
+                }
                 if (pool.Count > 0)
                 {
-                    int idx = WeightedPick(pool, archetype, rng);
-                    var pick = pool[idx];
+                    var pick = pool[rng.Next(pool.Count)];
                     run.PlayerAbilities.Add(pick.Type);
                     run.RecordAbilityPicked(pick.Type);
                 }

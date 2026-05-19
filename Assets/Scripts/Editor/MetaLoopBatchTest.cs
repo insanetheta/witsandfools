@@ -84,7 +84,10 @@ namespace WitsAndFools.EditorTools
 
             var allArch = ArchetypeDefinitions.AllArchetypes;
             archetype = allArch[rng.Next(allArch.Length)];
+            run.PlayerArchetype = archetype;
             run.PlayerAbilities.AddRange(archetype.StartingAbilities());
+            var trinket = archetype.StartingTrinket();
+            if (trinket.HasValue) run.PlayerTrinkets.Add(trinket.Value);
 
             run.CurrentAct = 0;
             run.CurrentMap = MapGenerator.Generate(0, rng);
@@ -226,6 +229,7 @@ namespace WitsAndFools.EditorTools
             foreach (var def in AbilityPool.All)
             {
                 if (run.PlayerAbilities.Contains(def.Type)) continue;
+                if (!def.IsNeutral && def.Owner != run.PlayerArchetype) continue;
                 if (!isElite && def.Rarity == AbilityRarity.Rare && rng.Next(100) >= 30) continue;
                 pool.Add(def);
             }
@@ -245,7 +249,11 @@ namespace WitsAndFools.EditorTools
             {
                 var pool = new List<AbilityDefinition>();
                 foreach (var def in AbilityPool.All)
-                    if (!run.PlayerAbilities.Contains(def.Type)) pool.Add(def);
+                {
+                    if (run.PlayerAbilities.Contains(def.Type)) continue;
+                    if (!def.IsNeutral && def.Owner != run.PlayerArchetype) continue;
+                    pool.Add(def);
+                }
                 if (pool.Count > 0)
                 {
                     var pick = pool[rng.Next(pool.Count)];
@@ -296,7 +304,11 @@ namespace WitsAndFools.EditorTools
             {
                 var pool = new List<AbilityDefinition>();
                 foreach (var def in AbilityPool.All)
-                    if (!run.PlayerAbilities.Contains(def.Type)) pool.Add(def);
+                {
+                    if (run.PlayerAbilities.Contains(def.Type)) continue;
+                    if (!def.IsNeutral && def.Owner != run.PlayerArchetype) continue;
+                    pool.Add(def);
+                }
                 if (pool.Count > 0)
                 {
                     var pick = pool[rng.Next(pool.Count)];

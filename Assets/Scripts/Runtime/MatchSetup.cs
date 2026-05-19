@@ -191,6 +191,7 @@ namespace WitsAndFools
 
         static void ApplyArchetypePerk(MatchConfig config, int player, ArchetypeType archetype)
         {
+            config.ArchetypeResource[player] = ResourceDefinitions.ForArchetype(archetype);
             switch (archetype)
             {
                 case ArchetypeType.Rogue:    config.ShadowReflexes[player] = true; break;
