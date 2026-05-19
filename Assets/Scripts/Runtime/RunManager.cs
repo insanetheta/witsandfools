@@ -252,16 +252,30 @@ namespace WitsAndFools
             OnNodeSelected(column[bestRow], bestRow);
         }
 
-        static int NodePriority(MapNodeType t) => t switch
+        int NodePriority(MapNodeType t)
         {
-            MapNodeType.BossMatch => 100,
-            MapNodeType.EliteMatch => 90,
-            MapNodeType.RivalMatch => 80,
-            MapNodeType.Rest => 30,
-            MapNodeType.Rumor => 20,
-            MapNodeType.Shop => 10,
-            _ => 0
-        };
+            switch (t)
+            {
+                case MapNodeType.BossMatch: return 100;
+                case MapNodeType.EliteMatch: return 90;
+                case MapNodeType.RivalMatch: return 70;
+                case MapNodeType.Rest:
+                    int restBase = 25;
+                    if (_run.PlayerBurdens.Count >= 3) restBase = 95;
+                    else if (_run.PlayerBurdens.Count >= 2) restBase = 80;
+                    else if (_run.PlayerBurdens.Count >= 1) restBase = 60;
+                    return restBase;
+                case MapNodeType.Shop:
+                    int shopBase = 15;
+                    if (_run.Florins >= 15 && _run.PlayerAbilities.Count < _run.MaxAbilitySlots)
+                        shopBase = 75;
+                    else if (_run.Florins >= 10)
+                        shopBase = 40;
+                    return shopBase;
+                case MapNodeType.Rumor: return 20;
+                default: return 0;
+            }
+        }
 
         void AutoHandleShop()
         {
@@ -289,8 +303,25 @@ namespace WitsAndFools
         void AutoHandleEvent()
         {
             if (EventContinueButton && EventContinueButton.gameObject.activeSelf)
+            {
                 OnResultContinue();
-            else if (EventChoice1Button && EventChoice1Button.gameObject.activeSelf)
+                return;
+            }
+            if (_phase == RunPhase.Rest && _run.PlayerBurdens.Count > 0)
+            {
+                // Always mend when we have burdens at rest
+                if (_eventChoice1Action == DoRestMend)
+                    _eventChoice1Action.Invoke();
+                else if (_eventChoice2Action == DoRestMend)
+                    _eventChoice2Action.Invoke();
+                else
+                {
+                    DoRestMend();
+                    ShowEventOutcome($"Mended a burden. {_run.PlayerBurdens.Count} remaining.");
+                }
+                return;
+            }
+            if (EventChoice1Button && EventChoice1Button.gameObject.activeSelf)
                 _eventChoice1Action?.Invoke();
         }
 
@@ -1070,7 +1101,9 @@ namespace WitsAndFools
             if (headingFont) nameTMP.font = headingFont;
             string rarityTag = def.Rarity != AbilityRarity.Common ? $"  [{def.Rarity}]" : "";
             string bindTag = def.IsPassive ? " (Passive)" : $" ({def.BindingCount} cards)";
-            nameTMP.text = $"{abilityType.DisplayName()}{rarityTag}{bindTag}";
+            string pathTag = !string.IsNullOrEmpty(def.BuildPath) ? $"  <color=#9988AA>{def.BuildPath}</color>" : "";
+            nameTMP.text = $"{abilityType.DisplayName()}{rarityTag}{bindTag}{pathTag}";
+            nameTMP.richText = true;
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
             nameTMP.fontSize = 18;
             nameTMP.color = ThemePalette.Parchment;
@@ -1103,14 +1136,46 @@ namespace WitsAndFools
         {
             if (_run.PlayerAbilities.Count >= _run.MaxAbilitySlots)
             {
-                var worst = _run.PlayerAbilities[0];
-                _run.PlayerAbilities.RemoveAt(0);
+                int worstIdx = FindWorstAbilityIndex();
+                var worst = _run.PlayerAbilities[worstIdx];
+                _run.PlayerAbilities.RemoveAt(worstIdx);
                 Debug.Log($"[RunManager] Replaced {worst.DisplayName()} with {type.DisplayName()}");
             }
             _run.PlayerAbilities.Add(type);
             _run.RecordAbilityPicked(type);
             UpdateRunHud();
             FinishAbilityPick();
+        }
+
+        int FindWorstAbilityIndex()
+        {
+            int worst = 0;
+            int worstScore = AbilityKeepScore(_run.PlayerAbilities[0]);
+            for (int i = 1; i < _run.PlayerAbilities.Count; i++)
+            {
+                int score = AbilityKeepScore(_run.PlayerAbilities[i]);
+                if (score < worstScore)
+                {
+                    worst = i;
+                    worstScore = score;
+                }
+            }
+            return worst;
+        }
+
+        int AbilityKeepScore(AbilityType type)
+        {
+            var def = AbilityPool.Get(type);
+            int score = def.Rarity switch
+            {
+                AbilityRarity.Common => 0,
+                AbilityRarity.Uncommon => 100,
+                AbilityRarity.Rare => 200,
+                _ => 0
+            };
+            if (!def.IsNeutral && def.Owner == _run.PlayerArchetype)
+                score += 50;
+            return score;
         }
 
         void OnAbilityPickSkip()

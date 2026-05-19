@@ -168,7 +168,47 @@ namespace WitsAndFools
             if (source.Length == 0) return Clone(Boss);
 
             var template = source[rng.Next(source.Length)];
-            return Clone(template);
+            var result = Clone(template);
+            if (!isElite && !isBoss)
+                ApplyVariation(result, actIndex, rng);
+            return result;
+        }
+
+        static readonly HouseRuleType[] MinorHouseRules =
+        {
+            HouseRuleType.HeavyHands, HouseRuleType.NoTrumpsBeforeDusk,
+        };
+
+        static readonly AbilityType[] BonusAbilities =
+        {
+            AbilityType.Blocker, AbilityType.ExtraDraw, AbilityType.Fortify,
+            AbilityType.Peek, AbilityType.SteadyHand, AbilityType.Brace,
+        };
+
+        static void ApplyVariation(OpponentProfile opp, int actIndex, Random rng)
+        {
+            int roll = rng.Next(100);
+
+            // 20% chance: gain a bonus ability
+            if (roll < 20 && actIndex >= 1)
+            {
+                var bonus = BonusAbilities[rng.Next(BonusAbilities.Length)];
+                if (!opp.Abilities.Contains(bonus))
+                    opp.Abilities.Add(bonus);
+            }
+            // 10% chance: gain a minor house rule (acts 2+)
+            else if (roll < 30 && actIndex >= 2 && opp.HouseRule == HouseRuleType.None)
+            {
+                opp.HouseRule = MinorHouseRules[rng.Next(MinorHouseRules.Length)];
+            }
+            // 15% chance: gain a trinket (acts 1+)
+            else if (roll < 45 && actIndex >= 1)
+            {
+                var allTrinkets = (TrinketType[])Enum.GetValues(typeof(TrinketType));
+                var trinket = allTrinkets[rng.Next(allTrinkets.Length)];
+                if (!opp.Trinkets.Contains(trinket))
+                    opp.Trinkets.Add(trinket);
+            }
         }
 
         public static OpponentProfile[] AllForAct(int actIndex)
