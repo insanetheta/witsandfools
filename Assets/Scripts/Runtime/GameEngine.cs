@@ -44,6 +44,7 @@ namespace WitsAndFools
         bool[] _luckyDrawUsed = new bool[2];
         readonly int[] _resource = new int[2];
         bool[] _attackedThisBout = new bool[2];
+        bool[] _shadowReflexesUsedThisBout = new bool[2];
         readonly List<Rank> _pendingBonusRanks = new();
 
         public int AttackerIndex { get; private set; }
@@ -331,8 +332,9 @@ namespace WitsAndFools
             Phase = Phase.Attack;
             OnDefensePlayed?.Invoke(playerIndex, slot, card);
 
-            if (_config.ShadowReflexes[playerIndex] && card.Rank == _bout.Attacks[slot].Rank && _deck.Count > 0)
+            if (_config.ShadowReflexes[playerIndex] && !_shadowReflexesUsedThisBout[playerIndex] && _deck.Count > 0)
             {
+                _shadowReflexesUsedThisBout[playerIndex] = true;
                 _hands[playerIndex].Add(_deck.Draw());
                 OnDrew?.Invoke(playerIndex, 1);
                 GainResource(playerIndex, 1);
@@ -483,7 +485,7 @@ namespace WitsAndFools
                 }
             }
 
-            // Undermine: opponent discards 1 extra card when you use an ability
+            // Undermine: opponent discards 1 extra card when using an ability
             int opponent = 1 - playerIndex;
             if (_config.Undermine[opponent] && _hands[playerIndex].Count > 0)
             {
@@ -534,7 +536,7 @@ namespace WitsAndFools
                 case AbilityType.Feint:
                     return Phase == Phase.Attack && _deck.Count > 0 && _bout.AttackCount < (_config.MaxAttacksPerBout + _pileOnBonus);
                 case AbilityType.Deflect:
-                    return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
+                    return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0 && _resource[playerIndex] >= 1;
                 case AbilityType.SlipAway:
                     return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0 && !_slipAwayUsed[playerIndex];
                 case AbilityType.Peek:
@@ -703,6 +705,7 @@ namespace WitsAndFools
                     break;
 
                 case AbilityType.Deflect:
+                    SpendResource(playerIndex, 1);
                     AttackerIndex = 1 - AttackerIndex;
                     Phase = Phase.Defense;
                     break;
@@ -776,10 +779,7 @@ namespace WitsAndFools
                 case AbilityType.SleightOfHand:
                 {
                     if (_deck.Count > 0)
-                    {
-                        var drawn = _deck.Draw();
-                        _hands[playerIndex].Add(drawn);
-                    }
+                        _hands[playerIndex].Add(_deck.Draw());
                     var worst = FindWorstCard(_hands[playerIndex], Trump);
                     if (worst.HasValue)
                     {
@@ -1346,6 +1346,7 @@ namespace WitsAndFools
             _doubleTroubleActive = false;
             _pileOnBonus = 0;
             _duelistGloveUsedThisBout = new bool[2];
+            _shadowReflexesUsedThisBout = new bool[2];
 
             ApplyResourceDecay();
 
@@ -1406,7 +1407,7 @@ namespace WitsAndFools
 
         void ApplyCourtFavor(int player)
         {
-            if (!_config.CourtFavor[player] || _deck.Count < 2) return;
+            if (!_config.CourtFavor[player] || _deck.Count < 4) return;
             var top2 = _deck.PeekTop(2);
             int score0 = CardValue(top2[0], Trump);
             int score1 = CardValue(top2[1], Trump);
@@ -1414,7 +1415,6 @@ namespace WitsAndFools
                 _deck.SwapTopTwo();
             _deck.SwapTopTwo();
             _deck.PutTopOnBottom();
-            GainResource(player, 1);
         }
 
         static int CardValue(Card c, Suit trump)

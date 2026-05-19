@@ -286,20 +286,33 @@ namespace WitsAndFools.EditorTools
 
         static List<AbilityType> PickAbilityOfferings(RunState run, int count, bool isElite, System.Random rng)
         {
-            var pool = new List<AbilityDefinition>();
+            var archPool = new List<AbilityDefinition>();
+            var neutralPool = new List<AbilityDefinition>();
             foreach (var def in AbilityPool.All)
             {
                 if (run.PlayerAbilities.Contains(def.Type)) continue;
                 if (!def.IsNeutral && def.Owner != run.PlayerArchetype) continue;
                 if (!isElite && def.Rarity == AbilityRarity.Rare && rng.Next(100) >= 30) continue;
-                pool.Add(def);
+                if (def.IsNeutral) neutralPool.Add(def);
+                else archPool.Add(def);
             }
+
             var result = new List<AbilityType>();
-            for (int i = 0; i < count && pool.Count > 0; i++)
+            if (archPool.Count > 0)
             {
-                int idx = rng.Next(pool.Count);
-                result.Add(pool[idx].Type);
-                pool.RemoveAt(idx);
+                int idx = rng.Next(archPool.Count);
+                result.Add(archPool[idx].Type);
+                archPool.RemoveAt(idx);
+            }
+
+            var combined = new List<AbilityDefinition>();
+            combined.AddRange(archPool);
+            combined.AddRange(neutralPool);
+            while (result.Count < count && combined.Count > 0)
+            {
+                int idx = rng.Next(combined.Count);
+                result.Add(combined[idx].Type);
+                combined.RemoveAt(idx);
             }
             return result;
         }

@@ -976,16 +976,8 @@ namespace WitsAndFools
 
         List<AbilityType> PickAbilityOfferings(int count)
         {
-            var pool = BuildAbilityPool(_run.PlayerArchetype, _run.PlayerAbilities,
-                _currentNode?.Type == MapNodeType.EliteMatch || _currentNode?.Type == MapNodeType.BossMatch, _rng);
-            var result = new List<AbilityType>();
-            for (int i = 0; i < count && pool.Count > 0; i++)
-            {
-                int idx = _rng.Next(pool.Count);
-                result.Add(pool[idx].Type);
-                pool.RemoveAt(idx);
-            }
-            return result;
+            bool isElite = _currentNode?.Type == MapNodeType.EliteMatch || _currentNode?.Type == MapNodeType.BossMatch;
+            return PickAbilityOfferingsWeighted(count, isElite, _rng);
         }
 
         static List<AbilityDefinition> BuildAbilityPool(ArchetypeType? archetype,
@@ -1000,6 +992,39 @@ namespace WitsAndFools
                 pool.Add(def);
             }
             return pool;
+        }
+
+        List<AbilityType> PickAbilityOfferingsWeighted(int count, bool isElite, System.Random rng)
+        {
+            var archPool = new List<AbilityDefinition>();
+            var neutralPool = new List<AbilityDefinition>();
+            foreach (var def in AbilityPool.All)
+            {
+                if (_run.PlayerAbilities.Contains(def.Type)) continue;
+                if (!def.IsNeutral && def.Owner != _run.PlayerArchetype) continue;
+                if (!isElite && def.Rarity == AbilityRarity.Rare && rng.Next(100) >= 30) continue;
+                if (def.IsNeutral) neutralPool.Add(def);
+                else archPool.Add(def);
+            }
+
+            var result = new List<AbilityType>();
+            if (archPool.Count > 0)
+            {
+                int idx = rng.Next(archPool.Count);
+                result.Add(archPool[idx].Type);
+                archPool.RemoveAt(idx);
+            }
+
+            var combined = new List<AbilityDefinition>();
+            combined.AddRange(archPool);
+            combined.AddRange(neutralPool);
+            while (result.Count < count && combined.Count > 0)
+            {
+                int idx = rng.Next(combined.Count);
+                result.Add(combined[idx].Type);
+                combined.RemoveAt(idx);
+            }
+            return result;
         }
 
         void ShowAbilityPick()

@@ -42,7 +42,7 @@ namespace WitsAndFools
             },
             ArchetypeType.Diplomat => new List<AbilityType>
             {
-                AbilityType.TrumpChanger, AbilityType.Deflect, AbilityType.SlipAway
+                AbilityType.TrumpChanger, AbilityType.Deflect, AbilityType.Diplomacy
             },
             ArchetypeType.Gambler => new List<AbilityType>
             {
@@ -71,9 +71,9 @@ namespace WitsAndFools
 
         public static string PerkDescription(this ArchetypeType a) => a switch
         {
-            ArchetypeType.Rogue => "Defend with matching rank to draw 1 card.",
+            ArchetypeType.Rogue => "First successful defense each bout draws 1 card and gains 1 Intel.",
             ArchetypeType.Brute => "When opponent eats your attacks, draw 1 extra.",
-            ArchetypeType.Diplomat => "At each bout, the better of the top 2 deck cards rises to the top.",
+            ArchetypeType.Diplomat => "At each bout (deck ≥ 4), the better of the top 2 deck cards rises to the top.",
             ArchetypeType.Gambler => "Once per match after eating, discard your worst card.",
             _ => ""
         };
@@ -101,7 +101,7 @@ namespace WitsAndFools
         static readonly HashSet<AbilityType> DiplomatSynergy = new()
         {
             AbilityType.TrumpChanger, AbilityType.Deflect, AbilityType.SeizeInitiative,
-            AbilityType.Peek, AbilityType.SlipAway, AbilityType.EndgameSpecialist
+            AbilityType.Peek, AbilityType.Diplomacy, AbilityType.EndgameSpecialist
         };
 
         static readonly HashSet<AbilityType> GamblerSynergy = new()
