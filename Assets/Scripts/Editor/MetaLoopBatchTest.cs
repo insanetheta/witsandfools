@@ -20,23 +20,42 @@ namespace WitsAndFools.EditorTools
             int wins = 0, totalMatches = 0, totalMatchWins = 0;
             var archetypeWins = new Dictionary<ArchetypeType, int>();
             var archetypeRuns = new Dictionary<ArchetypeType, int>();
+            var archetypeMatchWins = new Dictionary<ArchetypeType, int>();
+            var archetypeMatchPlayed = new Dictionary<ArchetypeType, int>();
+            var archetypeFlorins = new Dictionary<ArchetypeType, int>();
             var abilityPicks = new Dictionary<AbilityType, int>();
+            var buildPathPicks = new Dictionary<string, int>();
+            var buildPathWins = new Dictionary<string, int>();
+            var buildPathRuns = new Dictionary<string, int>();
             var results = new List<string>();
 
             for (int r = 0; r < runCount; r++)
             {
-                var result = SimulateRun(Environment.TickCount + r, out var archetype);
+                var result = SimulateRun(Environment.TickCount + r, out var archetype, out var buildPath);
                 totalMatches += result.MatchesPlayed;
                 totalMatchWins += result.MatchesWon;
 
                 if (!archetypeRuns.ContainsKey(archetype)) archetypeRuns[archetype] = 0;
                 archetypeRuns[archetype]++;
+                if (!archetypeMatchWins.ContainsKey(archetype)) archetypeMatchWins[archetype] = 0;
+                archetypeMatchWins[archetype] += result.MatchesWon;
+                if (!archetypeMatchPlayed.ContainsKey(archetype)) archetypeMatchPlayed[archetype] = 0;
+                archetypeMatchPlayed[archetype] += result.MatchesPlayed;
+                if (!archetypeFlorins.ContainsKey(archetype)) archetypeFlorins[archetype] = 0;
+                archetypeFlorins[archetype] += result.Florins;
+
+                string pathKey = buildPath ?? "None";
+                string fullKey = $"{archetype.DisplayName()}/{pathKey}";
+                if (!buildPathRuns.ContainsKey(fullKey)) buildPathRuns[fullKey] = 0;
+                buildPathRuns[fullKey]++;
 
                 if (result.RunWon)
                 {
                     wins++;
                     if (!archetypeWins.ContainsKey(archetype)) archetypeWins[archetype] = 0;
                     archetypeWins[archetype]++;
+                    if (!buildPathWins.ContainsKey(fullKey)) buildPathWins[fullKey] = 0;
+                    buildPathWins[fullKey]++;
                 }
 
                 foreach (var kv in result.AbilityPickCount)
@@ -46,7 +65,7 @@ namespace WitsAndFools.EditorTools
                 }
 
                 string tag = result.RunWon ? "WON" : "LOST";
-                results.Add($"  {tag} | {archetype.DisplayName()} | Acts: {result.CurrentAct + 1}/5 | W/L: {result.MatchesWon}/{result.MatchesPlayed} | Florins: {result.Florins} | Abilities: {result.PlayerAbilities.Count}");
+                results.Add($"  {tag} | {archetype.DisplayName()} [{pathKey}] | Acts: {result.CurrentAct + 1}/5 | W/L: {result.MatchesWon}/{result.MatchesPlayed} | Florins: {result.Florins} | Burdens: {result.PlayerBurdens.Count}");
             }
 
             var sb = new StringBuilder();
@@ -55,20 +74,35 @@ namespace WitsAndFools.EditorTools
             sb.AppendLine($"Match win rate: {totalMatchWins}/{totalMatches} ({100.0 * totalMatchWins / totalMatches:0.0}%)");
             sb.AppendLine();
 
-            sb.AppendLine("Archetype breakdown:");
+            sb.AppendLine("=== ARCHETYPE BREAKDOWN ===");
             foreach (var arch in ArchetypeDefinitions.AllArchetypes)
             {
                 int played = archetypeRuns.GetValueOrDefault(arch, 0);
                 int won = archetypeWins.GetValueOrDefault(arch, 0);
+                int mw = archetypeMatchWins.GetValueOrDefault(arch, 0);
+                int mp = archetypeMatchPlayed.GetValueOrDefault(arch, 0);
+                int fl = archetypeFlorins.GetValueOrDefault(arch, 0);
                 if (played > 0)
-                    sb.AppendLine($"  {arch.DisplayName()}: {won}/{played} wins ({100.0 * won / played:0.0}%)");
+                    sb.AppendLine($"  {arch.DisplayName()}: {won}/{played} runs won ({100.0 * won / played:0.0}%)  |  Matches: {mw}/{mp} ({100.0 * mw / mp:0.0}%)  |  Avg Florins: {fl / played}");
             }
             sb.AppendLine();
 
-            sb.AppendLine("Top ability picks:");
-            var sorted = abilityPicks.OrderByDescending(kv => kv.Value).Take(10);
+            sb.AppendLine("=== BUILD PATH BREAKDOWN ===");
+            foreach (var kv in buildPathRuns.OrderByDescending(kv => kv.Value))
+            {
+                int bpWon = buildPathWins.GetValueOrDefault(kv.Key, 0);
+                sb.AppendLine($"  {kv.Key}: {bpWon}/{kv.Value} runs won ({100.0 * bpWon / kv.Value:0.0}%)");
+            }
+            sb.AppendLine();
+
+            sb.AppendLine("=== TOP ABILITY PICKS ===");
+            var sorted = abilityPicks.OrderByDescending(kv => kv.Value).Take(15);
             foreach (var kv in sorted)
-                sb.AppendLine($"  {kv.Key.DisplayName()}: {kv.Value}");
+            {
+                var def = AbilityPool.Get(kv.Key);
+                string path = def.BuildPath ?? "Neutral";
+                sb.AppendLine($"  {kv.Key.DisplayName()} [{path}] ({def.Rarity}): {kv.Value}");
+            }
             sb.AppendLine();
 
             foreach (var line in results)
@@ -77,7 +111,7 @@ namespace WitsAndFools.EditorTools
             Debug.Log(sb.ToString());
         }
 
-        static RunState SimulateRun(int seed, out ArchetypeType archetype)
+        static RunState SimulateRun(int seed, out ArchetypeType archetype, out string adoptedBuildPath)
         {
             var rng = new System.Random(seed);
             var run = new RunState { Seed = seed };
@@ -100,7 +134,7 @@ namespace WitsAndFools.EditorTools
                 while (col < run.CurrentMap.Count && !run.RunComplete)
                 {
                     var column = run.CurrentMap[col];
-                    var node = PickBestNode(column);
+                    var node = PickBestNode(column, run);
                     col++;
 
                     switch (node.Type)
@@ -136,31 +170,42 @@ namespace WitsAndFools.EditorTools
                 }
             }
 
+            adoptedBuildPath = adoptedPath;
             return run;
         }
 
-        static MapNode PickBestNode(List<MapNode> column)
+        static MapNode PickBestNode(List<MapNode> column, RunState run)
         {
             MapNode best = column[0];
-            int bestP = NodePriority(best.Type);
+            int bestP = NodePriority(best.Type, run);
             for (int i = 1; i < column.Count; i++)
             {
-                int p = NodePriority(column[i].Type);
+                int p = NodePriority(column[i].Type, run);
                 if (p > bestP) { best = column[i]; bestP = p; }
             }
             return best;
         }
 
-        static int NodePriority(MapNodeType t) => t switch
+        static int NodePriority(MapNodeType t, RunState run)
         {
-            MapNodeType.BossMatch => 100,
-            MapNodeType.EliteMatch => 90,
-            MapNodeType.RivalMatch => 80,
-            MapNodeType.Rest => 30,
-            MapNodeType.Rumor => 20,
-            MapNodeType.Shop => 10,
-            _ => 0
-        };
+            switch (t)
+            {
+                case MapNodeType.BossMatch: return 100;
+                case MapNodeType.EliteMatch: return 90;
+                case MapNodeType.RivalMatch: return 70;
+                case MapNodeType.Rest:
+                    if (run.PlayerBurdens.Count >= 3) return 95;
+                    if (run.PlayerBurdens.Count >= 2) return 80;
+                    if (run.PlayerBurdens.Count >= 1) return 60;
+                    return 25;
+                case MapNodeType.Shop:
+                    if (run.Florins >= 15 && run.PlayerAbilities.Count < run.MaxAbilitySlots) return 75;
+                    if (run.Florins >= 10) return 40;
+                    return 15;
+                case MapNodeType.Rumor: return 20;
+                default: return 0;
+            }
+        }
 
         static void SimulateMatch(RunState run, MapNode node, System.Random rng)
         {
@@ -225,7 +270,10 @@ namespace WitsAndFools.EditorTools
                 pick = offerings[rng.Next(offerings.Count)];
 
             if (run.PlayerAbilities.Count >= run.MaxAbilitySlots)
-                run.PlayerAbilities.RemoveAt(0);
+            {
+                int worstIdx = FindWorstAbility(run);
+                run.PlayerAbilities.RemoveAt(worstIdx);
+            }
             run.PlayerAbilities.Add(pick);
             run.RecordAbilityPicked(pick);
 
@@ -357,10 +405,36 @@ namespace WitsAndFools.EditorTools
 
         static void SimulateRest(RunState run, System.Random rng)
         {
-            if (run.PlayerBurdens.Count > 0 && rng.Next(100) < 60)
-                run.PlayerBurdens.RemoveAt(0);
+            if (run.PlayerBurdens.Count > 0)
+                run.PlayerBurdens.RemoveAt(rng.Next(run.PlayerBurdens.Count));
             else
                 run.Florins += 3;
+        }
+
+        static int FindWorstAbility(RunState run)
+        {
+            int worst = 0;
+            int worstScore = AbilityKeepScore(run.PlayerAbilities[0], run.PlayerArchetype);
+            for (int i = 1; i < run.PlayerAbilities.Count; i++)
+            {
+                int score = AbilityKeepScore(run.PlayerAbilities[i], run.PlayerArchetype);
+                if (score < worstScore) { worst = i; worstScore = score; }
+            }
+            return worst;
+        }
+
+        static int AbilityKeepScore(AbilityType type, ArchetypeType? archetype)
+        {
+            var def = AbilityPool.Get(type);
+            int score = def.Rarity switch
+            {
+                AbilityRarity.Common => 0,
+                AbilityRarity.Uncommon => 100,
+                AbilityRarity.Rare => 200,
+                _ => 0
+            };
+            if (!def.IsNeutral && def.Owner == archetype) score += 50;
+            return score;
         }
 
         static void AssignBurden(RunState run, System.Random rng)
