@@ -22,10 +22,10 @@ namespace WitsAndFools
         public TMP_Text AbilityBadge;
 
         [Header("Visual settings")]
-        public Color FaceColor = new Color(0.96f, 0.94f, 0.88f);
-        public Color BackColor = new Color(0.55f, 0.13f, 0.13f);
-        public Color RedSuitColor = new Color(0.75f, 0.13f, 0.13f);
-        public Color BlackSuitColor = new Color(0.05f, 0.05f, 0.05f);
+        public Color FaceColor = default;
+        public Color BackColor = default;
+        public Color RedSuitColor = default;
+        public Color BlackSuitColor = default;
 
         Card _card;
         bool _faceUp = true;
@@ -46,6 +46,10 @@ namespace WitsAndFools
         {
             _canvasGroup = GetComponent<CanvasGroup>();
             if (!_canvasGroup) _canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            if (FaceColor == default) FaceColor = ThemePalette.CardCream;
+            if (BackColor == default) BackColor = ThemePalette.CrimsonCard;
+            if (RedSuitColor == default) RedSuitColor = ThemePalette.RedSuit;
+            if (BlackSuitColor == default) BlackSuitColor = ThemePalette.BlackSuit;
         }
 
         public void Bind(Card card, bool faceUp)

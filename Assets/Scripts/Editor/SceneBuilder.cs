@@ -454,7 +454,7 @@ namespace WitsAndFools.EditorTools
             // Venue background (dimmed, set at runtime by RunManager)
             var mapVenueBg = NewChild(mapPanel.GetComponent<RectTransform>(), "MapVenueBg");
             var mapVenueBgImg = mapVenueBg.gameObject.AddComponent<Image>();
-            mapVenueBgImg.color = new Color(1, 1, 1, 0.15f);
+            mapVenueBgImg.color = new Color(1, 1, 1, 0.4f);
             mapVenueBgImg.raycastTarget = false;
             FillParent(mapVenueBg);
             mapVenueBg.SetAsFirstSibling();
@@ -482,6 +482,15 @@ namespace WitsAndFools.EditorTools
             nodeLayout.childForceExpandWidth = false;
             nodeLayout.childForceExpandHeight = false;
 
+            // Vignette overlay for map
+            var mapVignette = NewChild(mapPanel, "MapVignette");
+            var mapVignetteImg = mapVignette.gameObject.AddComponent<Image>();
+            if (vignetteSprite) { mapVignetteImg.sprite = vignetteSprite; mapVignetteImg.color = new Color(1, 1, 1, 0.7f); }
+            else mapVignetteImg.color = new Color(0, 0, 0, 0);
+            mapVignetteImg.raycastTarget = false;
+            FillParent(mapVignette);
+            mapVignette.SetSiblingIndex(1); // after venue bg, before UI elements
+
             mapPanel.gameObject.SetActive(false);
 
             // ----- Result Panel -----
@@ -489,6 +498,21 @@ namespace WitsAndFools.EditorTools
             FillParent(resultPanel);
             var resultBg = resultPanel.gameObject.AddComponent<Image>();
             resultBg.color = ThemePalette.ResultOverlay;
+            // Venue background behind overlay
+            var resultVenueBg = NewChild(resultPanel.GetComponent<RectTransform>(), "ResultVenueBg");
+            var resultVenueBgImg = resultVenueBg.gameObject.AddComponent<Image>();
+            resultVenueBgImg.color = new Color(1, 1, 1, 0.25f);
+            resultVenueBgImg.raycastTarget = false;
+            FillParent(resultVenueBg);
+            resultVenueBg.SetAsFirstSibling();
+            // Vignette
+            var resultVignette = NewChild(resultPanel.GetComponent<RectTransform>(), "ResultVignette");
+            var resultVignetteImg = resultVignette.gameObject.AddComponent<Image>();
+            if (vignetteSprite) { resultVignetteImg.sprite = vignetteSprite; resultVignetteImg.color = new Color(1, 1, 1, 0.8f); }
+            else resultVignetteImg.color = new Color(0, 0, 0, 0);
+            resultVignetteImg.raycastTarget = false;
+            FillParent(resultVignette);
+            resultVignette.SetSiblingIndex(1);
 
             var resultTitle = AddText(resultPanel, "ResultTitle", "Victory!",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
@@ -544,16 +568,40 @@ namespace WitsAndFools.EditorTools
             FillParent(runOverPanel);
             var runOverBg = runOverPanel.gameObject.AddComponent<Image>();
             runOverBg.color = ThemePalette.Midnight;
+            // Venue background
+            var runOverVenueBg = NewChild(runOverPanel.GetComponent<RectTransform>(), "RunOverVenueBg");
+            var runOverVenueBgImg = runOverVenueBg.gameObject.AddComponent<Image>();
+            runOverVenueBgImg.color = new Color(1, 1, 1, 0.2f);
+            runOverVenueBgImg.raycastTarget = false;
+            FillParent(runOverVenueBg);
+            runOverVenueBg.SetAsFirstSibling();
+            // Vignette
+            var runOverVignette = NewChild(runOverPanel.GetComponent<RectTransform>(), "RunOverVignette");
+            var runOverVignetteImg = runOverVignette.gameObject.AddComponent<Image>();
+            if (vignetteSprite) { runOverVignetteImg.sprite = vignetteSprite; runOverVignetteImg.color = Color.white; }
+            else runOverVignetteImg.color = new Color(0, 0, 0, 0);
+            runOverVignetteImg.raycastTarget = false;
+            FillParent(runOverVignette);
+            runOverVignette.SetSiblingIndex(1);
 
             var runOverTitle = AddText(runOverPanel, "RunOverTitle", "Run Over",
-                anchorMin: new Vector2(0.1f, 0.60f), anchorMax: new Vector2(0.9f, 0.85f),
+                anchorMin: new Vector2(0.1f, 0.65f), anchorMax: new Vector2(0.9f, 0.88f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
                 fontSize: 52, color: ThemePalette.Gold, font: HeadingFont);
 
+            // Decorative divider under title
+            var divider = NewChild(runOverPanel, "Divider");
+            divider.anchorMin = new Vector2(0.35f, 0.63f);
+            divider.anchorMax = new Vector2(0.65f, 0.63f);
+            divider.sizeDelta = new Vector2(0, 2);
+            var divImg = divider.gameObject.AddComponent<Image>();
+            divImg.color = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.4f);
+            divImg.raycastTarget = false;
+
             var runOverStats = AddText(runOverPanel, "RunOverStats", "",
-                anchorMin: new Vector2(0.2f, 0.30f), anchorMax: new Vector2(0.8f, 0.58f),
+                anchorMin: new Vector2(0.2f, 0.28f), anchorMax: new Vector2(0.8f, 0.60f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 26, color: Color.white, font: MonoFont);
+                fontSize: 22, color: ThemePalette.Parchment);
             runOverStats.enableWordWrapping = true;
 
             var runOverRestartBtn = AddButton(runOverPanel, "RunOverRestartButton", "New Run");
@@ -573,11 +621,19 @@ namespace WitsAndFools.EditorTools
             var shopSceneBg = NewChild(shopPanel.GetComponent<RectTransform>(), "ShopSceneBg");
             var shopSceneBgImg = shopSceneBg.gameObject.AddComponent<Image>();
             var shopSceneSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Scenes/scene_shop.png");
-            if (shopSceneSprite) { shopSceneBgImg.sprite = shopSceneSprite; shopSceneBgImg.color = new Color(1, 1, 1, 0.2f); }
+            if (shopSceneSprite) { shopSceneBgImg.sprite = shopSceneSprite; shopSceneBgImg.color = new Color(1, 1, 1, 0.4f); }
             else shopSceneBgImg.color = new Color(0, 0, 0, 0);
             shopSceneBgImg.raycastTarget = false;
             FillParent(shopSceneBg);
             shopSceneBg.SetAsFirstSibling();
+            // Vignette
+            var shopVignette = NewChild(shopPanel.GetComponent<RectTransform>(), "ShopVignette");
+            var shopVignetteImg = shopVignette.gameObject.AddComponent<Image>();
+            if (vignetteSprite) { shopVignetteImg.sprite = vignetteSprite; shopVignetteImg.color = new Color(1, 1, 1, 0.7f); }
+            else shopVignetteImg.color = new Color(0, 0, 0, 0);
+            shopVignetteImg.raycastTarget = false;
+            FillParent(shopVignette);
+            shopVignette.SetSiblingIndex(1);
 
             var shopTitle = AddText(shopPanel, "ShopTitle", "The Fence",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
@@ -619,11 +675,19 @@ namespace WitsAndFools.EditorTools
             var eventSceneBg = NewChild(eventPanel.GetComponent<RectTransform>(), "EventSceneBg");
             var eventSceneBgImg = eventSceneBg.gameObject.AddComponent<Image>();
             var eventSceneSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Scenes/scene_rumor.png");
-            if (eventSceneSprite) { eventSceneBgImg.sprite = eventSceneSprite; eventSceneBgImg.color = new Color(1, 1, 1, 0.2f); }
+            if (eventSceneSprite) { eventSceneBgImg.sprite = eventSceneSprite; eventSceneBgImg.color = new Color(1, 1, 1, 0.4f); }
             else eventSceneBgImg.color = new Color(0, 0, 0, 0);
             eventSceneBgImg.raycastTarget = false;
             FillParent(eventSceneBg);
             eventSceneBg.SetAsFirstSibling();
+            // Vignette
+            var eventVignette = NewChild(eventPanel.GetComponent<RectTransform>(), "EventVignette");
+            var eventVignetteImg = eventVignette.gameObject.AddComponent<Image>();
+            if (vignetteSprite) { eventVignetteImg.sprite = vignetteSprite; eventVignetteImg.color = new Color(1, 1, 1, 0.7f); }
+            else eventVignetteImg.color = new Color(0, 0, 0, 0);
+            eventVignetteImg.raycastTarget = false;
+            FillParent(eventVignette);
+            eventVignette.SetSiblingIndex(1);
 
             var eventTitle = AddText(eventPanel, "EventTitle", "Event",
                 anchorMin: new Vector2(0.1f, 0.78f), anchorMax: new Vector2(0.9f, 0.92f),
@@ -765,6 +829,8 @@ namespace WitsAndFools.EditorTools
             };
             rm.TableSurfaceSprites = tableSurfaces;
             rm.MapVenueBgImage = mapVenueBgImg;
+            rm.ResultVenueBgImage = resultVenueBgImg;
+            rm.RunOverVenueBgImage = runOverVenueBgImg;
 
             // Load venue background sprites for per-act theming
             var venueBackgrounds = new[]

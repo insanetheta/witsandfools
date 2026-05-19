@@ -82,6 +82,8 @@ namespace WitsAndFools
         public Sprite[] VenueBackgroundSprites;
         public Sprite VignetteSprite;
         public Image MapVenueBgImage;
+        public Image ResultVenueBgImage;
+        public Image RunOverVenueBgImage;
 
         [Header("Opponent Portraits")]
         public string[] PortraitNames;
@@ -489,24 +491,79 @@ namespace WitsAndFools
             {
                 btnGO = new GameObject($"Node_{index}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
                 btnGO.transform.SetParent(MapNodeContainer, false);
-                btnGO.GetComponent<Image>().color = NodeColor(node.Type);
+
+                var bgColor = NodeColor(node.Type);
+                btnGO.GetComponent<Image>().color = new Color(bgColor.r * 0.5f, bgColor.g * 0.5f, bgColor.b * 0.5f, 0.85f);
+
                 var le = btnGO.GetComponent<LayoutElement>();
-                le.preferredHeight = 80;
+                le.preferredHeight = 72;
                 le.preferredWidth = 500;
 
-                var lblGO = new GameObject("Label", typeof(RectTransform));
-                lblGO.transform.SetParent(btnGO.transform, false);
-                var lblRT = (RectTransform)lblGO.transform;
-                lblRT.anchorMin = Vector2.zero;
-                lblRT.anchorMax = Vector2.one;
-                lblRT.offsetMin = Vector2.zero;
-                lblRT.offsetMax = Vector2.zero;
-                var lbl = lblGO.AddComponent<TextMeshProUGUI>();
-                lbl.text = NodeLabel(node);
-                lbl.alignment = TextAlignmentOptions.Center;
-                lbl.fontSize = 22;
-                lbl.color = Color.white;
-                lbl.raycastTarget = false;
+                // Left accent bar
+                var accentGO = new GameObject("Accent", typeof(RectTransform), typeof(Image));
+                accentGO.transform.SetParent(btnGO.transform, false);
+                var accentRT = (RectTransform)accentGO.transform;
+                accentRT.anchorMin = new Vector2(0, 0);
+                accentRT.anchorMax = new Vector2(0, 1);
+                accentRT.pivot = new Vector2(0, 0.5f);
+                accentRT.sizeDelta = new Vector2(5, 0);
+                accentRT.anchoredPosition = Vector2.zero;
+                accentGO.GetComponent<Image>().color = bgColor;
+                accentGO.GetComponent<Image>().raycastTarget = false;
+
+                // Node icon (left side)
+                var iconGO = new GameObject("Icon", typeof(RectTransform));
+                iconGO.transform.SetParent(btnGO.transform, false);
+                var iconRT = (RectTransform)iconGO.transform;
+                iconRT.anchorMin = new Vector2(0, 0);
+                iconRT.anchorMax = new Vector2(0, 1);
+                iconRT.pivot = new Vector2(0, 0.5f);
+                iconRT.sizeDelta = new Vector2(50, 0);
+                iconRT.anchoredPosition = new Vector2(14, 0);
+                var iconTMP = iconGO.AddComponent<TextMeshProUGUI>();
+                iconTMP.text = NodeIcon(node.Type);
+                iconTMP.alignment = TextAlignmentOptions.Center;
+                iconTMP.fontSize = 28;
+                iconTMP.color = bgColor;
+                iconTMP.raycastTarget = false;
+
+                // Title label
+                var titleGO = new GameObject("Title", typeof(RectTransform));
+                titleGO.transform.SetParent(btnGO.transform, false);
+                var titleRT = (RectTransform)titleGO.transform;
+                titleRT.anchorMin = new Vector2(0, 0.5f);
+                titleRT.anchorMax = new Vector2(1, 1);
+                titleRT.offsetMin = new Vector2(68, 0);
+                titleRT.offsetMax = new Vector2(-12, -4);
+                var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
+                var headingFont = FontAssets.Heading;
+                if (headingFont) titleTMP.font = headingFont;
+                titleTMP.text = NodeTitle(node);
+                titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
+                titleTMP.fontSize = 20;
+                titleTMP.color = ThemePalette.Parchment;
+                titleTMP.raycastTarget = false;
+
+                // Subtitle label
+                var subGO = new GameObject("Subtitle", typeof(RectTransform));
+                subGO.transform.SetParent(btnGO.transform, false);
+                var subRT = (RectTransform)subGO.transform;
+                subRT.anchorMin = new Vector2(0, 0);
+                subRT.anchorMax = new Vector2(1, 0.5f);
+                subRT.offsetMin = new Vector2(68, 4);
+                subRT.offsetMax = new Vector2(-12, 0);
+                var subTMP = subGO.AddComponent<TextMeshProUGUI>();
+                subTMP.text = NodeSubtitle(node);
+                subTMP.alignment = TextAlignmentOptions.MidlineLeft;
+                subTMP.fontSize = 14;
+                subTMP.color = ThemePalette.DustyTan;
+                subTMP.raycastTarget = false;
+
+                // Hover highlight color
+                var btn = btnGO.GetComponent<Button>();
+                var colors = btn.colors;
+                colors.highlightedColor = new Color(bgColor.r * 0.7f, bgColor.g * 0.7f, bgColor.b * 0.7f, 0.95f);
+                btn.colors = colors;
             }
 
             var button = btnGO.GetComponent<Button>();
@@ -514,15 +571,37 @@ namespace WitsAndFools
             button.onClick.AddListener(() => OnNodeSelected(capturedNode));
         }
 
-        string NodeLabel(MapNode node) => node.Type switch
+        static string NodeIcon(MapNodeType type) => type switch
         {
-            MapNodeType.RivalMatch => $"[Match] {node.Opponent?.Name ?? "Rival"}",
-            MapNodeType.EliteMatch => $"[ELITE] {node.Opponent?.Name ?? "Elite"}",
-            MapNodeType.BossMatch => $"[BOSS] {node.Opponent?.Name ?? "Boss"}",
-            MapNodeType.Shop => "[Shop] The Fence",
-            MapNodeType.Rumor => "[Rumor] A whispered lead...",
-            MapNodeType.Rest => "[Rest] The Hearth",
+            MapNodeType.RivalMatch => "⚔",  // crossed swords
+            MapNodeType.EliteMatch => "☠",  // skull
+            MapNodeType.BossMatch  => "♚",  // crown/king
+            MapNodeType.Shop       => "⚖",  // scales
+            MapNodeType.Rumor      => "✉",  // envelope
+            MapNodeType.Rest       => "♨",  // hot springs
+            _ => "?"
+        };
+
+        string NodeTitle(MapNode node) => node.Type switch
+        {
+            MapNodeType.RivalMatch => node.Opponent?.Name ?? "Rival",
+            MapNodeType.EliteMatch => node.Opponent?.Name ?? "Elite",
+            MapNodeType.BossMatch => node.Opponent?.Name ?? "Boss",
+            MapNodeType.Shop => "The Fence",
+            MapNodeType.Rumor => "A Whispered Lead",
+            MapNodeType.Rest => "The Hearth",
             _ => "???"
+        };
+
+        static string NodeSubtitle(MapNode node) => node.Type switch
+        {
+            MapNodeType.RivalMatch => "Card match",
+            MapNodeType.EliteMatch => "Elite challenge — greater reward",
+            MapNodeType.BossMatch => "Boss — defeat to advance",
+            MapNodeType.Shop => "Buy abilities and trinkets",
+            MapNodeType.Rumor => "Risk and reward await...",
+            MapNodeType.Rest => "Rest and recuperate",
+            _ => ""
         };
 
         Color NodeColor(MapNodeType type) => type switch
@@ -778,38 +857,72 @@ namespace WitsAndFools
         void CreateAbilityPickButton(AbilityType abilityType)
         {
             var def = AbilityPool.Get(abilityType);
-            bool slotsFull = _run.PlayerAbilities.Count >= _run.MaxAbilitySlots;
 
             var btnGO = new GameObject($"Pick_{abilityType}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(AbilityPickContainer, false);
 
-            var img = btnGO.GetComponent<Image>();
-            img.color = def.Rarity switch
+            var bgColor = def.Rarity switch
             {
                 AbilityRarity.Common => ThemePalette.RarityCommonBg,
                 AbilityRarity.Uncommon => ThemePalette.RarityUncommonBg,
                 AbilityRarity.Rare => ThemePalette.RarityRareBg,
                 _ => ThemePalette.LockedGray
             };
+            var img = btnGO.GetComponent<Image>();
+            img.color = new Color(bgColor.r * 0.7f, bgColor.g * 0.7f, bgColor.b * 0.7f, 0.9f);
 
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 80;
             le.preferredWidth = 500;
+
+            // Rarity accent bar (left edge)
+            var rarityColor = def.Rarity switch
+            {
+                AbilityRarity.Common => ThemePalette.RarityCommon,
+                AbilityRarity.Uncommon => ThemePalette.RarityUncommon,
+                AbilityRarity.Rare => ThemePalette.RarityRare,
+                _ => ThemePalette.DustyTan
+            };
+            var accentGO = new GameObject("RarityAccent", typeof(RectTransform), typeof(Image));
+            accentGO.transform.SetParent(btnGO.transform, false);
+            var accentRT = (RectTransform)accentGO.transform;
+            accentRT.anchorMin = new Vector2(0, 0);
+            accentRT.anchorMax = new Vector2(0, 1);
+            accentRT.pivot = new Vector2(0, 0.5f);
+            accentRT.sizeDelta = new Vector2(4, 0);
+            accentRT.anchoredPosition = Vector2.zero;
+            accentGO.GetComponent<Image>().color = rarityColor;
+            accentGO.GetComponent<Image>().raycastTarget = false;
+
+            // Ability type indicator dot
+            var typeColor = ThemePalette.AbilityBadgeColor(abilityType);
+            var dotGO = new GameObject("TypeDot", typeof(RectTransform), typeof(Image));
+            dotGO.transform.SetParent(btnGO.transform, false);
+            var dotRT = (RectTransform)dotGO.transform;
+            dotRT.anchorMin = new Vector2(0, 0.5f);
+            dotRT.anchorMax = new Vector2(0, 0.5f);
+            dotRT.pivot = new Vector2(0.5f, 0.5f);
+            dotRT.sizeDelta = new Vector2(12, 12);
+            dotRT.anchoredPosition = new Vector2(16, 0);
+            dotGO.GetComponent<Image>().color = typeColor;
+            dotGO.GetComponent<Image>().raycastTarget = false;
 
             var nameGO = new GameObject("Name", typeof(RectTransform));
             nameGO.transform.SetParent(btnGO.transform, false);
             var nameRT = (RectTransform)nameGO.transform;
             nameRT.anchorMin = new Vector2(0, 0.5f);
             nameRT.anchorMax = new Vector2(1, 1);
-            nameRT.offsetMin = new Vector2(12, 0);
+            nameRT.offsetMin = new Vector2(32, 0);
             nameRT.offsetMax = new Vector2(-12, -2);
             var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            var headingFont = FontAssets.Heading;
+            if (headingFont) nameTMP.font = headingFont;
             string rarityTag = def.Rarity != AbilityRarity.Common ? $"  [{def.Rarity}]" : "";
             string bindTag = def.IsPassive ? " (Passive)" : $" ({def.BindingCount} cards)";
             nameTMP.text = $"{abilityType.DisplayName()}{rarityTag}{bindTag}";
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            nameTMP.fontSize = 20;
-            nameTMP.color = Color.white;
+            nameTMP.fontSize = 18;
+            nameTMP.color = ThemePalette.Parchment;
             nameTMP.raycastTarget = false;
 
             var descGO = new GameObject("Desc", typeof(RectTransform));
@@ -817,17 +930,20 @@ namespace WitsAndFools
             var descRT = (RectTransform)descGO.transform;
             descRT.anchorMin = Vector2.zero;
             descRT.anchorMax = new Vector2(1, 0.5f);
-            descRT.offsetMin = new Vector2(12, 2);
+            descRT.offsetMin = new Vector2(32, 2);
             descRT.offsetMax = new Vector2(-12, 0);
             var descTMP = descGO.AddComponent<TextMeshProUGUI>();
             descTMP.text = abilityType.Description();
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            descTMP.fontSize = 15;
+            descTMP.fontSize = 14;
             descTMP.color = ThemePalette.DescGray;
             descTMP.raycastTarget = false;
             descTMP.enableWordWrapping = true;
 
             var btn = btnGO.GetComponent<Button>();
+            var colors = btn.colors;
+            colors.highlightedColor = new Color(bgColor.r, bgColor.g, bgColor.b, 0.95f);
+            btn.colors = colors;
             var captured = abilityType;
             btn.onClick.AddListener(() => OnAbilityPicked(captured));
         }
@@ -940,31 +1056,83 @@ namespace WitsAndFools
         {
             var def = AbilityPool.Get(offering.type);
             bool canBuy = _run.Florins >= offering.price && _run.PlayerAbilities.Count < _run.MaxAbilitySlots;
-            string label = $"{offering.type.DisplayName()}  —  {offering.price}f";
             string desc = offering.type.Description();
 
             var btnGO = new GameObject("ShopItem", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(ShopItemContainer, false);
 
             var img = btnGO.GetComponent<Image>();
-            img.color = canBuy ? ThemePalette.ShopTrinketBg : ThemePalette.LockedGray;
+            img.color = canBuy ? new Color(0.12f, 0.22f, 0.30f, 0.85f) : ThemePalette.LockedGray;
 
             var le = btnGO.GetComponent<LayoutElement>();
-            le.preferredHeight = 90;
+            le.preferredHeight = 85;
             le.preferredWidth = 550;
+
+            // Rarity accent bar
+            var rarityColor = def.Rarity switch
+            {
+                AbilityRarity.Common => ThemePalette.RarityCommon,
+                AbilityRarity.Uncommon => ThemePalette.RarityUncommon,
+                AbilityRarity.Rare => ThemePalette.RarityRare,
+                _ => ThemePalette.DustyTan
+            };
+            var accentGO = new GameObject("RarityAccent", typeof(RectTransform), typeof(Image));
+            accentGO.transform.SetParent(btnGO.transform, false);
+            var accentRT = (RectTransform)accentGO.transform;
+            accentRT.anchorMin = new Vector2(0, 0);
+            accentRT.anchorMax = new Vector2(0, 1);
+            accentRT.pivot = new Vector2(0, 0.5f);
+            accentRT.sizeDelta = new Vector2(4, 0);
+            accentRT.anchoredPosition = Vector2.zero;
+            accentGO.GetComponent<Image>().color = canBuy ? rarityColor : ThemePalette.DisabledOutline;
+            accentGO.GetComponent<Image>().raycastTarget = false;
+
+            // Ability type dot
+            var typeColor = ThemePalette.AbilityBadgeColor(offering.type);
+            var dotGO = new GameObject("TypeDot", typeof(RectTransform), typeof(Image));
+            dotGO.transform.SetParent(btnGO.transform, false);
+            var dotRT = (RectTransform)dotGO.transform;
+            dotRT.anchorMin = new Vector2(0, 0.5f);
+            dotRT.anchorMax = new Vector2(0, 0.5f);
+            dotRT.pivot = new Vector2(0.5f, 0.5f);
+            dotRT.sizeDelta = new Vector2(12, 12);
+            dotRT.anchoredPosition = new Vector2(18, 0);
+            dotGO.GetComponent<Image>().color = canBuy ? typeColor : ThemePalette.DisabledOutline;
+            dotGO.GetComponent<Image>().raycastTarget = false;
+
+            // Price tag (right side)
+            var priceGO = new GameObject("Price", typeof(RectTransform));
+            priceGO.transform.SetParent(btnGO.transform, false);
+            var priceRT = (RectTransform)priceGO.transform;
+            priceRT.anchorMin = new Vector2(1, 0);
+            priceRT.anchorMax = new Vector2(1, 1);
+            priceRT.pivot = new Vector2(1, 0.5f);
+            priceRT.sizeDelta = new Vector2(70, 0);
+            priceRT.anchoredPosition = new Vector2(-12, 0);
+            var priceTMP = priceGO.AddComponent<TextMeshProUGUI>();
+            var monoFont = FontAssets.Mono;
+            if (monoFont) priceTMP.font = monoFont;
+            priceTMP.text = $"{offering.price}f";
+            priceTMP.alignment = TextAlignmentOptions.Center;
+            priceTMP.fontSize = 22;
+            priceTMP.color = canBuy ? ThemePalette.Gold : ThemePalette.DisabledText;
+            priceTMP.raycastTarget = false;
 
             var nameGO = new GameObject("Name", typeof(RectTransform));
             nameGO.transform.SetParent(btnGO.transform, false);
             var nameRT = (RectTransform)nameGO.transform;
             nameRT.anchorMin = new Vector2(0, 0.5f);
             nameRT.anchorMax = new Vector2(1, 1);
-            nameRT.offsetMin = new Vector2(16, 0);
-            nameRT.offsetMax = new Vector2(-16, -4);
+            nameRT.offsetMin = new Vector2(36, 0);
+            nameRT.offsetMax = new Vector2(-85, -4);
             var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
-            nameTMP.text = label;
+            var headingFont = FontAssets.Heading;
+            if (headingFont) nameTMP.font = headingFont;
+            string rarityTag = def.Rarity != AbilityRarity.Common ? $"  [{def.Rarity}]" : "";
+            nameTMP.text = $"{offering.type.DisplayName()}{rarityTag}";
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            nameTMP.fontSize = 22;
-            nameTMP.color = canBuy ? Color.white : ThemePalette.DisabledText;
+            nameTMP.fontSize = 18;
+            nameTMP.color = canBuy ? ThemePalette.Parchment : ThemePalette.DisabledText;
             nameTMP.raycastTarget = false;
 
             var descGO = new GameObject("Desc", typeof(RectTransform));
@@ -972,24 +1140,15 @@ namespace WitsAndFools
             var descRT = (RectTransform)descGO.transform;
             descRT.anchorMin = Vector2.zero;
             descRT.anchorMax = new Vector2(1, 0.5f);
-            descRT.offsetMin = new Vector2(16, 4);
-            descRT.offsetMax = new Vector2(-16, 0);
+            descRT.offsetMin = new Vector2(36, 4);
+            descRT.offsetMax = new Vector2(-85, 0);
             var descTMP = descGO.AddComponent<TextMeshProUGUI>();
             descTMP.text = desc;
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            descTMP.fontSize = 16;
+            descTMP.fontSize = 14;
             descTMP.color = ThemePalette.DescGray;
             descTMP.raycastTarget = false;
             descTMP.enableWordWrapping = true;
-
-            var rarityTag = def.Rarity switch
-            {
-                AbilityRarity.Common => "",
-                AbilityRarity.Uncommon => "  [Uncommon]",
-                AbilityRarity.Rare => "  [Rare]",
-                _ => ""
-            };
-            if (rarityTag.Length > 0) nameTMP.text += rarityTag;
 
             var btn = btnGO.GetComponent<Button>();
             btn.interactable = canBuy;
@@ -1523,6 +1682,10 @@ namespace WitsAndFools
             }
             if (MapVenueBgImage && VenueBackgroundSprites != null && act < VenueBackgroundSprites.Length)
                 MapVenueBgImage.sprite = VenueBackgroundSprites[act];
+            if (ResultVenueBgImage && VenueBackgroundSprites != null && act < VenueBackgroundSprites.Length)
+                ResultVenueBgImage.sprite = VenueBackgroundSprites[act];
+            if (RunOverVenueBgImage && VenueBackgroundSprites != null && act < VenueBackgroundSprites.Length)
+                RunOverVenueBgImage.sprite = VenueBackgroundSprites[act];
             if (Camera.main)
                 Camera.main.backgroundColor = ThemePalette.ActBackgroundTint[act];
         }
@@ -1546,14 +1709,15 @@ namespace WitsAndFools
             if (RunOverStatsLabel)
             {
                 string archName = _selectedArchetype.HasValue ? _selectedArchetype.Value.DisplayName() : "Unknown";
-                string stats = $"Archetype: {archName}\n" +
-                    $"Acts completed: {_run.CurrentAct}/5\n" +
-                    $"Matches won: {_run.MatchesWon}/{_run.MatchesPlayed}\n" +
-                    $"Florins earned: {_run.Florins}\n" +
-                    $"Abilities: {_run.PlayerAbilities.Count}\n" +
-                    $"Trinkets: {_run.PlayerTrinkets.Count}\n" +
-                    $"\n+{repEarned} Reputation  (Total: {repData.TotalReputation})";
+                string stats = $"<color=#D4A846>{archName}</color>\n\n" +
+                    $"Acts completed  <color=#99CCEE>{_run.CurrentAct}/5</color>\n" +
+                    $"Matches won  <color=#99CCEE>{_run.MatchesWon}/{_run.MatchesPlayed}</color>\n" +
+                    $"Florins earned  <color=#D4A846>{_run.Florins}</color>\n" +
+                    $"Abilities  <color=#99CCEE>{_run.PlayerAbilities.Count}</color>    " +
+                    $"Trinkets  <color=#99CCEE>{_run.PlayerTrinkets.Count}</color>\n\n" +
+                    $"<color=#66B866>+{repEarned} Reputation</color>  (Total: {repData.TotalReputation})";
                 RunOverStatsLabel.text = stats;
+                RunOverStatsLabel.richText = true;
             }
             if (RunOverRestartButton)
             {
