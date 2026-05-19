@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>{{{ PRODUCT_NAME }}}</title>
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; overflow: hidden; background: #0A0A14; }
+    #unity-container {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0A0A14;
+    }
+    #unity-canvas {
+      width: 100%;
+      height: 100%;
+      cursor: default;
+    }
+    #loading-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0A0A14;
+      z-index: 10;
+      transition: opacity 0.5s ease;
+      font-family: 'Cinzel', 'Georgia', serif;
+      color: #F0E6D2;
+    }
+    #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+    #loading-title {
+      font-size: 3rem;
+      color: #D4A846;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    #loading-subtitle {
+      font-size: 1rem;
+      color: #A89B8C;
+      margin-bottom: 2rem;
+      font-family: 'Georgia', serif;
+      font-style: italic;
+    }
+    #loading-bar-bg {
+      width: 320px;
+      height: 6px;
+      background: #1E2832;
+      border-radius: 3px;
+      overflow: hidden;
+      border: 1px solid #5A4830;
+    }
+    #loading-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #D4A846, #B8922C);
+      border-radius: 3px;
+      transition: width 0.2s ease;
+    }
+    #loading-percent {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      color: #A89B8C;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    #fullscreen-btn {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      z-index: 5;
+      background: rgba(42, 52, 66, 0.8);
+      border: 1px solid #5A4830;
+      color: #F0E6D2;
+      padding: 6px 14px;
+      font-family: 'Georgia', serif;
+      font-size: 0.8rem;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: background 0.2s;
+    }
+    #fullscreen-btn:hover { background: rgba(90, 72, 48, 0.9); }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="unity-container">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <div id="loading-overlay">
+      <div id="loading-title">Wits &amp; Fools</div>
+      <div id="loading-subtitle">A Renaissance Card Game</div>
+      <div id="loading-bar-bg"><div id="loading-bar"></div></div>
+      <div id="loading-percent">Loading...</div>
+    </div>
+    <button id="fullscreen-btn" title="Toggle fullscreen">&#x26F6; Fullscreen</button>
+  </div>
+
+  <script>
+    var container = document.getElementById("unity-container");
+    var canvas = document.getElementById("unity-canvas");
+    var overlay = document.getElementById("loading-overlay");
+    var bar = document.getElementById("loading-bar");
+    var pct = document.getElementById("loading-percent");
+    var fsBtn = document.getElementById("fullscreen-btn");
+
+    var buildUrl = "Build";
+    var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
+    var config = {
+      arguments: [],
+      dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
+      frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
+#if USE_WASM
+      codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
+#endif
+#if SYMBOLS_FILENAME
+      symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
+#endif
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: {{{ JSON.stringify(COMPANY_NAME) }}},
+      productName: {{{ JSON.stringify(PRODUCT_NAME) }}},
+      productVersion: {{{ JSON.stringify(PRODUCT_VERSION) }}},
+    };
+
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      var meta = document.createElement("meta");
+      meta.name = "viewport";
+      meta.content = "width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes";
+      document.getElementsByTagName("head")[0].appendChild(meta);
+    }
+
+    var script = document.createElement("script");
+    script.src = loaderUrl;
+    script.onload = function () {
+      createUnityInstance(canvas, config, function (progress) {
+        bar.style.width = (progress * 100) + "%";
+        pct.textContent = Math.round(progress * 100) + "%";
+      }).then(function (instance) {
+        overlay.classList.add("hidden");
+        setTimeout(function () { overlay.style.display = "none"; }, 600);
+
+        fsBtn.addEventListener("click", function () {
+          instance.SetFullscreen(1);
+        });
+      }).catch(function (message) {
+        pct.textContent = "Error: " + message;
+      });
+    };
+    document.body.appendChild(script);
+  </script>
+</body>
+</html>
