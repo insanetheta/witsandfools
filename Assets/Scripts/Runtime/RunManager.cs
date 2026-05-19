@@ -35,7 +35,9 @@ namespace WitsAndFools
         [Header("Map Panel Refs")]
         public TMP_Text MapTitleLabel;
         public Transform MapNodeContainer;
+        public Transform MapPathContainer;
         public GameObject MapNodeButtonPrefab;
+        public Sprite[] MapNodeSprites;
 
         [Header("Result Panel Refs")]
         public TMP_Text ResultTitleLabel;
@@ -240,14 +242,14 @@ namespace WitsAndFools
         {
             if (_currentColumn >= _run.CurrentMap.Count) return;
             var column = _run.CurrentMap[_currentColumn];
-            MapNode best = column[0];
-            int bestPriority = NodePriority(best.Type);
+            int bestRow = 0;
+            int bestPriority = NodePriority(column[0].Type);
             for (int i = 1; i < column.Count; i++)
             {
                 int p = NodePriority(column[i].Type);
-                if (p > bestPriority) { best = column[i]; bestPriority = p; }
+                if (p > bestPriority) { bestRow = i; bestPriority = p; }
             }
-            OnNodeSelected(best);
+            OnNodeSelected(column[bestRow], bestRow);
         }
 
         static int NodePriority(MapNodeType t) => t switch
@@ -303,6 +305,8 @@ namespace WitsAndFools
             _run.CurrentAct = 0;
             _run.CurrentMap = MapGenerator.Generate(0, _rng);
             _currentColumn = 0;
+            _visitedNodeRows.Clear();
+            _selectedNodeRow = -1;
             ApplyActTheme(0);
 
             SetPhase(RunPhase.ArchetypeSelect);
@@ -446,7 +450,10 @@ namespace WitsAndFools
             btn.onClick.AddListener(() => OnArchetypeSelected(captured));
         }
 
-        // ---------- Map ----------
+        // ---------- Map (branching path layout) ----------
+
+        int _selectedNodeRow = -1; // which row was picked in the current column (for path lines)
+        readonly List<int> _visitedNodeRows = new(); // row picked per visited column
 
         void ShowMap()
         {
@@ -465,122 +472,272 @@ namespace WitsAndFools
                 return;
             }
 
-            var column = _run.CurrentMap[_currentColumn];
-            for (int i = 0; i < column.Count; i++)
-            {
-                var node = column[i];
-                CreateMapNodeButton(node, i);
-            }
+            RenderFullMap();
         }
 
         void ClearMapNodes()
         {
             if (!MapNodeContainer) return;
             for (int i = MapNodeContainer.childCount - 1; i >= 0; i--)
-                Destroy(MapNodeContainer.GetChild(i).gameObject);
+            {
+                var child = MapNodeContainer.GetChild(i);
+                if (child.name != "MapPathContainer")
+                    Destroy(child.gameObject);
+            }
+            if (MapPathContainer)
+                for (int i = MapPathContainer.childCount - 1; i >= 0; i--)
+                    Destroy(MapPathContainer.GetChild(i).gameObject);
         }
 
-        void CreateMapNodeButton(MapNode node, int index)
+        void RenderFullMap()
         {
             if (!MapNodeContainer) return;
+            var containerRT = (RectTransform)MapNodeContainer;
+            var map = _run.CurrentMap;
+            int totalCols = map.Count;
+            float containerW = containerRT.rect.width;
+            float containerH = containerRT.rect.height;
+            if (containerW <= 0) containerW = 1200f;
+            if (containerH <= 0) containerH = 600f;
 
-            GameObject btnGO;
-            if (MapNodeButtonPrefab)
-                btnGO = Instantiate(MapNodeButtonPrefab, MapNodeContainer);
-            else
+            float colSpacing = containerW / (totalCols + 1);
+            float nodeSize = 100f;
+            float nodeGap = 16f;
+            var nodePositions = new List<List<Vector2>>();
+
+            for (int col = 0; col < totalCols; col++)
             {
-                btnGO = new GameObject($"Node_{index}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
-                btnGO.transform.SetParent(MapNodeContainer, false);
+                var column = map[col];
+                float x = colSpacing * (col + 1);
+                float totalH = column.Count * nodeSize + (column.Count - 1) * nodeGap;
+                float startY = containerH / 2f + totalH / 2f;
 
-                var bgColor = NodeColor(node.Type);
-                btnGO.GetComponent<Image>().color = new Color(bgColor.r * 0.5f, bgColor.g * 0.5f, bgColor.b * 0.5f, 0.85f);
-
-                var le = btnGO.GetComponent<LayoutElement>();
-                le.preferredHeight = 72;
-                le.preferredWidth = 500;
-
-                // Left accent bar
-                var accentGO = new GameObject("Accent", typeof(RectTransform), typeof(Image));
-                accentGO.transform.SetParent(btnGO.transform, false);
-                var accentRT = (RectTransform)accentGO.transform;
-                accentRT.anchorMin = new Vector2(0, 0);
-                accentRT.anchorMax = new Vector2(0, 1);
-                accentRT.pivot = new Vector2(0, 0.5f);
-                accentRT.sizeDelta = new Vector2(5, 0);
-                accentRT.anchoredPosition = Vector2.zero;
-                accentGO.GetComponent<Image>().color = bgColor;
-                accentGO.GetComponent<Image>().raycastTarget = false;
-
-                // Node icon (left side)
-                var iconGO = new GameObject("Icon", typeof(RectTransform));
-                iconGO.transform.SetParent(btnGO.transform, false);
-                var iconRT = (RectTransform)iconGO.transform;
-                iconRT.anchorMin = new Vector2(0, 0);
-                iconRT.anchorMax = new Vector2(0, 1);
-                iconRT.pivot = new Vector2(0, 0.5f);
-                iconRT.sizeDelta = new Vector2(50, 0);
-                iconRT.anchoredPosition = new Vector2(14, 0);
-                var iconTMP = iconGO.AddComponent<TextMeshProUGUI>();
-                iconTMP.text = NodeIcon(node.Type);
-                iconTMP.alignment = TextAlignmentOptions.Center;
-                iconTMP.fontSize = 28;
-                iconTMP.color = bgColor;
-                iconTMP.raycastTarget = false;
-
-                // Title label
-                var titleGO = new GameObject("Title", typeof(RectTransform));
-                titleGO.transform.SetParent(btnGO.transform, false);
-                var titleRT = (RectTransform)titleGO.transform;
-                titleRT.anchorMin = new Vector2(0, 0.5f);
-                titleRT.anchorMax = new Vector2(1, 1);
-                titleRT.offsetMin = new Vector2(68, 0);
-                titleRT.offsetMax = new Vector2(-12, -4);
-                var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
-                var headingFont = FontAssets.Heading;
-                if (headingFont) titleTMP.font = headingFont;
-                titleTMP.text = NodeTitle(node);
-                titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
-                titleTMP.fontSize = 20;
-                titleTMP.color = ThemePalette.Parchment;
-                titleTMP.raycastTarget = false;
-
-                // Subtitle label
-                var subGO = new GameObject("Subtitle", typeof(RectTransform));
-                subGO.transform.SetParent(btnGO.transform, false);
-                var subRT = (RectTransform)subGO.transform;
-                subRT.anchorMin = new Vector2(0, 0);
-                subRT.anchorMax = new Vector2(1, 0.5f);
-                subRT.offsetMin = new Vector2(68, 4);
-                subRT.offsetMax = new Vector2(-12, 0);
-                var subTMP = subGO.AddComponent<TextMeshProUGUI>();
-                subTMP.text = NodeSubtitle(node);
-                subTMP.alignment = TextAlignmentOptions.MidlineLeft;
-                subTMP.fontSize = 14;
-                subTMP.color = ThemePalette.DustyTan;
-                subTMP.raycastTarget = false;
-
-                // Hover highlight color
-                var btn = btnGO.GetComponent<Button>();
-                var colors = btn.colors;
-                colors.highlightedColor = new Color(bgColor.r * 0.7f, bgColor.g * 0.7f, bgColor.b * 0.7f, 0.95f);
-                btn.colors = colors;
+                var colPositions = new List<Vector2>();
+                for (int row = 0; row < column.Count; row++)
+                {
+                    float y = startY - row * (nodeSize + nodeGap) - nodeSize / 2f;
+                    colPositions.Add(new Vector2(x, y));
+                }
+                nodePositions.Add(colPositions);
             }
 
-            var button = btnGO.GetComponent<Button>();
-            var capturedNode = node;
-            button.onClick.AddListener(() => OnNodeSelected(capturedNode));
+            // Draw path lines between columns
+            DrawPathLines(nodePositions, containerRT);
+
+            // Create node cards
+            for (int col = 0; col < totalCols; col++)
+            {
+                var column = map[col];
+                bool isVisited = col < _currentColumn;
+                bool isCurrent = col == _currentColumn;
+                bool isFuture = col > _currentColumn;
+
+                for (int row = 0; row < column.Count; row++)
+                {
+                    var node = column[row];
+                    var pos = nodePositions[col][row];
+                    CreateMapNode(node, pos, nodeSize, isVisited, isCurrent, isFuture, col, row);
+                }
+
+                // Column numeral header
+                string numeral = (col + 1) switch { 1 => "I", 2 => "II", 3 => "III", 4 => "IV", _ => (col+1).ToString() };
+                var headerGO = new GameObject($"ColHeader_{col}", typeof(RectTransform));
+                headerGO.transform.SetParent(MapNodeContainer, false);
+                var headerRT = (RectTransform)headerGO.transform;
+                headerRT.anchorMin = headerRT.anchorMax = new Vector2(0, 0);
+                headerRT.pivot = new Vector2(0.5f, 0);
+                float headerX = nodePositions[col][0].x;
+                float topNodeY = nodePositions[col][0].y + nodeSize / 2f;
+                headerRT.anchoredPosition = new Vector2(headerX, topNodeY + 12f);
+                headerRT.sizeDelta = new Vector2(60, 24);
+                var headerTMP = headerGO.AddComponent<TextMeshProUGUI>();
+                var hFont = FontAssets.Heading;
+                if (hFont) headerTMP.font = hFont;
+                headerTMP.text = numeral;
+                headerTMP.alignment = TextAlignmentOptions.Center;
+                headerTMP.fontSize = 16;
+                headerTMP.color = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.6f);
+                headerTMP.raycastTarget = false;
+            }
         }
 
-        static string NodeIcon(MapNodeType type) => type switch
+        void CreateMapNode(MapNode node, Vector2 pos, float size, bool visited, bool current, bool future, int col, int row)
         {
-            MapNodeType.RivalMatch => "⚔",  // crossed swords
-            MapNodeType.EliteMatch => "☠",  // skull
-            MapNodeType.BossMatch  => "♚",  // crown/king
-            MapNodeType.Shop       => "⚖",  // scales
-            MapNodeType.Rumor      => "✉",  // envelope
-            MapNodeType.Rest       => "♨",  // hot springs
-            _ => "?"
-        };
+            var go = new GameObject($"Node_{col}_{row}", typeof(RectTransform), typeof(Image));
+            go.transform.SetParent(MapNodeContainer, false);
+            var rt = (RectTransform)go.transform;
+            rt.anchorMin = rt.anchorMax = new Vector2(0, 0);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.sizeDelta = new Vector2(size, size);
+            rt.anchoredPosition = pos;
+
+            var bgImg = go.GetComponent<Image>();
+            var bgColor = NodeColor(node.Type);
+
+            if (visited)
+            {
+                bool wasChosen = col < _visitedNodeRows.Count && _visitedNodeRows[col] == row;
+                bgImg.color = wasChosen
+                    ? new Color(bgColor.r * 0.4f, bgColor.g * 0.4f, bgColor.b * 0.4f, 0.7f)
+                    : new Color(0.15f, 0.15f, 0.15f, 0.5f);
+            }
+            else if (current)
+                bgImg.color = new Color(bgColor.r * 0.3f, bgColor.g * 0.3f, bgColor.b * 0.3f, 0.9f);
+            else
+                bgImg.color = new Color(0.15f, 0.12f, 0.1f, 0.7f);
+
+            // Icon sprite
+            int spriteIdx = (int)node.Type;
+            if (MapNodeSprites != null && spriteIdx < MapNodeSprites.Length && MapNodeSprites[spriteIdx])
+            {
+                var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+                iconGO.transform.SetParent(go.transform, false);
+                var iconRT = (RectTransform)iconGO.transform;
+                iconRT.anchorMin = new Vector2(0.5f, 0.5f);
+                iconRT.anchorMax = new Vector2(0.5f, 0.5f);
+                iconRT.pivot = new Vector2(0.5f, 0.5f);
+                iconRT.sizeDelta = new Vector2(size * 0.75f, size * 0.75f);
+                iconRT.anchoredPosition = new Vector2(0, 4);
+                var iconImg = iconGO.GetComponent<Image>();
+                iconImg.sprite = MapNodeSprites[spriteIdx];
+                iconImg.preserveAspect = true;
+                iconImg.raycastTarget = false;
+                if (future) iconImg.color = new Color(0.7f, 0.65f, 0.6f, 0.6f);
+                else if (visited) iconImg.color = new Color(0.6f, 0.6f, 0.6f, 0.7f);
+                else iconImg.color = Color.white;
+            }
+
+            // Name label below icon
+            var labelGO = new GameObject("Label", typeof(RectTransform));
+            labelGO.transform.SetParent(go.transform, false);
+            var labelRT = (RectTransform)labelGO.transform;
+            labelRT.anchorMin = new Vector2(0.5f, 0);
+            labelRT.anchorMax = new Vector2(0.5f, 0);
+            labelRT.pivot = new Vector2(0.5f, 1);
+            labelRT.sizeDelta = new Vector2(120, 30);
+            labelRT.anchoredPosition = new Vector2(0, -4);
+            var labelTMP = labelGO.AddComponent<TextMeshProUGUI>();
+            labelTMP.text = NodeTitle(node);
+            labelTMP.alignment = TextAlignmentOptions.Center;
+            labelTMP.fontSize = 11;
+            labelTMP.enableWordWrapping = false;
+            labelTMP.overflowMode = TextOverflowModes.Ellipsis;
+            labelTMP.raycastTarget = false;
+            if (future) labelTMP.color = new Color(ThemePalette.DustyTan.r, ThemePalette.DustyTan.g, ThemePalette.DustyTan.b, 0.55f);
+            else if (visited) labelTMP.color = new Color(ThemePalette.DustyTan.r, ThemePalette.DustyTan.g, ThemePalette.DustyTan.b, 0.6f);
+            else labelTMP.color = ThemePalette.Parchment;
+
+            // Gold border glow for current column
+            if (current)
+            {
+                var glowGO = new GameObject("Glow", typeof(RectTransform), typeof(Image));
+                glowGO.transform.SetParent(go.transform, false);
+                var glowRT = (RectTransform)glowGO.transform;
+                glowRT.anchorMin = Vector2.zero;
+                glowRT.anchorMax = Vector2.one;
+                glowRT.offsetMin = new Vector2(-3, -3);
+                glowRT.offsetMax = new Vector2(3, 3);
+                glowGO.GetComponent<Image>().color = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.5f);
+                glowGO.GetComponent<Image>().raycastTarget = false;
+                glowGO.transform.SetAsFirstSibling();
+
+                // Make clickable
+                var btn = go.AddComponent<Button>();
+                var btnColors = btn.colors;
+                btnColors.highlightedColor = new Color(bgColor.r * 0.5f, bgColor.g * 0.5f, bgColor.b * 0.5f, 0.95f);
+                btn.colors = btnColors;
+                var capturedNode = node;
+                var capturedRow = row;
+                btn.onClick.AddListener(() => OnNodeSelected(capturedNode, capturedRow));
+            }
+
+            // Visited checkmark
+            if (visited)
+            {
+                bool wasChosen = col < _visitedNodeRows.Count && _visitedNodeRows[col] == row;
+                if (wasChosen)
+                {
+                    var checkGO = new GameObject("Check", typeof(RectTransform));
+                    checkGO.transform.SetParent(go.transform, false);
+                    var checkRT = (RectTransform)checkGO.transform;
+                    checkRT.anchorMin = new Vector2(0.5f, 0.5f);
+                    checkRT.anchorMax = new Vector2(0.5f, 0.5f);
+                    checkRT.pivot = new Vector2(0.5f, 0.5f);
+                    checkRT.sizeDelta = new Vector2(30, 30);
+                    checkRT.anchoredPosition = Vector2.zero;
+                    var checkTMP = checkGO.AddComponent<TextMeshProUGUI>();
+                    checkTMP.text = "✓";
+                    checkTMP.alignment = TextAlignmentOptions.Center;
+                    checkTMP.fontSize = 24;
+                    checkTMP.color = ThemePalette.Gold;
+                    checkTMP.raycastTarget = false;
+                }
+            }
+        }
+
+        void DrawPathLines(List<List<Vector2>> nodePositions, RectTransform container)
+        {
+            if (!MapPathContainer) return;
+
+            for (int col = 0; col < nodePositions.Count - 1; col++)
+            {
+                bool isVisitedCol = col < _currentColumn;
+                bool isCurrentCol = col == _currentColumn - 1;
+
+                for (int srcRow = 0; srcRow < nodePositions[col].Count; srcRow++)
+                {
+                    bool srcChosen = col < _visitedNodeRows.Count && _visitedNodeRows[col] == srcRow;
+                    if (isVisitedCol && !srcChosen) continue;
+
+                    var srcPos = nodePositions[col][srcRow];
+
+                    for (int dstRow = 0; dstRow < nodePositions[col + 1].Count; dstRow++)
+                    {
+                        bool dstChosen = (col + 1) < _visitedNodeRows.Count && _visitedNodeRows[col + 1] == dstRow;
+                        var dstPos = nodePositions[col + 1][dstRow];
+
+                        float alpha;
+                        Color lineColor;
+                        if (isVisitedCol && srcChosen && dstChosen)
+                        {
+                            lineColor = ThemePalette.Gold;
+                            alpha = 0.8f;
+                        }
+                        else if (isVisitedCol && srcChosen && (col + 1) == _currentColumn)
+                        {
+                            lineColor = ThemePalette.Gold;
+                            alpha = 0.5f;
+                        }
+                        else if (!isVisitedCol && col >= _currentColumn)
+                        {
+                            lineColor = ThemePalette.DustyTan;
+                            alpha = 0.25f;
+                        }
+                        else continue;
+
+                        DrawLine(srcPos, dstPos, new Color(lineColor.r, lineColor.g, lineColor.b, alpha), 3f);
+                    }
+                }
+            }
+        }
+
+        void DrawLine(Vector2 from, Vector2 to, Color color, float thickness)
+        {
+            var lineGO = new GameObject("PathLine", typeof(RectTransform), typeof(Image));
+            lineGO.transform.SetParent(MapPathContainer, false);
+            var rt = (RectTransform)lineGO.transform;
+            var dir = to - from;
+            float dist = dir.magnitude;
+            float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            rt.anchorMin = rt.anchorMax = new Vector2(0, 0);
+            rt.pivot = new Vector2(0, 0.5f);
+            rt.sizeDelta = new Vector2(dist, thickness);
+            rt.anchoredPosition = from;
+            rt.localRotation = Quaternion.Euler(0, 0, angle);
+            var img = lineGO.GetComponent<Image>();
+            img.color = color;
+            img.raycastTarget = false;
+        }
 
         string NodeTitle(MapNode node) => node.Type switch
         {
@@ -591,17 +748,6 @@ namespace WitsAndFools
             MapNodeType.Rumor => "A Whispered Lead",
             MapNodeType.Rest => "The Hearth",
             _ => "???"
-        };
-
-        static string NodeSubtitle(MapNode node) => node.Type switch
-        {
-            MapNodeType.RivalMatch => "Card match",
-            MapNodeType.EliteMatch => "Elite challenge — greater reward",
-            MapNodeType.BossMatch => "Boss — defeat to advance",
-            MapNodeType.Shop => "Buy abilities and trinkets",
-            MapNodeType.Rumor => "Risk and reward await...",
-            MapNodeType.Rest => "Rest and recuperate",
-            _ => ""
         };
 
         Color NodeColor(MapNodeType type) => type switch
@@ -615,8 +761,13 @@ namespace WitsAndFools
             _ => Color.gray
         };
 
-        void OnNodeSelected(MapNode node)
+        void OnNodeSelected(MapNode node, int row = -1)
         {
+            if (row >= 0)
+            {
+                _selectedNodeRow = row;
+                _visitedNodeRows.Add(row);
+            }
             _currentNode = node;
             _currentColumn++;
 
@@ -1650,6 +1801,8 @@ namespace WitsAndFools
             }
             _run.CurrentMap = MapGenerator.Generate(_run.CurrentAct, _rng);
             _currentColumn = 0;
+            _visitedNodeRows.Clear();
+            _selectedNodeRow = -1;
             ApplyActTheme(_run.CurrentAct);
             SetPhase(RunPhase.MapSelect);
         }

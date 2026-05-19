@@ -446,50 +446,54 @@ namespace WitsAndFools.EditorTools
             ((RectTransform)infoLabel.transform).SetParent(matchPanel, true);
             matchPanel.gameObject.SetActive(false);
 
-            // ----- Map Panel -----
+            // ----- Map Panel (branching path layout) -----
             var mapPanel = NewChild(canvasRT, "MapPanel");
             FillParent(mapPanel);
+            // Parchment background
             var mapBgImg = mapPanel.gameObject.AddComponent<Image>();
-            mapBgImg.color = ThemePalette.DeepNavy;
-            // Venue background (dimmed, set at runtime by RunManager)
+            var parchmentSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Map/map_parchment_bg.png");
+            if (parchmentSprite) { mapBgImg.sprite = parchmentSprite; mapBgImg.color = Color.white; }
+            else mapBgImg.color = ThemePalette.DeepNavy;
+            // Venue background (dimmed overlay, set at runtime by RunManager)
             var mapVenueBg = NewChild(mapPanel.GetComponent<RectTransform>(), "MapVenueBg");
             var mapVenueBgImg = mapVenueBg.gameObject.AddComponent<Image>();
-            mapVenueBgImg.color = new Color(1, 1, 1, 0.4f);
+            mapVenueBgImg.color = new Color(1, 1, 1, 0.25f);
             mapVenueBgImg.raycastTarget = false;
             FillParent(mapVenueBg);
-            mapVenueBg.SetAsFirstSibling();
-
-            var mapTitle = AddText(mapPanel, "MapTitle", "Act 1 — The Bilge Rat Tavern",
-                anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 36, color: ThemePalette.Gold, font: HeadingFont);
-
-            var mapSubtitle = AddText(mapPanel, "MapSubtitle", "Choose your path:",
-                anchorMin: new Vector2(0.1f, 0.74f), anchorMax: new Vector2(0.9f, 0.82f),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 24, color: ThemePalette.DustyTan);
-
-            var mapNodeContainer = NewChild(mapPanel, "MapNodeContainer");
-            mapNodeContainer.anchorMin = new Vector2(0.25f, 0.15f);
-            mapNodeContainer.anchorMax = new Vector2(0.75f, 0.74f);
-            mapNodeContainer.offsetMin = Vector2.zero;
-            mapNodeContainer.offsetMax = Vector2.zero;
-            var nodeLayout = mapNodeContainer.gameObject.AddComponent<VerticalLayoutGroup>();
-            nodeLayout.spacing = 16;
-            nodeLayout.childAlignment = TextAnchor.UpperCenter;
-            nodeLayout.childControlWidth = true;
-            nodeLayout.childControlHeight = false;
-            nodeLayout.childForceExpandWidth = false;
-            nodeLayout.childForceExpandHeight = false;
-
-            // Vignette overlay for map
+            // Vignette overlay
             var mapVignette = NewChild(mapPanel, "MapVignette");
             var mapVignetteImg = mapVignette.gameObject.AddComponent<Image>();
-            if (vignetteSprite) { mapVignetteImg.sprite = vignetteSprite; mapVignetteImg.color = new Color(1, 1, 1, 0.7f); }
+            if (vignetteSprite) { mapVignetteImg.sprite = vignetteSprite; mapVignetteImg.color = new Color(1, 1, 1, 0.6f); }
             else mapVignetteImg.color = new Color(0, 0, 0, 0);
             mapVignetteImg.raycastTarget = false;
             FillParent(mapVignette);
-            mapVignette.SetSiblingIndex(1); // after venue bg, before UI elements
+
+            // Dark gradient strip behind map title for legibility
+            var mapTitleBg = NewChild(mapPanel, "MapTitleBg");
+            var mapTitleBgImg = mapTitleBg.gameObject.AddComponent<Image>();
+            mapTitleBgImg.color = new Color(0.05f, 0.03f, 0.02f, 0.6f);
+            mapTitleBgImg.raycastTarget = false;
+            mapTitleBg.anchorMin = new Vector2(0f, 0.86f);
+            mapTitleBg.anchorMax = new Vector2(1f, 1f);
+            mapTitleBg.offsetMin = Vector2.zero;
+            mapTitleBg.offsetMax = Vector2.zero;
+
+            var mapTitle = AddText(mapPanel, "MapTitle", "Act 1 — The Bilge Rat Tavern",
+                anchorMin: new Vector2(0.05f, 0.88f), anchorMax: new Vector2(0.95f, 0.97f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 32, color: ThemePalette.Gold, font: HeadingFont);
+
+            // Container for all map columns — nodes created dynamically by RunManager
+            var mapNodeContainer = NewChild(mapPanel, "MapNodeContainer");
+            mapNodeContainer.anchorMin = new Vector2(0.08f, 0.10f);
+            mapNodeContainer.anchorMax = new Vector2(0.92f, 0.85f);
+            mapNodeContainer.offsetMin = Vector2.zero;
+            mapNodeContainer.offsetMax = Vector2.zero;
+
+            // Path line container (behind nodes, drawn by RunManager)
+            var mapPathContainer = NewChild(mapNodeContainer, "MapPathContainer");
+            FillParent(mapPathContainer);
+            mapPathContainer.SetAsFirstSibling();
 
             mapPanel.gameObject.SetActive(false);
 
@@ -782,6 +786,18 @@ namespace WitsAndFools.EditorTools
             rm.RunHudPanel = runHudPanel.gameObject;
             rm.MapTitleLabel = mapTitle;
             rm.MapNodeContainer = mapNodeContainer;
+            rm.MapPathContainer = mapPathContainer;
+
+            // Load map node sprites — indexed by MapNodeType enum order
+            rm.MapNodeSprites = new[]
+            {
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Map/map_node_match.png"),  // RivalMatch=0
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Map/map_node_elite.png"),  // EliteMatch=1
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Map/map_node_shop.png"),   // Shop=2
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Map/map_node_rumor.png"),  // Rumor=3
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Map/map_node_rest.png"),   // Rest=4
+                AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Map/map_node_boss.png"),   // BossMatch=5
+            };
             rm.ResultTitleLabel = resultTitle;
             rm.ResultDetailsLabel = resultDetails;
             rm.ResultRewardLabel = resultReward;

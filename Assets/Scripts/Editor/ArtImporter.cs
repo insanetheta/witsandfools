@@ -23,6 +23,14 @@ namespace WitsAndFools.EditorTools
             }
             else if (assetPath.Contains("/Backgrounds/") || assetPath.Contains("/Tables/") || assetPath.Contains("/Scenes/"))
                 importer.maxTextureSize = 1024;
+            else if (assetPath.Contains("/Map/"))
+            {
+                importer.alphaIsTransparency = true;
+                if (assetPath.Contains("parchment_bg"))
+                    importer.maxTextureSize = 2048;
+                else
+                    importer.maxTextureSize = 128;
+            }
             else if (assetPath.Contains("/Portraits/"))
                 importer.maxTextureSize = 512;
             else
