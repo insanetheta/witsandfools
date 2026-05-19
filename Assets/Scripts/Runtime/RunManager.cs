@@ -405,14 +405,29 @@ namespace WitsAndFools
             ClearMapNodes();
             if (!MapNodeContainer) return;
 
-            foreach (var archetype in ArchetypeDefinitions.AllArchetypes)
+            var allArch = ArchetypeDefinitions.AllArchetypes;
+            var containerRT = (RectTransform)MapNodeContainer;
+            Canvas.ForceUpdateCanvases();
+            float containerW = containerRT.rect.width;
+            float containerH = containerRT.rect.height;
+            if (containerW <= 0) containerW = 1612f;
+            if (containerH <= 0) containerH = 810f;
+
+            float btnW = 550f;
+            float btnH = 100f;
+            float gap = 16f;
+            float totalH = allArch.Length * btnH + (allArch.Length - 1) * gap;
+            float startY = containerH / 2f + totalH / 2f;
+
+            for (int i = 0; i < allArch.Length; i++)
             {
-                bool unlocked = repData.UnlockedArchetypes.Contains(archetype);
-                CreateArchetypeButton(archetype, unlocked);
+                float y = startY - i * (btnH + gap) - btnH / 2f;
+                bool unlocked = repData.UnlockedArchetypes.Contains(allArch[i]);
+                CreateArchetypeButton(allArch[i], unlocked, new Vector2(containerW / 2f, y), btnW, btnH);
             }
         }
 
-        void CreateArchetypeButton(ArchetypeType archetype, bool unlocked)
+        void CreateArchetypeButton(ArchetypeType archetype, bool unlocked, Vector2 pos, float w, float h)
         {
             var abilities = archetype.StartingAbilities();
             string abilityList = string.Join(", ", abilities.ConvertAll(a => a.DisplayName()));
@@ -427,8 +442,14 @@ namespace WitsAndFools
                 _ => 0
             };
 
-            var btnGO = new GameObject($"Archetype_{archetype}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            var btnGO = new GameObject($"Archetype_{archetype}", typeof(RectTransform), typeof(Image), typeof(Button));
             btnGO.transform.SetParent(MapNodeContainer, false);
+
+            var btnRT = (RectTransform)btnGO.transform;
+            btnRT.anchorMin = btnRT.anchorMax = Vector2.zero;
+            btnRT.pivot = new Vector2(0.5f, 0.5f);
+            btnRT.anchoredPosition = pos;
+            btnRT.sizeDelta = new Vector2(w, h);
 
             var img = btnGO.GetComponent<Image>();
             img.color = unlocked ? archetype switch
@@ -439,10 +460,6 @@ namespace WitsAndFools
                 ArchetypeType.Gambler => ThemePalette.ArchGambler,
                 _ => Color.gray
             } : ThemePalette.LockedGray;
-
-            var le = btnGO.GetComponent<LayoutElement>();
-            le.preferredHeight = 100;
-            le.preferredWidth = 550;
 
             var nameGO = new GameObject("Name", typeof(RectTransform));
             nameGO.transform.SetParent(btnGO.transform, false);
