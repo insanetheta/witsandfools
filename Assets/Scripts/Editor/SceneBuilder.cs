@@ -121,19 +121,19 @@ namespace WitsAndFools.EditorTools
             hudBar.anchorMin = new Vector2(0, 1);
             hudBar.anchorMax = new Vector2(1, 1);
             hudBar.pivot = new Vector2(0.5f, 1);
-            hudBar.sizeDelta = new Vector2(0, 42);
+            hudBar.sizeDelta = new Vector2(0, 70);
             hudBar.anchoredPosition = Vector2.zero;
 
             var turnLabel = AddText(hudBar, "TurnLabel", "—", anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineLeft, fontSize: 16, color: Color.white);
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineLeft, fontSize: 30, color: Color.white);
             turnLabel.margin = new Vector4(16, 0, 0, 0);
 
             var trumpLabel = AddText(hudBar, "TrumpLabel", "Trump: ♥", anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(0.7f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center, fontSize: 16, color: Color.white,
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center, fontSize: 30, color: Color.white,
                 font: MonoFont);
 
             var deckLabel = AddText(hudBar, "DeckCountLabel", "Deck: 0", anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineRight, fontSize: 16, color: Color.white,
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineRight, fontSize: 30, color: Color.white,
                 font: MonoFont);
             deckLabel.margin = new Vector4(0, 0, 16, 0);
 
@@ -142,8 +142,8 @@ namespace WitsAndFools.EditorTools
             nameplate.anchorMin = new Vector2(0, 1);
             nameplate.anchorMax = new Vector2(0, 1);
             nameplate.pivot = new Vector2(0, 1);
-            nameplate.sizeDelta = new Vector2(220, 48);
-            nameplate.anchoredPosition = new Vector2(16, -48);
+            nameplate.sizeDelta = new Vector2(520, 200);
+            nameplate.anchoredPosition = new Vector2(16, -76);
             var nameplateBg = nameplate.gameObject.AddComponent<Image>();
             nameplateBg.color = new Color(0, 0, 0, 0.5f);
             nameplateBg.raycastTarget = false;
@@ -152,8 +152,8 @@ namespace WitsAndFools.EditorTools
             portraitRT.anchorMin = new Vector2(0, 0);
             portraitRT.anchorMax = new Vector2(0, 1);
             portraitRT.pivot = new Vector2(0, 0.5f);
-            portraitRT.sizeDelta = new Vector2(40, 40);
-            portraitRT.anchoredPosition = new Vector2(4, 0);
+            portraitRT.sizeDelta = new Vector2(190, 190);
+            portraitRT.anchoredPosition = new Vector2(5, 0);
             var portraitImg = portraitRT.gameObject.AddComponent<Image>();
             portraitImg.color = ThemePalette.WarmSlate;
             portraitImg.preserveAspect = true;
@@ -162,26 +162,26 @@ namespace WitsAndFools.EditorTools
             var oppNameLabel = AddText(nameplate, "OpponentName", "Opponent",
                 anchorMin: new Vector2(0, 0.5f), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(0, 1), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 14, color: ThemePalette.Parchment, font: HeadingFont);
+                fontSize: 36, color: ThemePalette.Parchment, font: HeadingFont);
             var oppNameRT = (RectTransform)oppNameLabel.transform;
-            oppNameRT.offsetMin = new Vector2(50, 0);
-            oppNameRT.offsetMax = new Vector2(-4, -2);
+            oppNameRT.offsetMin = new Vector2(200, 0);
+            oppNameRT.offsetMax = new Vector2(-8, -4);
 
             var oppArchLabel = AddText(nameplate, "OpponentArchetype", "The Fox",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(1, 0.5f),
                 pivot: new Vector2(0, 0), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 11, color: ThemePalette.DustyTan);
+                fontSize: 28, color: ThemePalette.DustyTan);
             var oppArchRT = (RectTransform)oppArchLabel.transform;
-            oppArchRT.offsetMin = new Vector2(50, 2);
-            oppArchRT.offsetMax = new Vector2(-4, 0);
+            oppArchRT.offsetMin = new Vector2(200, 4);
+            oppArchRT.offsetMax = new Vector2(-8, 0);
 
-            // ----- End-bout button (bottom-right) -----
+            // ----- End-bout button (bottom-right, above run HUD) -----
             var endBoutBtn = AddButton(canvasRT, "EndBoutButton", "End Bout");
             endBoutBtn.anchorMin = new Vector2(1, 0);
             endBoutBtn.anchorMax = new Vector2(1, 0);
             endBoutBtn.pivot = new Vector2(1, 0);
-            endBoutBtn.sizeDelta = new Vector2(140, 40);
-            endBoutBtn.anchoredPosition = new Vector2(-16, 52);
+            endBoutBtn.sizeDelta = new Vector2(180, 52);
+            endBoutBtn.anchoredPosition = new Vector2(-16, 145);
 
             // ----- Center band: deck/trump anchored to LEFT edge, discard anchored to RIGHT edge,
             // bout area in the middle. Anchoring to edges keeps everything visible at narrow aspect ratios.
@@ -251,7 +251,7 @@ namespace WitsAndFools.EditorTools
             playerHand.anchorMin = new Vector2(0.5f, 0);
             playerHand.anchorMax = new Vector2(0.5f, 0);
             playerHand.pivot = new Vector2(0.5f, 0);
-            playerHand.anchoredPosition = new Vector2(0, 52);
+            playerHand.anchoredPosition = new Vector2(0, 100);
             var playerHandLayout = playerHand.gameObject.AddComponent<HandLayout>();
             playerHandLayout.FaceUp = true;
             playerHandLayout.ReverseOrder = false;
@@ -315,11 +315,11 @@ namespace WitsAndFools.EditorTools
             var acPanel = NewChild(canvasRT, "AbilityChoicePanel");
             acPanel.anchorMin = new Vector2(0.5f, 0.5f);
             acPanel.anchorMax = new Vector2(0.5f, 0.5f);
-            acPanel.sizeDelta = new Vector2(480, 220);
+            acPanel.sizeDelta = new Vector2(480, 260);
             var acBg = acPanel.gameObject.AddComponent<Image>();
             acBg.color = ThemePalette.ModalOverlay;
             var acLabel = AddText(acPanel, "AbilityChoiceLabel", "Ability",
-                anchorMin: new Vector2(0.05f, 0.45f), anchorMax: new Vector2(0.95f, 0.95f),
+                anchorMin: new Vector2(0.05f, 0.40f), anchorMax: new Vector2(0.95f, 0.92f),
                 pivot: new Vector2(0.5f, 1f), alignment: TextAlignmentOptions.Center,
                 fontSize: 24, color: Color.white);
             acLabel.enableWordWrapping = true;
@@ -327,30 +327,37 @@ namespace WitsAndFools.EditorTools
             normalBtn.anchorMin = new Vector2(0.05f, 0);
             normalBtn.anchorMax = new Vector2(0.48f, 0);
             normalBtn.pivot = new Vector2(0.5f, 0);
-            normalBtn.sizeDelta = new Vector2(0, 60);
-            normalBtn.anchoredPosition = new Vector2(0, 20);
+            normalBtn.sizeDelta = new Vector2(0, 55);
+            normalBtn.anchoredPosition = new Vector2(0, 65);
             var useBtn = AddButton(acPanel, "UseAbilityButton", "Use ability");
             useBtn.anchorMin = new Vector2(0.52f, 0);
             useBtn.anchorMax = new Vector2(0.95f, 0);
             useBtn.pivot = new Vector2(0.5f, 0);
-            useBtn.sizeDelta = new Vector2(0, 60);
-            useBtn.anchoredPosition = new Vector2(0, 20);
+            useBtn.sizeDelta = new Vector2(0, 55);
+            useBtn.anchoredPosition = new Vector2(0, 65);
+            var cancelBtn = AddButton(acPanel, "CancelAbilityButton", "Cancel", secondary: true);
+            cancelBtn.anchorMin = new Vector2(0.25f, 0);
+            cancelBtn.anchorMax = new Vector2(0.75f, 0);
+            cancelBtn.pivot = new Vector2(0.5f, 0);
+            cancelBtn.sizeDelta = new Vector2(0, 45);
+            cancelBtn.anchoredPosition = new Vector2(0, 10);
             hud.AbilityChoicePanel = acPanel.gameObject;
             hud.AbilityChoiceLabel = acLabel;
             hud.PlayNormallyButton = normalBtn.GetComponent<Button>();
             hud.UseAbilityButton = useBtn.GetComponent<Button>();
+            hud.CancelAbilityButton = cancelBtn.GetComponent<Button>();
             acPanel.gameObject.SetActive(false);
 
-            // ----- Auto-play button (bottom-left) -----
+            // ----- Auto-play button (bottom-left, above run HUD) -----
             var autoPlayBtn = AddButton(canvasRT, "AutoPlayButton", "Auto: OFF", secondary: true);
             autoPlayBtn.anchorMin = new Vector2(0, 0);
             autoPlayBtn.anchorMax = new Vector2(0, 0);
             autoPlayBtn.pivot = new Vector2(0, 0);
-            autoPlayBtn.sizeDelta = new Vector2(120, 36);
-            autoPlayBtn.anchoredPosition = new Vector2(16, 52);
+            autoPlayBtn.sizeDelta = new Vector2(140, 46);
+            autoPlayBtn.anchoredPosition = new Vector2(16, 145);
             hud.AutoPlayButton = autoPlayBtn.GetComponent<Button>();
 
-            // ----- Tooltip label (bottom-left, hidden by default) -----
+            // ----- Tooltip label (bottom-left, above run HUD) -----
             var tooltipLabel = AddText(canvasRT, "TooltipLabel", "",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 0),
                 pivot: new Vector2(0, 0),
@@ -358,12 +365,12 @@ namespace WitsAndFools.EditorTools
                 color: new Color(1, 1, 1, 0.85f));
             var tooltipRT = (RectTransform)tooltipLabel.transform;
             tooltipRT.sizeDelta = new Vector2(0, 50);
-            tooltipRT.anchoredPosition = new Vector2(16, 52);
+            tooltipRT.anchoredPosition = new Vector2(16, 200);
             tooltipLabel.enableWordWrapping = true;
             tooltipLabel.gameObject.SetActive(false);
             hud.TooltipLabel = tooltipLabel;
 
-            // ----- Deck top label for Spy's Monocle (right side, above deck) -----
+            // ----- Deck top label for Spy's Monocle (right side, above run HUD) -----
             var deckTopLabel = AddText(canvasRT, "DeckTopLabel", "",
                 anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1f, 0),
                 pivot: new Vector2(1, 0),
@@ -371,7 +378,7 @@ namespace WitsAndFools.EditorTools
                 color: ThemePalette.Gold, font: MonoFont);
             var deckTopRT = (RectTransform)deckTopLabel.transform;
             deckTopRT.sizeDelta = new Vector2(0, 40);
-            deckTopRT.anchoredPosition = new Vector2(-16, 52);
+            deckTopRT.anchoredPosition = new Vector2(-16, 200);
             deckTopLabel.gameObject.SetActive(false);
             hud.DeckTopLabel = deckTopLabel;
 
@@ -379,11 +386,11 @@ namespace WitsAndFools.EditorTools
             var infoLabel = AddText(canvasRT, "InfoLabel", "",
                 anchorMin: new Vector2(0.4f, 1), anchorMax: new Vector2(1f, 1),
                 pivot: new Vector2(1, 1),
-                alignment: TextAlignmentOptions.TopRight, fontSize: 16,
+                alignment: TextAlignmentOptions.TopRight, fontSize: 20,
                 color: ThemePalette.Amber, font: MonoFont);
             var infoRT = (RectTransform)infoLabel.transform;
             infoRT.sizeDelta = new Vector2(0, 35);
-            infoRT.anchoredPosition = new Vector2(-16, -48);
+            infoRT.anchoredPosition = new Vector2(-16, -76);
             infoLabel.enableWordWrapping = true;
             infoLabel.gameObject.SetActive(false);
             hud.InfoLabel = infoLabel;
@@ -404,11 +411,11 @@ namespace WitsAndFools.EditorTools
             var oppResLabel = AddText(canvasRT, "OpponentResourceLabel", "",
                 anchorMin: new Vector2(0, 1), anchorMax: new Vector2(0.3f, 1),
                 pivot: new Vector2(0, 1),
-                alignment: TextAlignmentOptions.TopLeft, fontSize: 16,
+                alignment: TextAlignmentOptions.TopLeft, fontSize: 20,
                 color: ThemePalette.Gold, font: MonoFont);
             var oppResRT = (RectTransform)oppResLabel.transform;
-            oppResRT.sizeDelta = new Vector2(0, 26);
-            oppResRT.anchoredPosition = new Vector2(16, -48);
+            oppResRT.sizeDelta = new Vector2(0, 30);
+            oppResRT.anchoredPosition = new Vector2(16, -210);
             oppResLabel.gameObject.SetActive(false);
             hud.OpponentResourceLabel = oppResLabel;
 
@@ -505,7 +512,7 @@ namespace WitsAndFools.EditorTools
             // Venue background behind overlay
             var resultVenueBg = NewChild(resultPanel.GetComponent<RectTransform>(), "ResultVenueBg");
             var resultVenueBgImg = resultVenueBg.gameObject.AddComponent<Image>();
-            resultVenueBgImg.color = new Color(1, 1, 1, 0.25f);
+            resultVenueBgImg.color = new Color(1, 1, 1, 0f);
             resultVenueBgImg.raycastTarget = false;
             FillParent(resultVenueBg);
             resultVenueBg.SetAsFirstSibling();
@@ -521,24 +528,24 @@ namespace WitsAndFools.EditorTools
             var resultTitle = AddText(resultPanel, "ResultTitle", "Victory!",
                 anchorMin: new Vector2(0.1f, 0.82f), anchorMax: new Vector2(0.9f, 0.95f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 42, color: ThemePalette.Gold, font: HeadingFont);
+                fontSize: 55, color: ThemePalette.Gold, font: HeadingFont);
 
             var resultDetails = AddText(resultPanel, "ResultDetails", "",
                 anchorMin: new Vector2(0.15f, 0.72f), anchorMax: new Vector2(0.85f, 0.82f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 22, color: Color.white);
+                fontSize: 29, color: Color.white);
             resultDetails.enableWordWrapping = true;
 
             var resultReward = AddText(resultPanel, "ResultReward", "",
                 anchorMin: new Vector2(0.15f, 0.64f), anchorMax: new Vector2(0.85f, 0.72f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 26, color: ThemePalette.Sage);
+                fontSize: 34, color: ThemePalette.Sage);
 
             // Ability pick area
             var abilityPickLabel = AddText(resultPanel, "AbilityPickLabel", "Choose an ability:",
                 anchorMin: new Vector2(0.15f, 0.56f), anchorMax: new Vector2(0.85f, 0.64f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 24, color: ThemePalette.Gold);
+                fontSize: 31, color: ThemePalette.Gold);
 
             var abilityPickContainer = NewChild(resultPanel, "AbilityPickContainer");
             abilityPickContainer.anchorMin = new Vector2(0.15f, 0.18f);
@@ -554,16 +561,16 @@ namespace WitsAndFools.EditorTools
             pickLayout.childForceExpandHeight = false;
 
             var abilityPickSkipBtn = AddButton(resultPanel, "AbilityPickSkipButton", "Skip");
-            abilityPickSkipBtn.anchorMin = new Vector2(0.65f, 0.10f);
-            abilityPickSkipBtn.anchorMax = new Vector2(0.65f, 0.10f);
+            abilityPickSkipBtn.anchorMin = new Vector2(0.65f, 0.08f);
+            abilityPickSkipBtn.anchorMax = new Vector2(0.65f, 0.08f);
             abilityPickSkipBtn.pivot = new Vector2(0.5f, 0);
-            abilityPickSkipBtn.sizeDelta = new Vector2(180, 55);
+            abilityPickSkipBtn.sizeDelta = new Vector2(230, 70);
 
             var resultContinueBtn = AddButton(resultPanel, "ResultContinueButton", "Continue");
-            resultContinueBtn.anchorMin = new Vector2(0.35f, 0.10f);
-            resultContinueBtn.anchorMax = new Vector2(0.35f, 0.10f);
+            resultContinueBtn.anchorMin = new Vector2(0.35f, 0.08f);
+            resultContinueBtn.anchorMax = new Vector2(0.35f, 0.08f);
             resultContinueBtn.pivot = new Vector2(0.5f, 0);
-            resultContinueBtn.sizeDelta = new Vector2(200, 55);
+            resultContinueBtn.sizeDelta = new Vector2(260, 70);
 
             resultPanel.gameObject.SetActive(false);
 
@@ -696,18 +703,18 @@ namespace WitsAndFools.EditorTools
             var eventTitle = AddText(eventPanel, "EventTitle", "Event",
                 anchorMin: new Vector2(0.1f, 0.78f), anchorMax: new Vector2(0.9f, 0.92f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 36, color: ThemePalette.Gold, font: HeadingFont);
+                fontSize: 47, color: ThemePalette.Gold, font: HeadingFont);
 
             var eventDesc = AddText(eventPanel, "EventDesc", "",
                 anchorMin: new Vector2(0.15f, 0.52f), anchorMax: new Vector2(0.85f, 0.76f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 24, color: Color.white);
+                fontSize: 31, color: Color.white);
             eventDesc.enableWordWrapping = true;
 
             var eventOutcome = AddText(eventPanel, "EventOutcome", "",
                 anchorMin: new Vector2(0.15f, 0.35f), anchorMax: new Vector2(0.85f, 0.50f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 26, color: ThemePalette.Sage);
+                fontSize: 34, color: ThemePalette.Sage);
             eventOutcome.enableWordWrapping = true;
             eventOutcome.gameObject.SetActive(false);
 
@@ -715,21 +722,21 @@ namespace WitsAndFools.EditorTools
             eventChoice1Btn.anchorMin = new Vector2(0.5f, 0.22f);
             eventChoice1Btn.anchorMax = new Vector2(0.5f, 0.22f);
             eventChoice1Btn.pivot = new Vector2(0.5f, 0.5f);
-            eventChoice1Btn.sizeDelta = new Vector2(420, 60);
+            eventChoice1Btn.sizeDelta = new Vector2(540, 78);
             var eventChoice1Label = eventChoice1Btn.GetComponentInChildren<TMP_Text>();
 
             var eventChoice2Btn = AddButton(eventPanel, "EventChoice2Button", "Choice 2");
             eventChoice2Btn.anchorMin = new Vector2(0.5f, 0.12f);
             eventChoice2Btn.anchorMax = new Vector2(0.5f, 0.12f);
             eventChoice2Btn.pivot = new Vector2(0.5f, 0.5f);
-            eventChoice2Btn.sizeDelta = new Vector2(420, 60);
+            eventChoice2Btn.sizeDelta = new Vector2(540, 78);
             var eventChoice2Label = eventChoice2Btn.GetComponentInChildren<TMP_Text>();
 
             var eventContinueBtn = AddButton(eventPanel, "EventContinueButton", "Continue");
             eventContinueBtn.anchorMin = new Vector2(0.5f, 0.06f);
             eventContinueBtn.anchorMax = new Vector2(0.5f, 0.06f);
             eventContinueBtn.pivot = new Vector2(0.5f, 0);
-            eventContinueBtn.sizeDelta = new Vector2(260, 70);
+            eventContinueBtn.sizeDelta = new Vector2(340, 80);
             eventContinueBtn.gameObject.SetActive(false);
 
             eventPanel.gameObject.SetActive(false);
@@ -958,8 +965,8 @@ namespace WitsAndFools.EditorTools
             if (btnFont) lbl.font = btnFont;
             lbl.text = label;
             lbl.alignment = TextAlignmentOptions.Center;
-            lbl.fontSize = 15;
-            lbl.color = secondary ? ThemePalette.Parchment : ThemePalette.ButtonGoldText;
+            lbl.fontSize = 20;
+            lbl.color = secondary ? Color.white : new Color(0.08f, 0.06f, 0.02f, 1f);
             lbl.raycastTarget = false;
             return rt;
         }

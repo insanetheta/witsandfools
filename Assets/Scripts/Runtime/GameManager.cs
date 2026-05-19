@@ -221,6 +221,8 @@ namespace WitsAndFools
                 if (Hud.PlayNormallyButton) Hud.PlayNormallyButton.onClick.AddListener(OnAbilityChoiceNormal);
                 if (Hud.UseAbilityButton) Hud.UseAbilityButton.onClick.RemoveAllListeners();
                 if (Hud.UseAbilityButton) Hud.UseAbilityButton.onClick.AddListener(OnAbilityChoiceUse);
+                if (Hud.CancelAbilityButton) Hud.CancelAbilityButton.onClick.RemoveAllListeners();
+                if (Hud.CancelAbilityButton) Hud.CancelAbilityButton.onClick.AddListener(OnAbilityChoiceCancel);
                 Hud.SetEndBoutEnabled(false);
                 Hud.HideAbilityChoice();
             }
@@ -498,6 +500,12 @@ namespace WitsAndFools
                 Engine.TryUseAbility(HumanPlayerIndex, _pendingAbilityView.Card, slot);
                 _pendingAbilityView = null;
             }
+        }
+
+        void OnAbilityChoiceCancel()
+        {
+            Hud?.HideAbilityChoice();
+            _pendingAbilityView = null;
         }
 
         void OnAbilityUsed(int playerIndex, Card card, AbilityType ability)

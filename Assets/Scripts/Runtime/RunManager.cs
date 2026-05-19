@@ -118,7 +118,8 @@ namespace WitsAndFools
             _currentColumn = save.CurrentColumn;
             _selectedArchetype = save.SelectedArchetype;
             _rng = new System.Random(_run.Seed + _run.MatchesPlayed);
-            if (Enum.TryParse<RunPhase>(save.RunPhase, out var phase))
+            if (Enum.TryParse<RunPhase>(save.RunPhase, out var phase)
+                && (phase == RunPhase.MapSelect || phase == RunPhase.ArchetypeSelect))
                 SetPhase(phase);
             else
                 SetPhase(RunPhase.MapSelect);
@@ -804,7 +805,7 @@ namespace WitsAndFools
                         }
                         else continue;
 
-                        DrawLine(srcPos, dstPos, new Color(lineColor.r, lineColor.g, lineColor.b, alpha), 3f);
+                        DrawLine(srcPos, dstPos, new Color(lineColor.r, lineColor.g, lineColor.b, alpha), 5f);
                     }
                 }
             }
@@ -812,12 +813,25 @@ namespace WitsAndFools
 
         void DrawLine(Vector2 from, Vector2 to, Color color, float thickness)
         {
-            var lineGO = new GameObject("PathLine", typeof(RectTransform), typeof(Image));
-            lineGO.transform.SetParent(MapPathContainer, false);
-            var rt = (RectTransform)lineGO.transform;
             var dir = to - from;
             float dist = dir.magnitude;
             float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+
+            var strokeGO = new GameObject("PathStroke", typeof(RectTransform), typeof(Image));
+            strokeGO.transform.SetParent(MapPathContainer, false);
+            var strokeRT = (RectTransform)strokeGO.transform;
+            strokeRT.anchorMin = strokeRT.anchorMax = new Vector2(0, 0);
+            strokeRT.pivot = new Vector2(0, 0.5f);
+            strokeRT.sizeDelta = new Vector2(dist, thickness + 4f);
+            strokeRT.anchoredPosition = from;
+            strokeRT.localRotation = Quaternion.Euler(0, 0, angle);
+            var strokeImg = strokeGO.GetComponent<Image>();
+            strokeImg.color = new Color(0, 0, 0, color.a * 0.8f);
+            strokeImg.raycastTarget = false;
+
+            var lineGO = new GameObject("PathLine", typeof(RectTransform), typeof(Image));
+            lineGO.transform.SetParent(MapPathContainer, false);
+            var rt = (RectTransform)lineGO.transform;
             rt.anchorMin = rt.anchorMax = new Vector2(0, 0);
             rt.pivot = new Vector2(0, 0.5f);
             rt.sizeDelta = new Vector2(dist, thickness);
@@ -1148,8 +1162,8 @@ namespace WitsAndFools
             img.color = new Color(bgColor.r * 0.7f, bgColor.g * 0.7f, bgColor.b * 0.7f, 0.9f);
 
             var le = btnGO.GetComponent<LayoutElement>();
-            le.preferredHeight = 80;
-            le.preferredWidth = 500;
+            le.preferredHeight = 104;
+            le.preferredWidth = 650;
 
             // Rarity accent bar (left edge)
             var rarityColor = def.Rarity switch
@@ -1199,7 +1213,7 @@ namespace WitsAndFools
             nameTMP.text = $"{abilityType.DisplayName()}{rarityTag}{bindTag}{pathTag}";
             nameTMP.richText = true;
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            nameTMP.fontSize = 18;
+            nameTMP.fontSize = 23;
             nameTMP.color = ThemePalette.Parchment;
             nameTMP.raycastTarget = false;
 
@@ -1213,7 +1227,7 @@ namespace WitsAndFools
             var descTMP = descGO.AddComponent<TextMeshProUGUI>();
             descTMP.text = abilityType.Description();
             descTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            descTMP.fontSize = 14;
+            descTMP.fontSize = 18;
             descTMP.color = ThemePalette.DescGray;
             descTMP.raycastTarget = false;
             descTMP.enableWordWrapping = true;
@@ -1998,7 +2012,10 @@ namespace WitsAndFools
                 MapVenueBgImage.color = new Color(1, 1, 1, 0.2f);
             }
             if (ResultVenueBgImage && VenueBackgroundSprites != null && act < VenueBackgroundSprites.Length)
+            {
                 ResultVenueBgImage.sprite = VenueBackgroundSprites[act];
+                ResultVenueBgImage.color = new Color(1, 1, 1, 0.2f);
+            }
             if (RunOverVenueBgImage && VenueBackgroundSprites != null && act < VenueBackgroundSprites.Length)
                 RunOverVenueBgImage.sprite = VenueBackgroundSprites[act];
             if (Camera.main)

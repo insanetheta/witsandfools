@@ -37,10 +37,11 @@ namespace WitsAndFools
         public TMP_Text AbilityChoiceLabel;
         public Button PlayNormallyButton;
         public Button UseAbilityButton;
+        public Button CancelAbilityButton;
 
         public void SetTurn(string text) { if (TurnLabel) TurnLabel.text = text; }
         public void SetDeckCount(int n) { if (DeckCountLabel) DeckCountLabel.text = $"Deck: {n}"; }
-        public void SetTrump(Suit suit) { if (TrumpLabel) { TrumpLabel.text = $"Trump: {suit.Glyph()}"; TrumpLabel.color = suit.IsRed() ? ThemePalette.RedSuit : ThemePalette.BlackSuit; } }
+        public void SetTrump(Suit suit) { if (TrumpLabel) { TrumpLabel.text = $"Trump: {suit.Glyph()}"; TrumpLabel.color = suit.IsRed() ? ThemePalette.PrestigeRed : Color.white; } }
         public void SetEndBoutEnabled(bool enabled) { if (EndBoutButton) EndBoutButton.interactable = enabled; }
         public void ShowGameOver(string message)
         {
