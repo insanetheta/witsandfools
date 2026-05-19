@@ -5,7 +5,7 @@ namespace WitsAndFools.EditorTools
 {
     public static class WebGLBuilder
     {
-        [MenuItem("Wits and Fools/Build/WebGL (docs/webgl)")]
+        [MenuItem("Wits and Fools/Build/WebGL (docs)")]
         public static void BuildWebGL()
         {
             PlayerSettings.productName = "Wits and Fools";
@@ -20,7 +20,7 @@ namespace WitsAndFools.EditorTools
             EditorUserBuildSettings.SwitchActiveBuildTarget(
                 BuildTargetGroup.WebGL, BuildTarget.WebGL);
 
-            string outputPath = "docs/webgl";
+            string outputPath = "docs";
             var scenes = new[] { "Assets/Scenes/GameScene.unity" };
 
             var options = new BuildPlayerOptions

@@ -102,3 +102,5 @@ InitTestScene*.unity*
 .dolt/
 *.db
 .beads-credential-key
+docs/design/walkthrough/generate_assets.py
+docs/design/walkthrough/gen_image.sh
