@@ -70,22 +70,6 @@
       color: #A89B8C;
       font-family: 'JetBrains Mono', monospace;
     }
-    #fullscreen-btn {
-      position: absolute;
-      bottom: 12px;
-      right: 12px;
-      z-index: 5;
-      background: rgba(42, 52, 66, 0.8);
-      border: 1px solid #5A4830;
-      color: #F0E6D2;
-      padding: 6px 14px;
-      font-family: 'Georgia', serif;
-      font-size: 0.8rem;
-      cursor: pointer;
-      border-radius: 3px;
-      transition: background 0.2s;
-    }
-    #fullscreen-btn:hover { background: rgba(90, 72, 48, 0.9); }
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
@@ -99,7 +83,6 @@
       <div id="loading-bar-bg"><div id="loading-bar"></div></div>
       <div id="loading-percent">Loading...</div>
     </div>
-    <button id="fullscreen-btn" title="Toggle fullscreen">&#x26F6; Fullscreen</button>
   </div>
 
   <script>
@@ -108,8 +91,6 @@
     var overlay = document.getElementById("loading-overlay");
     var bar = document.getElementById("loading-bar");
     var pct = document.getElementById("loading-percent");
-    var fsBtn = document.getElementById("fullscreen-btn");
-
     var buildUrl = "Build";
     var loaderUrl = buildUrl + "/{{{ LOADER_FILENAME }}}";
     var config = {
@@ -145,9 +126,6 @@
         overlay.classList.add("hidden");
         setTimeout(function () { overlay.style.display = "none"; }, 600);
 
-        fsBtn.addEventListener("click", function () {
-          instance.SetFullscreen(1);
-        });
       }).catch(function (message) {
         pct.textContent = "Error: " + message;
       });
