@@ -549,21 +549,22 @@ namespace WitsAndFools
             if (containerH <= 0) containerH = 600f;
 
             float colSpacing = containerW / (totalCols + 1);
-            float nodeSize = 100f;
-            float nodeGap = 16f;
+            float nodeW = 150f;
+            float nodeH = 110f;
+            float nodeGap = 14f;
             var nodePositions = new List<List<Vector2>>();
 
             for (int col = 0; col < totalCols; col++)
             {
                 var column = map[col];
                 float x = colSpacing * (col + 1);
-                float totalH = column.Count * nodeSize + (column.Count - 1) * nodeGap;
+                float totalH = column.Count * nodeH + (column.Count - 1) * nodeGap;
                 float startY = containerH / 2f + totalH / 2f;
 
                 var colPositions = new List<Vector2>();
                 for (int row = 0; row < column.Count; row++)
                 {
-                    float y = startY - row * (nodeSize + nodeGap) - nodeSize / 2f;
+                    float y = startY - row * (nodeH + nodeGap) - nodeH / 2f;
                     colPositions.Add(new Vector2(x, y));
                 }
                 nodePositions.Add(colPositions);
@@ -584,7 +585,7 @@ namespace WitsAndFools
                 {
                     var node = column[row];
                     var pos = nodePositions[col][row];
-                    CreateMapNode(node, pos, nodeSize, isVisited, isCurrent, isFuture, col, row);
+                    CreateMapNode(node, pos, nodeW, nodeH, isVisited, isCurrent, isFuture, col, row);
                 }
 
                 // Column numeral header
@@ -595,9 +596,9 @@ namespace WitsAndFools
                 headerRT.anchorMin = headerRT.anchorMax = new Vector2(0, 0);
                 headerRT.pivot = new Vector2(0.5f, 0);
                 float headerX = nodePositions[col][0].x;
-                float topNodeY = nodePositions[col][0].y + nodeSize / 2f;
+                float topNodeY = nodePositions[col][0].y + nodeH / 2f;
                 headerRT.anchoredPosition = new Vector2(headerX, topNodeY + 12f);
-                headerRT.sizeDelta = new Vector2(60, 24);
+                headerRT.sizeDelta = new Vector2(80, 28);
                 var headerTMP = headerGO.AddComponent<TextMeshProUGUI>();
                 var hFont = FontAssets.Heading;
                 if (hFont) headerTMP.font = hFont;
@@ -609,71 +610,110 @@ namespace WitsAndFools
             }
         }
 
-        void CreateMapNode(MapNode node, Vector2 pos, float size, bool visited, bool current, bool future, int col, int row)
+        void CreateMapNode(MapNode node, Vector2 pos, float w, float h, bool visited, bool current, bool future, int col, int row)
         {
             var go = new GameObject($"Node_{col}_{row}", typeof(RectTransform), typeof(Image));
             go.transform.SetParent(MapNodeContainer, false);
             var rt = (RectTransform)go.transform;
-            rt.anchorMin = rt.anchorMax = new Vector2(0, 0);
+            rt.anchorMin = rt.anchorMax = Vector2.zero;
             rt.pivot = new Vector2(0.5f, 0.5f);
-            rt.sizeDelta = new Vector2(size, size);
+            rt.sizeDelta = new Vector2(w, h);
             rt.anchoredPosition = pos;
 
             var bgImg = go.GetComponent<Image>();
-            var bgColor = NodeColor(node.Type);
+            var typeColor = NodeColor(node.Type);
+            bool wasChosen = visited && col < _visitedNodeRows.Count && _visitedNodeRows[col] == row;
 
             if (visited)
-            {
-                bool wasChosen = col < _visitedNodeRows.Count && _visitedNodeRows[col] == row;
                 bgImg.color = wasChosen
-                    ? new Color(bgColor.r * 0.4f, bgColor.g * 0.4f, bgColor.b * 0.4f, 0.7f)
-                    : new Color(0.15f, 0.15f, 0.15f, 0.5f);
-            }
+                    ? new Color(typeColor.r * 0.35f, typeColor.g * 0.35f, typeColor.b * 0.35f, 0.8f)
+                    : new Color(0.12f, 0.12f, 0.12f, 0.45f);
             else if (current)
-                bgImg.color = new Color(bgColor.r * 0.3f, bgColor.g * 0.3f, bgColor.b * 0.3f, 0.9f);
+                bgImg.color = new Color(typeColor.r * 0.25f, typeColor.g * 0.25f, typeColor.b * 0.25f, 0.92f);
             else
-                bgImg.color = new Color(0.15f, 0.12f, 0.1f, 0.7f);
+                bgImg.color = new Color(0.1f, 0.08f, 0.06f, 0.65f);
 
-            // Icon sprite
+            // Colored top stripe (type indicator)
+            var stripeGO = new GameObject("Stripe", typeof(RectTransform), typeof(Image));
+            stripeGO.transform.SetParent(go.transform, false);
+            var stripeRT = (RectTransform)stripeGO.transform;
+            stripeRT.anchorMin = new Vector2(0, 1);
+            stripeRT.anchorMax = Vector2.one;
+            stripeRT.pivot = new Vector2(0.5f, 1);
+            stripeRT.sizeDelta = new Vector2(0, 5);
+            stripeRT.anchoredPosition = Vector2.zero;
+            var stripeColor = current ? typeColor : (visited && wasChosen ? typeColor * 0.6f : typeColor * 0.4f);
+            stripeColor.a = visited && !wasChosen ? 0.3f : 0.9f;
+            stripeGO.GetComponent<Image>().color = stripeColor;
+            stripeGO.GetComponent<Image>().raycastTarget = false;
+
+            // Type label (e.g. "MATCH", "SHOP", "REST")
+            string typeName = NodeTypeName(node.Type);
+            var typeGO = new GameObject("TypeLabel", typeof(RectTransform));
+            typeGO.transform.SetParent(go.transform, false);
+            var typeRT = (RectTransform)typeGO.transform;
+            typeRT.anchorMin = new Vector2(0, 0.68f);
+            typeRT.anchorMax = new Vector2(1, 0.95f);
+            typeRT.offsetMin = new Vector2(4, 0);
+            typeRT.offsetMax = new Vector2(-4, -6);
+            var typeTMP = typeGO.AddComponent<TextMeshProUGUI>();
+            var headFont = FontAssets.Heading;
+            if (headFont) typeTMP.font = headFont;
+            typeTMP.text = typeName;
+            typeTMP.alignment = TextAlignmentOptions.Center;
+            typeTMP.fontSize = 14;
+            typeTMP.characterSpacing = 4;
+            typeTMP.raycastTarget = false;
+            if (future) typeTMP.color = new Color(typeColor.r * 1.4f, typeColor.g * 1.4f, typeColor.b * 1.4f, 0.45f);
+            else if (visited && !wasChosen) typeTMP.color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
+            else typeTMP.color = new Color(
+                Mathf.Min(typeColor.r * 2f, 1f),
+                Mathf.Min(typeColor.g * 2f, 1f),
+                Mathf.Min(typeColor.b * 2f, 1f),
+                current ? 1f : 0.7f);
+
+            // Icon sprite (smaller, between type and name)
             int spriteIdx = (int)node.Type;
             if (MapNodeSprites != null && spriteIdx < MapNodeSprites.Length && MapNodeSprites[spriteIdx])
             {
                 var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
                 iconGO.transform.SetParent(go.transform, false);
                 var iconRT = (RectTransform)iconGO.transform;
-                iconRT.anchorMin = new Vector2(0.5f, 0.5f);
-                iconRT.anchorMax = new Vector2(0.5f, 0.5f);
+                iconRT.anchorMin = new Vector2(0.5f, 0.3f);
+                iconRT.anchorMax = new Vector2(0.5f, 0.7f);
                 iconRT.pivot = new Vector2(0.5f, 0.5f);
-                iconRT.sizeDelta = new Vector2(size * 0.75f, size * 0.75f);
-                iconRT.anchoredPosition = new Vector2(0, 4);
+                iconRT.sizeDelta = new Vector2(36, 0);
+                iconRT.anchoredPosition = new Vector2(0, -2);
                 var iconImg = iconGO.GetComponent<Image>();
                 iconImg.sprite = MapNodeSprites[spriteIdx];
                 iconImg.preserveAspect = true;
                 iconImg.raycastTarget = false;
-                if (future) iconImg.color = new Color(0.7f, 0.65f, 0.6f, 0.6f);
-                else if (visited) iconImg.color = new Color(0.6f, 0.6f, 0.6f, 0.7f);
-                else iconImg.color = Color.white;
+                if (future) iconImg.color = new Color(0.7f, 0.65f, 0.6f, 0.4f);
+                else if (visited && !wasChosen) iconImg.color = new Color(0.4f, 0.4f, 0.4f, 0.4f);
+                else if (visited) iconImg.color = new Color(0.7f, 0.7f, 0.7f, 0.6f);
+                else iconImg.color = new Color(1, 1, 1, current ? 0.9f : 0.5f);
             }
 
-            // Name label below icon
+            // Name label at bottom
+            string title = NodeTitle(node);
             var labelGO = new GameObject("Label", typeof(RectTransform));
             labelGO.transform.SetParent(go.transform, false);
             var labelRT = (RectTransform)labelGO.transform;
-            labelRT.anchorMin = new Vector2(0.5f, 0);
-            labelRT.anchorMax = new Vector2(0.5f, 0);
-            labelRT.pivot = new Vector2(0.5f, 1);
-            labelRT.sizeDelta = new Vector2(120, 30);
-            labelRT.anchoredPosition = new Vector2(0, -4);
+            labelRT.anchorMin = Vector2.zero;
+            labelRT.anchorMax = new Vector2(1, 0.3f);
+            labelRT.offsetMin = new Vector2(4, 2);
+            labelRT.offsetMax = new Vector2(-4, 0);
             var labelTMP = labelGO.AddComponent<TextMeshProUGUI>();
-            labelTMP.text = NodeTitle(node);
+            labelTMP.text = title;
             labelTMP.alignment = TextAlignmentOptions.Center;
-            labelTMP.fontSize = 11;
+            labelTMP.fontSize = 13;
             labelTMP.enableWordWrapping = false;
             labelTMP.overflowMode = TextOverflowModes.Ellipsis;
             labelTMP.raycastTarget = false;
-            if (future) labelTMP.color = new Color(ThemePalette.DustyTan.r, ThemePalette.DustyTan.g, ThemePalette.DustyTan.b, 0.55f);
-            else if (visited) labelTMP.color = new Color(ThemePalette.DustyTan.r, ThemePalette.DustyTan.g, ThemePalette.DustyTan.b, 0.6f);
-            else labelTMP.color = ThemePalette.Parchment;
+            if (future) labelTMP.color = new Color(ThemePalette.Parchment.r, ThemePalette.Parchment.g, ThemePalette.Parchment.b, 0.35f);
+            else if (visited && !wasChosen) labelTMP.color = new Color(0.5f, 0.5f, 0.5f, 0.45f);
+            else if (visited) labelTMP.color = new Color(ThemePalette.Parchment.r, ThemePalette.Parchment.g, ThemePalette.Parchment.b, 0.6f);
+            else labelTMP.color = current ? ThemePalette.Parchment : new Color(ThemePalette.Parchment.r, ThemePalette.Parchment.g, ThemePalette.Parchment.b, 0.55f);
 
             // Gold border glow for current column
             if (current)
@@ -685,41 +725,36 @@ namespace WitsAndFools
                 glowRT.anchorMax = Vector2.one;
                 glowRT.offsetMin = new Vector2(-3, -3);
                 glowRT.offsetMax = new Vector2(3, 3);
-                glowGO.GetComponent<Image>().color = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.5f);
+                glowGO.GetComponent<Image>().color = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.6f);
                 glowGO.GetComponent<Image>().raycastTarget = false;
                 glowGO.transform.SetAsFirstSibling();
 
-                // Make clickable
                 var btn = go.AddComponent<Button>();
                 var btnColors = btn.colors;
-                btnColors.highlightedColor = new Color(bgColor.r * 0.5f, bgColor.g * 0.5f, bgColor.b * 0.5f, 0.95f);
+                btnColors.highlightedColor = new Color(typeColor.r * 0.45f, typeColor.g * 0.45f, typeColor.b * 0.45f, 0.95f);
                 btn.colors = btnColors;
                 var capturedNode = node;
                 var capturedRow = row;
                 btn.onClick.AddListener(() => OnNodeSelected(capturedNode, capturedRow));
             }
 
-            // Visited checkmark
-            if (visited)
+            // Visited checkmark overlay
+            if (wasChosen)
             {
-                bool wasChosen = col < _visitedNodeRows.Count && _visitedNodeRows[col] == row;
-                if (wasChosen)
-                {
-                    var checkGO = new GameObject("Check", typeof(RectTransform));
-                    checkGO.transform.SetParent(go.transform, false);
-                    var checkRT = (RectTransform)checkGO.transform;
-                    checkRT.anchorMin = new Vector2(0.5f, 0.5f);
-                    checkRT.anchorMax = new Vector2(0.5f, 0.5f);
-                    checkRT.pivot = new Vector2(0.5f, 0.5f);
-                    checkRT.sizeDelta = new Vector2(30, 30);
-                    checkRT.anchoredPosition = Vector2.zero;
-                    var checkTMP = checkGO.AddComponent<TextMeshProUGUI>();
-                    checkTMP.text = "✓";
-                    checkTMP.alignment = TextAlignmentOptions.Center;
-                    checkTMP.fontSize = 24;
-                    checkTMP.color = ThemePalette.Gold;
-                    checkTMP.raycastTarget = false;
-                }
+                var checkGO = new GameObject("Check", typeof(RectTransform));
+                checkGO.transform.SetParent(go.transform, false);
+                var checkRT = (RectTransform)checkGO.transform;
+                checkRT.anchorMin = new Vector2(1, 1);
+                checkRT.anchorMax = new Vector2(1, 1);
+                checkRT.pivot = new Vector2(1, 1);
+                checkRT.sizeDelta = new Vector2(22, 22);
+                checkRT.anchoredPosition = new Vector2(-2, -2);
+                var checkTMP = checkGO.AddComponent<TextMeshProUGUI>();
+                checkTMP.text = "✓";
+                checkTMP.alignment = TextAlignmentOptions.Center;
+                checkTMP.fontSize = 16;
+                checkTMP.color = ThemePalette.Gold;
+                checkTMP.raycastTarget = false;
             }
         }
 
@@ -787,13 +822,24 @@ namespace WitsAndFools
             img.raycastTarget = false;
         }
 
+        string NodeTypeName(MapNodeType type) => type switch
+        {
+            MapNodeType.RivalMatch => "MATCH",
+            MapNodeType.EliteMatch => "ELITE",
+            MapNodeType.BossMatch => "BOSS",
+            MapNodeType.Shop => "SHOP",
+            MapNodeType.Rumor => "RUMOR",
+            MapNodeType.Rest => "REST",
+            _ => "???"
+        };
+
         string NodeTitle(MapNode node) => node.Type switch
         {
             MapNodeType.RivalMatch => node.Opponent?.Name ?? "Rival",
             MapNodeType.EliteMatch => node.Opponent?.Name ?? "Elite",
             MapNodeType.BossMatch => node.Opponent?.Name ?? "Boss",
             MapNodeType.Shop => "The Fence",
-            MapNodeType.Rumor => "A Whispered Lead",
+            MapNodeType.Rumor => "Whispered Lead",
             MapNodeType.Rest => "The Hearth",
             _ => "???"
         };

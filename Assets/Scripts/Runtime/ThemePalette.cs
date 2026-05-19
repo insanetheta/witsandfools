@@ -77,13 +77,13 @@ namespace WitsAndFools
         public static readonly Color DescGray    = new Color(0.75f, 0.75f, 0.75f);
         public static readonly Color DisabledText = new Color(0.5f, 0.5f, 0.5f);
 
-        // Map node backgrounds
-        public static readonly Color NodeMatch    = Hex("#7A3030");
-        public static readonly Color NodeElite    = Hex("#8A6020");
-        public static readonly Color NodeBoss     = Hex("#4A2040");
-        public static readonly Color NodeShop     = Hex("#305830");
-        public static readonly Color NodeRumor    = Hex("#3A3060");
-        public static readonly Color NodeRest     = Hex("#4A3020");
+        // Map node type colors (saturated for clear distinction)
+        public static readonly Color NodeMatch    = Hex("#AA4040");
+        public static readonly Color NodeElite    = Hex("#CC8820");
+        public static readonly Color NodeBoss     = Hex("#882266");
+        public static readonly Color NodeShop     = Hex("#44884A");
+        public static readonly Color NodeRumor    = Hex("#5555AA");
+        public static readonly Color NodeRest     = Hex("#886633");
 
         // Button states
         public static readonly Color ButtonGoldBg       = Hex("#D4A846");
