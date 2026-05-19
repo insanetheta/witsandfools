@@ -10,11 +10,13 @@ namespace WitsAndFools
         public Dictionary<(Suit, Rank), AbilityType> Abilities;
         public Dictionary<(Suit, Rank), int> AbilityOwners;
 
+        // Original passive abilities
         public bool[] TrumpAffinity = new bool[2];
         public bool[] EndgameSpecialist = new bool[2];
         public bool[] QuickHands = new bool[2];
         public bool[] CardCounter = new bool[2];
 
+        // Trinkets
         public bool[] DuelistGlove = new bool[2];
         public bool[] PoisonedWine = new bool[2];
         public bool[] HereticsBrand = new bool[2];
@@ -31,18 +33,37 @@ namespace WitsAndFools
         public bool[] FoolsGold = new bool[2];
         public bool[] VentriloquistsDummy = new bool[2];
 
+        // Burdens
         public bool[] RattledNerves = new bool[2];
         public bool[] ClumsyFingers = new bool[2];
 
-        // Archetype resources (one per player, null if no archetype)
+        // Archetype resources
         public ResourceType?[] ArchetypeResource = new ResourceType?[2];
 
         // Archetype passive perks
-        public bool[] ShadowReflexes = new bool[2];  // Rogue: defend with matching rank = draw 1
-        public bool[] BruteFury = new bool[2];        // Brute: when defender eats, attacker draws 1 extra
-        public bool[] CourtFavor = new bool[2];       // Diplomat: at bout start, peek top 2, put 1 on bottom
-        public bool[] LuckyDraw = new bool[2];        // Gambler: once per match after eating, discard worst card
+        public bool[] ShadowReflexes = new bool[2];
+        public bool[] BruteFury = new bool[2];
+        public bool[] CourtFavor = new bool[2];
+        public bool[] LuckyDraw = new bool[2];
 
+        // New passive abilities
+        public bool[] PatienceRewarded = new bool[2];
+        public bool[] MarkedCards = new bool[2];
+        public bool[] Undermine = new bool[2];
+        public bool[] Bloodlust = new bool[2];
+        public bool[] ThickSkin = new bool[2];
+        public bool[] BattleHardened = new bool[2];
+        public bool[] GracefulManners = new bool[2];
+        public bool[] WebOfLies = new bool[2];
+        public bool[] GracefulRetreat = new bool[2];
+        public bool[] Equilibrium = new bool[2];
+        public bool[] SharkInstinct = new bool[2];
+        public bool[] Jackpot = new bool[2];
+        public bool[] SleightOfMind = new bool[2];
+        public bool[] ChaoticNature = new bool[2];
+        public bool[] SteadyHand = new bool[2];
+
+        // House rules
         public int NoTrumpsUntilBout;
         public bool FixedAttacker;
         public bool AnyRankAttack;

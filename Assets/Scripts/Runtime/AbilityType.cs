@@ -2,6 +2,7 @@ namespace WitsAndFools
 {
     public enum AbilityType
     {
+        // --- Original abilities ---
         TrumpChanger,
         ExtraDraw,
         Blocker,
@@ -17,7 +18,85 @@ namespace WitsAndFools
         TrumpAffinity,
         EndgameSpecialist,
         CardCounter,
-        QuickHands
+        QuickHands,
+
+        // --- Rogue: Shadow ---
+        Riposte,
+        ShadowCloak,
+        PatienceRewarded,
+
+        // --- Rogue: Spy ---
+        Wiretap,
+        MarkedCards,
+        DoubleAgent,
+        Blackmail,
+
+        // --- Rogue: Saboteur ---
+        SleightOfHand,
+        SmokeBomb,
+        TrapCard,
+        Undermine,
+
+        // --- Brute: Berserker ---
+        Rampage,
+        Bloodlust,
+
+        // --- Brute: Brawler ---
+        Haymaker,
+        IronGrip,
+        Brawl,
+        ThickSkin,
+
+        // --- Brute: Warlord ---
+        Conquer,
+        Intimidate,
+        CrownSeize,
+        BattleHardened,
+
+        // --- Diplomat: Courtier ---
+        CourtIntrigue,
+        RoyalDecree,
+        Patronage,
+        GracefulManners,
+
+        // --- Diplomat: Puppeteer ---
+        PullStrings,
+        Misdirection,
+        ForcedHand,
+        WebOfLies,
+
+        // --- Diplomat: Peacemaker ---
+        Diplomacy,
+        SafePassage,
+        Treaty,
+        GracefulRetreat,
+        Equilibrium,
+
+        // --- Gambler: Card Shark ---
+        StackTheDeck,
+        SecondDeal,
+        ColdRead,
+        SharkInstinct,
+
+        // --- Gambler: High Roller ---
+        AllIn,
+        DoubleOrNothing,
+        LuckyStreak,
+        Jackpot,
+
+        // --- Gambler: Trickster ---
+        BlindSwap,
+        Misdeal,
+        WildCard,
+        SleightOfMind,
+        ChaoticNature,
+
+        // --- Neutral ---
+        Fortify,
+        SecondWind,
+        Brace,
+        Desperation,
+        SteadyHand,
     }
 
     public static class AbilityTypeExtensions
@@ -40,6 +119,58 @@ namespace WitsAndFools
             AbilityType.EndgameSpecialist => "Endgame Specialist",
             AbilityType.CardCounter => "Card Counter",
             AbilityType.QuickHands => "Quick Hands",
+            AbilityType.Riposte => "Riposte",
+            AbilityType.ShadowCloak => "Shadow Cloak",
+            AbilityType.PatienceRewarded => "Patience Rewarded",
+            AbilityType.Wiretap => "Wiretap",
+            AbilityType.MarkedCards => "Marked Cards",
+            AbilityType.DoubleAgent => "Double Agent",
+            AbilityType.Blackmail => "Blackmail",
+            AbilityType.SleightOfHand => "Sleight of Hand",
+            AbilityType.SmokeBomb => "Smoke Bomb",
+            AbilityType.TrapCard => "Trap Card",
+            AbilityType.Undermine => "Undermine",
+            AbilityType.Rampage => "Rampage",
+            AbilityType.Bloodlust => "Bloodlust",
+            AbilityType.Haymaker => "Haymaker",
+            AbilityType.IronGrip => "Iron Grip",
+            AbilityType.Brawl => "Brawl",
+            AbilityType.ThickSkin => "Thick Skin",
+            AbilityType.Conquer => "Conquer",
+            AbilityType.Intimidate => "Intimidate",
+            AbilityType.CrownSeize => "Crown Seize",
+            AbilityType.BattleHardened => "Battle Hardened",
+            AbilityType.CourtIntrigue => "Court Intrigue",
+            AbilityType.RoyalDecree => "Royal Decree",
+            AbilityType.Patronage => "Patronage",
+            AbilityType.GracefulManners => "Graceful Manners",
+            AbilityType.PullStrings => "Pull Strings",
+            AbilityType.Misdirection => "Misdirection",
+            AbilityType.ForcedHand => "Forced Hand",
+            AbilityType.WebOfLies => "Web of Lies",
+            AbilityType.Diplomacy => "Diplomacy",
+            AbilityType.SafePassage => "Safe Passage",
+            AbilityType.Treaty => "Treaty",
+            AbilityType.GracefulRetreat => "Graceful Retreat",
+            AbilityType.Equilibrium => "Equilibrium",
+            AbilityType.StackTheDeck => "Stack the Deck",
+            AbilityType.SecondDeal => "Second Deal",
+            AbilityType.ColdRead => "Cold Read",
+            AbilityType.SharkInstinct => "Shark Instinct",
+            AbilityType.AllIn => "All In",
+            AbilityType.DoubleOrNothing => "Double or Nothing",
+            AbilityType.LuckyStreak => "Lucky Streak",
+            AbilityType.Jackpot => "Jackpot",
+            AbilityType.BlindSwap => "Blind Swap",
+            AbilityType.Misdeal => "Misdeal",
+            AbilityType.WildCard => "Wild Card",
+            AbilityType.SleightOfMind => "Sleight of Mind",
+            AbilityType.ChaoticNature => "Chaotic Nature",
+            AbilityType.Fortify => "Fortify",
+            AbilityType.SecondWind => "Second Wind",
+            AbilityType.Brace => "Brace",
+            AbilityType.Desperation => "Desperation",
+            AbilityType.SteadyHand => "Steady Hand",
             _ => a.ToString()
         };
 
@@ -61,6 +192,58 @@ namespace WitsAndFools
             AbilityType.EndgameSpecialist => "ENDGM",
             AbilityType.CardCounter => "COUNT",
             AbilityType.QuickHands => "QUICK",
+            AbilityType.Riposte => "RIPOST",
+            AbilityType.ShadowCloak => "CLOAK",
+            AbilityType.PatienceRewarded => "PATIEN",
+            AbilityType.Wiretap => "WIRE",
+            AbilityType.MarkedCards => "MARKED",
+            AbilityType.DoubleAgent => "D.AGNT",
+            AbilityType.Blackmail => "BLKML",
+            AbilityType.SleightOfHand => "SLIGHT",
+            AbilityType.SmokeBomb => "SMOKE",
+            AbilityType.TrapCard => "TRAP",
+            AbilityType.Undermine => "UNDRM",
+            AbilityType.Rampage => "RMPGE",
+            AbilityType.Bloodlust => "BLOOD",
+            AbilityType.Haymaker => "HAYMK",
+            AbilityType.IronGrip => "GRIP",
+            AbilityType.Brawl => "BRAWL",
+            AbilityType.ThickSkin => "THICK",
+            AbilityType.Conquer => "CNQR",
+            AbilityType.Intimidate => "INTIM",
+            AbilityType.CrownSeize => "CROWN",
+            AbilityType.BattleHardened => "HARDN",
+            AbilityType.CourtIntrigue => "COURT",
+            AbilityType.RoyalDecree => "ROYAL",
+            AbilityType.Patronage => "PATRON",
+            AbilityType.GracefulManners => "GRACE",
+            AbilityType.PullStrings => "PULL",
+            AbilityType.Misdirection => "MISDR",
+            AbilityType.ForcedHand => "FORCE",
+            AbilityType.WebOfLies => "WEB",
+            AbilityType.Diplomacy => "DIPLO",
+            AbilityType.SafePassage => "SAFE",
+            AbilityType.Treaty => "TREATY",
+            AbilityType.GracefulRetreat => "RETRT",
+            AbilityType.Equilibrium => "EQUIL",
+            AbilityType.StackTheDeck => "STACK",
+            AbilityType.SecondDeal => "2DEAL",
+            AbilityType.ColdRead => "COLD",
+            AbilityType.SharkInstinct => "SHARK",
+            AbilityType.AllIn => "ALLIN",
+            AbilityType.DoubleOrNothing => "DBL/N",
+            AbilityType.LuckyStreak => "LUCKY",
+            AbilityType.Jackpot => "JCKPT",
+            AbilityType.BlindSwap => "SWAP",
+            AbilityType.Misdeal => "MISDL",
+            AbilityType.WildCard => "WILD",
+            AbilityType.SleightOfMind => "SLGHT",
+            AbilityType.ChaoticNature => "CHAOS",
+            AbilityType.Fortify => "FORT",
+            AbilityType.SecondWind => "2WIND",
+            AbilityType.Brace => "BRACE",
+            AbilityType.Desperation => "DESPR",
+            AbilityType.SteadyHand => "STEDY",
             _ => "?"
         };
 
@@ -82,11 +265,71 @@ namespace WitsAndFools
             AbilityType.EndgameSpecialist => "When deck has 6 or fewer cards, defend with any suit.",
             AbilityType.CardCounter => "After drawing, peek at deck top and swap your worst card for it if better.",
             AbilityType.QuickHands => "After a successful defense, draw 1 extra then discard 1.",
+            AbilityType.Riposte => "Spend 1 Intel. Opponent discards 1 random card.",
+            AbilityType.ShadowCloak => "Reduce max attacks this bout by 2.",
+            AbilityType.PatienceRewarded => "After winning a bout as defender, gain 2 Intel.",
+            AbilityType.Wiretap => "Rearrange the top 5 cards of the deck.",
+            AbilityType.MarkedCards => "Gain 1 Intel at the start of each bout.",
+            AbilityType.DoubleAgent => "Spend 3 Intel. Take 1 random card from opponent's hand.",
+            AbilityType.Blackmail => "Spend 2 Intel. Opponent discards their 2 highest-rank cards.",
+            AbilityType.SleightOfHand => "Draw top deck card. Put 1 card from hand on top of deck.",
+            AbilityType.SmokeBomb => "Spend 1 Intel. End bout — all cards discarded, no one eats.",
+            AbilityType.TrapCard => "Spend 2 Intel. Return 1 undefended attack to attacker's hand.",
+            AbilityType.Undermine => "When opponent uses an ability, they discard 1 extra card.",
+            AbilityType.Rampage => "Spend 1 Fury. Play top 2 deck cards as attacks.",
+            AbilityType.Bloodlust => "When opponent eats, gain 1 Fury per card eaten.",
+            AbilityType.Haymaker => "Draw 2 cards.",
+            AbilityType.IronGrip => "Spend 1 Fury. Draw 3 cards.",
+            AbilityType.Brawl => "Spend 2 Fury. Both players discard all cards, then both draw 6.",
+            AbilityType.ThickSkin => "When eating, draw 1 extra card.",
+            AbilityType.Conquer => "Spend 1 Fury. Draw 1 card; if it's trump, draw 1 more.",
+            AbilityType.Intimidate => "Spend 1 Fury. Opponent discards 1 random non-trump card.",
+            AbilityType.CrownSeize => "Spend 3 Fury. Change trump to this card's suit and draw 2.",
+            AbilityType.BattleHardened => "When you attack with a trump card, gain 1 Fury.",
+            AbilityType.CourtIntrigue => "Spend 1 Favor. Rearrange top 3 deck cards and draw 1.",
+            AbilityType.RoyalDecree => "Spend 1 Favor. Draw 2 cards, opponent discards 1 random.",
+            AbilityType.Patronage => "Spend 3 Favor. Draw 3 cards.",
+            AbilityType.GracefulManners => "When trump suit changes, gain 2 Favor.",
+            AbilityType.PullStrings => "Spend 1 Favor. Opponent discards 2 random cards.",
+            AbilityType.Misdirection => "Spend 1 Favor. Cap attacks and opponent discards 1.",
+            AbilityType.ForcedHand => "Spend 2 Favor. Opponent discards their highest card.",
+            AbilityType.WebOfLies => "When opponent uses an ability, gain 1 Favor.",
+            AbilityType.Diplomacy => "End bout — all cards discarded, no one eats. Draw 1.",
+            AbilityType.SafePassage => "Spend 2 Favor. Auto-defend all remaining attacks.",
+            AbilityType.Treaty => "Spend 3 Favor. Both players draw up to 6 cards.",
+            AbilityType.GracefulRetreat => "When eating, 1 eaten card goes to discard instead.",
+            AbilityType.Equilibrium => "At bout start, if opponent has more cards, draw 1.",
+            AbilityType.StackTheDeck => "Put 1 card from hand on top of deck. Draw 2.",
+            AbilityType.SecondDeal => "Spend 1 Luck. Draw 2, put 1 card on bottom of deck.",
+            AbilityType.ColdRead => "Spend 2 Luck. Draw 3, put 1 card on top of deck.",
+            AbilityType.SharkInstinct => "At bout start, gain 1 Luck.",
+            AbilityType.AllIn => "Spend all Luck (min 1). Draw cards equal to Luck spent.",
+            AbilityType.DoubleOrNothing => "Spend 1 Luck. Draw 2 cards, discard your lowest.",
+            AbilityType.LuckyStreak => "Spend 2 Luck. Play top deck card as attack; if trump, play another.",
+            AbilityType.Jackpot => "After winning a bout as defender, gain 2 Luck.",
+            AbilityType.BlindSwap => "Swap 1 random card with opponent.",
+            AbilityType.Misdeal => "Spend 1 Luck. Shuffle attacks into deck, bout ends.",
+            AbilityType.WildCard => "Spend 2 Luck. Take most recent card from discard to hand.",
+            AbilityType.SleightOfMind => "After using an active ability, draw 1 card.",
+            AbilityType.ChaoticNature => "When using an ability, 50% chance the card returns to hand.",
+            AbilityType.Fortify => "Auto-defend first undefended attack.",
+            AbilityType.SecondWind => "Discard 2 cards, draw 3.",
+            AbilityType.Brace => "Draw 2 cards.",
+            AbilityType.Desperation => "Discard hand, auto-defend all attacks, draw 4.",
+            AbilityType.SteadyHand => "At bout start, if hand has 3 or fewer cards, draw 1.",
             _ => ""
         };
 
         public static bool IsPassive(this AbilityType a) =>
             a == AbilityType.TrumpAffinity || a == AbilityType.EndgameSpecialist ||
-            a == AbilityType.CardCounter || a == AbilityType.QuickHands;
+            a == AbilityType.CardCounter || a == AbilityType.QuickHands ||
+            a == AbilityType.PatienceRewarded || a == AbilityType.MarkedCards ||
+            a == AbilityType.Undermine || a == AbilityType.Bloodlust ||
+            a == AbilityType.ThickSkin || a == AbilityType.BattleHardened ||
+            a == AbilityType.GracefulManners || a == AbilityType.WebOfLies ||
+            a == AbilityType.GracefulRetreat || a == AbilityType.Equilibrium ||
+            a == AbilityType.SharkInstinct || a == AbilityType.Jackpot ||
+            a == AbilityType.SleightOfMind || a == AbilityType.ChaoticNature ||
+            a == AbilityType.SteadyHand;
     }
 }

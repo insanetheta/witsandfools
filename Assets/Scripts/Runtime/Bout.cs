@@ -58,6 +58,19 @@ namespace WitsAndFools
             foreach (var d in _defenses) if (d.HasValue) yield return d.Value;
         }
 
+        public void RemoveAttack(int slot)
+        {
+            if (slot < 0 || slot >= _attacks.Count) return;
+            _attacks.RemoveAt(slot);
+            _defenses.RemoveAt(slot);
+            _autoDefended.Remove(slot);
+            var shifted = new HashSet<int>();
+            foreach (int i in _autoDefended)
+                shifted.Add(i > slot ? i - 1 : i);
+            _autoDefended.Clear();
+            foreach (int i in shifted) _autoDefended.Add(i);
+        }
+
         public void AddBonusRank(Rank rank) => _bonusRanks.Add(rank);
 
         public IEnumerable<Rank> AttackRanks()

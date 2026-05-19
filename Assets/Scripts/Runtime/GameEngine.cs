@@ -191,6 +191,7 @@ namespace WitsAndFools
             ApplyVentriloquistsDummy();
 
             AttackerIndex = ChooseFirstAttacker();
+            ApplyBoutStartPassives();
             ApplyCourtFavor(AttackerIndex);
             Phase = Phase.Attack;
 
@@ -282,6 +283,9 @@ namespace WitsAndFools
             else if (_config.DuelistGlove[playerIndex] && !_duelistGloveUsedThisBout[playerIndex] && rankBypass)
                 _duelistGloveUsedThisBout[playerIndex] = true;
 
+            if (_config.BattleHardened[playerIndex] && card.Suit == Trump)
+                GainResource(playerIndex, 1);
+
             Phase = Phase.Defense;
             OnAttackPlayed?.Invoke(playerIndex, card);
             TryShieldBrooch();
@@ -344,8 +348,19 @@ namespace WitsAndFools
             if (_bout.IsEmpty) return false;
 
             CollectCrownOfThornsRanks();
+
+            int cardsEaten = 0;
             foreach (var c in _bout.AllCards())
+            {
+                if (_config.GracefulRetreat[playerIndex] && cardsEaten == 0 && _bout.Defenses[0] == null)
+                {
+                    _discard.Add(c);
+                    cardsEaten++;
+                    continue;
+                }
                 _hands[playerIndex].Add(c);
+                cardsEaten++;
+            }
             _bout.Clear();
 
             if (_config.PoisonedWine[1 - playerIndex])
@@ -370,12 +385,24 @@ namespace WitsAndFools
                 if (drawn > 0) OnDrew?.Invoke(playerIndex, drawn);
             }
 
+            if (_config.ThickSkin[playerIndex] && _deck.Count > 0)
+            {
+                _hands[playerIndex].Add(_deck.Draw());
+                OnDrew?.Invoke(playerIndex, 1);
+            }
+
             int attacker = 1 - playerIndex;
             if (_config.BruteFury[attacker] && _deck.Count > 0)
             {
                 _hands[attacker].Add(_deck.Draw());
                 OnDrew?.Invoke(attacker, 1);
                 GainResource(attacker, 1);
+            }
+
+            if (_config.Bloodlust[attacker])
+            {
+                int eaten = cardsEaten;
+                GainResource(attacker, eaten > 0 ? eaten : 1);
             }
 
             if (_config.LuckyDraw[playerIndex] && !_luckyDrawUsed[playerIndex] && _hands[playerIndex].Count > 1)
@@ -444,7 +471,43 @@ namespace WitsAndFools
                 _hands[playerIndex].Remove(card);
                 _discard.Add(card);
             }
+
+            // ChaoticNature: 50% chance to return the ability card to hand
+            if (!keepCard && _config.ChaoticNature[playerIndex])
+            {
+                int roll = (_deck.Count + _boutCount + playerIndex) % 2;
+                if (roll == 0)
+                {
+                    _discard.Remove(card);
+                    _hands[playerIndex].Add(card);
+                }
+            }
+
+            // Undermine: opponent discards 1 extra card when you use an ability
+            int opponent = 1 - playerIndex;
+            if (_config.Undermine[opponent] && _hands[playerIndex].Count > 0)
+            {
+                var worst = FindWorstCard(_hands[playerIndex], Trump);
+                if (worst.HasValue)
+                {
+                    _hands[playerIndex].Remove(worst.Value);
+                    _discard.Add(worst.Value);
+                }
+            }
+
+            // WebOfLies: gain 1 Favor when opponent uses an ability
+            if (_config.WebOfLies[opponent])
+                GainResource(opponent, 1);
+
             ApplyAbility(ability, playerIndex, card, defenseSlot);
+
+            // SleightOfMind: draw 1 after using an active ability
+            if (_config.SleightOfMind[playerIndex] && _deck.Count > 0 && Phase != Phase.GameOver)
+            {
+                _hands[playerIndex].Add(_deck.Draw());
+                OnDrew?.Invoke(playerIndex, 1);
+            }
+
             OnAbilityUsed?.Invoke(playerIndex, card, ability);
             return true;
         }
@@ -478,6 +541,107 @@ namespace WitsAndFools
                     return _deck.Count > 0;
                 case AbilityType.Gambit:
                     return _deck.Count > 0;
+
+                // Rogue: Shadow
+                case AbilityType.Riposte:
+                    return Phase == Phase.Defense && _resource[playerIndex] >= 1;
+                case AbilityType.ShadowCloak:
+                    return Phase == Phase.Defense;
+
+                // Rogue: Spy
+                case AbilityType.Wiretap:
+                    return _deck.Count > 0;
+                case AbilityType.DoubleAgent:
+                    return _resource[playerIndex] >= 3 && _hands[1 - playerIndex].Count > 0;
+                case AbilityType.Blackmail:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 2 && _hands[1 - playerIndex].Count > 0;
+
+                // Rogue: Saboteur
+                case AbilityType.SleightOfHand:
+                    return _deck.Count > 0 && _hands[playerIndex].Count > 0;
+                case AbilityType.SmokeBomb:
+                    return Phase == Phase.Defense && _resource[playerIndex] >= 1 && !_bout.IsEmpty;
+                case AbilityType.TrapCard:
+                    return Phase == Phase.Defense && _resource[playerIndex] >= 2 && _bout.FirstUndefendedSlot() >= 0;
+
+                // Brute: Berserker
+                case AbilityType.Rampage:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _deck.Count >= 2;
+
+                // Brute: Brawler
+                case AbilityType.Haymaker:
+                    return Phase == Phase.Attack && _deck.Count > 0;
+                case AbilityType.IronGrip:
+                    return Phase == Phase.Defense && _resource[playerIndex] >= 1 && _deck.Count > 0;
+                case AbilityType.Brawl:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 2 && _deck.Count >= 6;
+
+                // Brute: Warlord
+                case AbilityType.Conquer:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _deck.Count > 0;
+                case AbilityType.Intimidate:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _hands[1 - playerIndex].Count > 0;
+                case AbilityType.CrownSeize:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 3 && _deck.Count > 0;
+
+                // Diplomat: Courtier
+                case AbilityType.CourtIntrigue:
+                    return _resource[playerIndex] >= 1 && _deck.Count > 0;
+                case AbilityType.RoyalDecree:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _deck.Count > 0;
+                case AbilityType.Patronage:
+                    return _resource[playerIndex] >= 3 && _deck.Count > 0;
+
+                // Diplomat: Puppeteer
+                case AbilityType.PullStrings:
+                    return Phase == Phase.Defense && _resource[playerIndex] >= 1 && _hands[1 - playerIndex].Count > 0;
+                case AbilityType.Misdirection:
+                    return Phase == Phase.Defense && _resource[playerIndex] >= 1;
+                case AbilityType.ForcedHand:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 2 && _hands[1 - playerIndex].Count > 0;
+
+                // Diplomat: Peacemaker
+                case AbilityType.Diplomacy:
+                    return Phase == Phase.Defense && !_bout.IsEmpty;
+                case AbilityType.SafePassage:
+                    return Phase == Phase.Defense && _resource[playerIndex] >= 2 && _bout.FirstUndefendedSlot() >= 0;
+                case AbilityType.Treaty:
+                    return _resource[playerIndex] >= 3 && _deck.Count > 0;
+
+                // Gambler: Card Shark
+                case AbilityType.StackTheDeck:
+                    return _deck.Count > 0 && _hands[playerIndex].Count > 0;
+                case AbilityType.SecondDeal:
+                    return _resource[playerIndex] >= 1 && _deck.Count > 0;
+                case AbilityType.ColdRead:
+                    return _resource[playerIndex] >= 2 && _deck.Count > 0;
+
+                // Gambler: High Roller
+                case AbilityType.AllIn:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _deck.Count > 0;
+                case AbilityType.DoubleOrNothing:
+                    return _resource[playerIndex] >= 1 && _deck.Count >= 2;
+                case AbilityType.LuckyStreak:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 2 && _deck.Count > 0;
+
+                // Gambler: Trickster
+                case AbilityType.BlindSwap:
+                    return _hands[1 - playerIndex].Count > 0 && _hands[playerIndex].Count > 0;
+                case AbilityType.Misdeal:
+                    return Phase == Phase.Defense && _resource[playerIndex] >= 1 && !_bout.IsEmpty;
+                case AbilityType.WildCard:
+                    return _resource[playerIndex] >= 2 && _discard.Count > 0;
+
+                // Neutral
+                case AbilityType.Fortify:
+                    return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
+                case AbilityType.SecondWind:
+                    return _hands[playerIndex].Count >= 2 && _deck.Count > 0;
+                case AbilityType.Brace:
+                    return Phase == Phase.Defense && _deck.Count > 0;
+                case AbilityType.Desperation:
+                    return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
+
                 default:
                     return true;
             }
@@ -485,12 +649,15 @@ namespace WitsAndFools
 
         void ApplyAbility(AbilityType ability, int playerIndex, Card card, int defenseSlot)
         {
+            int opponent = 1 - playerIndex;
+
             switch (ability)
             {
                 case AbilityType.TrumpChanger:
                     Trump = card.Suit;
                     _trumpChangerUsed = true;
                     OnTrumpChanged?.Invoke(Trump);
+                    ApplyGracefulManners();
                     break;
 
                 case AbilityType.ExtraDraw:
@@ -558,21 +725,11 @@ namespace WitsAndFools
                     break;
 
                 case AbilityType.Peek:
-                    var top = _deck.PeekTop(3);
-                    if (top.Length > 1)
-                    {
-                        // Put easiest-to-shed cards on top: non-trump low rank first
-                        Array.Sort(top, (a, b) =>
-                        {
-                            bool at = a.Suit == Trump, bt = b.Suit == Trump;
-                            if (at != bt) return at ? 1 : -1;
-                            return (int)a.Rank - (int)b.Rank;
-                        });
-                        _deck.ReplaceTop(top);
-                    }
+                    SortTopDeck(3);
                     break;
 
                 case AbilityType.Gambit:
+                {
                     int count = _hands[playerIndex].Count;
                     var toDiscard = new List<Card>(_hands[playerIndex].Cards);
                     foreach (var c in toDiscard)
@@ -585,8 +742,532 @@ namespace WitsAndFools
                         _hands[playerIndex].Add(_deck.Draw());
                     if (toDraw > 0) OnDrew?.Invoke(playerIndex, toDraw);
                     break;
+                }
+
+                // --- Rogue: Shadow ---
+
+                case AbilityType.Riposte:
+                    SpendResource(playerIndex, 1);
+                    DiscardRandomCards(opponent, 1);
+                    break;
+
+                case AbilityType.ShadowCloak:
+                    _pileOnBonus -= 2;
+                    break;
+
+                // --- Rogue: Spy ---
+
+                case AbilityType.Wiretap:
+                    SortTopDeck(5);
+                    break;
+
+                case AbilityType.DoubleAgent:
+                    SpendResource(playerIndex, 3);
+                    StealRandomCard(playerIndex, opponent);
+                    break;
+
+                case AbilityType.Blackmail:
+                    SpendResource(playerIndex, 2);
+                    DiscardHighestCards(opponent, 2);
+                    break;
+
+                // --- Rogue: Saboteur ---
+
+                case AbilityType.SleightOfHand:
+                {
+                    if (_deck.Count > 0)
+                    {
+                        var drawn = _deck.Draw();
+                        _hands[playerIndex].Add(drawn);
+                    }
+                    var worst = FindWorstCard(_hands[playerIndex], Trump);
+                    if (worst.HasValue)
+                    {
+                        _hands[playerIndex].Remove(worst.Value);
+                        _deck.PutOnTop(worst.Value);
+                    }
+                    break;
+                }
+
+                case AbilityType.SmokeBomb:
+                {
+                    SpendResource(playerIndex, 1);
+                    for (int i = 0; i < _bout.Attacks.Count; i++)
+                    {
+                        _discard.Add(_bout.Attacks[i]);
+                        if (_bout.Defenses[i] != null)
+                            _discard.Add(_bout.Defenses[i].Value);
+                    }
+                    CollectCrownOfThornsRanks();
+                    _bout.Clear();
+                    ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
+                    break;
+                }
+
+                case AbilityType.TrapCard:
+                {
+                    SpendResource(playerIndex, 2);
+                    int trapSlot = _bout.FirstUndefendedSlot();
+                    if (trapSlot >= 0)
+                    {
+                        var attack = _bout.Attacks[trapSlot];
+                        _bout.RemoveAttack(trapSlot);
+                        _hands[opponent].Add(attack);
+                    }
+                    break;
+                }
+
+                // --- Brute: Berserker ---
+
+                case AbilityType.Rampage:
+                {
+                    SpendResource(playerIndex, 1);
+                    int played = 0;
+                    while (played < 2 && _deck.Count > 0)
+                    {
+                        var rampCard = _deck.Draw();
+                        _bout.AddAttack(rampCard);
+                        Phase = Phase.Defense;
+                        OnAttackPlayed?.Invoke(playerIndex, rampCard);
+                        played++;
+                    }
+                    break;
+                }
+
+                // --- Brute: Brawler ---
+
+                case AbilityType.Haymaker:
+                    DrawCards(playerIndex, 2);
+                    break;
+
+                case AbilityType.IronGrip:
+                    SpendResource(playerIndex, 1);
+                    DrawCards(playerIndex, 3);
+                    break;
+
+                case AbilityType.Brawl:
+                {
+                    SpendResource(playerIndex, 2);
+                    for (int p = 0; p < 2; p++)
+                    {
+                        var toDiscard = new List<Card>(_hands[p].Cards);
+                        foreach (var c in toDiscard)
+                        {
+                            _hands[p].Remove(c);
+                            _discard.Add(c);
+                        }
+                    }
+                    for (int p = 0; p < 2; p++)
+                        DrawCards(p, 6);
+                    break;
+                }
+
+                // --- Brute: Warlord ---
+
+                case AbilityType.Conquer:
+                {
+                    SpendResource(playerIndex, 1);
+                    if (_deck.Count > 0)
+                    {
+                        var drawn = _deck.Draw();
+                        _hands[playerIndex].Add(drawn);
+                        int d = 1;
+                        if (drawn.Suit == Trump && _deck.Count > 0)
+                        {
+                            _hands[playerIndex].Add(_deck.Draw());
+                            d++;
+                        }
+                        OnDrew?.Invoke(playerIndex, d);
+                    }
+                    break;
+                }
+
+                case AbilityType.Intimidate:
+                    SpendResource(playerIndex, 1);
+                    DiscardRandomNonTrump(opponent, 1);
+                    break;
+
+                case AbilityType.CrownSeize:
+                    SpendResource(playerIndex, 3);
+                    Trump = card.Suit;
+                    OnTrumpChanged?.Invoke(Trump);
+                    ApplyGracefulManners();
+                    DrawCards(playerIndex, 2);
+                    break;
+
+                // --- Diplomat: Courtier ---
+
+                case AbilityType.CourtIntrigue:
+                    SpendResource(playerIndex, 1);
+                    SortTopDeck(3);
+                    DrawCards(playerIndex, 1);
+                    break;
+
+                case AbilityType.RoyalDecree:
+                    SpendResource(playerIndex, 1);
+                    DrawCards(playerIndex, 2);
+                    DiscardRandomCards(opponent, 1);
+                    break;
+
+                case AbilityType.Patronage:
+                    SpendResource(playerIndex, 3);
+                    DrawCards(playerIndex, 3);
+                    break;
+
+                // --- Diplomat: Puppeteer ---
+
+                case AbilityType.PullStrings:
+                    SpendResource(playerIndex, 1);
+                    DiscardRandomCards(opponent, 2);
+                    break;
+
+                case AbilityType.Misdirection:
+                    SpendResource(playerIndex, 1);
+                    _bout.AttacksCapped = true;
+                    DiscardRandomCards(opponent, 1);
+                    break;
+
+                case AbilityType.ForcedHand:
+                    SpendResource(playerIndex, 2);
+                    DiscardHighestCards(opponent, 1);
+                    break;
+
+                // --- Diplomat: Peacemaker ---
+
+                case AbilityType.Diplomacy:
+                {
+                    for (int i = 0; i < _bout.Attacks.Count; i++)
+                    {
+                        _discard.Add(_bout.Attacks[i]);
+                        if (_bout.Defenses[i] != null)
+                            _discard.Add(_bout.Defenses[i].Value);
+                    }
+                    CollectCrownOfThornsRanks();
+                    _bout.Clear();
+                    DrawCards(playerIndex, 1);
+                    ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
+                    break;
+                }
+
+                case AbilityType.SafePassage:
+                {
+                    SpendResource(playerIndex, 2);
+                    for (int i = 0; i < _bout.Defenses.Count; i++)
+                    {
+                        if (_bout.Defenses[i] == null)
+                            _bout.AutoDefend(i);
+                    }
+                    Phase = Phase.Attack;
+                    break;
+                }
+
+                case AbilityType.Treaty:
+                {
+                    SpendResource(playerIndex, 3);
+                    for (int p = 0; p < 2; p++)
+                    {
+                        int need = 6 - _hands[p].Count;
+                        if (need > 0) DrawCards(p, need);
+                    }
+                    break;
+                }
+
+                // --- Gambler: Card Shark ---
+
+                case AbilityType.StackTheDeck:
+                {
+                    var worst = FindWorstCard(_hands[playerIndex], Trump);
+                    if (worst.HasValue)
+                    {
+                        _hands[playerIndex].Remove(worst.Value);
+                        _deck.PutOnTop(worst.Value);
+                    }
+                    DrawCards(playerIndex, 2);
+                    break;
+                }
+
+                case AbilityType.SecondDeal:
+                {
+                    SpendResource(playerIndex, 1);
+                    DrawCards(playerIndex, 2);
+                    var worst = FindWorstCard(_hands[playerIndex], Trump);
+                    if (worst.HasValue)
+                    {
+                        _hands[playerIndex].Remove(worst.Value);
+                        _deck.PutOnBottom(worst.Value);
+                    }
+                    break;
+                }
+
+                case AbilityType.ColdRead:
+                {
+                    SpendResource(playerIndex, 2);
+                    DrawCards(playerIndex, 3);
+                    var worst = FindWorstCard(_hands[playerIndex], Trump);
+                    if (worst.HasValue)
+                    {
+                        _hands[playerIndex].Remove(worst.Value);
+                        _deck.PutOnTop(worst.Value);
+                    }
+                    break;
+                }
+
+                // --- Gambler: High Roller ---
+
+                case AbilityType.AllIn:
+                {
+                    int luck = _resource[playerIndex];
+                    SpendResource(playerIndex, luck);
+                    DrawCards(playerIndex, luck);
+                    break;
+                }
+
+                case AbilityType.DoubleOrNothing:
+                {
+                    SpendResource(playerIndex, 1);
+                    DrawCards(playerIndex, 2);
+                    var worst = FindWorstCard(_hands[playerIndex], Trump);
+                    if (worst.HasValue)
+                    {
+                        _hands[playerIndex].Remove(worst.Value);
+                        _discard.Add(worst.Value);
+                    }
+                    break;
+                }
+
+                case AbilityType.LuckyStreak:
+                {
+                    SpendResource(playerIndex, 2);
+                    if (_deck.Count > 0)
+                    {
+                        var ls1 = _deck.Draw();
+                        _bout.AddAttack(ls1);
+                        Phase = Phase.Defense;
+                        OnAttackPlayed?.Invoke(playerIndex, ls1);
+                        if (ls1.Suit == Trump && _deck.Count > 0)
+                        {
+                            var ls2 = _deck.Draw();
+                            _bout.AddAttack(ls2);
+                            OnAttackPlayed?.Invoke(playerIndex, ls2);
+                        }
+                    }
+                    break;
+                }
+
+                // --- Gambler: Trickster ---
+
+                case AbilityType.BlindSwap:
+                {
+                    if (_hands[playerIndex].Count > 0 && _hands[opponent].Count > 0)
+                    {
+                        int myIdx = (_deck.Count + _boutCount) % _hands[playerIndex].Count;
+                        int theirIdx = (_deck.Count + _boutCount + 1) % _hands[opponent].Count;
+                        var myCard = _hands[playerIndex].Cards[myIdx];
+                        var theirCard = _hands[opponent].Cards[theirIdx];
+                        _hands[playerIndex].Remove(myCard);
+                        _hands[opponent].Remove(theirCard);
+                        _hands[playerIndex].Add(theirCard);
+                        _hands[opponent].Add(myCard);
+                    }
+                    break;
+                }
+
+                case AbilityType.Misdeal:
+                {
+                    SpendResource(playerIndex, 1);
+                    var attacks = new List<Card>();
+                    for (int i = 0; i < _bout.Attacks.Count; i++)
+                    {
+                        attacks.Add(_bout.Attacks[i]);
+                        if (_bout.Defenses[i] != null)
+                            _discard.Add(_bout.Defenses[i].Value);
+                    }
+                    _deck.ShuffleInMany(attacks);
+                    CollectCrownOfThornsRanks();
+                    _bout.Clear();
+                    ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
+                    break;
+                }
+
+                case AbilityType.WildCard:
+                {
+                    SpendResource(playerIndex, 2);
+                    if (_discard.Count > 0)
+                    {
+                        var retrieved = _discard[_discard.Count - 1];
+                        _discard.RemoveAt(_discard.Count - 1);
+                        _hands[playerIndex].Add(retrieved);
+                    }
+                    break;
+                }
+
+                // --- Neutral ---
+
+                case AbilityType.Fortify:
+                {
+                    int fSlot = _bout.FirstUndefendedSlot();
+                    if (fSlot >= 0)
+                        _bout.AutoDefend(fSlot);
+                    if (_bout.FullyDefended) Phase = Phase.Attack;
+                    break;
+                }
+
+                case AbilityType.SecondWind:
+                {
+                    int discarded = 0;
+                    while (discarded < 2 && _hands[playerIndex].Count > 0)
+                    {
+                        var worst = FindWorstCard(_hands[playerIndex], Trump);
+                        if (!worst.HasValue) break;
+                        _hands[playerIndex].Remove(worst.Value);
+                        _discard.Add(worst.Value);
+                        discarded++;
+                    }
+                    DrawCards(playerIndex, 3);
+                    break;
+                }
+
+                case AbilityType.Brace:
+                    DrawCards(playerIndex, 2);
+                    break;
+
+                case AbilityType.Desperation:
+                {
+                    var toDiscard = new List<Card>(_hands[playerIndex].Cards);
+                    foreach (var c in toDiscard)
+                    {
+                        _hands[playerIndex].Remove(c);
+                        _discard.Add(c);
+                    }
+                    for (int i = 0; i < _bout.Defenses.Count; i++)
+                    {
+                        if (_bout.Defenses[i] == null)
+                            _bout.AutoDefend(i);
+                    }
+                    Phase = Phase.Attack;
+                    DrawCards(playerIndex, 4);
+                    break;
+                }
             }
         }
+
+        // ---------- Ability helpers ----------
+
+        void DrawCards(int playerIndex, int count)
+        {
+            int drawn = 0;
+            while (drawn < count && _deck.Count > 0)
+            {
+                _hands[playerIndex].Add(_deck.Draw());
+                drawn++;
+            }
+            if (drawn > 0) OnDrew?.Invoke(playerIndex, drawn);
+        }
+
+        void DiscardRandomCards(int playerIndex, int count)
+        {
+            for (int i = 0; i < count && _hands[playerIndex].Count > 0; i++)
+            {
+                int idx = (_deck.Count + _boutCount + i) % _hands[playerIndex].Count;
+                var c = _hands[playerIndex].Cards[idx];
+                _hands[playerIndex].Remove(c);
+                _discard.Add(c);
+            }
+        }
+
+        void DiscardRandomNonTrump(int playerIndex, int count)
+        {
+            var candidates = new List<Card>();
+            foreach (var c in _hands[playerIndex].Cards)
+                if (c.Suit != Trump) candidates.Add(c);
+            if (candidates.Count == 0) return;
+            for (int i = 0; i < count && candidates.Count > 0; i++)
+            {
+                int idx = (_deck.Count + _boutCount + i) % candidates.Count;
+                var c = candidates[idx];
+                _hands[playerIndex].Remove(c);
+                _discard.Add(c);
+                candidates.RemoveAt(idx);
+            }
+        }
+
+        void DiscardHighestCards(int playerIndex, int count)
+        {
+            for (int i = 0; i < count && _hands[playerIndex].Count > 0; i++)
+            {
+                Card? highest = null;
+                foreach (var c in _hands[playerIndex].Cards)
+                {
+                    if (highest == null) { highest = c; continue; }
+                    if ((int)c.Rank > (int)highest.Value.Rank) highest = c;
+                    else if ((int)c.Rank == (int)highest.Value.Rank && c.Suit == Trump && highest.Value.Suit != Trump)
+                        highest = c;
+                }
+                if (highest.HasValue)
+                {
+                    _hands[playerIndex].Remove(highest.Value);
+                    _discard.Add(highest.Value);
+                }
+            }
+        }
+
+        void StealRandomCard(int playerIndex, int fromPlayer)
+        {
+            if (_hands[fromPlayer].Count == 0) return;
+            int idx = (_deck.Count + _boutCount) % _hands[fromPlayer].Count;
+            var c = _hands[fromPlayer].Cards[idx];
+            _hands[fromPlayer].Remove(c);
+            _hands[playerIndex].Add(c);
+        }
+
+        void SortTopDeck(int count)
+        {
+            var top = _deck.PeekTop(count);
+            if (top.Length > 1)
+            {
+                Array.Sort(top, (a, b) =>
+                {
+                    bool at = a.Suit == Trump, bt = b.Suit == Trump;
+                    if (at != bt) return at ? 1 : -1;
+                    return (int)a.Rank - (int)b.Rank;
+                });
+                _deck.ReplaceTop(top);
+            }
+        }
+
+        void ApplyGracefulManners()
+        {
+            for (int p = 0; p < 2; p++)
+            {
+                if (_config.GracefulManners[p])
+                    GainResource(p, 2);
+            }
+        }
+
+        // ---------- Bout-start passives ----------
+
+        void ApplyBoutStartPassives()
+        {
+            for (int p = 0; p < 2; p++)
+            {
+                if (_config.MarkedCards[p])
+                    GainResource(p, 1);
+                if (_config.SharkInstinct[p])
+                    GainResource(p, 1);
+                if (_config.Equilibrium[p] && _hands[1 - p].Count > _hands[p].Count && _deck.Count > 0)
+                {
+                    _hands[p].Add(_deck.Draw());
+                    OnDrew?.Invoke(p, 1);
+                }
+                if (_config.SteadyHand[p] && _hands[p].Count <= 3 && _deck.Count > 0)
+                {
+                    _hands[p].Add(_deck.Draw());
+                    OnDrew?.Invoke(p, 1);
+                }
+            }
+        }
+
+        // ---------- Core engine ----------
 
         int CountDefended()
         {
@@ -638,6 +1319,14 @@ namespace WitsAndFools
                         }
                     }
                 }
+
+                // PatienceRewarded: defender gains 2 Intel on successful defense
+                if (_config.PatienceRewarded[defenderBefore])
+                    GainResource(defenderBefore, 2);
+
+                // Jackpot: defender gains 2 Luck on successful defense
+                if (_config.Jackpot[defenderBefore])
+                    GainResource(defenderBefore, 2);
             }
 
             for (int p = 0; p < 2; p++)
@@ -680,6 +1369,7 @@ namespace WitsAndFools
                 _bout.AddBonusRank(r);
             _pendingBonusRanks.Clear();
 
+            ApplyBoutStartPassives();
             ApplyCourtFavor(AttackerIndex);
 
             Phase = Phase.Attack;

@@ -75,5 +75,21 @@ namespace WitsAndFools
             _cards.RemoveAt(_cards.Count - 1);
             _cards.Insert(0, top);
         }
+
+        public void PutOnTop(Card card) => _cards.Add(card);
+
+        public void PutOnBottom(Card card) => _cards.Insert(0, card);
+
+        public void ShuffleIn(Card card)
+        {
+            _cards.Insert(_rng.Next(_cards.Count + 1), card);
+        }
+
+        public void ShuffleInMany(IEnumerable<Card> cards)
+        {
+            foreach (var c in cards)
+                _cards.Insert(_rng.Next(_cards.Count + 1), c);
+        }
     }
 }
+

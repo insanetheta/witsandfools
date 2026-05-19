@@ -144,6 +144,168 @@ namespace WitsAndFools
                     int trumpReq = AbilityEagerness >= 1.2f ? 1 : 0;
                     return trumpCount <= trumpReq && hand.Count >= 4 && engine.DeckCount >= hand.Count;
 
+                // --- Rogue: Shadow ---
+
+                case AbilityType.Riposte:
+                    return engine.Phase == Phase.Defense && engine.GetResource(playerIndex) >= 1
+                        && engine.HandOf(1 - playerIndex).Count >= 2;
+
+                case AbilityType.ShadowCloak:
+                    return engine.Phase == Phase.Defense && engine.Bout.AttackCount >= 3;
+
+                // --- Rogue: Spy ---
+
+                case AbilityType.Wiretap:
+                    return engine.DeckCount >= 5 && hand.Count >= 3;
+
+                case AbilityType.DoubleAgent:
+                    return engine.GetResource(playerIndex) >= 3
+                        && engine.HandOf(1 - playerIndex).Count >= 3;
+
+                case AbilityType.Blackmail:
+                    return engine.GetResource(playerIndex) >= 2
+                        && engine.HandOf(1 - playerIndex).Count >= 3;
+
+                // --- Rogue: Saboteur ---
+
+                case AbilityType.SleightOfHand:
+                    return engine.DeckCount > 0 && hand.Count >= 3;
+
+                case AbilityType.SmokeBomb:
+                    return engine.Phase == Phase.Defense && engine.GetResource(playerIndex) >= 1
+                        && !engine.Bout.IsEmpty && CountUndefended(engine.Bout) >= 2;
+
+                case AbilityType.TrapCard:
+                    return engine.Phase == Phase.Defense && engine.GetResource(playerIndex) >= 2
+                        && engine.Bout.FirstUndefendedSlot() >= 0;
+
+                // --- Brute: Berserker ---
+
+                case AbilityType.Rampage:
+                    return engine.Phase == Phase.Attack && engine.GetResource(playerIndex) >= 1
+                        && engine.DeckCount >= 2;
+
+                // --- Brute: Brawler ---
+
+                case AbilityType.Haymaker:
+                    return engine.Phase == Phase.Attack && engine.DeckCount >= 2 && hand.Count <= 5;
+
+                case AbilityType.IronGrip:
+                    return engine.GetResource(playerIndex) >= 1 && engine.DeckCount >= 3
+                        && hand.Count <= 4;
+
+                case AbilityType.Brawl:
+                    return engine.GetResource(playerIndex) >= 2 && engine.DeckCount >= 6
+                        && hand.Count <= 3 && engine.HandOf(1 - playerIndex).Count >= 5;
+
+                // --- Brute: Warlord ---
+
+                case AbilityType.Conquer:
+                    return engine.Phase == Phase.Attack && engine.GetResource(playerIndex) >= 1
+                        && engine.DeckCount > 0;
+
+                case AbilityType.Intimidate:
+                    return engine.Phase == Phase.Attack && engine.GetResource(playerIndex) >= 1
+                        && engine.HandOf(1 - playerIndex).Count >= 3;
+
+                case AbilityType.CrownSeize:
+                    return engine.GetResource(playerIndex) >= 3 && engine.DeckCount >= 2
+                        && CountSuit(hand, engine.Trump) <= 1;
+
+                // --- Diplomat: Courtier ---
+
+                case AbilityType.CourtIntrigue:
+                    return engine.GetResource(playerIndex) >= 1 && engine.DeckCount >= 3;
+
+                case AbilityType.RoyalDecree:
+                    return engine.GetResource(playerIndex) >= 1 && engine.DeckCount >= 2
+                        && engine.HandOf(1 - playerIndex).Count >= 2;
+
+                case AbilityType.Patronage:
+                    return engine.GetResource(playerIndex) >= 3 && engine.DeckCount >= 3;
+
+                // --- Diplomat: Puppeteer ---
+
+                case AbilityType.PullStrings:
+                    return engine.GetResource(playerIndex) >= 1
+                        && engine.HandOf(1 - playerIndex).Count >= 3;
+
+                case AbilityType.Misdirection:
+                    return engine.Phase == Phase.Defense && engine.GetResource(playerIndex) >= 1
+                        && engine.Bout.AttackCount >= 2 && engine.HandOf(1 - playerIndex).Count >= 2;
+
+                case AbilityType.ForcedHand:
+                    return engine.GetResource(playerIndex) >= 2
+                        && engine.HandOf(1 - playerIndex).Count >= 3;
+
+                // --- Diplomat: Peacemaker ---
+
+                case AbilityType.Diplomacy:
+                    return engine.Phase == Phase.Defense && !engine.Bout.IsEmpty
+                        && CountUndefended(engine.Bout) >= 2 && engine.DeckCount > 0;
+
+                case AbilityType.SafePassage:
+                    return engine.Phase == Phase.Defense && engine.GetResource(playerIndex) >= 2
+                        && engine.Bout.FirstUndefendedSlot() >= 0 && CountUndefended(engine.Bout) >= 2;
+
+                case AbilityType.Treaty:
+                    return engine.GetResource(playerIndex) >= 3
+                        && hand.Count <= 4 && engine.DeckCount >= 4;
+
+                // --- Gambler: Card Shark ---
+
+                case AbilityType.StackTheDeck:
+                    return engine.DeckCount >= 2 && hand.Count >= 3;
+
+                case AbilityType.SecondDeal:
+                    return engine.GetResource(playerIndex) >= 1 && engine.DeckCount >= 2;
+
+                case AbilityType.ColdRead:
+                    return engine.GetResource(playerIndex) >= 2 && engine.DeckCount >= 3;
+
+                // --- Gambler: High Roller ---
+
+                case AbilityType.AllIn:
+                    return engine.GetResource(playerIndex) >= 2
+                        && engine.DeckCount >= engine.GetResource(playerIndex);
+
+                case AbilityType.DoubleOrNothing:
+                    return engine.GetResource(playerIndex) >= 1 && engine.DeckCount >= 2;
+
+                case AbilityType.LuckyStreak:
+                    return engine.Phase == Phase.Attack && engine.GetResource(playerIndex) >= 2
+                        && engine.DeckCount >= 1;
+
+                // --- Gambler: Trickster ---
+
+                case AbilityType.BlindSwap:
+                    return engine.HandOf(1 - playerIndex).Count >= 2 && hand.Count >= 2;
+
+                case AbilityType.Misdeal:
+                    return engine.Phase == Phase.Attack && engine.GetResource(playerIndex) >= 1
+                        && engine.Bout.AttackCount >= 2;
+
+                case AbilityType.WildCard:
+                    return engine.GetResource(playerIndex) >= 2
+                        && engine.Discard.Count > 0 && hand.Count <= 5;
+
+                // --- Neutral ---
+
+                case AbilityType.Fortify:
+                    return engine.Phase == Phase.Defense && engine.Bout.FirstUndefendedSlot() >= 0
+                        && !HasLegalDefense(engine, hand, engine.Bout.FirstUndefendedSlot());
+
+                case AbilityType.SecondWind:
+                    return hand.Count >= 4 && engine.DeckCount >= 3
+                        && CountSuit(hand, engine.Trump) <= 1;
+
+                case AbilityType.Brace:
+                    return engine.DeckCount >= 2 && hand.Count <= 4;
+
+                case AbilityType.Desperation:
+                    return engine.Phase == Phase.Defense && CountUndefended(engine.Bout) >= 3
+                        && hand.Count <= 3 && engine.DeckCount >= 4;
+
                 default:
                     return false;
             }

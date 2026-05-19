@@ -89,6 +89,21 @@ namespace WitsAndFools
                 case AbilityType.EndgameSpecialist: config.EndgameSpecialist[player] = true; break;
                 case AbilityType.QuickHands: config.QuickHands[player] = true; break;
                 case AbilityType.CardCounter: config.CardCounter[player] = true; break;
+                case AbilityType.PatienceRewarded: config.PatienceRewarded[player] = true; break;
+                case AbilityType.MarkedCards: config.MarkedCards[player] = true; break;
+                case AbilityType.Undermine: config.Undermine[player] = true; break;
+                case AbilityType.Bloodlust: config.Bloodlust[player] = true; break;
+                case AbilityType.ThickSkin: config.ThickSkin[player] = true; break;
+                case AbilityType.BattleHardened: config.BattleHardened[player] = true; break;
+                case AbilityType.GracefulManners: config.GracefulManners[player] = true; break;
+                case AbilityType.WebOfLies: config.WebOfLies[player] = true; break;
+                case AbilityType.GracefulRetreat: config.GracefulRetreat[player] = true; break;
+                case AbilityType.Equilibrium: config.Equilibrium[player] = true; break;
+                case AbilityType.SharkInstinct: config.SharkInstinct[player] = true; break;
+                case AbilityType.Jackpot: config.Jackpot[player] = true; break;
+                case AbilityType.SleightOfMind: config.SleightOfMind[player] = true; break;
+                case AbilityType.ChaoticNature: config.ChaoticNature[player] = true; break;
+                case AbilityType.SteadyHand: config.SteadyHand[player] = true; break;
             }
         }
 
