@@ -274,7 +274,10 @@ namespace WitsAndFools
                     else if (_run.Florins >= 10)
                         shopBase = 40;
                     return shopBase;
-                case MapNodeType.Rumor: return 20;
+                case MapNodeType.Rumor:
+                    int rumorBase = 50;
+                    if (_run.NodesSinceLastRumor >= 3) rumorBase = 85;
+                    return rumorBase;
                 default: return 0;
             }
         }
@@ -918,6 +921,7 @@ namespace WitsAndFools
             }
             _currentNode = node;
             _currentColumn++;
+            _run.NodesSinceLastRumor++;
 
             switch (node.Type)
             {
@@ -930,6 +934,7 @@ namespace WitsAndFools
                     HandleShop();
                     break;
                 case MapNodeType.Rumor:
+                    _run.NodesSinceLastRumor = 0;
                     HandleRumor();
                     break;
                 case MapNodeType.Rest:

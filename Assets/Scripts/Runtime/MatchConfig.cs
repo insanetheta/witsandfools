@@ -72,6 +72,10 @@ namespace WitsAndFools
 
         public int MaxBouts;
 
+        public bool AbilitiesCostResource;
+        public int StartingResource;
+        public bool DesperationDiscard;
+
         public static MatchConfig Default() => new()
         {
             Abilities = DeckConfig.DefaultAbilities,

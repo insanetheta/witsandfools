@@ -245,6 +245,9 @@ namespace WitsAndFools
                 ApplyBurden(config, 0, burden);
 
             config.AnyRankAttack = true;
+            config.AbilitiesCostResource = true;
+            config.StartingResource = 3;
+            config.DesperationDiscard = true;
             ApplyHouseRule(config, opponent.HouseRule);
 
             return (config, playerDeck, enemyDeck);

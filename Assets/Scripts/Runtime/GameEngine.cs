@@ -94,6 +94,7 @@ namespace WitsAndFools
         public event Action<int, Card, AbilityType> OnAbilityUsed;
         public event Action<Suit> OnTrumpChanged;
         public event Action<int, ResourceType, int> OnResourceChanged;
+        public event Action<int, int> OnDesperationDiscard;
 
         public bool TrumpChangerUsed => _trumpChangerUsed;
         public bool DoubleTroubleActive => _doubleTroubleActive;
@@ -246,8 +247,8 @@ namespace WitsAndFools
             _slipAwayUsed = new bool[2];
             _jugglersBallsUsed = new bool[2];
             _luckyDrawUsed = new bool[2];
-            _resource[0] = 0;
-            _resource[1] = 0;
+            _resource[0] = _config.StartingResource;
+            _resource[1] = _config.StartingResource;
             _attackedThisBout[0] = false;
             _attackedThisBout[1] = false;
 
@@ -405,8 +406,12 @@ namespace WitsAndFools
 
             if (card.Trigger == TriggerTiming.OnAttack && card.HasAbility)
             {
-                ApplyAbility(card.Ability.Value, playerIndex, card, -1);
-                OnAbilityUsed?.Invoke(playerIndex, card, card.Ability.Value);
+                bool canFire = !_config.AbilitiesCostResource || SpendResource(playerIndex, 1);
+                if (canFire)
+                {
+                    ApplyAbility(card.Ability.Value, playerIndex, card, -1);
+                    OnAbilityUsed?.Invoke(playerIndex, card, card.Ability.Value);
+                }
             }
 
             TryShieldBrooch();
@@ -454,8 +459,12 @@ namespace WitsAndFools
 
             if (card.Trigger == TriggerTiming.OnDefend && card.HasAbility)
             {
-                ApplyAbility(card.Ability.Value, playerIndex, card, slot);
-                OnAbilityUsed?.Invoke(playerIndex, card, card.Ability.Value);
+                bool canFire = !_config.AbilitiesCostResource || SpendResource(playerIndex, 1);
+                if (canFire)
+                {
+                    ApplyAbility(card.Ability.Value, playerIndex, card, slot);
+                    OnAbilityUsed?.Invoke(playerIndex, card, card.Ability.Value);
+                }
             }
 
             if (_config.ShadowReflexes[playerIndex] && !_shadowReflexesUsedThisBout[playerIndex] && CanDrawFromDeck(playerIndex))
@@ -543,6 +552,26 @@ namespace WitsAndFools
                     _discard.Add(worst.Value);
                 }
                 GainResource(playerIndex, 1);
+            }
+
+            if (_config.DesperationDiscard && _hands[playerIndex].Count >= 10)
+            {
+                int discarded = 0;
+                for (int d = 0; d < 2 && _hands[playerIndex].Count > 6; d++)
+                {
+                    var worst = FindWorstCard(_hands[playerIndex], Trump);
+                    if (worst.HasValue)
+                    {
+                        _hands[playerIndex].Remove(worst.Value);
+                        AddToDiscard(worst.Value, playerIndex);
+                        discarded++;
+                    }
+                }
+                if (discarded > 0)
+                {
+                    GainResource(playerIndex, 1);
+                    OnDesperationDiscard?.Invoke(playerIndex, discarded);
+                }
             }
 
             ResolveBout(BoutOutcome.DefenderAteCards);
@@ -1377,6 +1406,8 @@ namespace WitsAndFools
         {
             for (int p = 0; p < 2; p++)
             {
+                if (_config.AbilitiesCostResource)
+                    GainResource(p, 1);
                 if (_config.MarkedCards[p])
                     GainResource(p, 1);
                 if (_config.SharkInstinct[p])

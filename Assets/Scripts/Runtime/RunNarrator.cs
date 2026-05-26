@@ -154,6 +154,7 @@ namespace WitsAndFools
             _engine.OnAbilityUsed += OnAbility;
             _engine.OnGameOver += OnGameOver;
             _engine.OnTrumpChanged += OnTrumpChanged;
+            _engine.OnDesperationDiscard += OnDesperation;
             _subscribed = true;
         }
 
@@ -166,6 +167,7 @@ namespace WitsAndFools
             _engine.OnAbilityUsed -= OnAbility;
             _engine.OnGameOver -= OnGameOver;
             _engine.OnTrumpChanged -= OnTrumpChanged;
+            _engine.OnDesperationDiscard -= OnDesperation;
             _subscribed = false;
             _engine = null;
         }
@@ -213,6 +215,12 @@ namespace WitsAndFools
             _matchLog.AppendLine($"  ♦ Trump changed to {newTrump}!");
         }
 
+        void OnDesperation(int player, int cardsDiscarded)
+        {
+            string who = player == 0 ? "Player" : _opponentName;
+            _matchLog.AppendLine($"  ** {who} DESPERATION -- discards {cardsDiscarded} weak cards, gains resource!");
+        }
+
         void OnGameOver(int foolIndex)
         {
             string winner = foolIndex == 1 ? "Player" : _opponentName;
@@ -234,16 +242,23 @@ namespace WitsAndFools
         {
             var run = GetRunState();
             if (run == null) return "Choosing the next destination...";
+            string deckInfo = run.PlayerDoctrine.HasValue
+                ? $"Doctrine: {run.PlayerDoctrine.Value} | Deck: {run.PlayerDeckCardIds.Count} cards | Relics: {run.PlayerRelics.Count}"
+                : $"Abilities: {run.PlayerAbilities.Count} | Trinkets: {run.PlayerTrinkets.Count}";
             return $"Act {run.CurrentAct + 1} — Prestige: {run.Prestige} | Florins: {run.Florins}\n" +
-                   $"Abilities: {run.PlayerAbilities.Count} | Trinkets: {run.PlayerTrinkets.Count} | Burdens: {run.PlayerBurdens.Count}\n" +
-                   "The auto-runner picks the best available node (Bosses > Elites > Shop/Rest > Rumor).";
+                   $"{deckInfo} | Burdens: {run.PlayerBurdens.Count}\n" +
+                   "The auto-runner picks the best available node.";
         }
 
         string DescribeMatchStart()
         {
             if (_engine == null) return "Match begins...";
+            string res = "";
+            var rt = _engine.GetResourceType(0);
+            if (rt.HasValue)
+                res = $" | Resource: {_engine.GetResource(0)} {rt.Value}";
             return $"Trump: {_engine.Trump} | Player hand: {_engine.HandOf(0).Count} cards | " +
-                   $"{_opponentName} hand: {_engine.HandOf(1).Count} cards | Deck: {_engine.DeckCount}\n" +
+                   $"{_opponentName} hand: {_engine.HandOf(1).Count} cards | Deck: {_engine.DeckCount}{res}\n" +
                    $"First attacker: {(_engine.AttackerIndex == 0 ? "Player" : _opponentName)}";
         }
 
@@ -251,10 +266,15 @@ namespace WitsAndFools
         {
             var run = GetRunState();
             if (run == null) return "Match complete.";
-            return $"Record: {run.MatchesWon}W / {run.MatchesPlayed - run.MatchesWon}L | " +
-                   $"Prestige: {run.Prestige} | Florins: {run.Florins}\n" +
-                   $"Abilities: [{string.Join(", ", run.PlayerAbilities)}]\n" +
-                   $"Burdens: {run.PlayerBurdens.Count}";
+            string info = $"Record: {run.MatchesWon}W / {run.MatchesPlayed - run.MatchesWon}L | " +
+                          $"Prestige: {run.Prestige} | Florins: {run.Florins}\n";
+            if (run.PlayerDoctrine.HasValue)
+                info += $"Doctrine: {run.PlayerDoctrine.Value} | Deck: {run.PlayerDeckCardIds.Count} cards | " +
+                        $"Relics: [{string.Join(", ", run.PlayerRelics)}]\n";
+            else
+                info += $"Abilities: [{string.Join(", ", run.PlayerAbilities)}]\n";
+            info += $"Burdens: {run.PlayerBurdens.Count}";
+            return info;
         }
 
         string DescribeShop()

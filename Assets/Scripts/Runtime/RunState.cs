@@ -50,6 +50,8 @@ namespace WitsAndFools
         public bool RunWon;
         public bool PhoenixMedalUsed;
 
+        public int NodesSinceLastRumor;
+
         public Dictionary<AbilityType, int> AbilityUsageCount = new();
         public Dictionary<AbilityType, int> AbilityPickCount = new();
 
