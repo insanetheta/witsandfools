@@ -244,6 +244,7 @@ namespace WitsAndFools
             foreach (var burden in run.PlayerBurdens)
                 ApplyBurden(config, 0, burden);
 
+            config.AnyRankAttack = true;
             ApplyHouseRule(config, opponent.HouseRule);
 
             return (config, playerDeck, enemyDeck);

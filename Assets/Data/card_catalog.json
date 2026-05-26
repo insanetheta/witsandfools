@@ -2,9 +2,30 @@
   "meta": {
     "version": "1.0.0",
     "totalCards": 95,
-    "suits": ["Hearts", "Diamonds", "Clubs", "Spades"],
-    "ranks": { "6": 6, "7": 7, "8": 8, "9": 9, "10": 10, "Jack": 11, "Queen": 12, "King": 13, "Ace": 14 },
-    "doctrines": ["Schemer", "Brute", "Trickster", "Hoarder", "Neutral"],
+    "suits": [
+      "Hearts",
+      "Diamonds",
+      "Clubs",
+      "Spades"
+    ],
+    "ranks": {
+      "6": 6,
+      "7": 7,
+      "8": 8,
+      "9": 9,
+      "10": 10,
+      "Jack": 11,
+      "Queen": 12,
+      "King": 13,
+      "Ace": 14
+    },
+    "doctrines": [
+      "Schemer",
+      "Brute",
+      "Trickster",
+      "Hoarder",
+      "Neutral"
+    ],
     "resources": {
       "Schemer": "Intel",
       "Brute": "Fury",
@@ -33,7 +54,7 @@
       "rank": 6,
       "doctrine": "Schemer",
       "trigger": "None",
-      "ability": "Discard to activate: Scry 3 — look at the top 3 cards of your deck and reorder them.",
+      "ability": "Discard to activate: Scry 3 \u2014 look at the top 3 cards of your deck and reorder them.",
       "flavorText": "From the campanile, all Venice lies bare.",
       "rarity": "Common",
       "startingDeck": true
@@ -138,7 +159,7 @@
       "id": "schemer_envoy",
       "name": "The Envoy",
       "suit": "Hearts",
-      "rank": 11,
+      "rank": 10,
       "doctrine": "Schemer",
       "trigger": "OnAttack",
       "ability": "Gain 1 Intel.",
@@ -254,7 +275,6 @@
       "rarity": "Rare",
       "startingDeck": false
     },
-
     {
       "id": "brute_condottiero",
       "name": "The Condottiero",
@@ -271,7 +291,7 @@
       "id": "brute_siege_ram",
       "name": "The Battering Ram",
       "suit": "Spades",
-      "rank": 9,
+      "rank": 11,
       "doctrine": "Brute",
       "trigger": "OnAttack",
       "ability": "If defender picks up, gain 2 Fury.",
@@ -393,8 +413,8 @@
       "suit": "Spades",
       "rank": 14,
       "doctrine": "Brute",
-      "trigger": "OnAttack",
-      "ability": "Gain 1 Fury.",
+      "trigger": "None",
+      "ability": "None",
       "flavorText": "Armies are merely the extension of one man's will.",
       "rarity": "Uncommon",
       "startingDeck": true
@@ -495,7 +515,6 @@
       "rarity": "Uncommon",
       "startingDeck": true
     },
-
     {
       "id": "trickster_courtesan",
       "name": "The Courtesan",
@@ -575,7 +594,7 @@
       "rank": 8,
       "doctrine": "Trickster",
       "trigger": "None",
-      "ability": "Discard to activate: Spend 2 Favor — attacker must pick up their own attack card.",
+      "ability": "Discard to activate: Spend 2 Favor \u2014 attacker must pick up their own attack card.",
       "flavorText": "The stars say you will lose. The stars are never wrong.",
       "rarity": "Uncommon",
       "startingDeck": true
@@ -736,7 +755,6 @@
       "rarity": "Rare",
       "startingDeck": false
     },
-
     {
       "id": "hoarder_miser",
       "name": "The Miser",
@@ -765,7 +783,7 @@
       "id": "hoarder_merchant",
       "name": "The Merchant",
       "suit": "Diamonds",
-      "rank": 11,
+      "rank": 10,
       "doctrine": "Hoarder",
       "trigger": "OnAttack",
       "ability": "If you have 6+ cards in hand, draw 1 card.",
@@ -801,7 +819,7 @@
       "id": "hoarder_tax_collector",
       "name": "The Tax Collector",
       "suit": "Diamonds",
-      "rank": 9,
+      "rank": 8,
       "doctrine": "Hoarder",
       "trigger": "OnAttack",
       "ability": "Gain 1 Luck for every 2 cards in your hand.",
@@ -977,7 +995,6 @@
       "rarity": "Uncommon",
       "startingDeck": false
     },
-
     {
       "id": "neutral_knight",
       "name": "Knight of the Order",

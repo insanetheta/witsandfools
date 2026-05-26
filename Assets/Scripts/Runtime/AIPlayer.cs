@@ -374,6 +374,12 @@ namespace WitsAndFools
 
         Card? SelectAttackCard(GameEngine engine, Hand hand, Hand oppHand)
         {
+            if (engine.Bout.IsEmpty)
+            {
+                var paired = FindPairedRankAttack(engine, hand);
+                if (paired != null) return paired;
+            }
+
             return Archetype switch
             {
                 AIArchetypeName.Brawler => HighestLegalAttack(engine, hand),
@@ -386,15 +392,37 @@ namespace WitsAndFools
             };
         }
 
+        Card? FindPairedRankAttack(GameEngine engine, Hand hand)
+        {
+            Card? best = null;
+            foreach (var c in hand.Cards)
+            {
+                if (c.Suit == engine.Trump) continue;
+                int count = 0;
+                foreach (var c2 in hand.Cards)
+                    if (c2.Rank == c.Rank) count++;
+                if (count < 2) continue;
+                if (best == null || (int)c.Rank < (int)best.Value.Rank)
+                    best = c;
+            }
+            return best;
+        }
+
         bool ShouldStopAttacking(GameEngine engine, Hand hand, Card next, Hand oppHand)
         {
+            if (engine.Bout.AttackCount >= 4)
+                return true;
+
+            if (engine.Bout.AttackCount < 3 && next.Suit != engine.Trump)
+                return false;
+
             return Archetype switch
             {
-                AIArchetypeName.Brawler => false, // never stops willingly
-                AIArchetypeName.Miser => engine.Bout.AttackCount >= 2 || next.Suit == engine.Trump,
+                AIArchetypeName.Brawler => false,
+                AIArchetypeName.Miser => engine.Bout.AttackCount >= 3 || next.Suit == engine.Trump,
                 AIArchetypeName.Noble => next.Suit == engine.Trump && engine.DeckCount >= 12,
                 AIArchetypeName.Scholar => next.Suit == engine.Trump,
-                AIArchetypeName.Assassin => _boutsPlayed < 3 && engine.Bout.AttackCount >= 1,
+                AIArchetypeName.Assassin => engine.Bout.AttackCount >= 2,
                 AIArchetypeName.Fox => FoxShouldStop(engine, hand, next, oppHand),
                 _ => next.Suit == engine.Trump,
             };
@@ -405,7 +433,7 @@ namespace WitsAndFools
         Card? HighestLegalAttack(GameEngine engine, Hand hand)
         {
             Card? best = null;
-            bool bypass = engine.DoubleTroubleActive;
+            bool bypass = engine.DoubleTroubleActive || engine.Config.AnyRankAttack;
             foreach (var c in hand.Cards)
             {
                 if (!bypass && !Rules.CanAttackWith(engine.Bout, c)) continue;
@@ -432,7 +460,7 @@ namespace WitsAndFools
         Card? NobleAttackPick(GameEngine engine, Hand hand)
         {
             Card? best = null;
-            bool bypass = engine.DoubleTroubleActive;
+            bool bypass = engine.DoubleTroubleActive || engine.Config.AnyRankAttack;
             foreach (var c in hand.Cards)
             {
                 if (!bypass && !Rules.CanAttackWith(engine.Bout, c)) continue;
@@ -450,7 +478,7 @@ namespace WitsAndFools
         {
             Card? rankMatch = null;
             Card? fallback = null;
-            bool bypass = engine.DoubleTroubleActive;
+            bool bypass = engine.DoubleTroubleActive || engine.Config.AnyRankAttack;
 
             foreach (var c in hand.Cards)
             {
@@ -510,7 +538,7 @@ namespace WitsAndFools
         {
             Card? best = null;
             int bestScore = int.MinValue;
-            bool bypass = engine.DoubleTroubleActive;
+            bool bypass = engine.DoubleTroubleActive || engine.Config.AnyRankAttack;
             foreach (var c in hand.Cards)
             {
                 if (!bypass && !Rules.CanAttackWith(engine.Bout, c)) continue;

@@ -77,6 +77,9 @@ namespace WitsAndFools
 
         static AbilityType? MapAbility(string id, TriggerTiming trigger, string text, DoctrineType doctrine)
         {
+            if (string.IsNullOrEmpty(text) || text.Equals("None", StringComparison.OrdinalIgnoreCase))
+                return null;
+
             var lower = text.ToLowerInvariant();
 
             if (lower.Contains("draw 2")) return AbilityType.ExtraDraw;
@@ -108,7 +111,7 @@ namespace WitsAndFools
             if (trigger == TriggerTiming.OnAttack) return AbilityType.ExtraDraw;
             if (trigger == TriggerTiming.OnDefend) return AbilityType.Brace;
 
-            return AbilityType.ExtraDraw;
+            return null;
         }
     }
 }
