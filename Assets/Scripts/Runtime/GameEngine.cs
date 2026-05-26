@@ -1656,7 +1656,7 @@ namespace WitsAndFools
                 switch (rt.Value)
                 {
                     case ResourceType.Luck:
-                        if (_resource[p] > 0)
+                        if (!_usedAbilityThisBout[p] && _resource[p] > 0)
                         {
                             _resource[p]--;
                             OnResourceChanged?.Invoke(p, rt.Value, _resource[p]);

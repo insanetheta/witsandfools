@@ -318,7 +318,7 @@
       "ability": "This card attacks with +2 rank.",
       "flavorText": "Gold buys soldiers. Fear buys victory.",
       "rarity": "Common",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Conquer"
     },
     {
@@ -445,11 +445,11 @@
       "rank": 11,
       "doctrine": "Brute",
       "trigger": "OnAttack",
-      "ability": "This card attacks with +2 rank.",
+      "ability": "Spend 1 Fury. Play top 2 deck cards as attacks.",
       "flavorText": "What the sword takes, the sack carries away.",
       "rarity": "Common",
       "startingDeck": true,
-      "abilityType": "Conquer"
+      "abilityType": "Rampage"
     },
     {
       "id": "brute_warlord",
@@ -539,7 +539,7 @@
       "ability": "Gain 1 Fury when defending successfully.",
       "flavorText": "Supply lines win wars. Swords merely finish them.",
       "rarity": "Common",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "ResourceGain"
     },
     {
@@ -604,7 +604,7 @@
       "ability": "Change the trump suit to this card's suit.",
       "flavorText": "Lead into gold? Child's play. Try turning hearts into spades.",
       "rarity": "Uncommon",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "TrumpChanger"
     },
     {
@@ -653,11 +653,11 @@
       "rank": 9,
       "doctrine": "Trickster",
       "trigger": "OnDefend",
-      "ability": "Defend as if this card's rank were 2 higher.",
+      "ability": "Spend 1 Favor. Opponent discards 1 random card.",
       "flavorText": "His credentials are impeccable. Also fictional.",
       "rarity": "Common",
       "startingDeck": true,
-      "abilityType": "Conquer"
+      "abilityType": "Riposte"
     },
     {
       "id": "trickster_fortune_teller",
@@ -799,7 +799,7 @@
       "ability": "Gain 1 Favor.",
       "flavorText": "Your blade finds only your own reflection.",
       "rarity": "Rare",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "ResourceGain"
     },
     {
@@ -955,7 +955,7 @@
       "ability": "When you have 8+ cards in hand, your defense cards get +1 rank.",
       "flavorText": "Age only increases value, never diminishes it.",
       "rarity": "Common",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "SteadyHand"
     },
     {
@@ -994,7 +994,7 @@
       "ability": "Gain 1 Luck.",
       "flavorText": "Nothing is wasted in my shop. Nothing.",
       "rarity": "Uncommon",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "ResourceGain"
     },
     {
@@ -1004,11 +1004,11 @@
       "rank": 10,
       "doctrine": "Hoarder",
       "trigger": "OnAttack",
-      "ability": "If you have more cards than opponent, this card attacks with +2 rank.",
+      "ability": "Spend all Luck (min 1). Draw cards equal to Luck spent.",
       "flavorText": "Going once. Going twice. Gone.",
       "rarity": "Uncommon",
       "startingDeck": true,
-      "abilityType": "Conquer"
+      "abilityType": "AllIn"
     },
     {
       "id": "hoarder_treasure_hunter",
@@ -1303,11 +1303,11 @@
       "rank": 10,
       "doctrine": "Neutral",
       "trigger": "OnDefend",
-      "ability": "This card attacks with +1 rank.",
+      "ability": "Draw 2 cards.",
       "flavorText": "He carries the banner and asks no questions.",
       "rarity": "Common",
       "startingDeck": false,
-      "abilityType": "Conquer"
+      "abilityType": "Brace"
     },
     {
       "id": "neutral_courser",
