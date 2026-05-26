@@ -728,7 +728,7 @@ namespace WitsAndFools
                 case AbilityType.SmokeBomb:
                     return Phase == Phase.Defense && _resource[playerIndex] >= 1 && !_bout.IsEmpty;
                 case AbilityType.TrapCard:
-                    return Phase == Phase.Defense && _resource[playerIndex] >= 2 && _bout.FirstUndefendedSlot() >= 0;
+                    return true;
 
                 // Brute: Berserker
                 case AbilityType.Rampage:
@@ -981,13 +981,15 @@ namespace WitsAndFools
 
                 case AbilityType.TrapCard:
                 {
-                    SpendResource(playerIndex, 2);
-                    int trapSlot = _bout.FirstUndefendedSlot();
-                    if (trapSlot >= 0)
+                    DrawCards(playerIndex, 1);
+                    if (_hands[opponent].Count > 0)
                     {
-                        var attack = _bout.Attacks[trapSlot];
-                        _bout.RemoveAttack(trapSlot);
-                        _hands[opponent].Add(attack);
+                        var worst = FindWorstCard(_hands[opponent], Trump);
+                        if (worst.HasValue)
+                        {
+                            _hands[opponent].Remove(worst.Value);
+                            PutOnBottomOfDeck(opponent, worst.Value);
+                        }
                     }
                     break;
                 }
@@ -1360,7 +1362,7 @@ namespace WitsAndFools
 
                 case AbilityType.Monopoly:
                 {
-                    int need = 8 - _hands[playerIndex].Count;
+                    int need = 7 - _hands[playerIndex].Count;
                     if (need > 0) DrawCards(playerIndex, need);
                     while (_hands[opponent].Count > 5)
                     {

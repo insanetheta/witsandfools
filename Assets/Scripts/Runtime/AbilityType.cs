@@ -293,7 +293,7 @@ namespace WitsAndFools
             AbilityType.Blackmail => "Spend 2 Intel. Opponent discards their 2 highest-rank cards.",
             AbilityType.SleightOfHand => "Draw top deck card. Put 1 card from hand on top of deck.",
             AbilityType.SmokeBomb => "Spend 1 Intel. End bout — all cards discarded, no one eats.",
-            AbilityType.TrapCard => "Spend 2 Intel. Return 1 undefended attack to attacker's hand.",
+            AbilityType.TrapCard => "Draw 1 card. Bury opponent's weakest card to bottom of their deck.",
             AbilityType.Undermine => "When opponent uses an ability, they discard 1 extra card.",
             AbilityType.Rampage => "Spend 1 Fury. Play top 2 deck cards as attacks.",
             AbilityType.Bloodlust => "When opponent eats, gain 1 Fury per card eaten.",
@@ -340,7 +340,7 @@ namespace WitsAndFools
             AbilityType.Masterstroke => "Spend 3 Intel. Opponent discards their 2 highest-rank cards. Draw 1.",
             AbilityType.Onslaught => "Spend 3 Fury. Play top 3 deck cards as attacks.",
             AbilityType.Masquerade => "Spend 3 Favor. Swap your entire hand with opponent's.",
-            AbilityType.Monopoly => "Spend 3 Luck. Draw until you have 8 cards. Opponent discards down to 5.",
+            AbilityType.Monopoly => "Spend 2 Luck. Draw until you have 7 cards. Opponent discards down to 5.",
             _ => ""
         };
 
@@ -390,7 +390,7 @@ namespace WitsAndFools
             AbilityType.Masterstroke => 3,
             AbilityType.Onslaught => 3,
             AbilityType.Masquerade => 3,
-            AbilityType.Monopoly => 3,
+            AbilityType.Monopoly => 2,
             // Powerful free-trigger abilities cost 2
             AbilityType.Haymaker => 2,
             // Standard trigger cost
