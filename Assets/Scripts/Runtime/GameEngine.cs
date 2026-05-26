@@ -1327,7 +1327,10 @@ namespace WitsAndFools
                 }
 
                 case AbilityType.ResourceGain:
-                    GainResource(playerIndex, 1);
+                    if (_resource[playerIndex] >= MaxResource)
+                        DrawCards(playerIndex, 1);
+                    else
+                        GainResource(playerIndex, 1);
                     break;
 
                 case AbilityType.Masterstroke:

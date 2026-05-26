@@ -336,7 +336,7 @@ namespace WitsAndFools
             AbilityType.Brace => "Draw 2 cards.",
             AbilityType.Desperation => "Discard hand, auto-defend all attacks, draw 4.",
             AbilityType.SteadyHand => "At bout start, if hand has 3 or fewer cards, draw 1.",
-            AbilityType.ResourceGain => "Gain 1 resource.",
+            AbilityType.ResourceGain => "Gain 1 resource. If at cap, draw 1 card instead.",
             AbilityType.Masterstroke => "Spend 4 Intel. Opponent discards their 2 highest-rank cards. Draw 1.",
             AbilityType.Onslaught => "Spend 3 Fury. Play top 3 deck cards as attacks.",
             AbilityType.Masquerade => "Spend 2 Favor. Swap your entire hand with opponent's.",
