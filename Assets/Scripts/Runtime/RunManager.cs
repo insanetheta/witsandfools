@@ -268,6 +268,12 @@ namespace WitsAndFools
                     else if (_run.PlayerBurdens.Count >= 1) restBase = 60;
                     return restBase;
                 case MapNodeType.Shop:
+                    if (_run.UseDualDeck)
+                    {
+                        int dShop = 55;
+                        if (_run.Florins >= 8) dShop = 80;
+                        return dShop;
+                    }
                     int shopBase = 15;
                     if (_run.Florins >= 15 && _run.PlayerAbilities.Count < _run.MaxAbilitySlots)
                         shopBase = 75;
@@ -284,6 +290,11 @@ namespace WitsAndFools
 
         void AutoHandleShop()
         {
+            if (_run.UseDualDeck)
+            {
+                AutoHandleShopDualDeck();
+                return;
+            }
             if (_run.Florins >= 8 && _run.PlayerAbilities.Count < _run.MaxAbilitySlots)
             {
                 var offerings = PickShopOfferings(1);
@@ -303,6 +314,64 @@ namespace WitsAndFools
                 }
             }
             OnResultContinue();
+        }
+
+        void AutoHandleShopDualDeck()
+        {
+            if (_run.Florins >= 8 && _run.PlayerDeckCardIds.Count > 8 && _run.CardRemovalsPurchased < 3)
+            {
+                string weakest = FindWeakestDeckCard();
+                if (weakest != null)
+                {
+                    _run.PlayerDeckCardIds.Remove(weakest);
+                    _run.Florins -= 8;
+                    _run.CardRemovalsPurchased++;
+                    OnResultContinue();
+                    return;
+                }
+            }
+            if (_run.Florins >= 6 && _run.PlayerDeckCardIds.Count < 16)
+            {
+                var card = PickDraftableCard();
+                if (card != null)
+                {
+                    _run.PlayerDeckCardIds.Add(card.Id);
+                    _run.Florins -= 6;
+                    OnResultContinue();
+                    return;
+                }
+            }
+            OnResultContinue();
+        }
+
+        string FindWeakestDeckCard()
+        {
+            string weakest = null;
+            int weakestScore = int.MaxValue;
+            foreach (var id in _run.PlayerDeckCardIds)
+            {
+                if (!CardCatalog.TryGet(id, out var def)) continue;
+                int score = (int)def.Rank;
+                if (def.HasAbility) score += 10;
+                if (def.Doctrine != DoctrineType.Neutral) score += 5;
+                if (score < weakestScore) { weakestScore = score; weakest = id; }
+            }
+            return weakest;
+        }
+
+        CardDefinition PickDraftableCard()
+        {
+            if (!_run.PlayerDoctrine.HasValue) return null;
+            var pool = CardCatalog.Draftable(_run.PlayerDoctrine.Value);
+            var candidates = new List<CardDefinition>();
+            foreach (var card in pool)
+            {
+                if (_run.PlayerDeckCardIds.Contains(card.Id)) continue;
+                if (card.InStartingDeck) continue;
+                candidates.Add(card);
+            }
+            if (candidates.Count == 0) return null;
+            return candidates[_rng.Next(candidates.Count)];
         }
 
         void AutoHandleEvent()

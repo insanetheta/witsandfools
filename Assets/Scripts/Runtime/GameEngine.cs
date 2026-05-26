@@ -102,10 +102,12 @@ namespace WitsAndFools
         public int GetResource(int player) => _resource[player];
         public ResourceType? GetResourceType(int player) => _config.ArchetypeResource[player];
 
+        const int MaxResource = 5;
+
         public void GainResource(int player, int amount)
         {
             if (_config.ArchetypeResource[player] == null || amount <= 0) return;
-            _resource[player] += amount;
+            _resource[player] = Math.Min(_resource[player] + amount, MaxResource);
             OnResourceChanged?.Invoke(player, _config.ArchetypeResource[player].Value, _resource[player]);
         }
 
@@ -406,7 +408,8 @@ namespace WitsAndFools
 
             if (card.Trigger == TriggerTiming.OnAttack && card.HasAbility)
             {
-                bool canFire = !_config.AbilitiesCostResource || SpendResource(playerIndex, 1);
+                int cost = _config.AbilitiesCostResource ? card.Ability.Value.TriggerCost() : 0;
+                bool canFire = cost == 0 || SpendResource(playerIndex, cost);
                 if (canFire)
                 {
                     ApplyAbility(card.Ability.Value, playerIndex, card, -1);
@@ -459,7 +462,8 @@ namespace WitsAndFools
 
             if (card.Trigger == TriggerTiming.OnDefend && card.HasAbility)
             {
-                bool canFire = !_config.AbilitiesCostResource || SpendResource(playerIndex, 1);
+                int cost = _config.AbilitiesCostResource ? card.Ability.Value.TriggerCost() : 0;
+                bool canFire = cost == 0 || SpendResource(playerIndex, cost);
                 if (canFire)
                 {
                     ApplyAbility(card.Ability.Value, playerIndex, card, slot);
@@ -799,6 +803,8 @@ namespace WitsAndFools
                     return Phase == Phase.Defense && DeckCountFor(playerIndex) > 0;
                 case AbilityType.Desperation:
                     return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
+                case AbilityType.ResourceGain:
+                    return true;
 
                 default:
                     return true;
@@ -1304,6 +1310,10 @@ namespace WitsAndFools
                     DrawCards(playerIndex, 4);
                     break;
                 }
+
+                case AbilityType.ResourceGain:
+                    GainResource(playerIndex, 1);
+                    break;
             }
         }
 
@@ -1406,7 +1416,7 @@ namespace WitsAndFools
         {
             for (int p = 0; p < 2; p++)
             {
-                if (_config.AbilitiesCostResource)
+                if (_config.AbilitiesCostResource && _boutCount % 2 == 0)
                     GainResource(p, 1);
                 if (_config.MarkedCards[p])
                     GainResource(p, 1);

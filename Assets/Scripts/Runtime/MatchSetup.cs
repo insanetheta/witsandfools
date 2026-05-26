@@ -246,7 +246,7 @@ namespace WitsAndFools
 
             config.AnyRankAttack = true;
             config.AbilitiesCostResource = true;
-            config.StartingResource = 3;
+            config.StartingResource = 2;
             config.DesperationDiscard = true;
             ApplyHouseRule(config, opponent.HouseRule);
 

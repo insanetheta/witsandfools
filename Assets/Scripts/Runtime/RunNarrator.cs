@@ -175,14 +175,21 @@ namespace WitsAndFools
         void OnAttack(int player, Card card)
         {
             string who = player == 0 ? "Player" : _opponentName;
-            _matchLog.AppendLine($"  {who} attacks with {card}");
+            _matchLog.AppendLine($"  {who} attacks with {CardLabel(card)}");
         }
 
         void OnDefense(int player, int slot, Card card)
         {
             string who = player == 0 ? "Player" : _opponentName;
             var atkCard = _engine.Bout.Attacks[slot];
-            _matchLog.AppendLine($"  {who} defends {atkCard} with {card}");
+            _matchLog.AppendLine($"  {who} defends {CardLabel(atkCard)} with {CardLabel(card)}");
+        }
+
+        static string CardLabel(Card card)
+        {
+            if (!string.IsNullOrEmpty(card.DefinitionId) && CardCatalog.TryGet(card.DefinitionId, out var def))
+                return $"{def.Name} ({card})";
+            return card.ToString();
         }
 
         void OnBoutResolved(BoutOutcome outcome)
@@ -207,8 +214,41 @@ namespace WitsAndFools
         void OnAbility(int player, Card card, AbilityType ability)
         {
             string who = player == 0 ? "Player" : _opponentName;
-            _matchLog.AppendLine($"  ★ {who} triggers {ability.ShortName()} from {card}");
+            string effect = AbilityEffectSummary(ability);
+            string costInfo = "";
+            if (_engine != null)
+            {
+                var resType = _engine.GetResourceType(player);
+                int resAmt = _engine.GetResource(player);
+                if (resType.HasValue)
+                    costInfo = $" [{resType.Value.DisplayName()} {resAmt}]";
+            }
+            _matchLog.AppendLine($"  ★ {who} triggers {ability.ShortName()} from {CardLabel(card)} — {effect}{costInfo}");
         }
+
+        static string AbilityEffectSummary(AbilityType a) => a switch
+        {
+            AbilityType.ResourceGain => "gains 1 resource",
+            AbilityType.ExtraDraw => "draws cards",
+            AbilityType.Haymaker => "draws 2 cards",
+            AbilityType.Peek => "scries deck",
+            AbilityType.Conquer => "attacks with +2 rank",
+            AbilityType.TrumpChanger => "changes trump suit",
+            AbilityType.Blocker => "caps attacks this bout",
+            AbilityType.DoubleAgent => "steals opponent's card",
+            AbilityType.Riposte => "opponent discards",
+            AbilityType.DoubleDefense => "covers two attacks",
+            AbilityType.DoubleTrouble => "plays extra attack",
+            AbilityType.Brace => "draws 2 cards",
+            AbilityType.Fortify => "auto-defends one attack",
+            AbilityType.Rampage => "plays 2 deck cards as attacks",
+            AbilityType.IronGrip => "draws 3 cards",
+            AbilityType.Intimidate => "opponent discards non-trump",
+            AbilityType.SeizeInitiative => "seizes initiative",
+            AbilityType.SlipAway => "discards undefended attacks",
+            AbilityType.SmokeBomb => "ends bout, all cards discarded",
+            _ => a.DisplayName(),
+        };
 
         void OnTrumpChanged(Suit newTrump)
         {
@@ -354,13 +394,28 @@ namespace WitsAndFools
         {
             var run = GetRunState();
             string result = run != null && run.RunWon ? "VICTORY" : "DEFEAT";
+            string buildInfo;
+            if (run != null && run.UseDualDeck)
+            {
+                var cardNames = new System.Collections.Generic.List<string>();
+                foreach (var id in run.PlayerDeckCardIds)
+                    cardNames.Add(CardCatalog.TryGet(id, out var def) ? def.Name : id);
+                buildInfo = $"Doctrine: {run.PlayerDoctrine}\n" +
+                            $"Deck ({run.PlayerDeckCardIds.Count} cards): [{string.Join(", ", cardNames)}]\n" +
+                            $"Relics: [{string.Join(", ", run.PlayerRelics)}]\n" +
+                            $"Card removals purchased: {run.CardRemovalsPurchased}";
+            }
+            else
+            {
+                buildInfo = $"Abilities: [{string.Join(", ", run.PlayerAbilities)}]\n" +
+                            $"Trinkets: [{string.Join(", ", run.PlayerTrinkets)}]";
+            }
             string body = run != null
                 ? $"Result: {result}\n" +
                   $"Acts completed: {run.CurrentAct + (run.RunWon ? 1 : 0)}/5\n" +
                   $"Matches: {run.MatchesWon}W / {run.MatchesPlayed - run.MatchesWon}L\n" +
                   $"Florins: {run.Florins} | Prestige: {run.Prestige}\n" +
-                  $"Abilities: [{string.Join(", ", run.PlayerAbilities)}]\n" +
-                  $"Trinkets: [{string.Join(", ", run.PlayerTrinkets)}]"
+                  buildInfo
                 : "Run complete.";
 
             yield return StartCoroutine(CaptureAfterSettle("run-over",

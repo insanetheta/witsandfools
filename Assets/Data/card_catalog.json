@@ -174,7 +174,7 @@
       "rank": 7,
       "doctrine": "Schemer",
       "trigger": "OnDefend",
-      "ability": "Opponent reveals their entire hand.",
+      "ability": "Force opponent to discard 1 random card.",
       "flavorText": "Confession is inevitable; only the timing varies.",
       "rarity": "Uncommon",
       "startingDeck": true
@@ -186,7 +186,7 @@
       "rank": 13,
       "doctrine": "Schemer",
       "trigger": "OnAttack",
-      "ability": "Gain 1 Intel.",
+      "ability": "Seize the initiative; you become the attacker after this bout.",
       "flavorText": "Every piece falls exactly where he planned.",
       "rarity": "Rare",
       "startingDeck": true
@@ -234,7 +234,7 @@
       "rank": 14,
       "doctrine": "Schemer",
       "trigger": "OnAttack",
-      "ability": "Gain 1 Intel.",
+      "ability": "Cap attacks this bout at 2.",
       "flavorText": "His presence alone shifts the balance of power.",
       "rarity": "Uncommon",
       "startingDeck": true
@@ -390,7 +390,7 @@
       "rank": 13,
       "doctrine": "Brute",
       "trigger": "OnAttack",
-      "ability": "Gain 1 Fury.",
+      "ability": "This card attacks with +1 rank.",
       "flavorText": "The crowd roars. He does not hear them.",
       "rarity": "Uncommon",
       "startingDeck": true
@@ -630,7 +630,7 @@
       "rank": 10,
       "doctrine": "Trickster",
       "trigger": "OnDefend",
-      "ability": "Gain 1 Favor; you may defend with a card from the top of your deck instead.",
+      "ability": "Defend with the top card of your deck instead of a hand card.",
       "flavorText": "The customs men search the wrong crate every time.",
       "rarity": "Uncommon",
       "startingDeck": true
@@ -666,7 +666,7 @@
       "rank": 12,
       "doctrine": "Trickster",
       "trigger": "OnAttack",
-      "ability": "Gain 1 Favor.",
+      "ability": "This card counts as trump suit for this attack.",
       "flavorText": "Blood and gold open every door in the republic.",
       "rarity": "Common",
       "startingDeck": true
@@ -726,7 +726,7 @@
       "rank": 14,
       "doctrine": "Trickster",
       "trigger": "OnAttack",
-      "ability": "Gain 1 Favor.",
+      "ability": "Cap attacks this bout at 2.",
       "flavorText": "The final act is always his to command.",
       "rarity": "Uncommon",
       "startingDeck": true
@@ -738,7 +738,7 @@
       "rank": 12,
       "doctrine": "Trickster",
       "trigger": "OnAttack",
-      "ability": "Gain 1 Favor.",
+      "ability": "Draw 1 card, then discard 1 card.",
       "flavorText": "His elixir cures nothing, but his tongue cures doubt.",
       "rarity": "Uncommon",
       "startingDeck": true
@@ -930,7 +930,7 @@
       "rank": 13,
       "doctrine": "Hoarder",
       "trigger": "OnAttack",
-      "ability": "Gain 1 Luck.",
+      "ability": "Draw 1 card for every 3 cards in your hand.",
       "flavorText": "The family name carries more weight than any blade.",
       "rarity": "Rare",
       "startingDeck": true
@@ -978,7 +978,7 @@
       "rank": 12,
       "doctrine": "Hoarder",
       "trigger": "OnDefend",
-      "ability": "Gain 1 Luck.",
+      "ability": "Draw 2 cards from your deck.",
       "flavorText": "The vault opens for those who've earned its trust.",
       "rarity": "Rare",
       "startingDeck": true

@@ -82,19 +82,21 @@ namespace WitsAndFools
 
             var lower = text.ToLowerInvariant();
 
-            if (lower.Contains("draw 2")) return AbilityType.ExtraDraw;
             if (lower.Contains("draw 3")) return AbilityType.Haymaker;
-            if (lower.Contains("draw 1")) return AbilityType.ExtraDraw;
-            if (lower.Contains("peek") || lower.Contains("look at the top")) return AbilityType.Peek;
+            if (lower.Contains("draw 2")) return AbilityType.ExtraDraw;
+            if (lower.Contains("+2 rank") || lower.Contains("+3 rank") || lower.Contains("+4 rank") || lower.Contains("bonus rank")) return AbilityType.Conquer;
+            if (lower.Contains("peek") || lower.Contains("look at the top") || lower.Contains("scry")) return AbilityType.Peek;
             if (lower.Contains("trump") && lower.Contains("change")) return AbilityType.TrumpChanger;
-            if (lower.Contains("block") || lower.Contains("cap attacks")) return AbilityType.Blocker;
-            if (lower.Contains("discard") && lower.Contains("opponent")) return AbilityType.Riposte;
+            if (lower.Contains("cap attacks") || (lower.Contains("block") && !lower.Contains("pick"))) return AbilityType.Blocker;
             if (lower.Contains("steal")) return AbilityType.DoubleAgent;
             if (lower.Contains("defend") && lower.Contains("two")) return AbilityType.DoubleDefense;
             if (lower.Contains("seize") && lower.Contains("initiative")) return AbilityType.SeizeInitiative;
-            if (lower.Contains("any rank")) return AbilityType.DoubleTrouble;
-            if (lower.Contains("+2 rank") || lower.Contains("bonus rank")) return AbilityType.Conquer;
-            if (lower.Contains("resource") || lower.Contains("gain")) return AbilityType.BattleHardened;
+            if (lower.Contains("any rank") || lower.Contains("additional attack")) return AbilityType.DoubleTrouble;
+            if (lower.Contains("discard") && lower.Contains("opponent")) return AbilityType.Riposte;
+            if (lower.Contains("draw 1")) return AbilityType.ExtraDraw;
+            if (lower.Contains("reveal") && lower.Contains("opponent")) return AbilityType.Peek;
+
+            if (lower.Contains("gain")) return AbilityType.ResourceGain;
 
             if (trigger == TriggerTiming.Passive)
             {
@@ -103,8 +105,10 @@ namespace WitsAndFools
                 if (lower.Contains("endgame") || lower.Contains("6 or fewer")) return AbilityType.EndgameSpecialist;
                 if (lower.Contains("steady") || lower.Contains("3 or fewer")) return AbilityType.SteadyHand;
                 if (lower.Contains("equilibrium") || lower.Contains("fewer cards")) return AbilityType.Equilibrium;
-                if (lower.Contains("bloodlust") || lower.Contains("eat")) return AbilityType.Bloodlust;
+                if (lower.Contains("bloodlust") || lower.Contains("eat") || lower.Contains("pick up")) return AbilityType.Bloodlust;
                 if (lower.Contains("quick hands") || lower.Contains("successful defense")) return AbilityType.QuickHands;
+                if (lower.Contains("more cards than opponent")) return AbilityType.SharkInstinct;
+                if (lower.Contains("hand size")) return AbilityType.SteadyHand;
                 return AbilityType.SteadyHand;
             }
 

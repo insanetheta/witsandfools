@@ -97,6 +97,9 @@ namespace WitsAndFools
         Brace,
         Desperation,
         SteadyHand,
+
+        // --- Doctrine resource gain (auto-trigger) ---
+        ResourceGain,
     }
 
     public static class AbilityTypeExtensions
@@ -171,6 +174,7 @@ namespace WitsAndFools
             AbilityType.Brace => "Brace",
             AbilityType.Desperation => "Desperation",
             AbilityType.SteadyHand => "Steady Hand",
+            AbilityType.ResourceGain => "Resource Gain",
             _ => a.ToString()
         };
 
@@ -244,6 +248,7 @@ namespace WitsAndFools
             AbilityType.Brace => "BRACE",
             AbilityType.Desperation => "DESPR",
             AbilityType.SteadyHand => "STEDY",
+            AbilityType.ResourceGain => "RSRC+",
             _ => "?"
         };
 
@@ -317,6 +322,7 @@ namespace WitsAndFools
             AbilityType.Brace => "Draw 2 cards.",
             AbilityType.Desperation => "Discard hand, auto-defend all attacks, draw 4.",
             AbilityType.SteadyHand => "At bout start, if hand has 3 or fewer cards, draw 1.",
+            AbilityType.ResourceGain => "Gain 1 resource.",
             _ => ""
         };
 
@@ -331,5 +337,42 @@ namespace WitsAndFools
             a == AbilityType.SharkInstinct || a == AbilityType.Jackpot ||
             a == AbilityType.SleightOfMind || a == AbilityType.ChaoticNature ||
             a == AbilityType.SteadyHand;
+
+        public static int TriggerCost(this AbilityType a) => a switch
+        {
+            AbilityType.ResourceGain => 0,
+            // Abilities that manage their own resource cost internally
+            AbilityType.Riposte => 0,
+            AbilityType.DoubleAgent => 0,
+            AbilityType.Blackmail => 0,
+            AbilityType.SmokeBomb => 0,
+            AbilityType.TrapCard => 0,
+            AbilityType.Rampage => 0,
+            AbilityType.IronGrip => 0,
+            AbilityType.Brawl => 0,
+            AbilityType.Conquer => 0,
+            AbilityType.Intimidate => 0,
+            AbilityType.CrownSeize => 0,
+            AbilityType.CourtIntrigue => 0,
+            AbilityType.RoyalDecree => 0,
+            AbilityType.Patronage => 0,
+            AbilityType.PullStrings => 0,
+            AbilityType.Misdirection => 0,
+            AbilityType.ForcedHand => 0,
+            AbilityType.SafePassage => 0,
+            AbilityType.Treaty => 0,
+            AbilityType.SecondDeal => 0,
+            AbilityType.ColdRead => 0,
+            AbilityType.AllIn => 0,
+            AbilityType.DoubleOrNothing => 0,
+            AbilityType.LuckyStreak => 0,
+            AbilityType.Misdeal => 0,
+            AbilityType.WildCard => 0,
+            AbilityType.Deflect => 0,
+            // Powerful free-trigger abilities cost 2
+            AbilityType.Haymaker => 2,
+            // Standard trigger cost
+            _ => 1,
+        };
     }
 }
