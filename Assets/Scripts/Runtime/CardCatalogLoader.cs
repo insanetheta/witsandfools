@@ -32,7 +32,11 @@ namespace WitsAndFools
                     InStartingDeck = (bool)(c["startingDeck"] ?? false),
                 };
 
-                def.Ability = MapAbility(def.Id, def.Trigger, def.AbilityText, def.Doctrine);
+                var explicitType = (string)c["abilityType"];
+                if (!string.IsNullOrEmpty(explicitType) && Enum.TryParse<AbilityType>(explicitType, out var parsed))
+                    def.Ability = parsed;
+                else
+                    def.Ability = MapAbility(def.Id, def.Trigger, def.AbilityText, def.Doctrine);
                 defs.Add(def);
             }
 

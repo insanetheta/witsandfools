@@ -45,7 +45,8 @@
       "ability": "Draw 2 cards from your deck.",
       "flavorText": "Every whisper has a price.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Brace"
     },
     {
       "id": "schemer_spyglass",
@@ -54,10 +55,11 @@
       "rank": 6,
       "doctrine": "Schemer",
       "trigger": "None",
-      "ability": "Discard to activate: Scry 3 \u2014 look at the top 3 cards of your deck and reorder them.",
+      "ability": "Discard to activate: Scry 3 — look at the top 3 cards of your deck and reorder them.",
       "flavorText": "From the campanile, all Venice lies bare.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Peek"
     },
     {
       "id": "schemer_cipher",
@@ -69,7 +71,8 @@
       "ability": "Force opponent to discard 1 random card.",
       "flavorText": "The code reveals more than its author intended.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Riposte"
     },
     {
       "id": "schemer_cartographer",
@@ -81,7 +84,8 @@
       "ability": "Scry 2, then draw 1 card.",
       "flavorText": "He who maps the terrain chooses the battlefield.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Peek"
     },
     {
       "id": "schemer_forger",
@@ -93,7 +97,8 @@
       "ability": "Look at opponent's hand; choose 1 card they must play next if able.",
       "flavorText": "A perfect copy is worth more than the original.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Peek"
     },
     {
       "id": "schemer_librarian",
@@ -105,7 +110,8 @@
       "ability": "Your Scry effects look at 1 additional card.",
       "flavorText": "The index is mightier than the text.",
       "rarity": "Uncommon",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "SteadyHand"
     },
     {
       "id": "schemer_interceptor",
@@ -117,7 +123,8 @@
       "ability": "Seize the initiative; you become the attacker after this bout.",
       "flavorText": "The message never arrived.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "SeizeInitiative"
     },
     {
       "id": "schemer_double_agent",
@@ -129,7 +136,8 @@
       "ability": "Steal 1 random card from opponent's hand.",
       "flavorText": "He serves two masters and betrays them both.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "DoubleAgent"
     },
     {
       "id": "schemer_poisoner",
@@ -141,7 +149,8 @@
       "ability": "Discard to activate: Force opponent to put the top 3 cards of their deck on the bottom.",
       "flavorText": "A slow death, sweetened with wine.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Peek"
     },
     {
       "id": "schemer_scribe",
@@ -153,7 +162,8 @@
       "ability": "Cycle 1: discard 1 card, then draw 1 card.",
       "flavorText": "Every transaction leaves a trace in the ledger.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": false,
+      "abilityType": "SleightOfHand"
     },
     {
       "id": "schemer_envoy",
@@ -165,7 +175,8 @@
       "ability": "Gain 1 Intel.",
       "flavorText": "He speaks for the Doge, but listens for himself.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "schemer_inquisitor",
@@ -177,7 +188,8 @@
       "ability": "Force opponent to discard 1 random card.",
       "flavorText": "Confession is inevitable; only the timing varies.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Riposte"
     },
     {
       "id": "schemer_mastermind",
@@ -189,7 +201,8 @@
       "ability": "Seize the initiative; you become the attacker after this bout.",
       "flavorText": "Every piece falls exactly where he planned.",
       "rarity": "Rare",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "SeizeInitiative"
     },
     {
       "id": "schemer_cryptanalyst",
@@ -201,7 +214,8 @@
       "ability": "Gain 1 Intel.",
       "flavorText": "Patterns emerge from chaos for those who know where to look.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "schemer_puppeteer",
@@ -213,7 +227,8 @@
       "ability": "Discard to activate: Look at opponent's hand and put 1 card from it on top of their deck.",
       "flavorText": "The strings are invisible, but the dance is unmistakable.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Peek"
     },
     {
       "id": "schemer_archivist",
@@ -225,7 +240,8 @@
       "ability": "Scry 2.",
       "flavorText": "Nothing is ever truly lost in these vaults.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Peek"
     },
     {
       "id": "schemer_ambassador",
@@ -237,7 +253,8 @@
       "ability": "Cap attacks this bout at 2.",
       "flavorText": "His presence alone shifts the balance of power.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Blocker"
     },
     {
       "id": "schemer_shadow_courier",
@@ -249,7 +266,8 @@
       "ability": "Scry 2; if either card is trump suit, draw it.",
       "flavorText": "She moves between courts unseen and unremembered.",
       "rarity": "Uncommon",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Peek"
     },
     {
       "id": "schemer_venetian_mirror",
@@ -261,7 +279,8 @@
       "ability": "Reveal the card you defend with before playing; gain 1 Intel.",
       "flavorText": "The mirror shows not what is, but what will be.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "schemer_doge_spymaster",
@@ -269,11 +288,12 @@
       "suit": "Clubs",
       "rank": 13,
       "doctrine": "Schemer",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "Force opponent to discard 1 random card.",
       "flavorText": "The Council of Ten answers to him alone.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Riposte"
     },
     {
       "id": "schemer_grand_inquisitor",
@@ -285,7 +305,8 @@
       "ability": "Masterstroke: spend 3 Intel — opponent discards their 2 highest-rank cards, you draw 1.",
       "flavorText": "His questions have only one answer, and it is always confession.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": true,
+      "abilityType": "Masterstroke"
     },
     {
       "id": "brute_condottiero",
@@ -297,7 +318,8 @@
       "ability": "This card attacks with +2 rank.",
       "flavorText": "Gold buys soldiers. Fear buys victory.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Conquer"
     },
     {
       "id": "brute_siege_ram",
@@ -309,7 +331,8 @@
       "ability": "If defender picks up, gain 2 Fury.",
       "flavorText": "The gate holds until it doesn't.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "brute_berserker",
@@ -321,7 +344,8 @@
       "ability": "Attack with an additional card from your hand that shares this rank.",
       "flavorText": "He fights until nothing stands, including himself.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "DoubleTrouble"
     },
     {
       "id": "brute_enforcer",
@@ -333,7 +357,8 @@
       "ability": "Opponent must defend with a card of rank 10+ or pick up.",
       "flavorText": "He collects what is owed, one way or another.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Intimidate"
     },
     {
       "id": "brute_warmonger",
@@ -345,7 +370,8 @@
       "ability": "Gain 1 Fury.",
       "flavorText": "Peace is merely the pause between profitable conflicts.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "brute_pit_fighter",
@@ -357,7 +383,8 @@
       "ability": "This card attacks with +3 rank but you discard 1 card from hand.",
       "flavorText": "Scars are the only medals that matter in the arena.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Conquer"
     },
     {
       "id": "brute_cannon_master",
@@ -369,7 +396,8 @@
       "ability": "Attack all defended cards with +1 rank this bout.",
       "flavorText": "The walls of Constantinople fell to lesser guns.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Conquer"
     },
     {
       "id": "brute_mercenary_captain",
@@ -381,7 +409,8 @@
       "ability": "You may play 1 additional attack card this bout.",
       "flavorText": "Loyalty lasts exactly as long as the contract.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "DoubleTrouble"
     },
     {
       "id": "brute_sapper",
@@ -393,7 +422,8 @@
       "ability": "Discard to activate: Force opponent to discard 1 card of their choice.",
       "flavorText": "The tunnel was finished before dawn.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Riposte"
     },
     {
       "id": "brute_gladiator",
@@ -405,7 +435,8 @@
       "ability": "This card attacks with +1 rank.",
       "flavorText": "The crowd roars. He does not hear them.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Conquer"
     },
     {
       "id": "brute_pillager",
@@ -417,7 +448,8 @@
       "ability": "This card attacks with +2 rank.",
       "flavorText": "What the sword takes, the sack carries away.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Conquer"
     },
     {
       "id": "brute_warlord",
@@ -425,11 +457,12 @@
       "suit": "Spades",
       "rank": 14,
       "doctrine": "Brute",
-      "trigger": "None",
-      "ability": "None",
+      "trigger": "OnAttack",
+      "ability": "Gain 1 Fury.",
       "flavorText": "Armies are merely the extension of one man's will.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "brute_battering_shield",
@@ -441,7 +474,8 @@
       "ability": "Gain 1 Fury.",
       "flavorText": "Defense is just the prelude to the killing stroke.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "brute_vanguard",
@@ -453,7 +487,8 @@
       "ability": "Your next attack card this bout gets +2 rank.",
       "flavorText": "First through the breach, last to fall.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Conquer"
     },
     {
       "id": "brute_arsonist",
@@ -465,7 +500,8 @@
       "ability": "Discard to activate: Force opponent to discard their lowest-rank card.",
       "flavorText": "From the ashes, nothing grows back.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": false,
+      "abilityType": "Riposte"
     },
     {
       "id": "brute_iron_duke",
@@ -477,7 +513,8 @@
       "ability": "Your attack cards get +1 rank when you have 3+ Fury.",
       "flavorText": "His armor is forged from lesser men's swords.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "BattleHardened"
     },
     {
       "id": "brute_siege_tower",
@@ -489,7 +526,8 @@
       "ability": "Defender cannot use trump suit to defend against this card.",
       "flavorText": "No wall stands against proper engineering.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Conquer"
     },
     {
       "id": "brute_quartermaster",
@@ -501,7 +539,8 @@
       "ability": "Gain 1 Fury when defending successfully.",
       "flavorText": "Supply lines win wars. Swords merely finish them.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "brute_executioner",
@@ -513,7 +552,8 @@
       "ability": "Spend 3 Fury: this card attacks with +4 rank.",
       "flavorText": "The sentence is always the same.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Conquer"
     },
     {
       "id": "brute_titan",
@@ -525,7 +565,8 @@
       "ability": "Onslaught: spend 3 Fury — play top 3 cards from your deck as attacks.",
       "flavorText": "When the Titan charges, the earth itself retreats.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": true,
+      "abilityType": "Onslaught"
     },
     {
       "id": "brute_war_elephant",
@@ -533,11 +574,12 @@
       "suit": "Diamonds",
       "rank": 13,
       "doctrine": "Brute",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "This card attacks with +2 rank.",
       "flavorText": "It crushes friend and foe with equal indifference.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Conquer"
     },
     {
       "id": "trickster_courtesan",
@@ -549,7 +591,8 @@
       "ability": "Change trump suit to this card's suit until end of round.",
       "flavorText": "A smile can topple kingdoms.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "TrumpChanger"
     },
     {
       "id": "trickster_alchemist",
@@ -561,7 +604,8 @@
       "ability": "Discard to activate: Change this bout's trump suit to any suit you choose.",
       "flavorText": "Lead into gold? Child's play. Try turning hearts into spades.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "TrumpChanger"
     },
     {
       "id": "trickster_jester",
@@ -573,7 +617,8 @@
       "ability": "This card may defend as if it were any suit.",
       "flavorText": "Only the fool may speak truth to power.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Fortify"
     },
     {
       "id": "trickster_mask_maker",
@@ -585,7 +630,8 @@
       "ability": "Choose this card's suit after seeing defender's hand size.",
       "flavorText": "Behind the carnival mask, all faces are equal.",
       "rarity": "Uncommon",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "TrumpChanger"
     },
     {
       "id": "trickster_illusionist",
@@ -597,7 +643,8 @@
       "ability": "Opponent must defend this card before any others this bout.",
       "flavorText": "The eye sees what the hand directs.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Blocker"
     },
     {
       "id": "trickster_charlatan",
@@ -609,7 +656,8 @@
       "ability": "Defend as if this card's rank were 2 higher.",
       "flavorText": "His credentials are impeccable. Also fictional.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Conquer"
     },
     {
       "id": "trickster_fortune_teller",
@@ -618,10 +666,11 @@
       "rank": 8,
       "doctrine": "Trickster",
       "trigger": "None",
-      "ability": "Discard to activate: Spend 2 Favor \u2014 attacker must pick up their own attack card.",
+      "ability": "Discard to activate: Spend 2 Favor — attacker must pick up their own attack card.",
       "flavorText": "The stars say you will lose. The stars are never wrong.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "TrapCard"
     },
     {
       "id": "trickster_pickpocket",
@@ -633,7 +682,8 @@
       "ability": "After defending, steal 1 random card from opponent's hand into yours.",
       "flavorText": "Grazie, signore. You are too kind.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "DoubleAgent"
     },
     {
       "id": "trickster_card_sharp",
@@ -645,7 +695,8 @@
       "ability": "Gain 1 Favor; swap this card's suit with another card in your hand.",
       "flavorText": "The deck is always stacked in his favor.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "trickster_smuggler",
@@ -657,7 +708,8 @@
       "ability": "Defend with the top card of your deck instead of a hand card.",
       "flavorText": "The customs men search the wrong crate every time.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Brace"
     },
     {
       "id": "trickster_acrobat",
@@ -669,7 +721,8 @@
       "ability": "After defending, return this card to your hand instead of discarding.",
       "flavorText": "She bends but never breaks.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Brace"
     },
     {
       "id": "trickster_doppelganger",
@@ -681,7 +734,8 @@
       "ability": "This card copies the suit and rank of the card it defends against.",
       "flavorText": "Which one is the reflection?",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Fortify"
     },
     {
       "id": "trickster_venetian_noble",
@@ -693,7 +747,8 @@
       "ability": "This card counts as trump suit for this attack.",
       "flavorText": "Blood and gold open every door in the republic.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "TrumpChanger"
     },
     {
       "id": "trickster_con_artist",
@@ -705,7 +760,8 @@
       "ability": "Opponent must reveal 1 card; that card cannot be used to defend this bout.",
       "flavorText": "Trust is the most profitable commodity.",
       "rarity": "Uncommon",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Peek"
     },
     {
       "id": "trickster_escape_artist",
@@ -717,7 +773,8 @@
       "ability": "Discard to activate: Spend 3 Favor to nullify all remaining undefended attacks this bout; attack cards return to attacker's hand.",
       "flavorText": "The chains were real. The locks were not.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "SlipAway"
     },
     {
       "id": "trickster_puppet_master",
@@ -725,11 +782,12 @@
       "suit": "Spades",
       "rank": 13,
       "doctrine": "Trickster",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "Passive",
+      "ability": "At bout start, if opponent has more cards, draw 1.",
       "flavorText": "The carnival never ends; it merely changes masks.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Equilibrium"
     },
     {
       "id": "trickster_mirror_mage",
@@ -741,7 +799,8 @@
       "ability": "Gain 1 Favor.",
       "flavorText": "Your blade finds only your own reflection.",
       "rarity": "Rare",
-      "startingDeck": true
+      "startingDeck": false,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "trickster_maestro",
@@ -753,7 +812,8 @@
       "ability": "Cap attacks this bout at 2.",
       "flavorText": "The final act is always his to command.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Blocker"
     },
     {
       "id": "trickster_mountebank",
@@ -765,7 +825,8 @@
       "ability": "Swap 1 random card with opponent.",
       "flavorText": "His elixir cures nothing, but his tongue cures doubt.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "BlindSwap"
     },
     {
       "id": "trickster_grand_masquerader",
@@ -777,7 +838,8 @@
       "ability": "Masquerade: spend 3 Favor — swap your entire hand with opponent's.",
       "flavorText": "Behind the final mask is another mask, and behind that — your face.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": true,
+      "abilityType": "Masquerade"
     },
     {
       "id": "trickster_contessa",
@@ -785,11 +847,12 @@
       "suit": "Hearts",
       "rank": 14,
       "doctrine": "Trickster",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnDefend",
+      "ability": "Cap attacks this bout at 2.",
       "flavorText": "She dismisses armies with a wave of her fan.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Blocker"
     },
     {
       "id": "hoarder_miser",
@@ -801,7 +864,8 @@
       "ability": "Your maximum hand size is increased by 2.",
       "flavorText": "Every coin saved is a battle won.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "SteadyHand"
     },
     {
       "id": "hoarder_collector",
@@ -813,7 +877,8 @@
       "ability": "Cards you pick up go to your hand, not the bottom of your deck. When you pick up, draw 1 additional card from your deck.",
       "flavorText": "Others see refuse. He sees treasure.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ThickSkin"
     },
     {
       "id": "hoarder_merchant",
@@ -825,7 +890,8 @@
       "ability": "If you have 6+ cards in hand, draw 1 card.",
       "flavorText": "Wealth breeds wealth, as any Medici knows.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ExtraDraw"
     },
     {
       "id": "hoarder_packrat",
@@ -837,7 +903,8 @@
       "ability": "Spend 3 Luck: draw 3 cards.",
       "flavorText": "One man's trash is another man's arsenal.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Patronage"
     },
     {
       "id": "hoarder_warehouse_keeper",
@@ -849,7 +916,8 @@
       "ability": "When you pick up attack cards, you may put any of them on the bottom of your deck instead.",
       "flavorText": "Everything has a place. Finding it is the art.",
       "rarity": "Uncommon",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "SteadyHand"
     },
     {
       "id": "hoarder_tax_collector",
@@ -861,7 +929,8 @@
       "ability": "Gain 1 Luck for every 2 cards in your hand.",
       "flavorText": "The republic's coffers are bottomless. So is his patience.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "hoarder_banker",
@@ -873,7 +942,8 @@
       "ability": "Gain 1 Luck.",
       "flavorText": "Gold flows to those who already have it.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "hoarder_antiquarian",
@@ -885,7 +955,8 @@
       "ability": "When you have 8+ cards in hand, your defense cards get +1 rank.",
       "flavorText": "Age only increases value, never diminishes it.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "SteadyHand"
     },
     {
       "id": "hoarder_squirrel",
@@ -897,7 +968,8 @@
       "ability": "Draw 1 card after defending.",
       "flavorText": "Winter is always coming. Best be ready.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "ExtraDraw"
     },
     {
       "id": "hoarder_usurer",
@@ -909,7 +981,8 @@
       "ability": "Discard to activate: Draw cards until you have as many cards as your opponent.",
       "flavorText": "The interest compounds. It always compounds.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "ExtraDraw"
     },
     {
       "id": "hoarder_apothecary",
@@ -921,7 +994,8 @@
       "ability": "Discard to activate: Retrieve the last 2 cards from your discard pile into your hand.",
       "flavorText": "Nothing is wasted in my shop. Nothing.",
       "rarity": "Uncommon",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "WildCard"
     },
     {
       "id": "hoarder_auctioneer",
@@ -933,7 +1007,8 @@
       "ability": "If you have more cards than opponent, this card attacks with +2 rank.",
       "flavorText": "Going once. Going twice. Gone.",
       "rarity": "Uncommon",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Conquer"
     },
     {
       "id": "hoarder_treasure_hunter",
@@ -945,7 +1020,8 @@
       "ability": "Spend 5 Luck: opponent must pick up regardless of defense.",
       "flavorText": "X never marks the spot. That would be too easy.",
       "rarity": "Common",
-      "startingDeck": true
+      "startingDeck": false,
+      "abilityType": "AllIn"
     },
     {
       "id": "hoarder_guild_master",
@@ -953,11 +1029,12 @@
       "suit": "Clubs",
       "rank": 13,
       "doctrine": "Hoarder",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "If you have more cards than opponent, this card attacks with +2 rank.",
       "flavorText": "The guilds control the flow of everything worth having.",
       "rarity": "Uncommon",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Conquer"
     },
     {
       "id": "hoarder_monopolist",
@@ -969,7 +1046,8 @@
       "ability": "Monopoly: spend 3 Luck — draw cards until you have 8 in hand, opponent discards down to 5.",
       "flavorText": "When one man owns everything, the game is already over.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": true,
+      "abilityType": "Monopoly"
     },
     {
       "id": "hoarder_dynasty_heir",
@@ -981,7 +1059,8 @@
       "ability": "Draw 1 card for every 3 cards in your hand.",
       "flavorText": "The family name carries more weight than any blade.",
       "rarity": "Rare",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Haymaker"
     },
     {
       "id": "hoarder_reliquary",
@@ -993,7 +1072,8 @@
       "ability": "Gain 1 Luck.",
       "flavorText": "Holy bones and sacred teeth. All genuine, of course.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "hoarder_fence",
@@ -1005,7 +1085,8 @@
       "ability": "After defending, you may swap 1 card from your hand with 1 card from your discard.",
       "flavorText": "Everything has a buyer. Everything has a seller.",
       "rarity": "Uncommon",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "WildCard"
     },
     {
       "id": "hoarder_cartels_don",
@@ -1017,7 +1098,8 @@
       "ability": "Gain 1 Luck at the start of each round you have more cards than opponent.",
       "flavorText": "Control the supply. The demand takes care of itself.",
       "rarity": "Rare",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "SharkInstinct"
     },
     {
       "id": "hoarder_vault_keeper",
@@ -1029,7 +1111,8 @@
       "ability": "Draw 2 cards from your deck.",
       "flavorText": "The vault opens for those who've earned its trust.",
       "rarity": "Rare",
-      "startingDeck": true
+      "startingDeck": true,
+      "abilityType": "Brace"
     },
     {
       "id": "hoarder_speculator",
@@ -1041,7 +1124,8 @@
       "ability": "If you have 7+ cards in hand, draw 1 card.",
       "flavorText": "Risk is for amateurs. I invest in certainties.",
       "rarity": "Uncommon",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "ExtraDraw"
     },
     {
       "id": "neutral_knight",
@@ -1232,12 +1316,12 @@
       "schemer_cartographer",
       "schemer_interceptor",
       "schemer_double_agent",
-      "schemer_scribe",
       "schemer_envoy",
       "schemer_inquisitor",
       "schemer_ambassador",
       "schemer_cryptanalyst",
-      "schemer_mastermind"
+      "schemer_mastermind",
+      "schemer_grand_inquisitor"
     ],
     "Brute": [
       "brute_condottiero",
@@ -1249,9 +1333,9 @@
       "brute_mercenary_captain",
       "brute_pillager",
       "brute_warlord",
-      "brute_arsonist",
       "brute_gladiator",
-      "brute_war_elephant"
+      "brute_war_elephant",
+      "brute_titan"
     ],
     "Trickster": [
       "trickster_courtesan",
@@ -1265,7 +1349,7 @@
       "trickster_venetian_noble",
       "trickster_maestro",
       "trickster_mountebank",
-      "trickster_mirror_mage"
+      "trickster_grand_masquerader"
     ],
     "Hoarder": [
       "hoarder_miser",
@@ -1277,9 +1361,9 @@
       "hoarder_antiquarian",
       "hoarder_squirrel",
       "hoarder_auctioneer",
-      "hoarder_treasure_hunter",
       "hoarder_dynasty_heir",
-      "hoarder_vault_keeper"
+      "hoarder_vault_keeper",
+      "hoarder_monopolist"
     ]
   }
 }
