@@ -1701,6 +1701,8 @@ namespace WitsAndFools
             return false;
         }
 
+        public void ForceEndGame(int fool) => EndGame(fool);
+
         void EndGame(int fool)
         {
             FoolIndex = fool;

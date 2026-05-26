@@ -50,6 +50,7 @@ namespace WitsAndFools
         float _baseDealSeconds;
 
         int _stallFrames;
+        int _matchFrames;
 
         void Update()
         {
@@ -59,6 +60,16 @@ namespace WitsAndFools
                 CycleAutoPlay();
 
             if (Engine.Phase == Phase.GameOver) return;
+
+            _matchFrames++;
+            if (_matchFrames > 10000)
+            {
+                Debug.LogWarning($"[GameManager] Match exceeded 10000 frames — forcing game over. BoutCount={Engine.BoutCount}");
+                int cards0 = Engine.HandOf(0).Count + Engine.DeckCount;
+                int cards1 = Engine.HandOf(1).Count;
+                Engine.ForceEndGame(cards0 >= cards1 ? 0 : 1);
+                return;
+            }
 
             int active = Engine.Phase == Phase.Defense ? Engine.DefenderIndex : Engine.AttackerIndex;
             bool aiTurn = _loop.Controllers[active].Kind == PlayerKind.AI;
@@ -176,6 +187,7 @@ namespace WitsAndFools
                 p1: ai,
                 engine: engine);
             _humanIsPlayerZero = true;
+            _matchFrames = 0;
             WireEngineEvents();
             WireHudButtons();
             _loop.Start();
@@ -196,6 +208,7 @@ namespace WitsAndFools
                 p1: ai,
                 engine: engine);
             _humanIsPlayerZero = true;
+            _matchFrames = 0;
             WireEngineEvents();
             WireHudButtons();
             _loop.Start();
