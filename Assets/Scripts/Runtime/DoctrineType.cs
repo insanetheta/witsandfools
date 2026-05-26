@@ -40,6 +40,15 @@ namespace WitsAndFools
             _ => "#FFFFFF"
         };
 
+        public static DoctrineType? FromArchetype(ArchetypeType a) => a switch
+        {
+            ArchetypeType.Rogue => DoctrineType.Schemer,
+            ArchetypeType.Brute => DoctrineType.Brute,
+            ArchetypeType.Diplomat => DoctrineType.Trickster,
+            ArchetypeType.Gambler => DoctrineType.Hoarder,
+            _ => null
+        };
+
         public static ResourceType? Resource(this DoctrineType d) => d switch
         {
             DoctrineType.Schemer => ResourceType.Intel,

@@ -70,6 +70,8 @@ namespace WitsAndFools
         public bool EatDrawsExtra;
         public bool MirrorAbilities;
 
+        public int MaxBouts;
+
         public static MatchConfig Default() => new()
         {
             Abilities = DeckConfig.DefaultAbilities,

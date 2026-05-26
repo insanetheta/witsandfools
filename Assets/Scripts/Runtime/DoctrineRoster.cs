@@ -112,6 +112,8 @@ namespace WitsAndFools
                         profile.HouseRule = parsed;
                 }
 
+                profile.GimmickDescription = (string)e["gimmickDescription"];
+
                 result.Add(profile);
             }
 
@@ -131,6 +133,7 @@ namespace WitsAndFools
             Doctrine = src.Doctrine,
             DeckCardIds = new List<string>(src.DeckCardIds),
             Relics = new List<RelicType>(src.Relics),
+            GimmickDescription = src.GimmickDescription,
         };
     }
 }

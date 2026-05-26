@@ -57,6 +57,7 @@ namespace WitsAndFools
             }
 
             EnsureShopAndRest(map, actIndex, rng);
+            EnsureRumor(map, actIndex, rng);
             return map;
         }
 
@@ -128,6 +129,18 @@ namespace WitsAndFools
             if (!hasRest) InjectNodeType(map, MapNodeType.Rest, actIndex, rng);
         }
 
+        static void EnsureRumor(List<List<MapNode>> map, int actIndex, Random rng)
+        {
+            if (actIndex == 4) return;
+
+            bool hasRumor = false;
+            foreach (var col in map)
+                foreach (var node in col)
+                    if (node.Type == MapNodeType.Rumor) hasRumor = true;
+
+            if (!hasRumor) InjectNodeType(map, MapNodeType.Rumor, actIndex, rng);
+        }
+
         static void InjectNodeType(List<List<MapNode>> map, MapNodeType target, int actIndex, Random rng)
         {
             // Find swappable RivalMatch nodes in non-first columns (skip elites/bosses)
@@ -148,7 +161,9 @@ namespace WitsAndFools
 
         static OpponentProfile GenerateOpponent(int actIndex, bool isElite, bool isBoss, Random rng)
         {
-            return OpponentRoster.Pick(actIndex, isElite, isBoss, rng);
+            return DoctrineRoster.IsInitialized
+                ? DoctrineRoster.Pick(actIndex, isElite, isBoss, rng)
+                : OpponentRoster.Pick(actIndex, isElite, isBoss, rng);
         }
     }
 }

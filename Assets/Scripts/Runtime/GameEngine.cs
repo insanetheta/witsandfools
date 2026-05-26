@@ -1514,6 +1514,15 @@ namespace WitsAndFools
 
             if (CheckGameOver(attackerBefore, defenderBefore, outcome)) return;
 
+            if (_config.MaxBouts > 0 && _boutCount >= _config.MaxBouts)
+            {
+                int cards0 = _hands[0].Count + DeckCountFor(0);
+                int cards1 = _hands[1].Count + DeckCountFor(1);
+                int loser = cards0 >= cards1 ? 0 : 1;
+                EndGame(fool: loser);
+                return;
+            }
+
             if (_config.FixedAttacker)
             {
                 // Attacker never rotates

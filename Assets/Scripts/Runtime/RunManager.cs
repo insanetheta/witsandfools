@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -334,6 +335,8 @@ namespace WitsAndFools
             _run = new RunState { Seed = seed };
             _selectedArchetype = null;
 
+            EnsureCatalogsLoaded();
+
             _run.CurrentAct = 0;
             _run.CurrentMap = MapGenerator.Generate(0, _rng);
             _currentColumn = 0;
@@ -344,6 +347,29 @@ namespace WitsAndFools
             SetPhase(RunPhase.ArchetypeSelect);
         }
 
+        void EnsureCatalogsLoaded()
+        {
+            if (!CardCatalog.IsInitialized)
+            {
+                string path = Path.Combine(Application.dataPath, "Data", "card_catalog.json");
+                if (File.Exists(path))
+                {
+                    CardCatalogLoader.LoadFromJson(File.ReadAllText(path));
+                    Debug.Log($"[RunManager] Loaded {CardCatalog.Count} cards from catalog.");
+                }
+            }
+            if (!DoctrineRoster.IsInitialized)
+            {
+                string path = Path.Combine(Application.dataPath, "Data", "enemy_roster.json");
+                if (File.Exists(path))
+                {
+                    var enemies = DoctrineRoster.ParseJson(File.ReadAllText(path));
+                    DoctrineRoster.RegisterAll(enemies);
+                    Debug.Log($"[RunManager] Loaded {DoctrineRoster.Count} enemies from roster.");
+                }
+            }
+        }
+
         void OnArchetypeSelected(ArchetypeType archetype)
         {
             _selectedArchetype = archetype;
@@ -352,6 +378,14 @@ namespace WitsAndFools
             var trinket = archetype.StartingTrinket();
             if (trinket.HasValue)
                 _run.PlayerTrinkets.Add(trinket.Value);
+
+            var doctrine = DoctrineExtensions.FromArchetype(archetype);
+            if (doctrine.HasValue && CardCatalog.IsInitialized)
+            {
+                _run.InitDoctrineDeck(doctrine.Value);
+                Debug.Log($"[RunManager] Initialized {doctrine.Value} deck with {_run.PlayerDeckCardIds.Count} cards.");
+            }
+
             SetPhase(RunPhase.MapSelect);
         }
 
@@ -910,13 +944,26 @@ namespace WitsAndFools
 
         void StartMatch(MapNode node)
         {
-            var config = MatchSetup.Build(_run, node.Opponent, _rng);
             SetPhase(RunPhase.InMatch);
             _boutsDefended = 0;
 
             GameManager.OnMatchComplete -= OnMatchComplete;
             GameManager.OnMatchComplete += OnMatchComplete;
-            GameManager.BeginConfiguredGame(config, node.Opponent, _rng.Next());
+
+            if (_run.UseDualDeck && node.Opponent != null && node.Opponent.UseDualDeck)
+            {
+                var (config, pDeck, eDeck) = MatchSetup.BuildDualDeck(_run, node.Opponent, _rng);
+                config.MaxBouts = 12;
+                GameManager.BeginDualDeckGame(config, pDeck, eDeck, node.Opponent, _rng.Next());
+                Debug.Log($"[RunManager] Dual-deck match vs {node.Opponent.Name} (bout cap: 12)");
+            }
+            else
+            {
+                var config = MatchSetup.Build(_run, node.Opponent, _rng);
+                config.MaxBouts = 12;
+                GameManager.BeginConfiguredGame(config, node.Opponent, _rng.Next());
+            }
+
             if (_autoRun)
             {
                 GameManager.SetAutoPlay(true);
@@ -929,6 +976,9 @@ namespace WitsAndFools
                 var archName = AIArchetypes.DisplayName(node.Opponent.Archetype);
                 var archColor = ArchetypeColor(node.Opponent.Archetype);
                 GameManager.Hud.SetOpponent(node.Opponent.Name, archName, portrait, archColor);
+
+                if (!string.IsNullOrEmpty(node.Opponent.GimmickDescription))
+                    GameManager.Hud.SetInfo(node.Opponent.GimmickDescription);
             }
 
             var engine = GameManager.Engine;

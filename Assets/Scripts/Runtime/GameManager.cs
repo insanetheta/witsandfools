@@ -181,6 +181,26 @@ namespace WitsAndFools
             _loop.Start();
         }
 
+        public void BeginDualDeckGame(MatchConfig config, PlayerDeck playerDeck, PlayerDeck enemyDeck,
+            OpponentProfile opponent, int? seed = null)
+        {
+            OpponentName = opponent.Name;
+            ClearAllVisuals();
+            Hud?.HideGameOver();
+
+            var engine = new GameEngine(seed, config, playerDeck, enemyDeck);
+            var ai = new AIPlayer(opponent.Name, seed ?? 0);
+            AIArchetypes.Apply(ai, opponent.Archetype, opponent.ActIndex);
+            _loop = new GameLoop(
+                p0: new HumanPlayer(PlayerName),
+                p1: ai,
+                engine: engine);
+            _humanIsPlayerZero = true;
+            WireEngineEvents();
+            WireHudButtons();
+            _loop.Start();
+        }
+
         public void BeginNewGame()
         {
             ClearAllVisuals();
