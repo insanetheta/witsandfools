@@ -21,8 +21,12 @@ namespace WitsAndFools
     public sealed class GameEngine
     {
         readonly Deck _deck;
+        readonly PlayerDeck[] _playerDecks;
+        readonly bool _dualDeckMode;
+        readonly int _seed;
         readonly Hand[] _hands;
         readonly List<Card> _discard = new();
+        readonly List<Card>[] _playerDiscards;
         readonly Bout _bout = new();
         readonly MatchConfig _config;
 
@@ -55,8 +59,8 @@ namespace WitsAndFools
 
         public Bout Bout => _bout;
         public IReadOnlyList<Card> Discard => _discard;
-        public int DeckCount => _deck.Count;
-        public Card? DeckTopCard => _deck.Count > 0 ? _deck.PeekTop(1)[0] : null;
+        public int DeckCount => AnyDeckCount();
+        public Card? DeckTopCard => AnyDeckCount() > 0 ? PeekTopDeck(AttackerIndex, 1)[0] : null;
 
         public List<Card> GetMarkedCards(int playerIndex, int count)
         {
@@ -69,7 +73,7 @@ namespace WitsAndFools
             int picks = System.Math.Min(count, hand.Count);
             for (int i = 0; i < picks; i++)
             {
-                int idx = _deck.Count > 0 ? (_deck.Count + i) % indices.Count : i % indices.Count;
+                int idx = AnyDeckCount() > 0 ? (PseudoRandomSeed() + i) % indices.Count : i % indices.Count;
                 result.Add(hand.Cards[indices[idx]]);
                 indices.RemoveAt(idx);
             }
@@ -120,8 +124,102 @@ namespace WitsAndFools
         public GameEngine(int? seed, MatchConfig config)
         {
             _config = config ?? MatchConfig.Default();
+            _seed = seed ?? Environment.TickCount;
             _deck = new Deck(seed, _config.Abilities);
             _hands = new[] { new Hand(), new Hand() };
+            _dualDeckMode = false;
+            _playerDecks = null;
+            _playerDiscards = null;
+        }
+
+        public GameEngine(int? seed, MatchConfig config, PlayerDeck deck0, PlayerDeck deck1)
+        {
+            _config = config ?? MatchConfig.Default();
+            _seed = seed ?? Environment.TickCount;
+            _deck = null;
+            _playerDecks = new[] { deck0, deck1 };
+            _playerDiscards = new[] { new List<Card>(), new List<Card>() };
+            _dualDeckMode = true;
+            _hands = new[] { new Hand(), new Hand() };
+
+            deck0.Build(_seed);
+            deck1.Build(_seed + 1);
+        }
+
+        // --- Dual-deck helpers: route all deck ops through these ---
+
+        Card DrawFromDeck(int playerIndex)
+        {
+            if (_dualDeckMode) return _playerDecks[playerIndex].Draw();
+            return _deck.Draw();
+        }
+
+        bool CanDrawFromDeck(int playerIndex)
+        {
+            if (_dualDeckMode) return _playerDecks[playerIndex].DrawPileCount > 0;
+            return _deck.Count > 0;
+        }
+
+        int AnyDeckCount()
+        {
+            if (_dualDeckMode) return _playerDecks[0].DrawPileCount + _playerDecks[1].DrawPileCount;
+            return _deck.Count;
+        }
+
+        int DeckCountFor(int playerIndex)
+        {
+            if (_dualDeckMode) return _playerDecks[playerIndex].DrawPileCount;
+            return _deck.Count;
+        }
+
+        void AddToDiscard(Card card, int ownerIndex = -1)
+        {
+            if (_dualDeckMode && ownerIndex >= 0)
+                _playerDiscards[ownerIndex].Add(card);
+            else
+                _discard.Add(card);
+        }
+
+        Card[] PeekTopDeck(int playerIndex, int count)
+        {
+            if (_dualDeckMode) return _playerDecks[playerIndex].PeekTop(count);
+            return _deck.PeekTop(count);
+        }
+
+        void ReplaceTopDeck(int playerIndex, Card[] cards)
+        {
+            if (_dualDeckMode) _playerDecks[playerIndex].ReplaceTop(cards);
+            else _deck.ReplaceTop(cards);
+        }
+
+        void PutOnTopOfDeck(int playerIndex, Card card)
+        {
+            if (_dualDeckMode) _playerDecks[playerIndex].PutOnTop(card);
+            else _deck.PutOnTop(card);
+        }
+
+        void ShuffleIntoDeck(int playerIndex, Card card)
+        {
+            if (_dualDeckMode) _playerDecks[playerIndex].ShuffleIn(card);
+            else _deck.ShuffleIn(card);
+        }
+
+        int PseudoRandomSeed()
+        {
+            if (_dualDeckMode) return _playerDecks[0].DrawPileCount + _playerDecks[1].DrawPileCount + _boutCount;
+            return _deck.Count + _boutCount;
+        }
+
+        void PutOnBottomOfDeck(int playerIndex, Card card)
+        {
+            if (_dualDeckMode) _playerDecks[playerIndex].PutOnBottom(card);
+            else _deck.PutOnBottom(card);
+        }
+
+        void ShuffleInManyToDeck(int playerIndex, IEnumerable<Card> cards)
+        {
+            if (_dualDeckMode) _playerDecks[playerIndex].ShuffleInMany(cards);
+            else _deck.ShuffleInMany(cards);
         }
 
         public void StartNewGame()
@@ -143,7 +241,7 @@ namespace WitsAndFools
             _courtiersFanUsed = new bool[2];
             _clumsyFingersTriggered = new bool[2];
 
-            _deck.Shuffle();
+            if (!_dualDeckMode) _deck.Shuffle();
             _quicksilverUsed = new bool[2];
             _slipAwayUsed = new bool[2];
             _jugglersBallsUsed = new bool[2];
@@ -153,41 +251,56 @@ namespace WitsAndFools
             _attackedThisBout[0] = false;
             _attackedThisBout[1] = false;
 
-            for (int p = 0; p < 2; p++)
+            if (_dualDeckMode)
             {
-                if (!_config.LoadedDice[p]) continue;
-                var topCards = _deck.PeekTop(3);
-                if (topCards.Length > 1)
-                {
-                    Array.Sort(topCards, (a, b) =>
-                    {
-                        bool at = a.Suit == TrumpCard.Suit, bt = b.Suit == TrumpCard.Suit;
-                        if (at != bt) return at ? 1 : -1;
-                        return (int)a.Rank - (int)b.Rank;
-                    });
-                    _deck.ReplaceTop(topCards);
-                }
-                break;
+                if (_config.ForcedTrumpSuit.HasValue)
+                    Trump = (Suit)_config.ForcedTrumpSuit.Value;
+                else
+                    Trump = (Suit)(new Random(_seed).Next(4));
+                TrumpCard = new Card(Trump, Rank.Six, null);
             }
 
             int handSize = _config.HandSize;
             for (int i = 0; i < handSize; i++)
             {
-                if (_deck.Count > 0) _hands[0].Add(_deck.Draw());
-                if (_deck.Count > 0) _hands[1].Add(_deck.Draw());
+                if (CanDrawFromDeck(0)) _hands[0].Add(DrawFromDeck(0));
+                if (CanDrawFromDeck(1)) _hands[1].Add(DrawFromDeck(1));
             }
 
-            TrumpCard = _deck.PeekBottom();
-            if (_config.ForcedTrumpSuit.HasValue)
-                Trump = (Suit)_config.ForcedTrumpSuit.Value;
-            else
-                Trump = TrumpCard.Suit;
+            if (!_dualDeckMode)
+            {
+                TrumpCard = _deck.PeekBottom();
+                if (_config.ForcedTrumpSuit.HasValue)
+                    Trump = (Suit)_config.ForcedTrumpSuit.Value;
+                else
+                    Trump = TrumpCard.Suit;
+            }
+
+            for (int p = 0; p < 2; p++)
+            {
+                if (!_config.LoadedDice[p]) continue;
+                var topCards = PeekTopDeck(p, 3);
+                if (topCards.Length > 1)
+                {
+                    Array.Sort(topCards, (a, b) =>
+                    {
+                        bool at = a.Suit == Trump, bt = b.Suit == Trump;
+                        if (at != bt) return at ? 1 : -1;
+                        return (int)a.Rank - (int)b.Rank;
+                    });
+                    ReplaceTopDeck(p, topCards);
+                }
+                break;
+            }
 
             for (int p = 0; p < 2; p++)
             {
                 if (_config.FoolsGold[p])
                     _hands[p].Add(new Card(Trump, Rank.Seven, null));
             }
+
+            if (_dualDeckMode)
+                ApplyDeckPassives();
 
             ApplyVentriloquistsDummy();
 
@@ -237,7 +350,7 @@ namespace WitsAndFools
                 }
                 if (opponentAbilities.Count == 0) continue;
 
-                var pick = opponentAbilities[_deck.Count % opponentAbilities.Count];
+                var pick = opponentAbilities[PseudoRandomSeed() % opponentAbilities.Count];
                 for (int i = 0; i < _hands[p].Cards.Count; i++)
                 {
                     var card = _hands[p].Cards[i];
@@ -289,6 +402,13 @@ namespace WitsAndFools
 
             Phase = Phase.Defense;
             OnAttackPlayed?.Invoke(playerIndex, card);
+
+            if (card.Trigger == TriggerTiming.OnAttack && card.HasAbility)
+            {
+                ApplyAbility(card.Ability.Value, playerIndex, card, -1);
+                OnAbilityUsed?.Invoke(playerIndex, card, card.Ability.Value);
+            }
+
             TryShieldBrooch();
             return true;
         }
@@ -316,7 +436,7 @@ namespace WitsAndFools
             if (!_hands[playerIndex].Contains(card)) return false;
 
             bool canDefend;
-            if (_config.EndgameSpecialist[playerIndex] && _deck.Count <= 6)
+            if (_config.EndgameSpecialist[playerIndex] && AnyDeckCount() <= 6)
                 canDefend = (int)card.Rank > (int)_bout.Attacks[slot].Rank || (card.Suit == Trump && _bout.Attacks[slot].Suit != Trump);
             else if (_config.HereticsBrand[playerIndex] && _bout.Attacks[slot].Suit == Trump)
                 canDefend = Rules.CanDefendSlotWith(_bout, slot, card, Trump) && (int)card.Rank > (int)_bout.Attacks[slot].Rank;
@@ -332,10 +452,16 @@ namespace WitsAndFools
             Phase = Phase.Attack;
             OnDefensePlayed?.Invoke(playerIndex, slot, card);
 
-            if (_config.ShadowReflexes[playerIndex] && !_shadowReflexesUsedThisBout[playerIndex] && _deck.Count > 0)
+            if (card.Trigger == TriggerTiming.OnDefend && card.HasAbility)
+            {
+                ApplyAbility(card.Ability.Value, playerIndex, card, slot);
+                OnAbilityUsed?.Invoke(playerIndex, card, card.Ability.Value);
+            }
+
+            if (_config.ShadowReflexes[playerIndex] && !_shadowReflexesUsedThisBout[playerIndex] && CanDrawFromDeck(playerIndex))
             {
                 _shadowReflexesUsedThisBout[playerIndex] = true;
-                _hands[playerIndex].Add(_deck.Draw());
+                _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                 OnDrew?.Invoke(playerIndex, 1);
                 GainResource(playerIndex, 1);
             }
@@ -368,9 +494,9 @@ namespace WitsAndFools
             if (_config.PoisonedWine[1 - playerIndex])
             {
                 int drawn = 0;
-                while (drawn < 2 && _deck.Count > 0)
+                while (drawn < 2 && CanDrawFromDeck(playerIndex))
                 {
-                    _hands[playerIndex].Add(_deck.Draw());
+                    _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                     drawn++;
                 }
                 if (drawn > 0) OnDrew?.Invoke(playerIndex, drawn);
@@ -379,24 +505,24 @@ namespace WitsAndFools
             if (_config.EatDrawsExtra)
             {
                 int drawn = 0;
-                while (drawn < 2 && _deck.Count > 0)
+                while (drawn < 2 && CanDrawFromDeck(playerIndex))
                 {
-                    _hands[playerIndex].Add(_deck.Draw());
+                    _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                     drawn++;
                 }
                 if (drawn > 0) OnDrew?.Invoke(playerIndex, drawn);
             }
 
-            if (_config.ThickSkin[playerIndex] && _deck.Count > 0)
+            if (_config.ThickSkin[playerIndex] && CanDrawFromDeck(playerIndex))
             {
-                _hands[playerIndex].Add(_deck.Draw());
+                _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                 OnDrew?.Invoke(playerIndex, 1);
             }
 
             int attacker = 1 - playerIndex;
-            if (_config.BruteFury[attacker] && _deck.Count > 0)
+            if (_config.BruteFury[attacker] && CanDrawFromDeck(attacker))
             {
-                _hands[attacker].Add(_deck.Draw());
+                _hands[attacker].Add(DrawFromDeck(attacker));
                 OnDrew?.Invoke(attacker, 1);
                 GainResource(attacker, 1);
             }
@@ -445,6 +571,7 @@ namespace WitsAndFools
             if (playerIndex != active) return false;
             if (!_hands[playerIndex].Contains(card)) return false;
             if (!card.HasAbility) return false;
+            if (card.Trigger != TriggerTiming.None) return false;
 
             if (_config.AbilityOwners != null &&
                 _config.AbilityOwners.TryGetValue((card.Suit, card.Rank), out int owner) &&
@@ -477,7 +604,7 @@ namespace WitsAndFools
             // ChaoticNature: 50% chance to return the ability card to hand
             if (!keepCard && _config.ChaoticNature[playerIndex])
             {
-                int roll = (_deck.Count + _boutCount + playerIndex) % 2;
+                int roll = (PseudoRandomSeed() + playerIndex) % 2;
                 if (roll == 0)
                 {
                     _discard.Remove(card);
@@ -504,9 +631,9 @@ namespace WitsAndFools
             ApplyAbility(ability, playerIndex, card, defenseSlot);
 
             // SleightOfMind: draw 1 after using an active ability
-            if (_config.SleightOfMind[playerIndex] && _deck.Count > 0 && Phase != Phase.GameOver)
+            if (_config.SleightOfMind[playerIndex] && CanDrawFromDeck(playerIndex) && Phase != Phase.GameOver)
             {
-                _hands[playerIndex].Add(_deck.Draw());
+                _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                 OnDrew?.Invoke(playerIndex, 1);
             }
 
@@ -521,7 +648,7 @@ namespace WitsAndFools
                 case AbilityType.TrumpChanger:
                     return !_trumpChangerUsed;
                 case AbilityType.ExtraDraw:
-                    return Phase == Phase.Attack && _deck.Count > 0;
+                    return Phase == Phase.Attack && DeckCountFor(playerIndex) > 0;
                 case AbilityType.DoubleTrouble:
                     return Phase == Phase.Attack;
                 case AbilityType.Blocker:
@@ -534,15 +661,15 @@ namespace WitsAndFools
                 case AbilityType.PileOn:
                     return Phase == Phase.Attack;
                 case AbilityType.Feint:
-                    return Phase == Phase.Attack && _deck.Count > 0 && _bout.AttackCount < (_config.MaxAttacksPerBout + _pileOnBonus);
+                    return Phase == Phase.Attack && DeckCountFor(playerIndex) > 0 && _bout.AttackCount < (_config.MaxAttacksPerBout + _pileOnBonus);
                 case AbilityType.Deflect:
                     return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0 && _resource[playerIndex] >= 1;
                 case AbilityType.SlipAway:
                     return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0 && !_slipAwayUsed[playerIndex];
                 case AbilityType.Peek:
-                    return _deck.Count > 0;
+                    return DeckCountFor(playerIndex) > 0;
                 case AbilityType.Gambit:
-                    return _deck.Count > 0;
+                    return DeckCountFor(playerIndex) > 0;
 
                 // Rogue: Shadow
                 case AbilityType.Riposte:
@@ -552,7 +679,7 @@ namespace WitsAndFools
 
                 // Rogue: Spy
                 case AbilityType.Wiretap:
-                    return _deck.Count > 0;
+                    return DeckCountFor(playerIndex) > 0;
                 case AbilityType.DoubleAgent:
                     return _resource[playerIndex] >= 3 && _hands[1 - playerIndex].Count > 0;
                 case AbilityType.Blackmail:
@@ -560,7 +687,7 @@ namespace WitsAndFools
 
                 // Rogue: Saboteur
                 case AbilityType.SleightOfHand:
-                    return _deck.Count > 0 && _hands[playerIndex].Count > 0;
+                    return DeckCountFor(playerIndex) > 0 && _hands[playerIndex].Count > 0;
                 case AbilityType.SmokeBomb:
                     return Phase == Phase.Defense && _resource[playerIndex] >= 1 && !_bout.IsEmpty;
                 case AbilityType.TrapCard:
@@ -568,31 +695,31 @@ namespace WitsAndFools
 
                 // Brute: Berserker
                 case AbilityType.Rampage:
-                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _deck.Count >= 2;
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && DeckCountFor(playerIndex) >= 2;
 
                 // Brute: Brawler
                 case AbilityType.Haymaker:
-                    return Phase == Phase.Attack && _deck.Count > 0;
+                    return Phase == Phase.Attack && DeckCountFor(playerIndex) > 0;
                 case AbilityType.IronGrip:
-                    return Phase == Phase.Defense && _resource[playerIndex] >= 1 && _deck.Count > 0;
+                    return Phase == Phase.Defense && _resource[playerIndex] >= 1 && DeckCountFor(playerIndex) > 0;
                 case AbilityType.Brawl:
-                    return Phase == Phase.Attack && _resource[playerIndex] >= 2 && _deck.Count >= 6;
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 2 && DeckCountFor(playerIndex) >= 6;
 
                 // Brute: Warlord
                 case AbilityType.Conquer:
-                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _deck.Count > 0;
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && DeckCountFor(playerIndex) > 0;
                 case AbilityType.Intimidate:
                     return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _hands[1 - playerIndex].Count > 0;
                 case AbilityType.CrownSeize:
-                    return Phase == Phase.Attack && _resource[playerIndex] >= 3 && _deck.Count > 0;
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 3 && DeckCountFor(playerIndex) > 0;
 
                 // Diplomat: Courtier
                 case AbilityType.CourtIntrigue:
-                    return _resource[playerIndex] >= 1 && _deck.Count > 0;
+                    return _resource[playerIndex] >= 1 && DeckCountFor(playerIndex) > 0;
                 case AbilityType.RoyalDecree:
-                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _deck.Count > 0;
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && DeckCountFor(playerIndex) > 0;
                 case AbilityType.Patronage:
-                    return _resource[playerIndex] >= 3 && _deck.Count > 0;
+                    return _resource[playerIndex] >= 3 && DeckCountFor(playerIndex) > 0;
 
                 // Diplomat: Puppeteer
                 case AbilityType.PullStrings:
@@ -608,23 +735,23 @@ namespace WitsAndFools
                 case AbilityType.SafePassage:
                     return Phase == Phase.Defense && _resource[playerIndex] >= 2 && _bout.FirstUndefendedSlot() >= 0;
                 case AbilityType.Treaty:
-                    return _resource[playerIndex] >= 3 && _deck.Count > 0;
+                    return _resource[playerIndex] >= 3 && DeckCountFor(playerIndex) > 0;
 
                 // Gambler: Card Shark
                 case AbilityType.StackTheDeck:
-                    return _deck.Count > 0 && _hands[playerIndex].Count > 0;
+                    return DeckCountFor(playerIndex) > 0 && _hands[playerIndex].Count > 0;
                 case AbilityType.SecondDeal:
-                    return _resource[playerIndex] >= 1 && _deck.Count > 0;
+                    return _resource[playerIndex] >= 1 && DeckCountFor(playerIndex) > 0;
                 case AbilityType.ColdRead:
-                    return _resource[playerIndex] >= 2 && _deck.Count > 0;
+                    return _resource[playerIndex] >= 2 && DeckCountFor(playerIndex) > 0;
 
                 // Gambler: High Roller
                 case AbilityType.AllIn:
-                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _deck.Count > 0;
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && DeckCountFor(playerIndex) > 0;
                 case AbilityType.DoubleOrNothing:
-                    return _resource[playerIndex] >= 1 && _deck.Count >= 2;
+                    return _resource[playerIndex] >= 1 && DeckCountFor(playerIndex) >= 2;
                 case AbilityType.LuckyStreak:
-                    return Phase == Phase.Attack && _resource[playerIndex] >= 2 && _deck.Count > 0;
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 2 && DeckCountFor(playerIndex) > 0;
 
                 // Gambler: Trickster
                 case AbilityType.BlindSwap:
@@ -638,9 +765,9 @@ namespace WitsAndFools
                 case AbilityType.Fortify:
                     return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
                 case AbilityType.SecondWind:
-                    return _hands[playerIndex].Count >= 2 && _deck.Count > 0;
+                    return _hands[playerIndex].Count >= 2 && DeckCountFor(playerIndex) > 0;
                 case AbilityType.Brace:
-                    return Phase == Phase.Defense && _deck.Count > 0;
+                    return Phase == Phase.Defense && DeckCountFor(playerIndex) > 0;
                 case AbilityType.Desperation:
                     return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
 
@@ -698,7 +825,7 @@ namespace WitsAndFools
                     break;
 
                 case AbilityType.Feint:
-                    var feintCard = _deck.Draw();
+                    var feintCard = DrawFromDeck(playerIndex);
                     _bout.AddAttack(feintCard);
                     Phase = Phase.Defense;
                     OnAttackPlayed?.Invoke(playerIndex, feintCard);
@@ -728,7 +855,7 @@ namespace WitsAndFools
                     break;
 
                 case AbilityType.Peek:
-                    SortTopDeck(3);
+                    SortTopDeck(playerIndex, 3);
                     break;
 
                 case AbilityType.Gambit:
@@ -740,9 +867,9 @@ namespace WitsAndFools
                         _hands[playerIndex].Remove(c);
                         _discard.Add(c);
                     }
-                    int toDraw = Math.Min(count, _deck.Count);
+                    int toDraw = Math.Min(count, DeckCountFor(playerIndex));
                     for (int i = 0; i < toDraw; i++)
-                        _hands[playerIndex].Add(_deck.Draw());
+                        _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                     if (toDraw > 0) OnDrew?.Invoke(playerIndex, toDraw);
                     break;
                 }
@@ -761,7 +888,7 @@ namespace WitsAndFools
                 // --- Rogue: Spy ---
 
                 case AbilityType.Wiretap:
-                    SortTopDeck(5);
+                    SortTopDeck(playerIndex, 5);
                     break;
 
                 case AbilityType.DoubleAgent:
@@ -778,13 +905,13 @@ namespace WitsAndFools
 
                 case AbilityType.SleightOfHand:
                 {
-                    if (_deck.Count > 0)
-                        _hands[playerIndex].Add(_deck.Draw());
+                    if (CanDrawFromDeck(playerIndex))
+                        _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                     var worst = FindWorstCard(_hands[playerIndex], Trump);
                     if (worst.HasValue)
                     {
                         _hands[playerIndex].Remove(worst.Value);
-                        _deck.PutOnTop(worst.Value);
+                        PutOnTopOfDeck(playerIndex, worst.Value);
                     }
                     break;
                 }
@@ -823,9 +950,9 @@ namespace WitsAndFools
                 {
                     SpendResource(playerIndex, 1);
                     int played = 0;
-                    while (played < 2 && _deck.Count > 0)
+                    while (played < 2 && CanDrawFromDeck(playerIndex))
                     {
-                        var rampCard = _deck.Draw();
+                        var rampCard = DrawFromDeck(playerIndex);
                         _bout.AddAttack(rampCard);
                         Phase = Phase.Defense;
                         OnAttackPlayed?.Invoke(playerIndex, rampCard);
@@ -867,14 +994,14 @@ namespace WitsAndFools
                 case AbilityType.Conquer:
                 {
                     SpendResource(playerIndex, 1);
-                    if (_deck.Count > 0)
+                    if (CanDrawFromDeck(playerIndex))
                     {
-                        var drawn = _deck.Draw();
+                        var drawn = DrawFromDeck(playerIndex);
                         _hands[playerIndex].Add(drawn);
                         int d = 1;
-                        if (drawn.Suit == Trump && _deck.Count > 0)
+                        if (drawn.Suit == Trump && CanDrawFromDeck(playerIndex))
                         {
-                            _hands[playerIndex].Add(_deck.Draw());
+                            _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                             d++;
                         }
                         OnDrew?.Invoke(playerIndex, d);
@@ -899,7 +1026,7 @@ namespace WitsAndFools
 
                 case AbilityType.CourtIntrigue:
                     SpendResource(playerIndex, 1);
-                    SortTopDeck(3);
+                    SortTopDeck(playerIndex, 3);
                     DrawCards(playerIndex, 1);
                     break;
 
@@ -980,7 +1107,7 @@ namespace WitsAndFools
                     if (worst.HasValue)
                     {
                         _hands[playerIndex].Remove(worst.Value);
-                        _deck.PutOnTop(worst.Value);
+                        PutOnTopOfDeck(playerIndex, worst.Value);
                     }
                     DrawCards(playerIndex, 2);
                     break;
@@ -994,7 +1121,7 @@ namespace WitsAndFools
                     if (worst.HasValue)
                     {
                         _hands[playerIndex].Remove(worst.Value);
-                        _deck.PutOnBottom(worst.Value);
+                        PutOnBottomOfDeck(playerIndex, worst.Value);
                     }
                     break;
                 }
@@ -1007,7 +1134,7 @@ namespace WitsAndFools
                     if (worst.HasValue)
                     {
                         _hands[playerIndex].Remove(worst.Value);
-                        _deck.PutOnTop(worst.Value);
+                        PutOnTopOfDeck(playerIndex, worst.Value);
                     }
                     break;
                 }
@@ -1038,15 +1165,15 @@ namespace WitsAndFools
                 case AbilityType.LuckyStreak:
                 {
                     SpendResource(playerIndex, 2);
-                    if (_deck.Count > 0)
+                    if (CanDrawFromDeck(playerIndex))
                     {
-                        var ls1 = _deck.Draw();
+                        var ls1 = DrawFromDeck(playerIndex);
                         _bout.AddAttack(ls1);
                         Phase = Phase.Defense;
                         OnAttackPlayed?.Invoke(playerIndex, ls1);
-                        if (ls1.Suit == Trump && _deck.Count > 0)
+                        if (ls1.Suit == Trump && CanDrawFromDeck(playerIndex))
                         {
-                            var ls2 = _deck.Draw();
+                            var ls2 = DrawFromDeck(playerIndex);
                             _bout.AddAttack(ls2);
                             OnAttackPlayed?.Invoke(playerIndex, ls2);
                         }
@@ -1060,8 +1187,8 @@ namespace WitsAndFools
                 {
                     if (_hands[playerIndex].Count > 0 && _hands[opponent].Count > 0)
                     {
-                        int myIdx = (_deck.Count + _boutCount) % _hands[playerIndex].Count;
-                        int theirIdx = (_deck.Count + _boutCount + 1) % _hands[opponent].Count;
+                        int myIdx = PseudoRandomSeed() % _hands[playerIndex].Count;
+                        int theirIdx = (PseudoRandomSeed() + 1) % _hands[opponent].Count;
                         var myCard = _hands[playerIndex].Cards[myIdx];
                         var theirCard = _hands[opponent].Cards[theirIdx];
                         _hands[playerIndex].Remove(myCard);
@@ -1082,7 +1209,7 @@ namespace WitsAndFools
                         if (_bout.Defenses[i] != null)
                             _discard.Add(_bout.Defenses[i].Value);
                     }
-                    _deck.ShuffleInMany(attacks);
+                    ShuffleInManyToDeck(1 - playerIndex, attacks);
                     CollectCrownOfThornsRanks();
                     _bout.Clear();
                     ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
@@ -1156,9 +1283,9 @@ namespace WitsAndFools
         void DrawCards(int playerIndex, int count)
         {
             int drawn = 0;
-            while (drawn < count && _deck.Count > 0)
+            while (drawn < count && CanDrawFromDeck(playerIndex))
             {
-                _hands[playerIndex].Add(_deck.Draw());
+                _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                 drawn++;
             }
             if (drawn > 0) OnDrew?.Invoke(playerIndex, drawn);
@@ -1168,7 +1295,7 @@ namespace WitsAndFools
         {
             for (int i = 0; i < count && _hands[playerIndex].Count > 0; i++)
             {
-                int idx = (_deck.Count + _boutCount + i) % _hands[playerIndex].Count;
+                int idx = (PseudoRandomSeed() + i) % _hands[playerIndex].Count;
                 var c = _hands[playerIndex].Cards[idx];
                 _hands[playerIndex].Remove(c);
                 _discard.Add(c);
@@ -1183,7 +1310,7 @@ namespace WitsAndFools
             if (candidates.Count == 0) return;
             for (int i = 0; i < count && candidates.Count > 0; i++)
             {
-                int idx = (_deck.Count + _boutCount + i) % candidates.Count;
+                int idx = (PseudoRandomSeed() + i) % candidates.Count;
                 var c = candidates[idx];
                 _hands[playerIndex].Remove(c);
                 _discard.Add(c);
@@ -1214,15 +1341,15 @@ namespace WitsAndFools
         void StealRandomCard(int playerIndex, int fromPlayer)
         {
             if (_hands[fromPlayer].Count == 0) return;
-            int idx = (_deck.Count + _boutCount) % _hands[fromPlayer].Count;
+            int idx = PseudoRandomSeed() % _hands[fromPlayer].Count;
             var c = _hands[fromPlayer].Cards[idx];
             _hands[fromPlayer].Remove(c);
             _hands[playerIndex].Add(c);
         }
 
-        void SortTopDeck(int count)
+        void SortTopDeck(int playerIndex, int count)
         {
-            var top = _deck.PeekTop(count);
+            var top = PeekTopDeck(playerIndex, count);
             if (top.Length > 1)
             {
                 Array.Sort(top, (a, b) =>
@@ -1231,7 +1358,7 @@ namespace WitsAndFools
                     if (at != bt) return at ? 1 : -1;
                     return (int)a.Rank - (int)b.Rank;
                 });
-                _deck.ReplaceTop(top);
+                ReplaceTopDeck(playerIndex, top);
             }
         }
 
@@ -1254,16 +1381,54 @@ namespace WitsAndFools
                     GainResource(p, 1);
                 if (_config.SharkInstinct[p])
                     GainResource(p, 1);
-                if (_config.Equilibrium[p] && _hands[1 - p].Count > _hands[p].Count && _deck.Count > 0)
+                if (_config.Equilibrium[p] && _hands[1 - p].Count > _hands[p].Count && CanDrawFromDeck(p))
                 {
-                    _hands[p].Add(_deck.Draw());
+                    _hands[p].Add(DrawFromDeck(p));
                     OnDrew?.Invoke(p, 1);
                 }
-                if (_config.SteadyHand[p] && _hands[p].Count <= 3 && _deck.Count > 0)
+                if (_config.SteadyHand[p] && _hands[p].Count <= 3 && CanDrawFromDeck(p))
                 {
-                    _hands[p].Add(_deck.Draw());
+                    _hands[p].Add(DrawFromDeck(p));
                     OnDrew?.Invoke(p, 1);
                 }
+            }
+        }
+
+        void ApplyDeckPassives()
+        {
+            for (int p = 0; p < 2; p++)
+            {
+                if (_playerDecks[p] == null) continue;
+                foreach (var def in _playerDecks[p].Templates)
+                {
+                    if (def.Trigger != TriggerTiming.Passive || !def.HasAbility) continue;
+                    ApplyPassiveFromAbility(def.Ability.Value, p);
+                }
+            }
+        }
+
+        void ApplyPassiveFromAbility(AbilityType ability, int player)
+        {
+            switch (ability)
+            {
+                case AbilityType.Equilibrium: _config.Equilibrium[player] = true; break;
+                case AbilityType.SteadyHand: _config.SteadyHand[player] = true; break;
+                case AbilityType.MarkedCards: _config.MarkedCards[player] = true; break;
+                case AbilityType.SharkInstinct: _config.SharkInstinct[player] = true; break;
+                case AbilityType.BattleHardened: _config.BattleHardened[player] = true; break;
+                case AbilityType.ThickSkin: _config.ThickSkin[player] = true; break;
+                case AbilityType.Bloodlust: _config.Bloodlust[player] = true; break;
+                case AbilityType.ShadowReflexes: _config.ShadowReflexes[player] = true; break;
+                case AbilityType.EndgameSpecialist: _config.EndgameSpecialist[player] = true; break;
+                case AbilityType.SleightOfMind: _config.SleightOfMind[player] = true; break;
+                case AbilityType.CardCounter: _config.CardCounter[player] = true; break;
+                case AbilityType.TrumpAffinity: _config.TrumpAffinity[player] = true; break;
+                case AbilityType.QuickHands: _config.QuickHands[player] = true; break;
+                case AbilityType.GracefulManners: _config.GracefulManners[player] = true; break;
+                case AbilityType.PatienceRewarded: _config.PatienceRewarded[player] = true; break;
+                case AbilityType.Jackpot: _config.Jackpot[player] = true; break;
+                case AbilityType.CourtFavor: _config.CourtFavor[player] = true; break;
+                case AbilityType.LoadedDice: _config.LoadedDice[player] = true; break;
             }
         }
 
@@ -1305,9 +1470,9 @@ namespace WitsAndFools
             {
                 for (int p = 0; p < 2; p++)
                 {
-                    if (_config.QuickHands[p] && _deck.Count > 0)
+                    if (_config.QuickHands[p] && CanDrawFromDeck(p))
                     {
-                        _hands[p].Add(_deck.Draw());
+                        _hands[p].Add(DrawFromDeck(p));
                         if (_hands[p].Count > 1)
                         {
                             var worst = FindWorstCard(_hands[p], Trump);
@@ -1407,14 +1572,31 @@ namespace WitsAndFools
 
         void ApplyCourtFavor(int player)
         {
-            if (!_config.CourtFavor[player] || _deck.Count < 4) return;
-            var top2 = _deck.PeekTop(2);
-            int score0 = CardValue(top2[0], Trump);
-            int score1 = CardValue(top2[1], Trump);
-            if (score1 > score0)
+            if (!_config.CourtFavor[player] || DeckCountFor(player) < 4) return;
+            if (_dualDeckMode)
+            {
+                var top2 = _playerDecks[player].PeekTop(2);
+                if (top2.Length < 2) return;
+                int s0 = CardValue(top2[0], Trump), s1 = CardValue(top2[1], Trump);
+                var topCard = _playerDecks[player].Draw();
+                var secondCard = _playerDecks[player].Draw();
+                if (s0 <= s1)
+                    _playerDecks[player].PutOnBottom(topCard);
+                else
+                    _playerDecks[player].PutOnBottom(secondCard);
+                if (s0 <= s1)
+                    _playerDecks[player].PutOnTop(secondCard);
+                else
+                    _playerDecks[player].PutOnTop(topCard);
+            }
+            else
+            {
+                var top2 = _deck.PeekTop(2);
+                int s0 = CardValue(top2[0], Trump), s1 = CardValue(top2[1], Trump);
+                if (s1 > s0) _deck.SwapTopTwo();
                 _deck.SwapTopTwo();
-            _deck.SwapTopTwo();
-            _deck.PutTopOnBottom();
+                _deck.PutTopOnBottom();
+            }
         }
 
         static int CardValue(Card c, Suit trump)
@@ -1433,16 +1615,16 @@ namespace WitsAndFools
             }
 
             int drawn = 0;
-            while (_hands[playerIndex].Count < target && _deck.Count > 0)
+            while (_hands[playerIndex].Count < target && CanDrawFromDeck(playerIndex))
             {
-                if (_trumpStillInDeck && _deck.Count == 1) _trumpStillInDeck = false;
-                var drawnCard = _deck.Draw();
+                if (_trumpStillInDeck && DeckCountFor(playerIndex) == 1) _trumpStillInDeck = false;
+                var drawnCard = DrawFromDeck(playerIndex);
                 _hands[playerIndex].Add(drawnCard);
                 drawn++;
 
-                if (_config.TrumpAffinity[playerIndex] && drawnCard.Suit == Trump && _deck.Count > 0)
+                if (_config.TrumpAffinity[playerIndex] && drawnCard.Suit == Trump && CanDrawFromDeck(playerIndex))
                 {
-                    _hands[playerIndex].Add(_deck.Draw());
+                    _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                     drawn++;
                     var worst = FindWorstCard(_hands[playerIndex], Trump);
                     if (worst.HasValue)
@@ -1453,9 +1635,9 @@ namespace WitsAndFools
                     }
                 }
             }
-            if (drawn > 0 && _config.CardCounter[playerIndex] && _deck.Count > 0)
+            if (drawn > 0 && _config.CardCounter[playerIndex] && CanDrawFromDeck(playerIndex))
             {
-                var peeked = _deck.PeekTop(1);
+                var peeked = PeekTopDeck(playerIndex, 1);
                 var worst = FindWorstCard(_hands[playerIndex], Trump);
                 if (worst.HasValue && peeked.Length > 0)
                 {
@@ -1463,7 +1645,7 @@ namespace WitsAndFools
                     if (pBetter)
                     {
                         _hands[playerIndex].Remove(worst.Value);
-                        _hands[playerIndex].Add(_deck.Draw());
+                        _hands[playerIndex].Add(DrawFromDeck(playerIndex));
                         _discard.Add(worst.Value);
                     }
                 }
@@ -1496,7 +1678,7 @@ namespace WitsAndFools
 
         bool CheckGameOver(int attackerBefore, int defenderBefore, BoutOutcome outcome)
         {
-            bool deckEmpty = _deck.Count == 0;
+            bool deckEmpty = AnyDeckCount() == 0;
             if (!deckEmpty) return false;
 
             bool empty0 = _hands[0].Count == 0;

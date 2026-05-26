@@ -72,6 +72,7 @@ namespace WitsAndFools
             foreach (var card in hand.Cards)
             {
                 if (!card.HasAbility) continue;
+                if (card.Trigger != TriggerTiming.None) continue;
                 if (!ShouldUseAbility(engine, playerIndex, card)) continue;
                 int slot = engine.Phase == Phase.Defense ? engine.Bout.FirstUndefendedSlot() : -1;
                 if (engine.TryUseAbility(playerIndex, card, slot))
@@ -508,12 +509,19 @@ namespace WitsAndFools
         Card? LowestLegalAttack(GameEngine engine, Hand hand)
         {
             Card? best = null;
+            int bestScore = int.MinValue;
             bool bypass = engine.DoubleTroubleActive;
             foreach (var c in hand.Cards)
             {
                 if (!bypass && !Rules.CanAttackWith(engine.Bout, c)) continue;
+                int bonus = AttackAbilityBonus(c);
+                if (bonus > 0)
+                {
+                    int score = bonus + (int)c.Rank;
+                    if (best == null || score > bestScore) { best = c; bestScore = score; continue; }
+                }
                 if (best == null) { best = c; continue; }
-                if (PrefersAsAttack(c, best.Value, engine.Trump)) best = c;
+                if (bestScore <= 0 && PrefersAsAttack(c, best.Value, engine.Trump)) best = c;
             }
             return best;
         }
@@ -607,7 +615,12 @@ namespace WitsAndFools
                 if (!Rules.CanDefendSlotWith(engine.Bout, slot, c, engine.Trump)) continue;
                 candidates.Add(c);
             }
-            candidates.Sort((a, b) => PrefersAsDefense(a, b, engine.Trump) ? -1 : 1);
+            candidates.Sort((a, b) =>
+            {
+                int bonusA = DefenseAbilityBonus(a), bonusB = DefenseAbilityBonus(b);
+                if (bonusA != bonusB) return bonusB.CompareTo(bonusA);
+                return PrefersAsDefense(a, b, engine.Trump) ? -1 : 1;
+            });
             return candidates.Count > 0 ? candidates[0] : null;
         }
 
@@ -637,6 +650,59 @@ namespace WitsAndFools
             if (cu && !ct) return true;
             if (ct && !cu) return false;
             return (int)candidate.Rank < (int)current.Rank;
+        }
+
+        static int AttackAbilityBonus(Card card)
+        {
+            if (!card.HasAbility || card.Trigger != TriggerTiming.OnAttack) return 0;
+            return card.Ability.Value switch
+            {
+                AbilityType.ExtraDraw => 3,
+                AbilityType.DoubleTrouble => 4,
+                AbilityType.PileOn => 3,
+                AbilityType.Feint => 2,
+                AbilityType.Rampage => 5,
+                AbilityType.Haymaker => 3,
+                AbilityType.Conquer => 3,
+                AbilityType.Intimidate => 4,
+                AbilityType.RoyalDecree => 3,
+                _ => 2,
+            };
+        }
+
+        static int DefenseAbilityBonus(Card card)
+        {
+            if (!card.HasAbility || card.Trigger != TriggerTiming.OnDefend) return 0;
+            return card.Ability.Value switch
+            {
+                AbilityType.Blocker => 4,
+                AbilityType.DoubleDefense => 5,
+                AbilityType.Deflect => 4,
+                AbilityType.SlipAway => 3,
+                AbilityType.ShadowCloak => 3,
+                AbilityType.Riposte => 4,
+                AbilityType.IronGrip => 3,
+                AbilityType.SmokeBomb => 3,
+                AbilityType.Fortify => 2,
+                AbilityType.Brace => 2,
+                _ => 2,
+            };
+        }
+
+        static int CardAttackScore(Card c, Suit trump)
+        {
+            int score = (int)c.Rank;
+            if (c.Suit == trump) score -= 10;
+            score += AttackAbilityBonus(c);
+            return score;
+        }
+
+        static int CardDefenseScore(Card c, Suit trump)
+        {
+            int score = -(int)c.Rank;
+            if (c.Suit == trump) score -= 5;
+            score += DefenseAbilityBonus(c);
+            return score;
         }
     }
 }

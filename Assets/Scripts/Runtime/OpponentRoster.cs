@@ -232,6 +232,9 @@ namespace WitsAndFools
             ActIndex = src.ActIndex,
             IsElite = src.IsElite,
             IsBoss = src.IsBoss,
+            Doctrine = src.Doctrine,
+            DeckCardIds = new List<string>(src.DeckCardIds),
+            Relics = new List<RelicType>(src.Relics),
         };
     }
 }

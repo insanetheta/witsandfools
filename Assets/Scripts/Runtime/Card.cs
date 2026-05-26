@@ -7,12 +7,17 @@ namespace WitsAndFools
         public readonly Suit Suit;
         public readonly Rank Rank;
         public readonly AbilityType? Ability;
+        public readonly TriggerTiming Trigger;
+        public readonly string DefinitionId;
 
-        public Card(Suit suit, Rank rank, AbilityType? ability = null)
+        public Card(Suit suit, Rank rank, AbilityType? ability = null,
+            TriggerTiming trigger = TriggerTiming.None, string definitionId = null)
         {
             Suit = suit;
             Rank = rank;
             Ability = ability;
+            Trigger = trigger;
+            DefinitionId = definitionId;
         }
 
         public bool HasAbility => Ability.HasValue;

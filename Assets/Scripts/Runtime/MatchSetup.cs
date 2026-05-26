@@ -216,6 +216,59 @@ namespace WitsAndFools
             }
         }
 
+        public static (MatchConfig config, PlayerDeck playerDeck, PlayerDeck enemyDeck) BuildDualDeck(
+            RunState run, OpponentProfile opponent, Random rng)
+        {
+            var config = new MatchConfig();
+
+            var playerDeck = new PlayerDeck(run.PlayerDeckCardIds);
+            var enemyDeck = new PlayerDeck(opponent.DeckCardIds);
+
+            if (run.PlayerDoctrine.HasValue)
+            {
+                var doctrine = run.PlayerDoctrine.Value;
+                config.ArchetypeResource[0] = doctrine.Resource();
+            }
+
+            if (opponent.Doctrine.HasValue)
+            {
+                var doctrine = opponent.Doctrine.Value;
+                config.ArchetypeResource[1] = doctrine.Resource();
+            }
+
+            foreach (var relic in run.PlayerRelics)
+                ApplyRelic(config, 0, relic);
+            foreach (var relic in opponent.Relics)
+                ApplyRelic(config, 1, relic);
+
+            foreach (var burden in run.PlayerBurdens)
+                ApplyBurden(config, 0, burden);
+
+            ApplyHouseRule(config, opponent.HouseRule);
+
+            return (config, playerDeck, enemyDeck);
+        }
+
+        static void ApplyRelic(MatchConfig config, int player, RelicType relic)
+        {
+            if (!RelicPool.TryGet(relic, out var def)) return;
+
+            switch (relic)
+            {
+                case RelicType.SpysMonocle: config.SpysMonocle[player] = true; break;
+                case RelicType.IronGauntlet: config.BruteFury[player] = true; break;
+                case RelicType.TwoFacedCoin: config.LuckyDraw[player] = true; break;
+                case RelicType.BottomlessPurse: config.SteadyHand[player] = true; break;
+                case RelicType.CandleStub: config.CardCounter[player] = true; break;
+                case RelicType.MerchantsPurse: break;
+                case RelicType.PhoenixMedal: break;
+                case RelicType.GamblersDie: config.LoadedDice[player] = true; break;
+                case RelicType.VenetianGlass: config.CourtiersFan[player] = true; break;
+                case RelicType.ThiefsLantern: config.QuicksilverVial[player] = true; break;
+                case RelicType.PilgrimsCompass: config.QuickHands[player] = true; break;
+            }
+        }
+
         static void Shuffle<T>(List<T> list, Random rng)
         {
             for (int i = list.Count - 1; i > 0; i--)

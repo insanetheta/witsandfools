@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Doctrine War &mdash; Complete Game Design Document</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --gold: #D4A843;
+    --gold-bright: #F5D076;
+    --gold-dim: #8B6914;
+    --parchment: #F2E8D5;
+    --ink: #12100E;
+    --ink-light: #1E1A16;
+    --wood: #3D2B1F;
+    --schemer-teal: #1A8A7A;
+    --schemer-glow: #2DD4BF;
+    --brute-red: #A83232;
+    --brute-glow: #EF4444;
+    --trickster-violet: #7C3AED;
+    --trickster-glow: #A78BFA;
+    --hoarder-amber: #B45309;
+    --hoarder-glow: #F59E0B;
+    --neutral-gray: #6B7280;
+    --neutral-glow: #9CA3AF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--parchment);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ---- TABLE OF CONTENTS SIDEBAR ---- */
+  .toc-toggle {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1001;
+    background: rgba(18,16,14,0.95);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+    transition: all 0.3s;
+  }
+  .toc-toggle:hover { background: rgba(212,168,67,0.15); }
+
+  .toc-sidebar {
+    position: fixed;
+    top: 0;
+    left: -320px;
+    width: 300px;
+    height: 100vh;
+    background: rgba(18,16,14,0.98);
+    border-right: 1px solid var(--gold-dim);
+    z-index: 1000;
+    padding: 3.5rem 1.5rem 2rem;
+    overflow-y: auto;
+    transition: left 0.3s ease;
+  }
+  .toc-sidebar.open { left: 0; }
+
+  .toc-sidebar h3 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--gold-dim);
+  }
+  .toc-sidebar a {
+    display: block;
+    color: var(--parchment);
+    text-decoration: none;
+    font-size: 0.85rem;
+    padding: 0.35rem 0;
+    opacity: 0.7;
+    transition: all 0.2s;
+    border-left: 2px solid transparent;
+    padding-left: 0.75rem;
+  }
+  .toc-sidebar a:hover {
+    opacity: 1;
+    color: var(--gold);
+    border-left-color: var(--gold);
+  }
+  .toc-sidebar a.toc-sub {
+    padding-left: 1.5rem;
+    font-size: 0.78rem;
+    opacity: 0.5;
+  }
+  .toc-sidebar a.toc-sub:hover { opacity: 0.9; }
+
+  .toc-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+  }
+  .toc-overlay.open { display: block; }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background:
+      radial-gradient(ellipse 40% 60% at 20% 30%, rgba(26,138,122,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(168,50,50,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 35% 80%, rgba(124,58,237,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 65% 80%, rgba(180,83,9,0.06) 0%, transparent 70%),
+      var(--ink);
+    padding: 4rem 2rem;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 10 L45 35 L70 40 L45 45 L40 70 L35 45 L10 40 L35 35Z' fill='none' stroke='%23D4A84306' stroke-width='0.5'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+  .hero-badge {
+    display: inline-block;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    padding: 0.4rem 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .hero h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 60px rgba(212,168,67,0.25);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  .hero h1 span {
+    display: block;
+    font-size: 0.35em;
+    font-weight: 400;
+    color: var(--parchment);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    text-shadow: none;
+    opacity: 0.7;
+  }
+  .hero-tagline {
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--gold-bright);
+    opacity: 0.8;
+    max-width: 650px;
+    margin: 1.5rem auto 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 2rem 0;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-stat {
+    text-align: center;
+  }
+  .hero-stat .hs-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold-bright);
+    display: block;
+  }
+  .hero-stat .hs-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
+  .hero-archetypes {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    margin-top: 1rem;
+  }
+  .archetype-pill {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2rem;
+    border: 1px solid;
+  }
+  .archetype-pill.schemer { border-color: var(--schemer-teal); color: var(--schemer-glow); background: rgba(26,138,122,0.1); }
+  .archetype-pill.brute { border-color: var(--brute-red); color: var(--brute-glow); background: rgba(168,50,50,0.1); }
+  .archetype-pill.trickster { border-color: var(--trickster-violet); color: var(--trickster-glow); background: rgba(124,58,237,0.1); }
+  .archetype-pill.hoarder { border-color: var(--hoarder-amber); color: var(--hoarder-glow); background: rgba(180,83,9,0.1); }
+
+  /* ---- SECTIONS ---- */
+  section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+  section h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  section h2 + .subtitle {
+    font-style: italic;
+    color: var(--gold-dim);
+    margin-bottom: 2.5rem;
+    font-size: 1.1rem;
+  }
+  section h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    color: var(--gold-bright);
+    margin: 2rem 0 0.75rem;
+  }
+  section p {
+    margin-bottom: 1rem;
+    opacity: 0.9;
+  }
+
+  /* ---- DIVIDER ---- */
+  .divider {
+    text-align: center;
+    padding: 3rem 0;
+    position: relative;
+  }
+  .divider::before {
+    content: '';
+    position: absolute;
+    left: 10%; right: 10%;
+    top: 50%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+  .divider span {
+    background: var(--ink);
+    padding: 0 1.5rem;
+    position: relative;
+    color: var(--gold-dim);
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+  }
+
+  /* ---- RULES BOX ---- */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  .rule-card {
+    background: linear-gradient(160deg, rgba(61,43,31,0.3), rgba(18,16,14,0.9));
+    border: 1px solid rgba(212,168,67,0.2);
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: transform 0.3s ease;
+  }
+  .rule-card:hover { transform: translateY(-3px); }
+  .rule-card .rc-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .rule-card .rc-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .rule-card .rc-text {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    line-height: 1.5;
+  }
+
+  /* ---- ARCHETYPE PANELS ---- */
+  .archetype-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  @media (max-width: 700px) { .archetype-grid { grid-template-columns: 1fr; } }
+  .archetype-panel {
+    border-radius: 10px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .archetype-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .archetype-panel.schemer {
+    background: linear-gradient(160deg, rgba(26,138,122,0.12), rgba(18,16,14,0.95));
+    border: 1px solid rgba(26,138,122,0.3);
+  }
+  .archetype-panel.schemer::before { background: linear-gradient(90deg, transparent, var(--schemer-teal), transparent); }
+  .archetype-panel.brute {
+    background: linear-gradient(160deg, rgba(168,50,50,0.12), rgba(18,16,14,0.95));
+    border: 1px solid rgba(168,50,50,0.3);
+  }
+  .archetype-panel.brute::before { background: linear-gradient(90deg, transparent, var(--brute-red), transparent); }
+  .archetype-panel.trickster {
+    background: linear-gradient(160deg, rgba(124,58,237,0.12), rgba(18,16,14,0.95));
+    border: 1px solid rgba(124,58,237,0.3);
+  }
+  .archetype-panel.trickster::before { background: linear-gradient(90deg, transparent, var(--trickster-violet), transparent); }
+  .archetype-panel.hoarder {
+    background: linear-gradient(160deg, rgba(180,83,9,0.12), rgba(18,16,14,0.95));
+    border: 1px solid rgba(180,83,9,0.3);
+  }
+  .archetype-panel.hoarder::before { background: linear-gradient(90deg, transparent, var(--hoarder-amber), transparent); }
+
+  .archetype-panel .ap-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .archetype-panel .ap-icon { font-size: 2rem; width: 2.5rem; text-align: center; }
+  .archetype-panel .ap-title { font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 700; }
+  .archetype-panel.schemer .ap-title { color: var(--schemer-glow); }
+  .archetype-panel.brute .ap-title { color: var(--brute-glow); }
+  .archetype-panel.trickster .ap-title { color: var(--trickster-glow); }
+  .archetype-panel.hoarder .ap-title { color: var(--hoarder-glow); }
+  .archetype-panel .ap-philosophy { font-style: italic; font-size: 0.95rem; opacity: 0.6; margin-bottom: 0.75rem; }
+  .archetype-panel .ap-desc { font-size: 0.95rem; opacity: 0.85; line-height: 1.5; margin-bottom: 1rem; }
+  .archetype-panel .ap-resource {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 0.75rem;
+  }
+  .archetype-panel.schemer .ap-resource { background: rgba(26,138,122,0.2); color: var(--schemer-glow); }
+  .archetype-panel.brute .ap-resource { background: rgba(168,50,50,0.2); color: var(--brute-glow); }
+  .archetype-panel.trickster .ap-resource { background: rgba(124,58,237,0.2); color: var(--trickster-glow); }
+  .archetype-panel.hoarder .ap-resource { background: rgba(180,83,9,0.2); color: var(--hoarder-glow); }
+  .archetype-panel .ap-keywords { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+  .archetype-panel .kw {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--parchment);
+    opacity: 0.7;
+  }
+  .ap-starting-deck {
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .ap-starting-deck .sd-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.5rem;
+  }
+  .ap-starting-deck .sd-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  .ap-starting-deck .sd-chip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  /* ---- CARD GALLERY ---- */
+  .card-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin: 2rem 0;
+  }
+  @media (max-width: 600px) {
+    .card-gallery { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 420px) {
+    .card-gallery { grid-template-columns: 1fr; }
+  }
+
+  .game-card {
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .game-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  }
+  .gc-inner {
+    height: 100%;
+    border: 2px solid;
+    border-radius: 12px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 290px;
+  }
+  .game-card.schemer .gc-inner { background: linear-gradient(160deg, #0f2420, #0a1614); border-color: var(--schemer-teal); }
+  .game-card.brute .gc-inner { background: linear-gradient(160deg, #240f0f, #180a0a); border-color: var(--brute-red); }
+  .game-card.trickster .gc-inner { background: linear-gradient(160deg, #1a0f2e, #100a1e); border-color: var(--trickster-violet); }
+  .game-card.hoarder .gc-inner { background: linear-gradient(160deg, #1e1508, #140e04); border-color: var(--hoarder-amber); }
+  .game-card.neutral .gc-inner { background: linear-gradient(160deg, #1a1816, #12100e); border-color: var(--neutral-gray); }
+
+  .gc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.2rem; }
+  .gc-suit-rank { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 1.2rem; line-height: 1; }
+  .gc-suit-rank.red { color: #EF4444; }
+  .gc-suit-rank.black { color: var(--parchment); }
+  .gc-archetype-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.45rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.12rem 0.4rem;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .gc-archetype-badge.schemer { background: rgba(26,138,122,0.25); color: var(--schemer-glow); }
+  .gc-archetype-badge.brute { background: rgba(168,50,50,0.25); color: var(--brute-glow); }
+  .gc-archetype-badge.trickster { background: rgba(124,58,237,0.25); color: var(--trickster-glow); }
+  .gc-archetype-badge.hoarder { background: rgba(180,83,9,0.25); color: var(--hoarder-glow); }
+  .gc-archetype-badge.neutral { background: rgba(107,114,128,0.25); color: var(--neutral-gray); }
+
+  .gc-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--gold);
+    text-align: center;
+    margin: 0.3rem 0;
+    letter-spacing: 0.03em;
+    line-height: 1.2;
+  }
+  .gc-art {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    opacity: 0.35;
+    min-height: 50px;
+  }
+  .gc-ability {
+    border-radius: 6px;
+    padding: 0.45rem;
+    font-size: 0.68rem;
+    line-height: 1.35;
+    text-align: center;
+    margin-top: auto;
+  }
+  .game-card.schemer .gc-ability { background: rgba(26,138,122,0.12); border: 1px solid rgba(26,138,122,0.25); }
+  .game-card.brute .gc-ability { background: rgba(168,50,50,0.12); border: 1px solid rgba(168,50,50,0.25); }
+  .game-card.trickster .gc-ability { background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.25); }
+  .game-card.hoarder .gc-ability { background: rgba(180,83,9,0.12); border: 1px solid rgba(180,83,9,0.25); }
+  .game-card.neutral .gc-ability { background: rgba(107,114,128,0.08); border: 1px solid rgba(107,114,128,0.2); }
+
+  .gc-trigger {
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+  .game-card.schemer .gc-trigger { color: var(--schemer-glow); }
+  .game-card.brute .gc-trigger { color: var(--brute-glow); }
+  .game-card.trickster .gc-trigger { color: var(--trickster-glow); }
+  .game-card.hoarder .gc-trigger { color: var(--hoarder-glow); }
+  .game-card.neutral .gc-trigger { color: var(--neutral-gray); }
+
+  .gc-flavor {
+    font-size: 0.6rem;
+    font-style: italic;
+    text-align: center;
+    opacity: 0.4;
+    margin-top: 0.3rem;
+    line-height: 1.2;
+  }
+
+  .gc-rarity {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .gc-rarity.common { background: var(--neutral-gray); }
+  .gc-rarity.uncommon { background: #3B82F6; box-shadow: 0 0 6px rgba(59,130,246,0.5); }
+  .gc-rarity.rare { background: var(--gold); box-shadow: 0 0 8px rgba(212,168,67,0.6); }
+
+  .gc-starting {
+    position: absolute;
+    bottom: 0.4rem;
+    left: 0.4rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.4rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.1rem 0.3rem;
+    border-radius: 2px;
+    background: rgba(212,168,67,0.2);
+    color: var(--gold);
+    border: 1px solid rgba(212,168,67,0.3);
+  }
+
+  /* ---- DOCTRINE SECTION HEADER ---- */
+  .doctrine-header {
+    padding: 2rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .doctrine-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .doctrine-header.schemer {
+    background: linear-gradient(160deg, rgba(26,138,122,0.15), rgba(18,16,14,0.95));
+    border: 1px solid rgba(26,138,122,0.3);
+  }
+  .doctrine-header.schemer::before { background: linear-gradient(90deg, transparent, var(--schemer-teal), transparent); }
+  .doctrine-header.brute {
+    background: linear-gradient(160deg, rgba(168,50,50,0.15), rgba(18,16,14,0.95));
+    border: 1px solid rgba(168,50,50,0.3);
+  }
+  .doctrine-header.brute::before { background: linear-gradient(90deg, transparent, var(--brute-red), transparent); }
+  .doctrine-header.trickster {
+    background: linear-gradient(160deg, rgba(124,58,237,0.15), rgba(18,16,14,0.95));
+    border: 1px solid rgba(124,58,237,0.3);
+  }
+  .doctrine-header.trickster::before { background: linear-gradient(90deg, transparent, var(--trickster-violet), transparent); }
+  .doctrine-header.hoarder {
+    background: linear-gradient(160deg, rgba(180,83,9,0.15), rgba(18,16,14,0.95));
+    border: 1px solid rgba(180,83,9,0.3);
+  }
+  .doctrine-header.hoarder::before { background: linear-gradient(90deg, transparent, var(--hoarder-amber), transparent); }
+  .doctrine-header.neutral {
+    background: linear-gradient(160deg, rgba(107,114,128,0.12), rgba(18,16,14,0.95));
+    border: 1px solid rgba(107,114,128,0.3);
+  }
+  .doctrine-header.neutral::before { background: linear-gradient(90deg, transparent, var(--neutral-gray), transparent); }
+
+  .doctrine-header .dh-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .doctrine-header.schemer .dh-name { color: var(--schemer-glow); }
+  .doctrine-header.brute .dh-name { color: var(--brute-glow); }
+  .doctrine-header.trickster .dh-name { color: var(--trickster-glow); }
+  .doctrine-header.hoarder .dh-name { color: var(--hoarder-glow); }
+  .doctrine-header.neutral .dh-name { color: var(--neutral-glow); }
+  .doctrine-header .dh-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    opacity: 0.6;
+    margin-top: 0.25rem;
+  }
+
+  /* ---- RELIC SECTION ---- */
+  .relic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+    margin: 1.5rem 0 2.5rem;
+  }
+  .relic {
+    background: linear-gradient(160deg, rgba(61,43,31,0.4), rgba(18,16,14,0.9));
+    border: 1px solid var(--gold-dim);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: transform 0.3s ease;
+    position: relative;
+  }
+  .relic:hover { transform: translateY(-3px); }
+  .relic .r-icon { font-size: 2rem; display: block; margin-bottom: 0.4rem; }
+  .relic .r-name { font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 700; color: var(--gold); margin-bottom: 0.25rem; }
+  .relic .r-desc { font-size: 0.8rem; color: var(--parchment); opacity: 0.85; line-height: 1.4; margin-bottom: 0.4rem; }
+  .relic .r-effect { font-size: 0.72rem; color: var(--parchment); opacity: 0.6; line-height: 1.3; font-style: italic; margin-bottom: 0.5rem; }
+  .relic .r-meta {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-top: 0.5rem;
+  }
+  .relic .r-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    padding: 0.12rem 0.4rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .r-tag.rarity-common { background: rgba(107,114,128,0.2); color: var(--neutral-glow); }
+  .r-tag.rarity-uncommon { background: rgba(59,130,246,0.2); color: #60A5FA; }
+  .r-tag.rarity-rare { background: rgba(212,168,67,0.2); color: var(--gold-bright); }
+  .r-tag.doctrine-schemer { background: rgba(26,138,122,0.15); color: var(--schemer-glow); }
+  .r-tag.doctrine-brute { background: rgba(168,50,50,0.15); color: var(--brute-glow); }
+  .r-tag.doctrine-trickster { background: rgba(124,58,237,0.15); color: var(--trickster-glow); }
+  .r-tag.doctrine-hoarder { background: rgba(180,83,9,0.15); color: var(--hoarder-glow); }
+  .r-tag.doctrine-universal { background: rgba(212,168,67,0.1); color: var(--gold); }
+  .r-tag.price { background: rgba(245,208,118,0.1); color: var(--gold-bright); }
+  .r-tag.acquisition { background: rgba(255,255,255,0.05); color: var(--parchment); opacity: 0.6; }
+  .relic .r-flavor { font-size: 0.62rem; font-style: italic; opacity: 0.35; margin-top: 0.4rem; line-height: 1.2; }
+
+  .relic.starting-relic { border-color: var(--gold); }
+  .relic.starting-relic::after {
+    content: 'STARTING';
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.45rem;
+    letter-spacing: 0.1em;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    background: rgba(212,168,67,0.25);
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+  }
+
+  /* ---- ENEMY SECTION ---- */
+  .enemy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+    margin: 1.5rem 0;
+  }
+  .enemy-card {
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 1px solid;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+  .enemy-card:hover { transform: translateY(-3px); }
+  .enemy-card.e-brute {
+    background: linear-gradient(160deg, rgba(168,50,50,0.12), rgba(18,16,14,0.95));
+    border-color: rgba(168,50,50,0.3);
+  }
+  .enemy-card.e-trickster {
+    background: linear-gradient(160deg, rgba(124,58,237,0.12), rgba(18,16,14,0.95));
+    border-color: rgba(124,58,237,0.3);
+  }
+  .enemy-card.e-schemer {
+    background: linear-gradient(160deg, rgba(26,138,122,0.12), rgba(18,16,14,0.95));
+    border-color: rgba(26,138,122,0.3);
+  }
+  .enemy-card.e-hoarder {
+    background: linear-gradient(160deg, rgba(180,83,9,0.12), rgba(18,16,14,0.95));
+    border-color: rgba(180,83,9,0.3);
+  }
+  .enemy-card.e-hybrid {
+    background: linear-gradient(160deg, rgba(168,50,50,0.08), rgba(26,138,122,0.08), rgba(18,16,14,0.95));
+    border-color: rgba(212,168,67,0.4);
+  }
+  .enemy-card .ec-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+  .enemy-card .ec-icon { font-size: 2rem; }
+  .enemy-card .ec-tier {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .ec-tier.regular { background: rgba(107,114,128,0.2); color: var(--neutral-glow); }
+  .ec-tier.elite { background: rgba(212,168,67,0.2); color: var(--gold-bright); }
+  .ec-tier.boss { background: rgba(168,50,50,0.25); color: #EF4444; border: 1px solid rgba(168,50,50,0.4); }
+  .enemy-card .ec-name { font-family: 'Cinzel', serif; font-size: 1.05rem; font-weight: 700; color: var(--gold); margin-bottom: 0.15rem; }
+  .enemy-card .ec-doctrine {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .enemy-card.e-brute .ec-doctrine { color: var(--brute-glow); }
+  .enemy-card.e-trickster .ec-doctrine { color: var(--trickster-glow); }
+  .enemy-card.e-schemer .ec-doctrine { color: var(--schemer-glow); }
+  .enemy-card.e-hoarder .ec-doctrine { color: var(--hoarder-glow); }
+  .enemy-card.e-hybrid .ec-doctrine { color: var(--gold); }
+  .enemy-card .ec-desc { font-size: 0.82rem; opacity: 0.75; line-height: 1.4; margin-bottom: 0.5rem; }
+  .enemy-card .ec-visual { font-size: 0.72rem; opacity: 0.5; font-style: italic; margin-bottom: 0.6rem; line-height: 1.3; }
+  .enemy-card .ec-stats {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+  }
+  .enemy-card .ec-stat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    padding: 0.12rem 0.4rem;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.3);
+    color: var(--parchment);
+    opacity: 0.7;
+  }
+  .enemy-card .ec-house-rule {
+    font-size: 0.72rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(212,168,67,0.08);
+    border: 1px solid rgba(212,168,67,0.15);
+    margin-bottom: 0.5rem;
+  }
+  .enemy-card .ec-house-rule .hr-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+  .enemy-card .ec-signature {
+    font-size: 0.72rem;
+    padding: 0.5rem 0.6rem;
+    border-radius: 4px;
+    border: 1px solid rgba(168,50,50,0.3);
+    background: rgba(168,50,50,0.08);
+    line-height: 1.4;
+  }
+  .ec-signature .sig-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #EF4444;
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+  .enemy-card .ec-difficulty {
+    display: flex;
+    gap: 2px;
+    margin-top: 0.5rem;
+  }
+  .ec-difficulty .diff-pip {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.1);
+  }
+  .ec-difficulty .diff-pip.filled { background: var(--gold); }
+  .ec-difficulty .diff-pip.filled.high { background: #EF4444; }
+
+  /* Act header */
+  .act-header {
+    padding: 1.5rem 2rem;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(160deg, rgba(61,43,31,0.3), rgba(18,16,14,0.95));
+    border: 1px solid rgba(212,168,67,0.2);
+  }
+  .act-header .ah-act {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
+  .act-header .ah-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  /* ---- DECK BUILDING RULES ---- */
+  .deck-rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.25rem;
+    margin: 2rem 0;
+  }
+  .deck-rule {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(212,168,67,0.15);
+    border-radius: 8px;
+    padding: 1.25rem;
+  }
+  .deck-rule .dr-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold-bright);
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  .deck-rule .dr-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+  .deck-rule .dr-text {
+    font-size: 0.82rem;
+    opacity: 0.7;
+    line-height: 1.4;
+  }
+
+  /* ---- ECONOMY TABLE ---- */
+  .econ-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+  }
+  .econ-table th {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    border-bottom: 1px solid rgba(212,168,67,0.2);
+    padding: 0.6rem 1rem;
+    text-align: left;
+  }
+  .econ-table td {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .econ-table td:first-child { color: var(--gold); font-family: 'Cinzel', serif; font-size: 0.8rem; }
+  .econ-table .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--gold-bright);
+  }
+
+  /* ---- PLACEHOLDER ---- */
+  .placeholder-section {
+    text-align: center;
+    padding: 3rem 2rem;
+    border: 2px dashed rgba(212,168,67,0.2);
+    border-radius: 12px;
+    margin: 2rem 0;
+  }
+  .placeholder-section .ps-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    border: 1px solid var(--gold-dim);
+    padding: 0.3rem 1rem;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+  .placeholder-section .ps-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .placeholder-section .ps-text {
+    opacity: 0.5;
+    font-style: italic;
+  }
+
+  /* ---- FOOTER ---- */
+  .doc-footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 1px solid rgba(212,168,67,0.15);
+    margin-top: 2rem;
+  }
+  .doc-footer .df-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.15em;
+  }
+  .doc-footer .df-sub {
+    font-size: 0.8rem;
+    opacity: 0.4;
+    margin-top: 0.5rem;
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 768px) {
+    section { padding: 3rem 1.25rem; }
+    .enemy-grid { grid-template-columns: 1fr; }
+    .relic-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOC Toggle -->
+<button class="toc-toggle" onclick="toggleToc()" id="tocToggle">&#9776; Contents</button>
+<div class="toc-overlay" id="tocOverlay" onclick="toggleToc()"></div>
+
+<!-- TOC Sidebar -->
+<nav class="toc-sidebar" id="tocSidebar">
+  <h3>Table of Contents</h3>
+  <a href="#hero">Title</a>
+  <a href="#rules">Rules of Play</a>
+  <a class="toc-sub" href="#rules-combat">Durak Combat</a>
+  <a class="toc-sub" href="#rules-decks">Per-Player Decks</a>
+  <a class="toc-sub" href="#rules-abilities">Ability Triggers</a>
+  <a class="toc-sub" href="#rules-cycling">Deck Cycling</a>
+  <a href="#doctrines">The Four Doctrines</a>
+  <a class="toc-sub" href="#doctrine-schemer">The Schemer</a>
+  <a class="toc-sub" href="#doctrine-brute">The Brute</a>
+  <a class="toc-sub" href="#doctrine-trickster">The Trickster</a>
+  <a class="toc-sub" href="#doctrine-hoarder">The Hoarder</a>
+  <a href="#cards">Card Galleries</a>
+  <a class="toc-sub" href="#cards-schemer">Schemer Cards (20)</a>
+  <a class="toc-sub" href="#cards-brute">Brute Cards (20)</a>
+  <a class="toc-sub" href="#cards-trickster">Trickster Cards (20)</a>
+  <a class="toc-sub" href="#cards-hoarder">Hoarder Cards (20)</a>
+  <a class="toc-sub" href="#cards-neutral">Neutral Cards (15)</a>
+  <a href="#relics">Relic Catalog</a>
+  <a class="toc-sub" href="#relics-starting">Starting Relics</a>
+  <a class="toc-sub" href="#relics-schemer">Schemer Relics</a>
+  <a class="toc-sub" href="#relics-brute">Brute Relics</a>
+  <a class="toc-sub" href="#relics-trickster">Trickster Relics</a>
+  <a class="toc-sub" href="#relics-hoarder">Hoarder Relics</a>
+  <a class="toc-sub" href="#relics-universal">Universal Relics</a>
+  <a href="#enemies">Enemy Roster</a>
+  <a class="toc-sub" href="#enemies-act1">Act 1 &mdash; The Bilge</a>
+  <a class="toc-sub" href="#enemies-act2">Act 2 &mdash; The Market</a>
+  <a class="toc-sub" href="#enemies-act3">Act 3 &mdash; The Guild</a>
+  <a class="toc-sub" href="#enemies-act4">Act 4 &mdash; The Church</a>
+  <a class="toc-sub" href="#enemies-act5">Act 5 &mdash; The Palace</a>
+  <a href="#acts-events">Acts &amp; Events</a>
+  <a href="#deckbuilding">Deck Building Rules</a>
+  <a href="#economy">Economy</a>
+</nav>
+
+<!-- ============ HERO ============ -->
+<div class="hero" id="hero">
+  <div class="hero-badge">Complete Game Design Document</div>
+  <h1>
+    The Doctrine War
+    <span>Wits &amp; Fools &bull; Deckbuilder Redesign</span>
+  </h1>
+  <p class="hero-tagline">
+    "Build your doctrine. Master your archetype. Break their strategy."
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="hs-num">95</span><span class="hs-label">Cards</span></div>
+    <div class="hero-stat"><span class="hs-num">4</span><span class="hs-label">Doctrines</span></div>
+    <div class="hero-stat"><span class="hs-num">28</span><span class="hs-label">Relics</span></div>
+    <div class="hero-stat"><span class="hs-num">30</span><span class="hs-label">Enemies</span></div>
+    <div class="hero-stat"><span class="hs-num">5</span><span class="hs-label">Acts</span></div>
+  </div>
+  <div class="hero-archetypes">
+    <span class="archetype-pill schemer">The Schemer</span>
+    <span class="archetype-pill brute">The Brute</span>
+    <span class="archetype-pill trickster">The Trickster</span>
+    <span class="archetype-pill hoarder">The Hoarder</span>
+  </div>
+</div>
+
+<div class="divider"><span>RULES OF PLAY</span></div>
+
+<!-- ============ RULES ============ -->
+<section id="rules">
+  <h2>Rules of Play</h2>
+  <p class="subtitle">Durak combat with per-player decks and ability-triggering cards.</p>
+
+  <div class="rules-grid" id="rules-combat">
+    <div class="rule-card">
+      <span class="rc-icon">&#9876;</span>
+      <div class="rc-title">Attack &amp; Defend</div>
+      <div class="rc-text">The attacker plays cards face-up. The defender must beat each attack card with a card of the same suit and higher rank, or a trump card. Multiple attack cards can be played if they share a rank with cards already on the table.</div>
+    </div>
+    <div class="rule-card">
+      <span class="rc-icon">&#127183;</span>
+      <div class="rc-title">Trump Suit</div>
+      <div class="rc-text">One suit is designated trump at match start (randomly, unless modified by relics). Trump cards beat any non-trump card regardless of suit. Among trump cards, higher rank wins. Trump is the great equalizer.</div>
+    </div>
+    <div class="rule-card">
+      <span class="rc-icon">&#128031;</span>
+      <div class="rc-title">Eating Cards</div>
+      <div class="rc-text">If the defender cannot (or chooses not to) beat all attacks, they "eat" &mdash; picking up every card on the table into their hand. The attacker then gets another turn. Eating is punishing but can fuel Hoarder strategies.</div>
+    </div>
+    <div class="rule-card">
+      <span class="rc-icon">&#127942;</span>
+      <div class="rc-title">Win Condition</div>
+      <div class="rc-text">Empty your hand when your draw pile is exhausted. The first player to have zero cards wins. The last player holding cards is the "Durak" (fool) and loses the match.</div>
+    </div>
+  </div>
+
+  <div class="rules-grid" id="rules-decks">
+    <div class="rule-card">
+      <span class="rc-icon">&#128220;</span>
+      <div class="rc-title">Per-Player Decks</div>
+      <div class="rc-text">Unlike traditional Durak which uses a shared 36-card deck, each player brings their own constructed deck (12&ndash;25 cards). Your deck is your character build, shaped by doctrine choices throughout the run.</div>
+    </div>
+    <div class="rule-card">
+      <span class="rc-icon">&#128260;</span>
+      <div class="rc-title">Draw &amp; Discard</div>
+      <div class="rc-text">At the end of each bout, players draw from their own deck to refill to their hand limit (default 6). Successfully defended cards are removed from the game. Cards eaten go to the defender's hand.</div>
+    </div>
+  </div>
+
+  <h3 id="rules-abilities">Ability Triggers</h3>
+  <p>Every doctrine card has an ability that fires at a specific timing:</p>
+  <div class="rules-grid">
+    <div class="rule-card">
+      <span class="rc-icon">&#9876;</span>
+      <div class="rc-title">OnAttack</div>
+      <div class="rc-text">Triggers when this card is played as an attack. Effects resolve before the defender responds. Brute cards often have OnAttack triggers for rank boosts and pressure.</div>
+    </div>
+    <div class="rule-card">
+      <span class="rc-icon">&#128737;</span>
+      <div class="rc-title">OnDefend</div>
+      <div class="rc-text">Triggers when this card is played to defend against an attack. Effects resolve after the defense is accepted. Schemer and Hoarder cards favor OnDefend for card draw and resource gain.</div>
+    </div>
+    <div class="rule-card">
+      <span class="rc-icon">&#128161;</span>
+      <div class="rc-title">Passive</div>
+      <div class="rc-text">Always active while in your hand or in play. Provides continuous bonuses like increased hand size, rank boosts, or triggered effects. Powerful but takes a deck slot.</div>
+    </div>
+    <div class="rule-card">
+      <span class="rc-icon">&#10006;</span>
+      <div class="rc-title">Active (None)</div>
+      <div class="rc-text">Can be activated by discarding the card from your hand as a free action. Provides a one-time powerful effect at the cost of losing the card. Sacrifice for immediate impact.</div>
+    </div>
+  </div>
+
+  <h3 id="rules-cycling">Deck Cycling</h3>
+  <p>When your draw pile empties, there is <strong>no reshuffle</strong>. Cards played in a successful defense are removed from the game entirely &mdash; neither player gets them back. This creates natural attrition: decks get thinner as the match progresses, making every card increasingly precious. The Schemer's card draw and the Hoarder's pickup benefits become more valuable as the draw pile shrinks.</p>
+</section>
+
+<div class="divider"><span>THE FOUR DOCTRINES</span></div>
+
+<!-- ============ DOCTRINES ============ -->
+<section id="doctrines">
+  <h2>The Four Doctrines</h2>
+  <p class="subtitle">Each doctrine defines a philosophy of play, a resource, and a starting deck of 12 cards.</p>
+
+  <div class="archetype-grid">
+
+    <!-- SCHEMER -->
+    <div class="archetype-panel schemer" id="doctrine-schemer">
+      <div class="ap-header">
+        <div class="ap-icon">&#128065;</div>
+        <div class="ap-title">The Schemer</div>
+      </div>
+      <div class="ap-philosophy">"Knowledge is the sharpest blade."</div>
+      <div class="ap-resource">Resource: Intel</div>
+      <div class="ap-desc">Card draw, deck manipulation, information warfare. Schemers see more cards, cycle faster, and always know what's coming. They win through inevitability &mdash; grinding opponents down with card advantage and perfect information.</div>
+      <div class="ap-keywords">
+        <span class="kw">Draw</span>
+        <span class="kw">Scry</span>
+        <span class="kw">Reveal</span>
+        <span class="kw">Cycle</span>
+        <span class="kw">Intel</span>
+      </div>
+      <div class="ap-starting-deck">
+        <div class="sd-title">Starting Deck (12 cards)</div>
+        <div class="sd-cards">
+          <span class="sd-chip">7&#9824; Informant</span>
+          <span class="sd-chip">6&#9830; Spyglass</span>
+          <span class="sd-chip">8&#9827; Cipher</span>
+          <span class="sd-chip">6&#9829; Cartographer</span>
+          <span class="sd-chip">6&#9827; Librarian</span>
+          <span class="sd-chip">10&#9824; Interceptor</span>
+          <span class="sd-chip">8&#9829; Double Agent</span>
+          <span class="sd-chip">6&#9824; Poisoner</span>
+          <span class="sd-chip">7&#9830; Scribe</span>
+          <span class="sd-chip">J&#9829; Envoy</span>
+          <span class="sd-chip">J&#9827; Inquisitor</span>
+          <span class="sd-chip">A&#9829; Ambassador</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRUTE -->
+    <div class="archetype-panel brute" id="doctrine-brute">
+      <div class="ap-header">
+        <div class="ap-icon">&#9876;</div>
+        <div class="ap-title">The Brute</div>
+      </div>
+      <div class="ap-philosophy">"Overwhelming force needs no subtlety."</div>
+      <div class="ap-resource">Resource: Fury</div>
+      <div class="ap-desc">Raw numbers, forced pick-ups, relentless pressure. Brutes pump their cards' effective ranks, attack with multiple cards, and punish failed defenses. They win by making every bout a losing proposition for the defender.</div>
+      <div class="ap-keywords">
+        <span class="kw">+Rank</span>
+        <span class="kw">Multi-attack</span>
+        <span class="kw">Punish</span>
+        <span class="kw">Force pickup</span>
+        <span class="kw">Fury</span>
+      </div>
+      <div class="ap-starting-deck">
+        <div class="sd-title">Starting Deck (12 cards)</div>
+        <div class="sd-cards">
+          <span class="sd-chip">10&#9827; Condottiero</span>
+          <span class="sd-chip">9&#9824; Battering Ram</span>
+          <span class="sd-chip">7&#9829; Berserker</span>
+          <span class="sd-chip">8&#9830; Enforcer</span>
+          <span class="sd-chip">Q&#9824; Warmonger</span>
+          <span class="sd-chip">7&#9827; Pit Fighter</span>
+          <span class="sd-chip">10&#9829; Merc. Captain</span>
+          <span class="sd-chip">6&#9827; Sapper</span>
+          <span class="sd-chip">J&#9830; Pillager</span>
+          <span class="sd-chip">A&#9824; Warlord</span>
+          <span class="sd-chip">6&#9829; Vanguard</span>
+          <span class="sd-chip">7&#9830; Arsonist</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRICKSTER -->
+    <div class="archetype-panel trickster" id="doctrine-trickster">
+      <div class="ap-header">
+        <div class="ap-icon">&#127183;</div>
+        <div class="ap-title">The Trickster</div>
+      </div>
+      <div class="ap-philosophy">"The rules are just suggestions."</div>
+      <div class="ap-resource">Resource: Favor</div>
+      <div class="ap-desc">Trump manipulation, suit-shifting, rule-bending. Tricksters change the trump suit mid-bout, make cards count as different suits, and invalidate the opponent's carefully planned defense. They win by making the game play by their rules.</div>
+      <div class="ap-keywords">
+        <span class="kw">Trump shift</span>
+        <span class="kw">Wild suit</span>
+        <span class="kw">Redirect</span>
+        <span class="kw">Nullify</span>
+        <span class="kw">Favor</span>
+      </div>
+      <div class="ap-starting-deck">
+        <div class="sd-title">Starting Deck (12 cards)</div>
+        <div class="sd-cards">
+          <span class="sd-chip">7&#9829; Courtesan</span>
+          <span class="sd-chip">6&#9830; Alchemist</span>
+          <span class="sd-chip">6&#9827; Jester</span>
+          <span class="sd-chip">8&#9829; Mask Maker</span>
+          <span class="sd-chip">7&#9824; Illusionist</span>
+          <span class="sd-chip">9&#9830; Charlatan</span>
+          <span class="sd-chip">8&#9827; Fortune Teller</span>
+          <span class="sd-chip">10&#9830; Card Sharp</span>
+          <span class="sd-chip">10&#9827; Smuggler</span>
+          <span class="sd-chip">J&#9829; Acrobat</span>
+          <span class="sd-chip">Q&#9829; Venetian Noble</span>
+          <span class="sd-chip">A&#9824; Maestro</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOARDER -->
+    <div class="archetype-panel hoarder" id="doctrine-hoarder">
+      <div class="ap-header">
+        <div class="ap-icon">&#128176;</div>
+        <div class="ap-title">The Hoarder</div>
+      </div>
+      <div class="ap-philosophy">"The one with the most cards wins... eventually."</div>
+      <div class="ap-resource">Resource: Luck</div>
+      <div class="ap-desc">Benefits from large hands, long games, and attrition. Hoarders gain power the more cards they hold, turn failed defenses (picking up cards) into advantages, and outlast opponents. They win by flipping Durak's core rule on its head.</div>
+      <div class="ap-keywords">
+        <span class="kw">Hand size</span>
+        <span class="kw">Attrition</span>
+        <span class="kw">On pickup</span>
+        <span class="kw">Stockpile</span>
+        <span class="kw">Luck</span>
+      </div>
+      <div class="ap-starting-deck">
+        <div class="sd-title">Starting Deck (12 cards)</div>
+        <div class="sd-cards">
+          <span class="sd-chip">7&#9830; Miser</span>
+          <span class="sd-chip">6&#9829; Collector</span>
+          <span class="sd-chip">J&#9830; Merchant</span>
+          <span class="sd-chip">6&#9827; Packrat</span>
+          <span class="sd-chip">8&#9827; Warehouse Keeper</span>
+          <span class="sd-chip">9&#9830; Tax Collector</span>
+          <span class="sd-chip">A&#9830; Banker</span>
+          <span class="sd-chip">8&#9829; Antiquarian</span>
+          <span class="sd-chip">7&#9824; Provisioner</span>
+          <span class="sd-chip">7&#9827; Apothecary</span>
+          <span class="sd-chip">10&#9824; Auctioneer</span>
+          <span class="sd-chip">6&#9824; Treasure Hunter</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><span>CARD GALLERIES</span></div>
+
+<!-- ============ CARD GALLERIES ============ -->
+<section id="cards">
+  <h2>Card Galleries</h2>
+  <p class="subtitle">All 95 cards in the game &mdash; 20 per doctrine plus 15 neutral.</p>
+
+  <!-- SCHEMER CARDS -->
+  <div class="doctrine-header schemer" id="cards-schemer">
+    <div class="dh-name">The Schemer</div>
+    <div class="dh-count">20 cards &bull; Resource: Intel &bull; 12 in starting deck</div>
+  </div>
+
+  <div class="card-gallery">
+
+    <div class="game-card schemer">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">7&#9824;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Informant</div>
+        <div class="gc-art">&#128065;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Draw 2 cards from your deck.</div>
+        <div class="gc-flavor">Every whisper has a price.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">6&#9830;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Spyglass</div>
+        <div class="gc-art">&#128269;</div>
+        <div class="gc-ability"><span class="gc-trigger">Active</span>Scry 3: look at the top 3 cards of your deck and reorder them.</div>
+        <div class="gc-flavor">From the campanile, all Venice lies bare.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">8&#9827;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Cipher</div>
+        <div class="gc-art">&#128272;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Reveal the top card of opponent's deck; if rank 10+, draw 1.</div>
+        <div class="gc-flavor">The code reveals more than its author intended.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">6&#9829;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Cartographer</div>
+        <div class="gc-art">&#128506;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Scry 2, then draw 1 card.</div>
+        <div class="gc-flavor">He who maps the terrain chooses the battlefield.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">9&#9830;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Forger</div>
+        <div class="gc-art">&#128396;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Look at opponent's hand; choose 1 card they must play next if able.</div>
+        <div class="gc-flavor">A perfect copy is worth more than the original.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">6&#9827;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Librarian</div>
+        <div class="gc-art">&#128218;</div>
+        <div class="gc-ability"><span class="gc-trigger">Passive</span>Your Scry effects look at 1 additional card.</div>
+        <div class="gc-flavor">The index is mightier than the text.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">10&#9824;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Interceptor</div>
+        <div class="gc-art">&#128232;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Reveal opponent's top card; if it matches this card's suit, discard it.</div>
+        <div class="gc-flavor">The message never arrived.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">8&#9829;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Double Agent</div>
+        <div class="gc-art">&#128373;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Draw 1 card; opponent must reveal 1 random card from their hand.</div>
+        <div class="gc-flavor">He serves two masters and betrays them both.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">6&#9824;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Poisoner</div>
+        <div class="gc-art">&#9760;</div>
+        <div class="gc-ability"><span class="gc-trigger">Active</span>Discard to force opponent to put the top 3 cards of their deck on the bottom.</div>
+        <div class="gc-flavor">A slow death, sweetened with wine.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">7&#9830;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Scribe</div>
+        <div class="gc-art">&#128221;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Cycle 1: discard 1 card, then draw 1 card.</div>
+        <div class="gc-flavor">Every transaction leaves a trace in the ledger.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">J&#9829;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Envoy</div>
+        <div class="gc-art">&#128140;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Gain 1 Intel.</div>
+        <div class="gc-flavor">He speaks for the Doge, but listens for himself.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">J&#9827;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Inquisitor</div>
+        <div class="gc-art">&#9878;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Opponent reveals their entire hand.</div>
+        <div class="gc-flavor">Confession is inevitable; only the timing varies.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">K&#9824;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Mastermind</div>
+        <div class="gc-art">&#128081;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>If you have 3+ Intel, draw 1 card.</div>
+        <div class="gc-flavor">Every piece falls exactly where he planned.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity uncommon"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">Q&#9830;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Cryptanalyst</div>
+        <div class="gc-art">&#128271;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Gain 1 Intel; if you have 5+ Intel, draw 1 card.</div>
+        <div class="gc-flavor">Patterns emerge from chaos for those who know where to look.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">9&#9829;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Puppeteer</div>
+        <div class="gc-art">&#127917;</div>
+        <div class="gc-ability"><span class="gc-trigger">Active</span>Discard to look at opponent's hand and put 1 card from it on top of their deck.</div>
+        <div class="gc-flavor">The strings are invisible, but the dance is unmistakable.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">9&#9827;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Archivist</div>
+        <div class="gc-art">&#128218;</div>
+        <div class="gc-ability"><span class="gc-trigger">Passive</span>When you draw cards from abilities, draw 1 additional card once per round.</div>
+        <div class="gc-flavor">Nothing is ever truly lost in these vaults.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">A&#9829;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Ambassador</div>
+        <div class="gc-art">&#127760;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Gain 1 Intel.</div>
+        <div class="gc-flavor">His presence alone shifts the balance of power.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity uncommon"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">8&#9824;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Shadow Courier</div>
+        <div class="gc-art">&#127769;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Scry 2; if either card is trump suit, draw it.</div>
+        <div class="gc-flavor">She moves between courts unseen and unremembered.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity common"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">10&#9830;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Venetian Mirror</div>
+        <div class="gc-art">&#128142;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Reveal the card you defend with before playing; gain 1 Intel.</div>
+        <div class="gc-flavor">The mirror shows not what is, but what will be.</div>
+      </div>
+    </div>
+
+    <div class="game-card schemer">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">K&#9827;</span><span class="gc-archetype-badge schemer">Schemer</span></div>
+        <div class="gc-name">The Doge's Spymaster</div>
+        <div class="gc-art">&#128373;</div>
+        <div class="gc-ability"><span class="gc-trigger">Passive</span>At the start of each round, Scry 1.</div>
+        <div class="gc-flavor">The Council of Ten answers to him alone.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BRUTE CARDS -->
+  <div class="doctrine-header brute" id="cards-brute">
+    <div class="dh-name">The Brute</div>
+    <div class="dh-count">20 cards &bull; Resource: Fury &bull; 12 in starting deck</div>
+  </div>
+
+  <div class="card-gallery">
+
+    <div class="game-card brute">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">10&#9827;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Condottiero</div>
+        <div class="gc-art">&#9876;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>This card attacks with +2 rank.</div>
+        <div class="gc-flavor">Gold buys soldiers. Fear buys victory.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">9&#9824;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Battering Ram</div>
+        <div class="gc-art">&#128296;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>If defender picks up, gain 2 Fury.</div>
+        <div class="gc-flavor">The gate holds until it doesn't.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">7&#9829;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Berserker</div>
+        <div class="gc-art">&#128544;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Attack with an additional card from your hand that shares this rank.</div>
+        <div class="gc-flavor">He fights until nothing stands, including himself.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">8&#9830;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Enforcer</div>
+        <div class="gc-art">&#128074;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Opponent must defend with a card of rank 10+ or pick up.</div>
+        <div class="gc-flavor">He collects what is owed, one way or another.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">Q&#9824;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Warmonger</div>
+        <div class="gc-art">&#127981;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Gain 1 Fury.</div>
+        <div class="gc-flavor">Peace is merely the pause between profitable conflicts.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">7&#9827;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Pit Fighter</div>
+        <div class="gc-art">&#129354;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>This card attacks with +3 rank but you discard 1 card from hand.</div>
+        <div class="gc-flavor">Scars are the only medals that matter in the arena.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">6&#9830;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Cannon Master</div>
+        <div class="gc-art">&#128163;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Attack all defended cards with +1 rank this bout.</div>
+        <div class="gc-flavor">The walls of Constantinople fell to lesser guns.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">10&#9829;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Mercenary Captain</div>
+        <div class="gc-art">&#9876;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>You may play 1 additional attack card this bout.</div>
+        <div class="gc-flavor">Loyalty lasts exactly as long as the contract.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">6&#9827;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Sapper</div>
+        <div class="gc-art">&#128163;</div>
+        <div class="gc-ability"><span class="gc-trigger">Active</span>Discard to force opponent to discard 1 card of their choice.</div>
+        <div class="gc-flavor">The tunnel was finished before dawn.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity uncommon"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">K&#9829;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Gladiator</div>
+        <div class="gc-art">&#127942;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>If you have 3+ Fury, this card attacks with +2 rank.</div>
+        <div class="gc-flavor">The crowd roars. He does not hear them.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">J&#9830;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Pillager</div>
+        <div class="gc-art">&#128293;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>If defender picks up, draw 1 card.</div>
+        <div class="gc-flavor">What the sword takes, the sack carries away.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">A&#9824;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Warlord</div>
+        <div class="gc-art">&#128081;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Gain 1 Fury.</div>
+        <div class="gc-flavor">Armies are merely the extension of one man's will.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">Q&#9827;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Shield Breaker</div>
+        <div class="gc-art">&#128737;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>After defending, you may immediately counter-attack with 1 card.</div>
+        <div class="gc-flavor">Defense is just the prelude to the killing stroke.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">6&#9829;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Vanguard</div>
+        <div class="gc-art">&#9876;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Your next attack card this bout gets +2 rank.</div>
+        <div class="gc-flavor">First through the breach, last to fall.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">7&#9830;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Arsonist</div>
+        <div class="gc-art">&#128293;</div>
+        <div class="gc-ability"><span class="gc-trigger">Active</span>Discard to force opponent to discard their lowest-rank card.</div>
+        <div class="gc-flavor">From the ashes, nothing grows back.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">J&#9824;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Iron Duke</div>
+        <div class="gc-art">&#128737;</div>
+        <div class="gc-ability"><span class="gc-trigger">Passive</span>Your attack cards get +1 rank when you have 3+ Fury.</div>
+        <div class="gc-flavor">His armor is forged from lesser men's swords.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">8&#9824;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Siege Engineer</div>
+        <div class="gc-art">&#9881;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Defender cannot use trump suit to defend against this card.</div>
+        <div class="gc-flavor">No wall stands against proper engineering.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity common"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">9&#9827;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Quartermaster</div>
+        <div class="gc-art">&#128230;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Gain 1 Fury when defending successfully.</div>
+        <div class="gc-flavor">Supply lines win wars. Swords merely finish them.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">9&#9829;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The Executioner</div>
+        <div class="gc-art">&#9760;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Spend 3 Fury: this card attacks with +4 rank.</div>
+        <div class="gc-flavor">The sentence is always the same.</div>
+      </div>
+    </div>
+
+    <div class="game-card brute">
+      <span class="gc-rarity uncommon"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">K&#9830;</span><span class="gc-archetype-badge brute">Brute</span></div>
+        <div class="gc-name">The War Elephant</div>
+        <div class="gc-art">&#128024;</div>
+        <div class="gc-ability"><span class="gc-trigger">Passive</span>When you force a pickup, gain 1 Fury.</div>
+        <div class="gc-flavor">It crushes friend and foe with equal indifference.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TRICKSTER CARDS -->
+  <div class="doctrine-header trickster" id="cards-trickster">
+    <div class="dh-name">The Trickster</div>
+    <div class="dh-count">20 cards &bull; Resource: Favor &bull; 12 in starting deck</div>
+  </div>
+
+  <div class="card-gallery">
+
+    <div class="game-card trickster">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">7&#9829;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Courtesan</div>
+        <div class="gc-art">&#128131;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Change trump suit to this card's suit until end of round.</div>
+        <div class="gc-flavor">A smile can topple kingdoms.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">6&#9830;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Alchemist</div>
+        <div class="gc-art">&#9883;</div>
+        <div class="gc-ability"><span class="gc-trigger">Active</span>Discard to change this bout's trump suit to any suit you choose.</div>
+        <div class="gc-flavor">Lead into gold? Child's play. Try turning hearts into spades.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">6&#9827;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Jester</div>
+        <div class="gc-art">&#129313;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>This card may defend as if it were any suit.</div>
+        <div class="gc-flavor">Only the fool may speak truth to power.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">8&#9829;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Mask Maker</div>
+        <div class="gc-art">&#127917;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Choose this card's suit after seeing defender's hand size.</div>
+        <div class="gc-flavor">Behind the carnival mask, all faces are equal.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">7&#9824;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Illusionist</div>
+        <div class="gc-art">&#10024;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Opponent must defend this card before any others this bout.</div>
+        <div class="gc-flavor">The eye sees what the hand directs.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">9&#9830;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Charlatan</div>
+        <div class="gc-art">&#127913;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Defend as if this card's rank were 2 higher.</div>
+        <div class="gc-flavor">His credentials are impeccable. Also fictional.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">8&#9827;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Fortune Teller</div>
+        <div class="gc-art">&#128302;</div>
+        <div class="gc-ability"><span class="gc-trigger">Active</span>Discard to redirect one attack card to target a different defender card.</div>
+        <div class="gc-flavor">The stars say you will lose. The stars are never wrong.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">6&#9824;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Pickpocket</div>
+        <div class="gc-art">&#128076;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>After defending, steal 1 random card from opponent's hand into yours.</div>
+        <div class="gc-flavor">Grazie, signore. You are too kind.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">10&#9830;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Card Sharp</div>
+        <div class="gc-art">&#127183;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Gain 1 Favor; swap this card's suit with another card in your hand.</div>
+        <div class="gc-flavor">The deck is always stacked in his favor.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">10&#9827;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Smuggler</div>
+        <div class="gc-art">&#128230;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Gain 1 Favor; you may defend with a card from the top of your deck instead.</div>
+        <div class="gc-flavor">The customs men search the wrong crate every time.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">J&#9829;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Acrobat</div>
+        <div class="gc-art">&#129336;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>After defending, return this card to your hand instead of discarding.</div>
+        <div class="gc-flavor">She bends but never breaks.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">9&#9824;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Doppelganger</div>
+        <div class="gc-art">&#128101;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>This card copies the suit and rank of the card it defends against.</div>
+        <div class="gc-flavor">Which one is the reflection?</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity common"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">Q&#9829;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Venetian Noble</div>
+        <div class="gc-art">&#128142;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Gain 1 Favor.</div>
+        <div class="gc-flavor">Blood and gold open every door in the republic.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity uncommon"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">8&#9830;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Con Artist</div>
+        <div class="gc-art">&#128172;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Opponent must reveal 1 card; that card cannot be used to defend this bout.</div>
+        <div class="gc-flavor">Trust is the most profitable commodity.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">7&#9827;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Escape Artist</div>
+        <div class="gc-art">&#128275;</div>
+        <div class="gc-ability"><span class="gc-trigger">Active</span>Discard to nullify one attack card targeting you; it returns to attacker's hand.</div>
+        <div class="gc-flavor">The chains were real. The locks were not.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">K&#9824;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Carnival Master</div>
+        <div class="gc-art">&#127914;</div>
+        <div class="gc-ability"><span class="gc-trigger">Passive</span>When trump suit changes, gain 1 Favor.</div>
+        <div class="gc-flavor">The carnival never ends; it merely changes masks.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">K&#9830;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Mirror Mage</div>
+        <div class="gc-art">&#128302;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Spend 2 Favor: attacker must pick up their own attack card.</div>
+        <div class="gc-flavor">Your blade finds only your own reflection.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity uncommon"></span>
+      <span class="gc-starting">Starter</span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">A&#9824;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Maestro</div>
+        <div class="gc-art">&#127926;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Attack</span>Gain 1 Favor.</div>
+        <div class="gc-flavor">The final act is always his to command.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity uncommon"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank black">Q&#9827;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Mountebank</div>
+        <div class="gc-art">&#127874;</div>
+        <div class="gc-ability"><span class="gc-trigger">Passive</span>Cards you play as wild suit keep their original rank.</div>
+        <div class="gc-flavor">His elixir cures nothing, but his tongue cures doubt.</div>
+      </div>
+    </div>
+
+    <div class="game-card trickster">
+      <span class="gc-rarity rare"></span>
+      <div class="gc-inner">
+        <div class="gc-top"><span class="gc-suit-rank red">A&#9829;</span><span class="gc-archetype-badge trickster">Trickster</span></div>
+        <div class="gc-name">The Contessa</div>
+        <div class="gc-art">&#128081;</div>
+        <div class="gc-ability"><span class="gc-trigger">On Defend</span>Spend 3 Favor: nullify all remaining undefended attacks this bout.</div>
+        <div class="gc-flavor">She dismisses armies with a wave of her fan.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- HOARDER CARDS -->
+  <div class="doctrine-header hoarder" id="cards-hoarder">
+    <div class="dh-name">The Hoarder</div>
+    <div class="dh-count">20 cards &bull; Resource: Luck &bull; 12 in starting deck</div>
+  </div>
+
+  <div class="card-gallery">
+
+    <div class="game-card hoarder"><span class="gc-rarity common"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">7&#9830;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Miser</div><div class="gc-art">&#128176;</div><div class="gc-ability"><span class="gc-trigger">Passive</span>Your maximum hand size is increased by 2.</div><div class="gc-flavor">Every coin saved is a battle won.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity common"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">6&#9829;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Collector</div><div class="gc-art">&#128230;</div><div class="gc-ability"><span class="gc-trigger">On Defend</span>When you pick up cards, draw 1 additional card from your deck.</div><div class="gc-flavor">Others see refuse. He sees treasure.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity uncommon"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">J&#9830;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Merchant</div><div class="gc-art">&#128176;</div><div class="gc-ability"><span class="gc-trigger">On Attack</span>Draw 1 card for each card in your hand above 5.</div><div class="gc-flavor">Wealth breeds wealth, as any Medici knows.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity common"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">6&#9827;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Packrat</div><div class="gc-art">&#128000;</div><div class="gc-ability"><span class="gc-trigger">On Defend</span>After picking up, gain 2 Luck.</div><div class="gc-flavor">One man's trash is another man's arsenal.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity uncommon"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">8&#9827;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Warehouse Keeper</div><div class="gc-art">&#127970;</div><div class="gc-ability"><span class="gc-trigger">Passive</span>When you pick up attack cards, you may put any of them on the bottom of your deck instead.</div><div class="gc-flavor">Everything has a place. Finding it is the art.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity common"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">9&#9830;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Tax Collector</div><div class="gc-art">&#128176;</div><div class="gc-ability"><span class="gc-trigger">On Attack</span>Gain 1 Luck for every 2 cards in your hand.</div><div class="gc-flavor">The republic's coffers are bottomless. So is his patience.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity uncommon"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">A&#9830;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Banker</div><div class="gc-art">&#127974;</div><div class="gc-ability"><span class="gc-trigger">On Attack</span>Gain 1 Luck.</div><div class="gc-flavor">Gold flows to those who already have it.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity common"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">8&#9829;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Antiquarian</div><div class="gc-art">&#128218;</div><div class="gc-ability"><span class="gc-trigger">On Defend</span>If you have 6+ cards in hand, this card defends with +2 rank.</div><div class="gc-flavor">Age only increases value, never diminishes it.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity common"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">7&#9824;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Provisioner</div><div class="gc-art">&#127830;</div><div class="gc-ability"><span class="gc-trigger">On Defend</span>Draw 1 card after defending.</div><div class="gc-flavor">Winter is always coming. Best be ready.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity rare"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">9&#9829;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Usurer</div><div class="gc-art">&#128176;</div><div class="gc-ability"><span class="gc-trigger">Active</span>Discard to draw cards until you have as many cards as your opponent.</div><div class="gc-flavor">The interest compounds. It always compounds.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity uncommon"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">7&#9827;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Apothecary</div><div class="gc-art">&#9883;</div><div class="gc-ability"><span class="gc-trigger">Active</span>Discard to retrieve the last 2 cards from your discard pile into your hand.</div><div class="gc-flavor">Nothing is wasted in my shop. Nothing.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity uncommon"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">10&#9824;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Auctioneer</div><div class="gc-art">&#128266;</div><div class="gc-ability"><span class="gc-trigger">On Attack</span>If you have more cards than opponent, this card attacks with +2 rank.</div><div class="gc-flavor">Going once. Going twice. Gone.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity common"></span><span class="gc-starting">Starter</span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">6&#9824;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Treasure Hunter</div><div class="gc-art">&#128270;</div><div class="gc-ability"><span class="gc-trigger">On Defend</span>When you pick up this bout's cards, choose 1 to put on top of your deck instead.</div><div class="gc-flavor">X never marks the spot. That would be too easy.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity uncommon"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">K&#9827;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Guild Master</div><div class="gc-art">&#128081;</div><div class="gc-ability"><span class="gc-trigger">Passive</span>Cards you pick up go to your hand, not the bottom of your deck.</div><div class="gc-flavor">The guilds control the flow of everything worth having.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity rare"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">K&#9829;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Dynasty Heir</div><div class="gc-art">&#128081;</div><div class="gc-ability"><span class="gc-trigger">On Attack</span>Spend 5 Luck: opponent must pick up regardless of defense.</div><div class="gc-flavor">The family name carries more weight than any blade.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity rare"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">Q&#9829;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Reliquary</div><div class="gc-art">&#9961;</div><div class="gc-ability"><span class="gc-trigger">Passive</span>When you have 8+ cards in hand, your defense cards get +1 rank.</div><div class="gc-flavor">Holy bones and sacred teeth. All genuine, of course.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity uncommon"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">8&#9824;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Fence</div><div class="gc-art">&#128275;</div><div class="gc-ability"><span class="gc-trigger">On Defend</span>After defending, you may swap 1 card from your hand with 1 card from your discard.</div><div class="gc-flavor">Everything has a buyer. Everything has a seller.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity rare"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">J&#9827;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Cartel's Don</div><div class="gc-art">&#128142;</div><div class="gc-ability"><span class="gc-trigger">Passive</span>Gain 1 Luck at the start of each round you have more cards than opponent.</div><div class="gc-flavor">Control the supply. The demand takes care of itself.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity rare"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">Q&#9830;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Vault Keeper</div><div class="gc-art">&#128274;</div><div class="gc-ability"><span class="gc-trigger">On Defend</span>Spend 3 Luck: draw 3 cards.</div><div class="gc-flavor">The vault opens for those who've earned its trust.</div></div></div>
+
+    <div class="game-card hoarder"><span class="gc-rarity uncommon"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">9&#9824;</span><span class="gc-archetype-badge hoarder">Hoarder</span></div><div class="gc-name">The Speculator</div><div class="gc-art">&#128200;</div><div class="gc-ability"><span class="gc-trigger">On Attack</span>If you have 7+ cards in hand, draw 2 cards.</div><div class="gc-flavor">Risk is for amateurs. I invest in certainties.</div></div></div>
+
+  </div>
+
+  <!-- NEUTRAL CARDS -->
+  <div class="doctrine-header neutral" id="cards-neutral">
+    <div class="dh-name">Neutral Cards</div>
+    <div class="dh-count">15 cards &bull; No abilities &bull; High rank, no synergy &bull; Pure stat sticks</div>
+  </div>
+
+  <div class="card-gallery">
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">A&#9824;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">Knight of the Order</div><div class="gc-art" style="opacity:0.2;">&#9824;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">Honor is its own reward.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">A&#9829;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Bishop</div><div class="gc-art" style="opacity:0.2;">&#9829;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">The church answers to a higher authority.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">A&#9827;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">Guild Champion</div><div class="gc-art" style="opacity:0.2;">&#9827;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">The guilds protect their own.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">A&#9830;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Crown Jewel</div><div class="gc-art" style="opacity:0.2;">&#9830;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">Worth more than the throne it adorns.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">K&#9824;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Duke</div><div class="gc-art" style="opacity:0.2;">&#9824;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">Power answers to power.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">K&#9829;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Cardinal</div><div class="gc-art" style="opacity:0.2;">&#9829;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">The scarlet robes conceal much.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">K&#9827;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Magistrate</div><div class="gc-art" style="opacity:0.2;">&#9827;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">The law is the law. Except when it isn't.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">Q&#9829;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Queen Regent</div><div class="gc-art" style="opacity:0.2;">&#9829;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">She rules while the king plays at war.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">Q&#9824;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Castellan</div><div class="gc-art" style="opacity:0.2;">&#9824;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">The fortress holds. It always holds.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">Q&#9830;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Treasurer</div><div class="gc-art" style="opacity:0.2;">&#9830;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">Every florin accounted for. Almost.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">J&#9827;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Herald</div><div class="gc-art" style="opacity:0.2;">&#9827;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">He announces what cannot be unannounced.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">J&#9824;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Squire</div><div class="gc-art" style="opacity:0.2;">&#9824;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">Every knight was once a squire.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">J&#9830;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Merchant Prince</div><div class="gc-art" style="opacity:0.2;">&#9830;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>High rank. Reliable in any deck.</div><div class="gc-flavor">Commerce is the truest form of diplomacy.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank black">10&#9827;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Footman</div><div class="gc-art" style="opacity:0.2;">&#9827;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>Reliable in any deck.</div><div class="gc-flavor">He carries the banner and asks no questions.</div></div></div>
+
+    <div class="game-card neutral"><span class="gc-rarity common"></span><div class="gc-inner"><div class="gc-top"><span class="gc-suit-rank red">10&#9829;</span><span class="gc-archetype-badge neutral">Neutral</span></div><div class="gc-name">The Courser</div><div class="gc-art" style="opacity:0.2;">&#9829;</div><div class="gc-ability"><span class="gc-trigger">No Ability</span>Reliable in any deck.</div><div class="gc-flavor">Speed is the first and last defense.</div></div></div>
+
+  </div>
+</section>
+
+<div class="divider"><span>RELIC CATALOG</span></div>
+
+<!-- ============ RELICS ============ -->
+<section id="relics">
+  <h2>Relic Catalog</h2>
+  <p class="subtitle">28 relics &mdash; persistent bonuses that shape your build. Max 5 relic slots per run.</p>
+
+  <!-- Starting Relics -->
+  <h3 id="relics-starting">Starting Relics</h3>
+  <p>Each doctrine begins the run with one starting relic. These define early game advantages.</p>
+  <div class="relic-grid">
+    <div class="relic starting-relic"><span class="r-icon">&#128270;</span><div class="r-name">The Spy's Monocle</div><div class="r-desc">See the top card of the deck at all times.</div><div class="r-effect">Continuously reveals the top card of the draw pile to the player.</div><div class="r-meta"><span class="r-tag rarity-common">Common</span><span class="r-tag doctrine-schemer">Schemer</span><span class="r-tag acquisition">Starting</span></div><div class="r-flavor">One eye on the cards, one eye on the exits.</div></div>
+
+    <div class="relic starting-relic"><span class="r-icon">&#9876;</span><div class="r-name">The Iron Gauntlet</div><div class="r-desc">Your first attack each bout ignores the rank-matching rule.</div><div class="r-effect">The first card played as an attack in each bout bypasses the rank-match restriction, allowing any rank.</div><div class="r-meta"><span class="r-tag rarity-common">Common</span><span class="r-tag doctrine-brute">Brute</span><span class="r-tag acquisition">Starting</span></div><div class="r-flavor">Subtlety is for those who lack strength.</div></div>
+
+    <div class="relic starting-relic"><span class="r-icon">&#128178;</span><div class="r-name">The Two-Faced Coin</div><div class="r-desc">Once per match, draw 1 fewer card during a refill phase.</div><div class="r-effect">Activates once per match: during a card refill at bout end, the player draws 1 fewer card than normal.</div><div class="r-meta"><span class="r-tag rarity-common">Common</span><span class="r-tag doctrine-trickster">Trickster</span><span class="r-tag acquisition">Starting</span></div><div class="r-flavor">Heads I win, tails you lose. Standard Venetian contract.</div></div>
+
+    <div class="relic starting-relic"><span class="r-icon">&#128184;</span><div class="r-name">The Bottomless Purse</div><div class="r-desc">At match start, rearrange the bottom 3 cards of the deck.</div><div class="r-effect">Before the first bout, peek at and reorder the bottom 3 cards in the draw pile.</div><div class="r-meta"><span class="r-tag rarity-common">Common</span><span class="r-tag doctrine-hoarder">Hoarder</span><span class="r-tag acquisition">Starting</span></div><div class="r-flavor">There's always one more coin. One more card. One more trick.</div></div>
+  </div>
+
+  <!-- Schemer Relics -->
+  <h3 id="relics-schemer">Schemer Relics</h3>
+  <div class="relic-grid">
+    <div class="relic"><span class="r-icon">&#128218;</span><div class="r-name">Scholar's Lens</div><div class="r-desc">At match start, reveal 3 random cards in the opponent's hand.</div><div class="r-effect">When the match begins, 3 cards chosen at random from the opponent's starting hand are revealed to the player.</div><div class="r-meta"><span class="r-tag rarity-uncommon">Uncommon</span><span class="r-tag doctrine-schemer">Schemer</span><span class="r-tag price">15F</span><span class="r-tag acquisition">Elite / Shop</span></div><div class="r-flavor">Knowledge is never free, but it's always worth the price.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128220;</span><div class="r-name">Venetian Cipher</div><div class="r-desc">After successfully defending a bout, see the next 2 cards you will draw.</div><div class="r-effect">When the player wins a bout as defender, reveal the top 2 cards of the draw pile until drawn.</div><div class="r-meta"><span class="r-tag rarity-uncommon">Uncommon</span><span class="r-tag doctrine-schemer">Schemer</span><span class="r-tag price">16F</span><span class="r-tag acquisition">Elite / Shop / Rumor</span></div><div class="r-flavor">The Doge's private correspondence, decoded by a man who no longer exists.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128396;</span><div class="r-name">The Forger's Kit</div><div class="r-desc">Abilities that bind to 1 card now bind to 2.</div><div class="r-effect">Any ability with a binding count of 1 is treated as binding count 2, doubling chances of drawing an ability card.</div><div class="r-meta"><span class="r-tag rarity-rare">Rare</span><span class="r-tag doctrine-schemer">Schemer</span><span class="r-tag price">24F</span><span class="r-tag acquisition">Elite / Shop</span></div><div class="r-flavor">With the right tools, any man can become a cardinal. Or a king.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128065;</span><div class="r-name">The Glass Eye</div><div class="r-desc">At match start, know the trump suit before seeing your hand.</div><div class="r-effect">The trump suit is revealed to the player before the initial hand is dealt.</div><div class="r-meta"><span class="r-tag rarity-common">Common</span><span class="r-tag doctrine-schemer">Schemer</span><span class="r-tag price">9F</span><span class="r-tag acquisition">Shop / Rumor</span></div><div class="r-flavor">It sees nothing, yet somehow its owner sees everything.</div></div>
+  </div>
+
+  <!-- Brute Relics -->
+  <h3 id="relics-brute">Brute Relics</h3>
+  <div class="relic-grid">
+    <div class="relic"><span class="r-icon">&#129354;</span><div class="r-name">The Duelist's Glove</div><div class="r-desc">When the opponent picks up your attacks, draw 1 extra card.</div><div class="r-effect">Whenever the opponent eats, the player draws 1 additional card during the next refill.</div><div class="r-meta"><span class="r-tag rarity-uncommon">Uncommon</span><span class="r-tag doctrine-brute">Brute</span><span class="r-tag price">14F</span><span class="r-tag acquisition">Elite / Shop</span></div><div class="r-flavor">A slap across the face. An insult that demands satisfaction.</div></div>
+
+    <div class="relic"><span class="r-icon">&#127863;</span><div class="r-name">Poisoned Wine</div><div class="r-desc">When the opponent eats your attacks, they draw 2 extra from the deck.</div><div class="r-effect">Whenever the opponent picks up attack cards, they must draw 2 additional cards from the draw pile.</div><div class="r-meta"><span class="r-tag rarity-uncommon">Uncommon</span><span class="r-tag doctrine-brute">Brute</span><span class="r-tag price">16F</span><span class="r-tag acquisition">Elite / Shop</span></div><div class="r-flavor">A toast to your health. Drink deep.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128296;</span><div class="r-name">Warhammer Pommel</div><div class="r-desc">Your trump attacks count as 1 rank higher for defense purposes.</div><div class="r-effect">When the player plays a trump card as an attack, the defender must beat it as though it were 1 rank higher.</div><div class="r-meta"><span class="r-tag rarity-rare">Rare</span><span class="r-tag doctrine-brute">Brute</span><span class="r-tag price">26F</span><span class="r-tag acquisition">Elite</span></div><div class="r-flavor">The Condottiero's argument-ender. No rhetoric required.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128293;</span><div class="r-name">The Heretic's Brand</div><div class="r-desc">Opponent's trump cards are treated as 1 rank lower for defense.</div><div class="r-effect">All trump cards in the opponent's hand are treated as 1 rank lower when used to defend.</div><div class="r-meta"><span class="r-tag rarity-rare">Rare</span><span class="r-tag doctrine-brute">Brute</span><span class="r-tag price">24F</span><span class="r-tag acquisition">Elite / Shop</span></div><div class="r-flavor">Marked by the Inquisition. Not even the saints will save you now.</div></div>
+
+    <div class="relic"><span class="r-icon">&#127941;</span><div class="r-name">Condottiero's Sash</div><div class="r-desc">+1 max attack per bout (7 instead of 6).</div><div class="r-effect">The maximum number of attack cards that can be played in a single bout increases by 1.</div><div class="r-meta"><span class="r-tag rarity-rare">Rare</span><span class="r-tag doctrine-brute">Brute</span><span class="r-tag price">24F</span><span class="r-tag acquisition">Elite</span></div><div class="r-flavor">The mercenary general counts victories, not casualties.</div></div>
+  </div>
+
+  <!-- Trickster Relics -->
+  <h3 id="relics-trickster">Trickster Relics</h3>
+  <div class="relic-grid">
+    <div class="relic"><span class="r-icon">&#128142;</span><div class="r-name">The Alchemist's Stone</div><div class="r-desc">Choose the trump suit at match start.</div><div class="r-effect">Before the match begins, the player selects which of the 4 suits will be trump for the entire match.</div><div class="r-meta"><span class="r-tag rarity-rare">Rare</span><span class="r-tag doctrine-trickster">Trickster</span><span class="r-tag price">28F</span><span class="r-tag acquisition">Elite</span></div><div class="r-flavor">Base metals into gold. Losing hands into winning ones. It's all transmutation.</div></div>
+
+    <div class="relic"><span class="r-icon">&#127917;</span><div class="r-name">Masquerade Mask</div><div class="r-desc">Once per match, play a non-trump card as though it were trump suit.</div><div class="r-effect">Once per match, designate one card to be treated as trump suit for that play only.</div><div class="r-meta"><span class="r-tag rarity-uncommon">Uncommon</span><span class="r-tag doctrine-trickster">Trickster</span><span class="r-tag price">16F</span><span class="r-tag acquisition">Elite / Shop / Rumor</span></div><div class="r-flavor">Behind the mask, everyone is someone else. Even the cards.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128131;</span><div class="r-name">The Courtesan's Fan</div><div class="r-desc">Once per match, force the opponent to attack with their lowest-rank card.</div><div class="r-effect">Activates once per match: the opponent's next attack must use their lowest-rank card in hand.</div><div class="r-meta"><span class="r-tag rarity-uncommon">Uncommon</span><span class="r-tag doctrine-trickster">Trickster</span><span class="r-tag price">14F</span><span class="r-tag acquisition">Shop / Rumor</span></div><div class="r-flavor">She fans herself, and the Duke does whatever she wishes.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128081;</span><div class="r-name">Crown of Thorns</div><div class="r-desc">Trump cards played in defense qualify for next bout's rank-matching.</div><div class="r-effect">When the player defends with a trump card, that trump card's rank qualifies for rank-match attacks next bout.</div><div class="r-meta"><span class="r-tag rarity-rare">Rare</span><span class="r-tag doctrine-trickster">Trickster</span><span class="r-tag price">22F</span><span class="r-tag acquisition">Elite / Shop</span></div><div class="r-flavor">Suffering sanctifies. Every wound becomes a weapon.</div></div>
+  </div>
+
+  <!-- Hoarder Relics -->
+  <h3 id="relics-hoarder">Hoarder Relics</h3>
+  <div class="relic-grid">
+    <div class="relic"><span class="r-icon">&#128176;</span><div class="r-name">The Merchant's Purse</div><div class="r-desc">+3 Florins after each match victory.</div><div class="r-effect">Whenever the player wins a match, gain 3 bonus Florins in addition to the normal match reward.</div><div class="r-meta"><span class="r-tag rarity-common">Common</span><span class="r-tag doctrine-hoarder">Hoarder</span><span class="r-tag price">8F</span><span class="r-tag acquisition">Shop / Rumor</span></div><div class="r-flavor">A Florentine purse: always heavier than it looks, always lighter than you'd like.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128141;</span><div class="r-name">The Miser's Ring</div><div class="r-desc">+1 Florin for each bout you successfully defend.</div><div class="r-effect">Each time the player wins a bout as the defender, gain 1 Florin. Accumulates across all bouts.</div><div class="r-meta"><span class="r-tag rarity-uncommon">Uncommon</span><span class="r-tag doctrine-hoarder">Hoarder</span><span class="r-tag price">14F</span><span class="r-tag acquisition">Shop / Rumor</span></div><div class="r-flavor">Count every coin. Count every card. Count every breath your enemies take.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128737;</span><div class="r-name">The Shield Brooch</div><div class="r-desc">Once per match, automatically beat the first undefended attack.</div><div class="r-effect">The first time you cannot beat an attack card, the Shield Brooch activates and automatically counters it.</div><div class="r-meta"><span class="r-tag rarity-uncommon">Uncommon</span><span class="r-tag doctrine-hoarder">Hoarder</span><span class="r-tag price">16F</span><span class="r-tag acquisition">Elite / Shop</span></div><div class="r-flavor">The Medici crest. Even their jewelry is armor.</div></div>
+  </div>
+
+  <!-- Universal Relics -->
+  <h3 id="relics-universal">Universal Relics</h3>
+  <div class="relic-grid">
+    <div class="relic"><span class="r-icon">&#127905;</span><div class="r-name">The Tailor's Thimble</div><div class="r-desc">Starting hand size reduced to 5, but draw 1 extra each refill.</div><div class="r-effect">Match begins with 5 cards instead of 6. At each bout refill, draw 1 additional card.</div><div class="r-meta"><span class="r-tag rarity-common">Common</span><span class="r-tag doctrine-universal">Universal</span><span class="r-tag price">8F</span><span class="r-tag acquisition">Shop / Rumor</span></div><div class="r-flavor">Measure twice, cut once. Hold less, but never run dry.</div></div>
+
+    <div class="relic"><span class="r-icon">&#9883;</span><div class="r-name">Quicksilver Vial</div><div class="r-desc">Once per match, use an ability without discarding the bound card.</div><div class="r-effect">The first ability activation each match does not require discarding the card. The card remains in hand.</div><div class="r-meta"><span class="r-tag rarity-uncommon">Uncommon</span><span class="r-tag doctrine-universal">Universal</span><span class="r-tag price">16F</span><span class="r-tag acquisition">Elite / Shop</span></div><div class="r-flavor">Liquid silver, liquid time. The alchemists say it captures moments.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128293;</span><div class="r-name">The Phoenix Medal</div><div class="r-desc">If you would lose the run, restore 1 Prestige instead. Once per run.</div><div class="r-effect">When Prestige would drop to 0, set it to 1 instead. Consumed after use.</div><div class="r-meta"><span class="r-tag rarity-rare">Rare</span><span class="r-tag doctrine-universal">Universal</span><span class="r-tag price">26F</span><span class="r-tag acquisition">Elite / Rumor</span></div><div class="r-flavor">The Order of the Phoenix. From the ashes, the gambler rises.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128178;</span><div class="r-name">Fool's Gold</div><div class="r-desc">Start each match with a temporary 7 of the trump suit.</div><div class="r-effect">At match start, a virtual card (rank 7, trump suit) is added to hand. Removed at end of match.</div><div class="r-meta"><span class="r-tag rarity-common">Common</span><span class="r-tag doctrine-universal">Universal</span><span class="r-tag price">9F</span><span class="r-tag acquisition">Shop / Rumor</span></div><div class="r-flavor">Glitters like the real thing. Gone before they notice.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128520;</span><div class="r-name">The Devil's Bargain</div><div class="r-desc">At match start, choose: +5 Florins OR start with 1 fewer card.</div><div class="r-effect">Before each match, choose: gain 5 Florins immediately, or reduce starting hand by 1 card.</div><div class="r-meta"><span class="r-tag rarity-uncommon">Uncommon</span><span class="r-tag doctrine-universal">Universal</span><span class="r-tag price">14F</span><span class="r-tag acquisition">Rumor / Shop</span></div><div class="r-flavor">The contract is simple. The fine print is eternal.</div></div>
+
+    <div class="relic"><span class="r-icon">&#128214;</span><div class="r-name">The Scholar's Tome</div><div class="r-desc">+1 ability slot (6 max instead of 5).</div><div class="r-effect">Permanently increases maximum ability slots from 5 to 6.</div><div class="r-meta"><span class="r-tag rarity-rare">Rare</span><span class="r-tag doctrine-universal">Universal</span><span class="r-tag price">24F</span><span class="r-tag acquisition">Elite / Shop</span></div><div class="r-flavor">In the library of San Marco, every book is a weapon. This one is a siege engine.</div></div>
+
+    <div class="relic"><span class="r-icon">&#129497;</span><div class="r-name">The Ventriloquist's Dummy</div><div class="r-desc">Once per match, use one of the opponent's abilities as your own.</div><div class="r-effect">Once per match, activate an ability bound to a card in the opponent's hand (if known) or a random opponent ability.</div><div class="r-meta"><span class="r-tag rarity-rare">Rare</span><span class="r-tag doctrine-universal">Universal</span><span class="r-tag price">26F</span><span class="r-tag acquisition">Elite</span></div><div class="r-flavor">Who is the puppet, and who pulls the strings? In Venice, the answer changes hourly.</div></div>
+
+    <div class="relic"><span class="r-icon">&#129337;</span><div class="r-name">The Juggler's Balls</div><div class="r-desc">After the first bout, discard 1 card for free.</div><div class="r-effect">At the end of the first bout, choose 1 card from your hand to discard without penalty.</div><div class="r-meta"><span class="r-tag rarity-common">Common</span><span class="r-tag doctrine-universal">Universal</span><span class="r-tag price">8F</span><span class="r-tag acquisition">Shop / Rumor</span></div><div class="r-flavor">Keep three in the air and the crowd never notices the fourth up your sleeve.</div></div>
+  </div>
+</section>
+
+<div class="divider"><span>ENEMY ROSTER</span></div>
+
+<!-- ============ ENEMIES ============ -->
+<section id="enemies">
+  <h2>Enemy Roster</h2>
+  <p class="subtitle">30 enemies across 5 acts. Each has a doctrine, AI personality, and escalating difficulty.</p>
+
+  <!-- ACT 1 -->
+  <div class="act-header" id="enemies-act1"><div class="ah-act">Act I</div><div class="ah-name">The Bilge Rat Tavern</div></div>
+  <div class="enemy-grid">
+    <div class="enemy-card e-brute"><div class="ec-top"><span class="ec-icon">&#128000;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Berto il Ratto</div><div class="ec-doctrine">Brute &bull; Brawler AI</div><div class="ec-desc">A wiry dockhand who learned cards in the hold of a grain ship. Plays fast, hits hard, thinks never.</div><div class="ec-visual">Rat-bitten ear, rope-burned hands, a single gold tooth</div><div class="ec-stats"><span class="ec-stat">Deck: 10</span><span class="ec-stat">Doctrine: 3</span><span class="ec-stat">Neutral: 7</span><span class="ec-stat">Random: 35%</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-hoarder"><div class="ec-top"><span class="ec-icon">&#128293;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Lucia la Fiamma</div><div class="ec-doctrine">Hoarder &bull; Miser AI</div><div class="ec-desc">A fishwife who hoards cards the way she hoards grudges &mdash; patiently, and with interest.</div><div class="ec-visual">Flame-red hair under a dirty kerchief, calloused fingers, shrewd squint</div><div class="ec-stats"><span class="ec-stat">Deck: 11</span><span class="ec-stat">Doctrine: 4</span><span class="ec-stat">Neutral: 7</span><span class="ec-stat">Random: 35%</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-brute"><div class="ec-top"><span class="ec-icon">&#127830;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Tomaso il Grasso</div><div class="ec-doctrine">Brute &bull; Brawler AI</div><div class="ec-desc">An enormous cook who smells of garlic and cheap wine. Slams cards on the table like he's tenderizing meat.</div><div class="ec-visual">Enormous belly, stained apron, a cleaver scar across his knuckles</div><div class="ec-stats"><span class="ec-stat">Deck: 12</span><span class="ec-stat">Doctrine: 5</span><span class="ec-stat">Neutral: 7</span><span class="ec-stat">Random: 35%</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-brute"><div class="ec-top"><span class="ec-icon">&#9876;</span><span class="ec-tier elite">Elite</span></div><div class="ec-name">Capitano Ferro</div><div class="ec-doctrine">Brute &bull; Brawler AI</div><div class="ec-desc">A retired mercenary captain who plays cards the way he fought &mdash; overwhelming force, no quarter given.</div><div class="ec-visual">Iron prosthetic hand, military medals, deep voice</div><div class="ec-stats"><span class="ec-stat">Deck: 12</span><span class="ec-stat">Doctrine: 5</span><span class="ec-stat">Neutral: 7</span><span class="ec-stat">Random: 30%</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>The Gauntlet</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-schemer"><div class="ec-top"><span class="ec-icon">&#128013;</span><span class="ec-tier elite">Elite</span></div><div class="ec-name">Donna Serpente</div><div class="ec-doctrine">Schemer &bull; Fox AI</div><div class="ec-desc">A dockside fortune teller who always seems to know what you're holding. Her smile never reaches her eyes.</div><div class="ec-visual">Green headscarf, kohl-lined eyes, silver serpent ring on every finger</div><div class="ec-stats"><span class="ec-stat">Deck: 11</span><span class="ec-stat">Doctrine: 4</span><span class="ec-stat">Neutral: 7</span><span class="ec-stat">Random: 30%</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>Heavy Hands</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-brute"><div class="ec-top"><span class="ec-icon">&#128081;</span><span class="ec-tier boss">Boss</span></div><div class="ec-name">Il Padrone &mdash; Vittorio Scoglio</div><div class="ec-doctrine">Brute &bull; Brawler AI</div><div class="ec-desc">The undisputed king of the Bilge Rat Tavern. A former galley slave who bought this dive with his winnings and rules it with an iron fist.</div><div class="ec-visual">Massive scarred forearms, necklace of lucky coins, permanent scowl, missing two fingers</div><div class="ec-stats"><span class="ec-stat">Deck: 12</span><span class="ec-stat">Doctrine: 5</span><span class="ec-stat">Neutral: 7</span><span class="ec-stat">Random: 25%</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>The Gauntlet</div><div class="ec-signature"><span class="sig-label">Signature Mechanic</span>Tavern King's Wrath &mdash; When Vittorio picks up cards, his next attack plays two cards simultaneously. The player must beat both or eat the entire pile.</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+  </div>
+
+  <!-- ACT 2 -->
+  <div class="act-header" id="enemies-act2"><div class="ah-act">Act II</div><div class="ah-name">The Merchant's Rest</div></div>
+  <div class="enemy-grid">
+    <div class="enemy-card e-hoarder"><div class="ec-top"><span class="ec-icon">&#128083;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Marco il Bilancio</div><div class="ec-doctrine">Hoarder &bull; Miser AI</div><div class="ec-desc">A spice merchant who counts cards the way he counts peppercorns &mdash; obsessively.</div><div class="ec-stats"><span class="ec-stat">Deck: 12</span><span class="ec-stat">Doctrine: 5</span><span class="ec-stat">Neutral: 7</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-schemer"><div class="ec-top"><span class="ec-icon">&#129418;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Silvana la Volpe</div><div class="ec-doctrine">Schemer &bull; Fox AI</div><div class="ec-desc">A traveling silk trader who plays cards in every inn from Venice to Naples. Reads opponents like contracts.</div><div class="ec-stats"><span class="ec-stat">Deck: 13</span><span class="ec-stat">Doctrine: 6</span><span class="ec-stat">Neutral: 7</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-trickster"><div class="ec-top"><span class="ec-icon">&#128298;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Rinaldo il Coltello</div><div class="ec-doctrine">Trickster &bull; Assassin AI</div><div class="ec-desc">A lean, quiet cutpurse who picked up cards in prison. Waits for one perfect moment, then strikes.</div><div class="ec-stats"><span class="ec-stat">Deck: 12</span><span class="ec-stat">Doctrine: 5</span><span class="ec-stat">Neutral: 7</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-schemer"><div class="ec-top"><span class="ec-icon">&#128176;</span><span class="ec-tier elite">Elite</span></div><div class="ec-name">Messer Argento</div><div class="ec-doctrine">Schemer &bull; Scholar AI</div><div class="ec-desc">A retired banker who ruined three noble families at the card table. Plays with cold precision.</div><div class="ec-stats"><span class="ec-stat">Deck: 14</span><span class="ec-stat">Doctrine: 8</span><span class="ec-stat">Neutral: 6</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>Cutthroat</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-hoarder"><div class="ec-top"><span class="ec-icon">&#128124;</span><span class="ec-tier elite">Elite</span></div><div class="ec-name">Madre Cenere</div><div class="ec-doctrine">Hoarder &bull; Miser AI</div><div class="ec-desc">An elderly midwife with infinite patience and an impossibly large hand.</div><div class="ec-stats"><span class="ec-stat">Deck: 14</span><span class="ec-stat">Doctrine: 8</span><span class="ec-stat">Neutral: 6</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>Heavy Hands</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-trickster"><div class="ec-top"><span class="ec-icon">&#128674;</span><span class="ec-tier boss">Boss</span></div><div class="ec-name">Il Capitano &mdash; Enzo Maraviglia</div><div class="ec-doctrine">Trickster &bull; Fox AI</div><div class="ec-desc">A legendary merchant captain. He treats cards the way he treats business &mdash; the rules are whatever he says they are.</div><div class="ec-stats"><span class="ec-stat">Deck: 14</span><span class="ec-stat">Doctrine: 8</span><span class="ec-stat">Neutral: 6</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>No Trumps Before Dusk</div><div class="ec-signature"><span class="sig-label">Captain's Gambit</span>Once per match, Enzo can change the trump suit to any suit AND draw 2 cards.</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+  </div>
+
+  <!-- ACT 3 -->
+  <div class="act-header" id="enemies-act3"><div class="ah-act">Act III</div><div class="ah-name">The Guild Hall</div></div>
+  <div class="enemy-grid">
+    <div class="enemy-card e-schemer"><div class="ec-top"><span class="ec-icon">&#128083;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Gilda Ferravecchi</div><div class="ec-doctrine">Schemer &bull; Scholar AI</div><div class="ec-desc">The guild's official record-keeper. Never forgets a discard.</div><div class="ec-stats"><span class="ec-stat">Deck: 14</span><span class="ec-stat">Doctrine: 8</span><span class="ec-stat">Neutral: 6</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-brute"><div class="ec-top"><span class="ec-icon">&#128296;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Orso Martello</div><div class="ec-doctrine">Brute &bull; Brawler AI</div><div class="ec-desc">The blacksmith guild's champion. Plays with the relentless rhythm of a hammer on an anvil.</div><div class="ec-stats"><span class="ec-stat">Deck: 15</span><span class="ec-stat">Doctrine: 10</span><span class="ec-stat">Neutral: 5</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-hoarder"><div class="ec-top"><span class="ec-icon">&#128142;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Fiorella Ambra</div><div class="ec-doctrine">Hoarder &bull; Noble AI</div><div class="ec-desc">A jeweler's daughter with the patience of someone who watches gems cut one facet at a time.</div><div class="ec-stats"><span class="ec-stat">Deck: 16</span><span class="ec-stat">Doctrine: 12</span><span class="ec-stat">Neutral: 4</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-schemer"><div class="ec-top"><span class="ec-icon">&#9878;</span><span class="ec-tier elite">Elite</span></div><div class="ec-name">Il Giudice &mdash; Prospero Legge</div><div class="ec-doctrine">Schemer &bull; Scholar AI</div><div class="ec-desc">A guild arbitrator who knows every rule and exploits every loophole.</div><div class="ec-stats"><span class="ec-stat">Deck: 15</span><span class="ec-stat">Doctrine: 11</span><span class="ec-stat">Neutral: 4</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>Cutthroat</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-trickster"><div class="ec-top"><span class="ec-icon">&#128131;</span><span class="ec-tier elite">Elite</span></div><div class="ec-name">La Mantide &mdash; Isadora Nera</div><div class="ec-doctrine">Trickster &bull; Assassin AI</div><div class="ec-desc">A courtesan who lures opponents into false confidence, then devours their hand.</div><div class="ec-stats"><span class="ec-stat">Deck: 15</span><span class="ec-stat">Doctrine: 11</span><span class="ec-stat">Neutral: 4</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>No Trumps Before Dusk</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-hoarder"><div class="ec-top"><span class="ec-icon">&#128081;</span><span class="ec-tier boss">Boss</span></div><div class="ec-name">Il Maestro &mdash; Domenico Aureliano</div><div class="ec-doctrine">Hoarder &bull; Noble AI</div><div class="ec-desc">The Guildmaster himself. His hand always seems impossibly full. He has never lost at his own table.</div><div class="ec-stats"><span class="ec-stat">Deck: 16</span><span class="ec-stat">Doctrine: 12</span><span class="ec-stat">Neutral: 4</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>Heavy Hands</div><div class="ec-signature"><span class="sig-label">The Guild's Coffers</span>Begins with 2 extra cards in hand. Whenever the draw pile reshuffles, draws 3 bonus cards. Beat him fast or drown in his wealth.</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+  </div>
+
+  <!-- ACT 4 -->
+  <div class="act-header" id="enemies-act4"><div class="ah-act">Act IV</div><div class="ah-name">The Cardinal's Court</div></div>
+  <div class="enemy-grid">
+    <div class="enemy-card e-schemer"><div class="ec-top"><span class="ec-icon">&#128727;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Fra' Silenzio</div><div class="ec-doctrine">Schemer &bull; Assassin AI</div><div class="ec-desc">A monk who has taken a vow of silence &mdash; but his cards speak volumes.</div><div class="ec-stats"><span class="ec-stat">Deck: 16</span><span class="ec-stat">Doctrine: 12</span><span class="ec-stat">Neutral: 4</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-trickster"><div class="ec-top"><span class="ec-icon">&#128156;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Contessa Viola Tempesta</div><div class="ec-doctrine">Trickster &bull; Fox AI</div><div class="ec-desc">A minor noblewoman exiled from court for cheating at primero. She simply played a different game.</div><div class="ec-stats"><span class="ec-stat">Deck: 17</span><span class="ec-stat">Doctrine: 13</span><span class="ec-stat">Neutral: 4</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-brute"><div class="ec-top"><span class="ec-icon">&#128074;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Don Sangue</div><div class="ec-doctrine">Brute &bull; Brawler AI</div><div class="ec-desc">A papal enforcer who collects debts and broken fingers with equal enthusiasm.</div><div class="ec-stats"><span class="ec-stat">Deck: 16</span><span class="ec-stat">Doctrine: 13</span><span class="ec-stat">Neutral: 3</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-schemer"><div class="ec-top"><span class="ec-icon">&#128373;</span><span class="ec-tier elite">Elite</span></div><div class="ec-name">L'Ombra &mdash; Caterina Velo</div><div class="ec-doctrine">Schemer &bull; Assassin AI</div><div class="ec-desc">The Cardinal's personal spymaster. No one knows her real name. Her eyes miss nothing.</div><div class="ec-stats"><span class="ec-stat">Deck: 17</span><span class="ec-stat">Doctrine: 14</span><span class="ec-stat">Neutral: 3</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>The Mirror</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-brute"><div class="ec-top"><span class="ec-icon">&#128293;</span><span class="ec-tier elite">Elite</span></div><div class="ec-name">Il Flagello &mdash; Brother Torquato</div><div class="ec-doctrine">Brute &bull; Brawler AI</div><div class="ec-desc">A Dominican inquisitor. Every attack is a judgment. Every forced pickup is a penance.</div><div class="ec-stats"><span class="ec-stat">Deck: 18</span><span class="ec-stat">Doctrine: 14</span><span class="ec-stat">Neutral: 4</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>Double or Nothing</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-schemer"><div class="ec-top"><span class="ec-icon">&#9961;</span><span class="ec-tier boss">Boss</span></div><div class="ec-name">Il Cardinale &mdash; Augusto Sforza</div><div class="ec-doctrine">Schemer &bull; Scholar AI</div><div class="ec-desc">The Cardinal himself. He has spies in every court. When he plays, he already knows your entire hand.</div><div class="ec-stats"><span class="ec-stat">Deck: 18</span><span class="ec-stat">Doctrine: 14</span><span class="ec-stat">Neutral: 4</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>The Mirror</div><div class="ec-signature"><span class="sig-label">Divine Omniscience</span>Sees the top 3 cards of the draw pile at all times. Once per match, can 'Excommunicate' &mdash; forcing the player to discard entire hand and redraw.</div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span></div></div>
+  </div>
+
+  <!-- ACT 5 -->
+  <div class="act-header" id="enemies-act5"><div class="ah-act">Act V</div><div class="ah-name">The Doge's Palace</div></div>
+  <div class="enemy-grid">
+    <div class="enemy-card e-trickster"><div class="ec-top"><span class="ec-icon">&#129413;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Marchese Falcone di Lupo</div><div class="ec-doctrine">Trickster &bull; Fox AI</div><div class="ec-desc">A hawk-faced nobleman who breeds falcons and plays cards with predatory patience.</div><div class="ec-stats"><span class="ec-stat">Deck: 14</span><span class="ec-stat">Doctrine: 12</span><span class="ec-stat">Neutral: 2</span><span class="ec-stat">Random: 0%</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-hoarder"><div class="ec-top"><span class="ec-icon">&#128142;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Principessa Bianca Nieve</div><div class="ec-doctrine">Hoarder &bull; Noble AI</div><div class="ec-desc">A princess who buries opponents in resources they cannot match.</div><div class="ec-stats"><span class="ec-stat">Deck: 15</span><span class="ec-stat">Doctrine: 14</span><span class="ec-stat">Neutral: 1</span><span class="ec-stat">Random: 0%</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-brute"><div class="ec-top"><span class="ec-icon">&#9876;</span><span class="ec-tier regular">Regular</span></div><div class="ec-name">Condottiero Ruggero il Nero</div><div class="ec-doctrine">Brute &bull; Assassin AI</div><div class="ec-desc">A mercenary general who saves his overwhelming force for the exact right moment.</div><div class="ec-stats"><span class="ec-stat">Deck: 16</span><span class="ec-stat">Doctrine: 14</span><span class="ec-stat">Neutral: 2</span><span class="ec-stat">Random: 0%</span></div><div class="ec-difficulty"><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip filled"></span><span class="diff-pip"></span></div></div>
+
+    <div class="enemy-card e-schemer"><div class="ec-top"><span class="ec-icon">&#128208;</span><span class="ec-tier elite">Elite</span></div><div class="ec-name">L'Architetto &mdash; Leonardo Ombrato</div><div class="ec-doctrine">Schemer &bull; Scholar AI</div><div class="ec-desc">A genius polymath who sees twelve moves ahead and builds his victory like a cathedral.</div><div class="ec-stats"><span class="ec-stat">Deck: 15</span><span class="ec-stat">Doctrine: 14</span><span class="ec-stat">Neutral: 1</span><span class="ec-stat">Random: 0%</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>Cutthroat</div><div class="ec-difficulty"><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span></div></div>
+
+    <div class="enemy-card e-trickster"><div class="ec-top"><span class="ec-icon">&#128302;</span><span class="ec-tier elite">Elite</span></div><div class="ec-name">La Strega &mdash; Maddalena Fuoco</div><div class="ec-doctrine">Trickster &bull; Assassin AI</div><div class="ec-desc">They call her the Witch. Cards change suits in her hands. Trumps appear from nowhere. Reality bends at her table.</div><div class="ec-stats"><span class="ec-stat">Deck: 14</span><span class="ec-stat">Doctrine: 14</span><span class="ec-stat">Neutral: 0</span><span class="ec-stat">Random: 0%</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>No Trumps Before Dusk</div><div class="ec-difficulty"><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span></div></div>
+
+    <div class="enemy-card e-hybrid"><div class="ec-top"><span class="ec-icon">&#128081;</span><span class="ec-tier boss">Boss</span></div><div class="ec-name">Il Doge &mdash; Alessandro Magnifico</div><div class="ec-doctrine">Hybrid: Brute + Schemer &bull; Fox AI</div><div class="ec-desc">The Duke himself. The most powerful man in the city and the greatest card player in all of Italy. Both iron fist and velvet glove. They say he has never lost a match in his own salon.</div><div class="ec-visual">Ermine-trimmed crimson robe, the ducal crown resting casually on the table, fingers heavy with rings of state</div><div class="ec-stats"><span class="ec-stat">Deck: 16</span><span class="ec-stat">Brute: 8</span><span class="ec-stat">Schemer: 8</span><span class="ec-stat">Neutral: 0</span><span class="ec-stat">Random: 0%</span></div><div class="ec-house-rule"><span class="hr-label">House Rule</span>The Gauntlet</div><div class="ec-signature"><span class="sig-label">The Doge's Mandate</span>Plays with BOTH Brute and Schemer passives active. Has two unique legendary cards: 'Doge's Judgment' (force reveal + pickup) and 'Doge's Decree' (see hand + rearrange top 5 of draw pile). Once per match: 'Absolute Authority' &mdash; cancels any player ability and turns it back on them.</div><div class="ec-difficulty"><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span><span class="diff-pip filled high"></span></div></div>
+  </div>
+</section>
+
+<div class="divider"><span>ACTS &amp; EVENTS</span></div>
+
+<!-- ============ ACTS & EVENTS ============ -->
+<section id="acts-events">
+  <h2>Acts &amp; Events</h2>
+  <p class="subtitle">Five acts of escalating challenge across Renaissance Italy.</p>
+
+  <div class="placeholder-section">
+    <div class="ps-badge">Coming Soon</div>
+    <div class="ps-title">Act Descriptions &amp; Event Catalog</div>
+    <div class="ps-text">Detailed act atmosphere, map structure diagrams, and the complete event catalog are in development.<br>The acts_events.json data file will populate this section when available.</div>
+  </div>
+
+  <h3>Act Structure Overview</h3>
+  <div class="rules-grid">
+    <div class="rule-card"><span class="rc-icon">&#127866;</span><div class="rc-title">Act I &mdash; The Bilge Rat Tavern</div><div class="rc-text">The dockside slums. Low-stakes games against drunks and thugs. Brute-heavy enemies teach the core attack/defend loop. Boss: Il Padrone.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#9973;</span><div class="rc-title">Act II &mdash; The Merchant's Rest</div><div class="rc-text">The trading quarter. All four doctrines appear. Mid-stakes games against traders and hustlers. Boss: Il Capitano.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#127970;</span><div class="rc-title">Act III &mdash; The Guild Hall</div><div class="rc-text">The guild district. High-synergy enemies with nearly full doctrine decks. Boss: Il Maestro.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#9961;</span><div class="rc-title">Act IV &mdash; The Cardinal's Court</div><div class="rc-text">The ecclesiastical quarter. Enemies with house rules and near-zero random play. Boss: Il Cardinale.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#128081;</span><div class="rc-title">Act V &mdash; The Doge's Palace</div><div class="rc-text">The seat of power. Perfect-play opponents with pure doctrine decks. The final boss is the only hybrid-doctrine enemy in the game. Boss: Il Doge.</div></div>
+  </div>
+
+  <h3>Map Node Types</h3>
+  <div class="rules-grid">
+    <div class="rule-card"><span class="rc-icon">&#9876;</span><div class="rc-title">Match</div><div class="rc-text">Standard combat encounter. Win to earn Florins and choose 1 of 3 card rewards. The core loop.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#9733;</span><div class="rc-title">Elite</div><div class="rc-text">Harder combat with house rules. Guaranteed relic reward plus card choice. High risk, high reward.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#128176;</span><div class="rc-title">Shop</div><div class="rc-text">Buy cards, relics, or remove cards from your deck. Prices escalate as the run progresses.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#128293;</span><div class="rc-title">Rest Stop</div><div class="rc-text">Choose: heal Prestige OR upgrade a card. The tension between recovery and power defines the run.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#128172;</span><div class="rc-title">Rumor (Event)</div><div class="rc-text">Narrative encounters with risk/reward choices. May grant relics, cards, Florins, or impose burdens.</div></div>
+  </div>
+</section>
+
+<div class="divider"><span>DECK BUILDING</span></div>
+
+<!-- ============ DECK BUILDING ============ -->
+<section id="deckbuilding">
+  <h2>Deck Building Rules</h2>
+  <p class="subtitle">The tension between lean efficiency and broad options defines the deckbuilder.</p>
+
+  <div class="deck-rules-grid">
+    <div class="deck-rule"><span class="dr-num">12</span><div class="dr-label">Starting Deck Size</div><div class="dr-text">Every doctrine begins with exactly 12 cards. All starting cards are Common or Uncommon rarity. This is the baseline.</div></div>
+    <div class="deck-rule"><span class="dr-num">10&ndash;16</span><div class="dr-label">Recommended Range</div><div class="dr-text">10&ndash;16 cards is the sweet spot. Small decks cycle fast (great for Schemers), large decks provide options (great for Hoarders).</div></div>
+    <div class="deck-rule"><span class="dr-num">18+</span><div class="dr-label">Warning Threshold</div><div class="dr-text">At 18+ cards, the game warns you that synergies are diluting. You'll draw your key combos less often. Only Hoarders should consider this.</div></div>
+    <div class="deck-rule"><span class="dr-num">25</span><div class="dr-label">Hard Cap</div><div class="dr-text">Maximum deck size. No deck can exceed 25 cards. This prevents infinite scaling and ensures every card matters.</div></div>
+  </div>
+
+  <h3>Card Acquisition</h3>
+  <div class="rules-grid">
+    <div class="rule-card"><span class="rc-icon">&#127942;</span><div class="rc-title">Match Rewards</div><div class="rc-text">After winning a match, choose 1 of 3 offered cards (or skip). Cards are weighted toward the current act's difficulty and the player's doctrine.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#128176;</span><div class="rc-title">Shop Purchases</div><div class="rc-text">Buy specific cards from the shop. Common: 5&ndash;8F, Uncommon: 10&ndash;16F, Rare: 18&ndash;25F. Cross-doctrine cards cost +3F.</div></div>
+  </div>
+
+  <h3>Card Removal</h3>
+  <div class="rules-grid">
+    <div class="rule-card"><span class="rc-icon">&#128293;</span><div class="rc-title">Rest Stops</div><div class="rc-text">At rest stops, you may choose to remove a card instead of healing. Free, but costs your healing opportunity. Strategic pruning.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#128176;</span><div class="rc-title">Shop Removal</div><div class="rc-text">Pay to remove a card. First removal: 5F. Each subsequent removal costs 5F more (10F, 15F, 20F...). Escalating cost creates real decisions.</div></div>
+  </div>
+
+  <h3>The Tension</h3>
+  <p>Small deck = fast cycle through your draw pile, see your best cards more often, stronger synergy chains. But fewer options when trump shifts or you face unexpected situations.</p>
+  <p>Big deck = more answers to varied threats, more flexibility in combat. But synergies fire less often, key cards get buried, and you're slower to empty your hand for the win.</p>
+  <p>The ideal deck size is a function of your doctrine, your relics, and the enemies you expect to face. There is no single right answer &mdash; and that's the point.</p>
+</section>
+
+<div class="divider"><span>ECONOMY</span></div>
+
+<!-- ============ ECONOMY ============ -->
+<section id="economy">
+  <h2>Economy</h2>
+  <p class="subtitle">Florins fuel your build. Prestige keeps you alive. Burdens test your resolve.</p>
+
+  <h3>Florin Rewards</h3>
+  <table class="econ-table">
+    <thead><tr><th>Source</th><th>Reward</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Regular Match Win</td><td><span class="num">8&ndash;12F</span></td><td>Scales with act number</td></tr>
+      <tr><td>Elite Match Win</td><td><span class="num">15&ndash;20F</span></td><td>Plus guaranteed relic</td></tr>
+      <tr><td>Boss Defeat</td><td><span class="num">25&ndash;35F</span></td><td>Plus rare card choice</td></tr>
+      <tr><td>Match Loss</td><td><span class="num">2&ndash;4F</span></td><td>Consolation; prevents soft-lock</td></tr>
+      <tr><td>Rumor Event</td><td><span class="num">0&ndash;15F</span></td><td>Varies by choice made</td></tr>
+      <tr><td>Merchant's Purse (relic)</td><td><span class="num">+3F</span></td><td>Per match victory</td></tr>
+      <tr><td>Miser's Ring (relic)</td><td><span class="num">+1F</span></td><td>Per successful defense bout</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Shop Prices</h3>
+  <table class="econ-table">
+    <thead><tr><th>Item</th><th>Price</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Common Card</td><td><span class="num">5&ndash;8F</span></td><td>Reliable starters and fillers</td></tr>
+      <tr><td>Uncommon Card</td><td><span class="num">10&ndash;16F</span></td><td>Build-around effects</td></tr>
+      <tr><td>Rare Card</td><td><span class="num">18&ndash;25F</span></td><td>Build-defining power</td></tr>
+      <tr><td>Cross-Doctrine Card</td><td><span class="num">+3F surcharge</span></td><td>Splash costs extra</td></tr>
+      <tr><td>Common Relic</td><td><span class="num">8&ndash;10F</span></td><td>Small, reliable effects</td></tr>
+      <tr><td>Uncommon Relic</td><td><span class="num">14&ndash;18F</span></td><td>Strategy-shaping effects</td></tr>
+      <tr><td>Rare Relic</td><td><span class="num">22&ndash;28F</span></td><td>Build-defining power</td></tr>
+      <tr><td>Card Removal (1st)</td><td><span class="num">5F</span></td><td>Escalates by 5F each time</td></tr>
+      <tr><td>Card Removal (2nd)</td><td><span class="num">10F</span></td><td></td></tr>
+      <tr><td>Card Removal (3rd+)</td><td><span class="num">15F+</span></td><td>Caps at 25F per removal</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Prestige (Run HP)</h3>
+  <p>You start each run with <strong>3 Prestige</strong>. Losing a match costs 1 Prestige. Losing to a boss costs 2 Prestige. When Prestige hits 0, the run is over (unless you hold The Phoenix Medal). Rest stops can restore 1 Prestige. Some rumor events also heal Prestige.</p>
+
+  <h3>Burdens</h3>
+  <p>Burdens are negative modifiers gained from rumor events, elite defeats, or risky choices. Examples:</p>
+  <div class="rules-grid">
+    <div class="rule-card"><span class="rc-icon">&#128168;</span><div class="rc-title">Cursed Hand</div><div class="rc-text">Start each match with 1 fewer card. Can be removed at a rest stop or by paying 15F at a shop.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#128064;</span><div class="rc-title">Marked by the Inquisition</div><div class="rc-text">Enemies can see 1 random card in your hand at match start. Removed after defeating an elite.</div></div>
+    <div class="rule-card"><span class="rc-icon">&#128176;</span><div class="rc-title">Debtor's Chain</div><div class="rc-text">Lose 2F after every match, win or lose. Removed by paying 20F at a shop.</div></div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<div class="doc-footer">
+  <div class="df-title">The Doctrine War &mdash; Wits &amp; Fools</div>
+  <div class="df-sub">Complete Game Design Document &bull; 95 Cards &bull; 28 Relics &bull; 30 Enemies &bull; 5 Acts</div>
+</div>
+
+<script>
+  function toggleToc() {
+    const sidebar = document.getElementById('tocSidebar');
+    const overlay = document.getElementById('tocOverlay');
+    const isOpen = sidebar.classList.contains('open');
+    if (isOpen) {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    } else {
+      sidebar.classList.add('open');
+      overlay.classList.add('open');
+    }
+  }
+
+  // Close TOC when clicking a link
+  document.querySelectorAll('.toc-sidebar a').forEach(link => {
+    link.addEventListener('click', () => {
+      document.getElementById('tocSidebar').classList.remove('open');
+      document.getElementById('tocOverlay').classList.remove('open');
+    });
+  });
+</script>
+
+</body>
+</html>

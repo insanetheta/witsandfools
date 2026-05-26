@@ -40,6 +40,11 @@ namespace WitsAndFools
         public List<TrinketType> PlayerTrinkets = new();
         public List<BurdenType> PlayerBurdens = new();
 
+        public DoctrineType? PlayerDoctrine;
+        public List<string> PlayerDeckCardIds = new();
+        public List<RelicType> PlayerRelics = new();
+        public int CardRemovalsPurchased;
+
         public List<List<MapNode>> CurrentMap;
         public bool RunComplete;
         public bool RunWon;
@@ -58,6 +63,16 @@ namespace WitsAndFools
         {
             if (!AbilityPickCount.ContainsKey(a)) AbilityPickCount[a] = 0;
             AbilityPickCount[a]++;
+        }
+
+        public bool UseDualDeck => PlayerDoctrine.HasValue && PlayerDeckCardIds.Count > 0;
+
+        public void InitDoctrineDeck(DoctrineType doctrine)
+        {
+            PlayerDoctrine = doctrine;
+            PlayerDeckCardIds.Clear();
+            foreach (var card in CardCatalog.StartingDeck(doctrine))
+                PlayerDeckCardIds.Add(card.Id);
         }
     }
 }

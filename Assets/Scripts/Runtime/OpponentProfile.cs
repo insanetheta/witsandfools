@@ -23,5 +23,10 @@ namespace WitsAndFools
         public int ActIndex;
         public bool IsElite;
         public bool IsBoss;
+
+        public DoctrineType? Doctrine;
+        public List<string> DeckCardIds = new();
+        public List<RelicType> Relics = new();
+        public bool UseDualDeck => DeckCardIds.Count > 0;
     }
 }

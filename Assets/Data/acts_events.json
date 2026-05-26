@@ -1,0 +1,1030 @@
+{
+  "acts": [
+    {
+      "id": 1,
+      "name": "The Bilge Rat Tavern",
+      "description": "A waterfront dive where sailors and dock rats play for pennies. The air reeks of salt, stale ale, and ambition. Every table is sticky, every opponent underestimated.",
+      "atmosphere": "Muddy browns, sickly yellows, warm orange candlelight. Rough-hewn wood, tallow candles guttering in the draught.",
+      "colorPalette": {
+        "primary": "#5A4020",
+        "secondary": "#C89430",
+        "accent": "#CC8833",
+        "background": "#14180A",
+        "felt": "rgba(33,77,46,0.35)",
+        "frame": "#664020"
+      },
+      "mapColumns": 3,
+      "nodesPerColumn": [2, 3, 1],
+      "nodeWeights": {
+        "match": 0.45,
+        "elite": 0.05,
+        "shop": 0.20,
+        "rest": 0.15,
+        "rumor": 0.15
+      },
+      "cardOfferingRarity": {
+        "common": 0.70,
+        "uncommon": 0.25,
+        "rare": 0.05
+      },
+      "abilityPool": [
+        "Blocker", "ExtraDraw", "DoubleTrouble", "Peek",
+        "Fortify", "SecondWind", "Brace", "SteadyHand",
+        "TrumpChanger", "DoubleDefense"
+      ],
+      "florinReward": {
+        "base": 13,
+        "eliteBonus": 8,
+        "bossBonus": 15
+      },
+      "difficulty": {
+        "opponentAbilities": 0,
+        "opponentTrinkets": 0,
+        "houseRuleChance": 0.0,
+        "description": "Forgiving. Opponents have no abilities or trinkets. Teaches core Durak mechanics."
+      }
+    },
+    {
+      "id": 2,
+      "name": "The Merchant's Rest",
+      "description": "A trading inn where spice merchants and moneylenders settle debts over cards. The stakes are real, the wine passable, and every player keeps a ledger.",
+      "atmosphere": "Rich warm browns, brass and copper fixtures, deep burgundy curtains, parchment-colored lamplight.",
+      "colorPalette": {
+        "primary": "#6B4A28",
+        "secondary": "#B87333",
+        "accent": "#CC4444",
+        "background": "#181410",
+        "felt": "rgba(51,72,41,0.35)",
+        "frame": "#806030"
+      },
+      "mapColumns": 3,
+      "nodesPerColumn": [2, 3, 2],
+      "nodeWeights": {
+        "match": 0.40,
+        "elite": 0.10,
+        "shop": 0.20,
+        "rest": 0.15,
+        "rumor": 0.15
+      },
+      "cardOfferingRarity": {
+        "common": 0.55,
+        "uncommon": 0.35,
+        "rare": 0.10
+      },
+      "abilityPool": [
+        "Blocker", "ExtraDraw", "DoubleTrouble", "Peek",
+        "SeizeInitiative", "Feint", "SlipAway", "Gambit",
+        "TrumpChanger", "DoubleDefense", "PileOn",
+        "Fortify", "SecondWind", "Brace", "Desperation", "SteadyHand",
+        "Riposte", "ShadowCloak", "Haymaker", "IronGrip",
+        "CourtIntrigue", "StackTheDeck"
+      ],
+      "florinReward": {
+        "base": 16,
+        "eliteBonus": 8,
+        "bossBonus": 15
+      },
+      "difficulty": {
+        "opponentAbilities": 1,
+        "opponentTrinkets": 1,
+        "houseRuleChance": 0.0,
+        "description": "Rising stakes. Opponents have 1 ability and 0-1 trinkets. Economy management matters."
+      }
+    },
+    {
+      "id": 3,
+      "name": "The Guildmaster's Hall",
+      "description": "The inner sanctum of the merchant guilds. Dark walnut paneling, silver candelabras, and opponents who have played this game longer than you have been alive.",
+      "atmosphere": "Dark polished wood, silver accents, jewel-tone tapestries. Emerald, sapphire, and ruby glass catches the light.",
+      "colorPalette": {
+        "primary": "#3A3040",
+        "secondary": "#888C90",
+        "accent": "#338866",
+        "background": "#141418",
+        "felt": "rgba(31,56,46,0.35)",
+        "frame": "#594C46"
+      },
+      "mapColumns": 4,
+      "nodesPerColumn": [2, 3, 3, 1],
+      "nodeWeights": {
+        "match": 0.35,
+        "elite": 0.15,
+        "shop": 0.18,
+        "rest": 0.12,
+        "rumor": 0.20
+      },
+      "cardOfferingRarity": {
+        "common": 0.40,
+        "uncommon": 0.40,
+        "rare": 0.20
+      },
+      "abilityPool": [
+        "SeizeInitiative", "Feint", "SlipAway", "Gambit",
+        "PileOn", "Deflect", "TrumpAffinity", "EndgameSpecialist",
+        "CardCounter", "QuickHands",
+        "Riposte", "ShadowCloak", "PatienceRewarded",
+        "Wiretap", "MarkedCards", "DoubleAgent",
+        "SleightOfHand", "SmokeBomb", "TrapCard",
+        "Rampage", "Bloodlust", "Haymaker", "IronGrip", "Brawl",
+        "Conquer", "Intimidate",
+        "CourtIntrigue", "RoyalDecree", "Patronage",
+        "PullStrings", "Misdirection", "ForcedHand",
+        "Diplomacy", "SafePassage",
+        "StackTheDeck", "SecondDeal", "ColdRead", "SharkInstinct",
+        "AllIn", "DoubleOrNothing",
+        "BlindSwap", "Misdeal", "WildCard",
+        "Fortify", "SecondWind", "Brace", "Desperation", "SteadyHand"
+      ],
+      "florinReward": {
+        "base": 19,
+        "eliteBonus": 8,
+        "bossBonus": 15
+      },
+      "difficulty": {
+        "opponentAbilities": 2,
+        "opponentTrinkets": 2,
+        "houseRuleChance": 0.15,
+        "description": "Serious play. Opponents carry 2 abilities and 1-2 trinkets. Elites appear more frequently and use house rules."
+      }
+    },
+    {
+      "id": 4,
+      "name": "The Cardinal's Library",
+      "description": "A vaulted cathedral library where clergy and scholars play in deadly silence. Every move is witnessed. Every mistake is remembered. The Cardinal himself may be watching.",
+      "atmosphere": "Deep purple shadows, amethyst-tinted glass, candlelight gold on ancient tomes. Incense and tension.",
+      "colorPalette": {
+        "primary": "#3A2050",
+        "secondary": "#8855AA",
+        "accent": "#D4A846",
+        "background": "#18141C",
+        "felt": "rgba(39,36,56,0.35)",
+        "frame": "#40334C"
+      },
+      "mapColumns": 4,
+      "nodesPerColumn": [3, 3, 3, 1],
+      "nodeWeights": {
+        "match": 0.30,
+        "elite": 0.20,
+        "shop": 0.15,
+        "rest": 0.10,
+        "rumor": 0.25
+      },
+      "cardOfferingRarity": {
+        "common": 0.25,
+        "uncommon": 0.45,
+        "rare": 0.30
+      },
+      "abilityPool": [
+        "Deflect", "Gambit", "TrumpAffinity", "EndgameSpecialist",
+        "CardCounter", "QuickHands",
+        "PatienceRewarded", "Wiretap", "MarkedCards", "DoubleAgent", "Blackmail",
+        "SmokeBomb", "TrapCard", "Undermine",
+        "Bloodlust", "Brawl", "ThickSkin",
+        "Conquer", "Intimidate", "CrownSeize", "BattleHardened",
+        "RoyalDecree", "Patronage", "GracefulManners",
+        "Misdirection", "ForcedHand", "WebOfLies",
+        "SafePassage", "Treaty", "GracefulRetreat", "Equilibrium",
+        "ColdRead", "SharkInstinct",
+        "AllIn", "DoubleOrNothing", "LuckyStreak", "Jackpot",
+        "Misdeal", "WildCard", "SleightOfMind", "ChaoticNature",
+        "Desperation", "SteadyHand"
+      ],
+      "florinReward": {
+        "base": 22,
+        "eliteBonus": 8,
+        "bossBonus": 15
+      },
+      "difficulty": {
+        "opponentAbilities": 3,
+        "opponentTrinkets": 3,
+        "houseRuleChance": 0.30,
+        "description": "Punishing. Opponents wield 3 abilities and 2-3 trinkets. Mistakes cost dearly. Rest stops are scarce."
+      }
+    },
+    {
+      "id": 5,
+      "name": "The Duke's Salon",
+      "description": "The private gaming room of the Duke of Florence. Velvet and gold, candlelight and conspiracy. One table, one opponent, one chance. Win and you own the circuit. Lose and you are forgotten.",
+      "atmosphere": "Pure gold filigree, midnight blue velvet, velvet crimson drapery. Crystal chandeliers. The air tastes like ambition.",
+      "colorPalette": {
+        "primary": "#1A2040",
+        "secondary": "#D4A846",
+        "accent": "#882244",
+        "background": "#0A1420",
+        "felt": "rgba(41,21,51,0.25)",
+        "frame": "#B89430"
+      },
+      "mapColumns": 2,
+      "nodesPerColumn": [2, 1],
+      "nodeWeights": {
+        "match": 0.00,
+        "elite": 0.00,
+        "shop": 0.50,
+        "rest": 0.50,
+        "rumor": 0.00
+      },
+      "cardOfferingRarity": {
+        "common": 0.10,
+        "uncommon": 0.40,
+        "rare": 0.50
+      },
+      "abilityPool": [
+        "Blackmail", "DoubleAgent", "Undermine",
+        "CrownSeize", "BattleHardened",
+        "GracefulManners", "WebOfLies",
+        "Treaty", "Equilibrium",
+        "LuckyStreak", "Jackpot",
+        "SleightOfMind", "ChaoticNature"
+      ],
+      "florinReward": {
+        "base": 25,
+        "eliteBonus": 8,
+        "bossBonus": 15
+      },
+      "difficulty": {
+        "opponentAbilities": 5,
+        "opponentTrinkets": 4,
+        "houseRuleChance": 1.0,
+        "description": "Final gauntlet. One preparation node, then the Champion. Boss has 5 abilities, 4 trinkets, and a house rule. This is the end."
+      },
+      "boss": {
+        "name": "The Champion",
+        "archetype": "Assassin",
+        "abilities": ["DoubleTrouble", "Deflect", "SeizeInitiative", "Gambit", "EndgameSpecialist"],
+        "trinkets": ["FoolsGold", "DuelistsGlove", "PoisonedWine", "HereticsBrand"],
+        "houseRule": "DoubleOrNothing"
+      }
+    }
+  ],
+
+  "events": [
+    {
+      "id": "wandering_merchant",
+      "name": "The Wandering Merchant",
+      "category": "character",
+      "description": "A hunched figure in a traveling cloak blocks the narrow alley. His cart is loaded with curiosities -- cards wrapped in oilcloth, small brass instruments, and bottles of dubious liquid.",
+      "minAct": 1,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Browse his wares",
+          "outcome": "Gain 1 random Common ability. Lose 5 Florins.",
+          "effect": { "gainAbility": "random_common", "loseFlorins": 5 }
+        },
+        {
+          "text": "Offer to play a quick hand",
+          "outcome": "50% chance: Gain 1 Uncommon ability. 50% chance: Lose 1 Prestige.",
+          "effect": {
+            "gamble": {
+              "win": { "gainAbility": "random_uncommon" },
+              "lose": { "losePrestige": 1 },
+              "chance": 0.5
+            }
+          }
+        },
+        {
+          "text": "Walk away",
+          "outcome": "Nothing happens.",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "strangers_wager",
+      "name": "The Stranger's Wager",
+      "category": "challenge",
+      "description": "A hooded figure materializes from the fog of the canal district. Gold coins dance between his fingers like a conjurer's trick. 'One wager,' he whispers. 'Double your coin, or I take it all.'",
+      "minAct": 1,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Accept the wager",
+          "outcome": "50% chance: Gain 8 + (act x 2) Florins. 50% chance: Lose 6 Florins.",
+          "effect": {
+            "gamble": {
+              "win": { "gainFlorins": "8 + act * 2" },
+              "lose": { "loseFlorins": 6 },
+              "chance": 0.5
+            }
+          }
+        },
+        {
+          "text": "Decline politely",
+          "outcome": "Nothing happens. Wise, perhaps.",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "herbalists_cart",
+      "name": "The Herbalist's Cart",
+      "category": "character",
+      "description": "A traveling herbalist tends her cart beside the bridge, bundles of dried sage and valerian hanging from every hook. She holds out a small green vial. 'Sharpen the mind, but steady the hand,' she warns with knowing eyes.",
+      "minAct": 1,
+      "maxAct": 4,
+      "choices": [
+        {
+          "text": "Drink the tonic",
+          "outcome": "65% chance: Gain 1 Common ability (or +4 Florins if full). 35% chance: Gain Clumsy Fingers burden.",
+          "effect": {
+            "gamble": {
+              "win": { "gainAbility": "random_common", "fallback": { "gainFlorins": 4 } },
+              "lose": { "gainBurden": "ClumsyFingers" },
+              "chance": 0.65
+            }
+          }
+        },
+        {
+          "text": "Pass",
+          "outcome": "You move on. Better safe than sorry.",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "card_sharps_challenge",
+      "name": "The Card Sharp's Challenge",
+      "category": "challenge",
+      "description": "A woman with ink-stained fingers and a calculating gaze blocks your way at the tavern stairs. Her deck is fanned face-down on the railing. 'Beat me in a trick, and I share my secret. Lose, and I mark your deck.'",
+      "minAct": 1,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Accept the challenge",
+          "outcome": "55% chance: Gain 6 + act Florins. 45% chance: Gain Marked Cards burden.",
+          "effect": {
+            "gamble": {
+              "win": { "gainFlorins": "6 + act" },
+              "lose": { "gainBurden": "MarkedCards" },
+              "chance": 0.55
+            }
+          }
+        },
+        {
+          "text": "Slip past her",
+          "outcome": "Gain 1 Florin from a loose pocket on the way by.",
+          "effect": { "gainFlorins": 1 }
+        }
+      ]
+    },
+    {
+      "id": "beggars_plea",
+      "name": "The Beggar's Plea",
+      "category": "character",
+      "description": "A ragged beggar clutches your sleeve at the market square, his grip surprisingly strong. His eyes are too sharp for a man who lives on charity. 'Spare some coin, friend? I know things about your next rival that gold cannot buy.'",
+      "minAct": 1,
+      "maxAct": 4,
+      "choices": [
+        {
+          "text": "Give 5 Florins for the information",
+          "outcome": "Pay 5 Florins. Gain 8 + (act x 2) Florins (net profit).",
+          "effect": { "loseFlorins": 5, "gainFlorins": "8 + act * 2" },
+          "requires": { "minFlorins": 5 }
+        },
+        {
+          "text": "Shake him off",
+          "outcome": "Nothing happens. The city has no mercy.",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "cursed_trinket",
+      "name": "The Cursed Trinket",
+      "category": "discovery",
+      "description": "In a dusty shop window, something catches your eye -- a trinket that seems to pulse with inner light. The vendor leans close. 'Powerful, but not without cost,' she whispers. 'All great things demand sacrifice.'",
+      "minAct": 2,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Take the trinket",
+          "outcome": "Gain 1 random trinket. Gain Rattled Nerves burden.",
+          "effect": { "gainTrinket": "random", "gainBurden": "RattledNerves" }
+        },
+        {
+          "text": "Leave it alone",
+          "outcome": "Probably wise. You move on.",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "drunken_sailor",
+      "name": "The Drunken Sailor",
+      "category": "character",
+      "description": "A sailor stumbles into you at the dockside, scattering cards from his sleeve across the wet cobblestones. 'Sorry, friend!' he slurs, grabbing at the air. 'Take one for your trouble -- I've got more than I can carry.'",
+      "minAct": 1,
+      "maxAct": 3,
+      "choices": [
+        {
+          "text": "Pick up a card",
+          "outcome": "Gain 1 random ability (if room). Otherwise, nothing useful.",
+          "effect": { "gainAbility": "random_common" }
+        },
+        {
+          "text": "Help him to his feet",
+          "outcome": "Gain 4 Florins from a grateful drunk.",
+          "effect": { "gainFlorins": 4 }
+        }
+      ]
+    },
+    {
+      "id": "fortune_teller",
+      "name": "The Fortune Teller",
+      "category": "character",
+      "description": "An old woman sits behind a table draped in star-patterned cloth, a crystal ball cloudy with smoke between her hands. 'Your fate is not yet written,' she murmurs. 'But the cards have much to say, if you have the courage to listen.'",
+      "minAct": 1,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Ask about rivals",
+          "outcome": "She reveals your next opponent's weakness. Gain 3 Florins.",
+          "effect": { "gainFlorins": 3 }
+        },
+        {
+          "text": "Ask about treasure",
+          "outcome": "She reveals a hidden cache. Gain 4 + act Florins.",
+          "effect": { "gainFlorins": "4 + act" }
+        }
+      ]
+    },
+    {
+      "id": "venetian_masquerade",
+      "name": "The Venetian Masquerade",
+      "category": "opportunity",
+      "description": "Music drifts from a palazzo draped in silk. A masked doorman offers you entry to a private card game. 'The buy-in is steep,' he says, adjusting his golden mask, 'but the winners leave with more than coin.'",
+      "minAct": 2,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Pay 10 Florins to enter",
+          "outcome": "60% chance: Gain 1 Rare ability. 40% chance: Lose your 10 Florins and gain Bad Reputation.",
+          "effect": {
+            "gamble": {
+              "win": { "gainAbility": "random_rare" },
+              "lose": { "gainBurden": "BadReputation" },
+              "chance": 0.6
+            },
+            "loseFlorins": 10
+          },
+          "requires": { "minFlorins": 10 }
+        },
+        {
+          "text": "Pay 5 Florins for a peek inside",
+          "outcome": "Gain 1 Uncommon ability.",
+          "effect": { "gainAbility": "random_uncommon", "loseFlorins": 5 },
+          "requires": { "minFlorins": 5 }
+        },
+        {
+          "text": "Walk past",
+          "outcome": "The music fades behind you. Perhaps next time.",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "bridge_toll",
+      "name": "The Bridge Toll",
+      "category": "dilemma",
+      "description": "Two bravi block the narrow bridge, their daggers catching moonlight. 'A small contribution,' the taller one says with a grin that shows no teeth, 'for the continued safety of your person and your purse.'",
+      "minAct": 1,
+      "maxAct": 4,
+      "choices": [
+        {
+          "text": "Pay the toll (8 Florins)",
+          "outcome": "Lose 8 Florins. Safe passage. Gain 1 Prestige (word spreads you handle trouble calmly).",
+          "effect": { "loseFlorins": 8, "gainPrestige": 1 },
+          "requires": { "minFlorins": 8 }
+        },
+        {
+          "text": "Refuse and push through",
+          "outcome": "40% chance: They back down (+3 Florins from dropped loot). 60% chance: Scuffle costs 1 Prestige.",
+          "effect": {
+            "gamble": {
+              "win": { "gainFlorins": 3 },
+              "lose": { "losePrestige": 1 },
+              "chance": 0.4
+            }
+          }
+        },
+        {
+          "text": "Find another route",
+          "outcome": "You lose time but nothing else.",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "alchemists_bargain",
+      "name": "The Alchemist's Bargain",
+      "category": "discovery",
+      "description": "Behind a nondescript door, an alchemist's laboratory bubbles and hisses. Glass tubes connect vessels of colored liquid. 'I can purify your deck,' he offers, holding up a flask of golden solvent. 'Remove the dross, reveal the gold.'",
+      "minAct": 2,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Pay 8 Florins for purification",
+          "outcome": "Remove 1 burden. If no burdens, gain 6 Florins back (net -2).",
+          "effect": { "loseFlorins": 8, "removeBurden": "random", "fallback": { "gainFlorins": 6 } },
+          "requires": { "minFlorins": 8 }
+        },
+        {
+          "text": "Ask about his other wares",
+          "outcome": "Gain 1 random trinket for 12 Florins.",
+          "effect": { "loseFlorins": 12, "gainTrinket": "random" },
+          "requires": { "minFlorins": 12 }
+        },
+        {
+          "text": "Leave quickly",
+          "outcome": "Something about those fumes...",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "confessional",
+      "name": "The Confessional",
+      "category": "dilemma",
+      "description": "A small chapel, empty but for a single candle. The confessional booth stands open. From within, a voice: 'Unburden yourself, child. Guilt weighs heavy on a gambler's soul.'",
+      "minAct": 2,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Confess your sins",
+          "outcome": "Remove 1 random burden. If no burdens, restore 1 Prestige (if below max).",
+          "effect": { "removeBurden": "random", "fallback": { "gainPrestige": 1 } }
+        },
+        {
+          "text": "Offer a donation (6 Florins)",
+          "outcome": "Lose 6 Florins. Remove all burdens.",
+          "effect": { "loseFlorins": 6, "removeAllBurdens": true },
+          "requires": { "minFlorins": 6 }
+        },
+        {
+          "text": "Walk away",
+          "outcome": "Some sins are best kept close.",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "pickpocket_ring",
+      "name": "The Pickpocket Ring",
+      "category": "dilemma",
+      "description": "You catch a young pickpocket with her hand in your pocket. She freezes, eyes wide. 'Please,' she whispers. 'My family needs to eat. I can make it worth your while -- I know where the guild keeps its stash.'",
+      "minAct": 1,
+      "maxAct": 3,
+      "choices": [
+        {
+          "text": "Let her go and follow her lead",
+          "outcome": "70% chance: She leads you to a cache. Gain 10 Florins. 30% chance: Ambush. Lose 1 Prestige.",
+          "effect": {
+            "gamble": {
+              "win": { "gainFlorins": 10 },
+              "lose": { "losePrestige": 1 },
+              "chance": 0.7
+            }
+          }
+        },
+        {
+          "text": "Grab your coin back",
+          "outcome": "Recover 3 Florins from her pocket. She vanishes.",
+          "effect": { "gainFlorins": 3 }
+        }
+      ]
+    },
+    {
+      "id": "maestros_lesson",
+      "name": "The Maestro's Lesson",
+      "category": "opportunity",
+      "description": "An aging card maestro sits alone at a corner table, methodically shuffling a well-worn deck. He watches you play and nods slowly. 'You have talent, but your fundamentals are sloppy. Sit. I will teach you -- if you can afford my time.'",
+      "minAct": 2,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Pay 15 Florins for a lesson",
+          "outcome": "Gain 1 Rare ability (guaranteed). Worth every coin.",
+          "effect": { "loseFlorins": 15, "gainAbility": "random_rare" },
+          "requires": { "minFlorins": 15 }
+        },
+        {
+          "text": "Offer to play him for the lesson",
+          "outcome": "50% chance: He's impressed. Gain 1 Uncommon ability free. 50% chance: He scoffs. Gain Heavy Purse burden.",
+          "effect": {
+            "gamble": {
+              "win": { "gainAbility": "random_uncommon" },
+              "lose": { "gainBurden": "HeavyPurse" },
+              "chance": 0.5
+            }
+          }
+        },
+        {
+          "text": "Decline respectfully",
+          "outcome": "He shrugs and returns to his shuffle.",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "abandoned_cache",
+      "name": "The Abandoned Cache",
+      "category": "discovery",
+      "description": "Behind a loose brick in the alley wall, you find a leather pouch. Inside: a handful of Florins and a folded card with strange markings. Someone hid this in a hurry.",
+      "minAct": 1,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Take everything",
+          "outcome": "Gain 7 Florins. 25% chance: Gain Marked Cards burden (the previous owner notices).",
+          "effect": {
+            "gainFlorins": 7,
+            "gamble": {
+              "lose": { "gainBurden": "MarkedCards" },
+              "chance": 0.75
+            }
+          }
+        },
+        {
+          "text": "Take only the Florins, leave the card",
+          "outcome": "Gain 4 Florins. No risk.",
+          "effect": { "gainFlorins": 4 }
+        }
+      ]
+    },
+    {
+      "id": "gondoliers_song",
+      "name": "The Gondolier's Song",
+      "category": "character",
+      "description": "A gondolier poles his boat through the evening mist, singing a haunting melody. He pauses near the dock. 'I ferry more than passengers,' he says. 'I carry secrets between the great houses. For a price, I can tell you what the nobles know.'",
+      "minAct": 2,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Pay 6 Florins for intelligence",
+          "outcome": "Gain 1 Uncommon ability. Knowledge is power.",
+          "effect": { "loseFlorins": 6, "gainAbility": "random_uncommon" },
+          "requires": { "minFlorins": 6 }
+        },
+        {
+          "text": "Offer him a game instead",
+          "outcome": "Win: Gain 8 Florins. Lose: Gain Rattled Nerves burden. (55/45 odds)",
+          "effect": {
+            "gamble": {
+              "win": { "gainFlorins": 8 },
+              "lose": { "gainBurden": "RattledNerves" },
+              "chance": 0.55
+            }
+          }
+        },
+        {
+          "text": "Enjoy the song and move on",
+          "outcome": "The melody lingers. +2 Florins (a passerby tips you, thinking you're the musician).",
+          "effect": { "gainFlorins": 2 }
+        }
+      ]
+    },
+    {
+      "id": "thieves_guild_invitation",
+      "name": "The Thieves' Guild Invitation",
+      "category": "opportunity",
+      "description": "A sealed letter slides under your door at the inn. Inside: a black card embossed with a silver dagger. 'You have been noticed. Present this card at the Blue Lantern. Come alone. Come armed with coin.'",
+      "minAct": 3,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Accept the invitation (pay 12 Florins entry)",
+          "outcome": "Gain 1 Rare ability and 1 random trinket. The underworld rewards the bold.",
+          "effect": { "loseFlorins": 12, "gainAbility": "random_rare", "gainTrinket": "random" },
+          "requires": { "minFlorins": 12 }
+        },
+        {
+          "text": "Sell the invitation card for coin",
+          "outcome": "Gain 8 Florins. Someone else takes the risk.",
+          "effect": { "gainFlorins": 8 }
+        },
+        {
+          "text": "Burn the letter",
+          "outcome": "Safer this way. The less you know, the longer you live.",
+          "effect": {}
+        }
+      ]
+    },
+    {
+      "id": "medici_envoy",
+      "name": "The Medici Envoy",
+      "category": "character",
+      "description": "A man in fine silk approaches you after your match, the Medici crest glinting on his ring. 'My patron has taken an interest in your play. He offers his patronage -- but patronage comes with expectations.'",
+      "minAct": 3,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Accept the patronage",
+          "outcome": "Gain 15 Florins and 1 Uncommon ability. Gain Bad Reputation burden (others resent your powerful ally).",
+          "effect": { "gainFlorins": 15, "gainAbility": "random_uncommon", "gainBurden": "BadReputation" }
+        },
+        {
+          "text": "Politely decline",
+          "outcome": "Gain 5 Florins (a courtesy gift regardless). Your independence is preserved.",
+          "effect": { "gainFlorins": 5 }
+        }
+      ]
+    },
+    {
+      "id": "plague_doctors_visit",
+      "name": "The Plague Doctor's Visit",
+      "category": "dilemma",
+      "description": "A figure in a beaked mask and black robes blocks the corridor. 'I smell sickness on you,' he intones. 'Not of the body, but of fortune. I can treat the malady -- for a price. Or you may take your chances with the affliction.'",
+      "minAct": 2,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Accept treatment (pay 10 Florins)",
+          "outcome": "Remove all burdens and restore 1 Prestige.",
+          "effect": { "loseFlorins": 10, "removeAllBurdens": true, "gainPrestige": 1 },
+          "requires": { "minFlorins": 10 }
+        },
+        {
+          "text": "Refuse the doctor",
+          "outcome": "50% chance: Nothing happens. 50% chance: Gain a random burden (the 'sickness' worsens).",
+          "effect": {
+            "gamble": {
+              "win": {},
+              "lose": { "gainBurden": "random" },
+              "chance": 0.5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "dueling_ground",
+      "name": "The Dueling Ground",
+      "category": "challenge",
+      "description": "At the edge of the piazza, two men face each other with cards drawn like weapons. A crowd gathers. Someone shoves you forward. 'Fresh blood!' they cry. 'Winner takes the pot!'",
+      "minAct": 1,
+      "maxAct": 5,
+      "choices": [
+        {
+          "text": "Step into the ring",
+          "outcome": "45% chance: Win the pot -- gain 12 Florins and 1 random trinket. 55% chance: Humiliated -- lose 1 Prestige and gain Rattled Nerves.",
+          "effect": {
+            "gamble": {
+              "win": { "gainFlorins": 12, "gainTrinket": "random" },
+              "lose": { "losePrestige": 1, "gainBurden": "RattledNerves" },
+              "chance": 0.45
+            }
+          }
+        },
+        {
+          "text": "Bet on the favorite (5 Florins)",
+          "outcome": "60% chance: Gain 8 Florins. 40% chance: Lose your 5 Florins.",
+          "effect": {
+            "gamble": {
+              "win": { "gainFlorins": 8 },
+              "lose": {},
+              "chance": 0.6
+            },
+            "loseFlorins": 5
+          },
+          "requires": { "minFlorins": 5 }
+        },
+        {
+          "text": "Watch from the crowd",
+          "outcome": "You learn something from the victor's technique. Gain 2 Florins.",
+          "effect": { "gainFlorins": 2 }
+        }
+      ]
+    }
+  ],
+
+  "economy": {
+    "startingFlorins": 0,
+    "startingPrestige": 7,
+    "maxPrestige": 7,
+    "matchReward": {
+      "base": 10,
+      "perAct": 3,
+      "formula": "base + (actIndex * perAct)"
+    },
+    "eliteBonus": 8,
+    "bossBonus": 15,
+    "lossConsolation": 3,
+    "shopPrices": {
+      "commonCard": [6, 8],
+      "uncommonCard": [10, 14],
+      "rareCard": [18, 24],
+      "cardRemoval": {
+        "base": 12,
+        "increment": 4,
+        "formula": "base + (timesPurchased * increment)"
+      },
+      "commonRelic": [8, 10],
+      "uncommonRelic": [14, 18],
+      "rareRelic": [22, 28],
+      "burdenRemoval": 6
+    },
+    "shopInventory": {
+      "abilitySlots": 2,
+      "trinketSlots": 1,
+      "burdenRemovalSlot": true,
+      "refreshCost": null
+    },
+    "trinketPricing": {
+      "engineAffecting": 15,
+      "passive": 10,
+      "maxTrinkets": 5
+    }
+  },
+
+  "prestige": {
+    "starting": 7,
+    "max": 7,
+    "lossPerDefeat": 1,
+    "burdenOnDefeat": true,
+    "atZero": "run_ends",
+    "recovery": {
+      "sources": [
+        "PhoenixMedal trinket (once per run, restores 1)",
+        "The Bridge Toll event (pay 8 Florins for 1)",
+        "The Plague Doctor event (pay 10 Florins for 1)",
+        "The Confessional event (if no burdens, restores 1)",
+        "Rest stop Recuperate action (restores 1 if below max)"
+      ],
+      "designNote": "Prestige recovery is deliberately scarce. Players should feel the weight of every loss."
+    }
+  },
+
+  "restActions": [
+    {
+      "id": "prune",
+      "name": "Prune",
+      "description": "Remove 1 card from your deck. A thinner deck means more reliable combos.",
+      "effect": { "removeCard": 1 },
+      "designNote": "Card removal is the primary reason to visit rest stops. Deck thinning is powerful and intentionally scarce."
+    },
+    {
+      "id": "mend",
+      "name": "Mend",
+      "description": "Remove 1 burden from your collection. Shake off a debilitating affliction.",
+      "effect": { "removeBurden": 1 },
+      "requires": { "hasBurden": true }
+    },
+    {
+      "id": "recuperate",
+      "name": "Recuperate",
+      "description": "Restore 1 Prestige. Only available when below maximum.",
+      "effect": { "gainPrestige": 1 },
+      "requires": { "belowMaxPrestige": true }
+    }
+  ],
+
+  "deckRules": {
+    "startingSize": 12,
+    "recommendedRange": [10, 16],
+    "warningThreshold": 18,
+    "warningMessage": "Your deck is bloated -- combos will be unreliable.",
+    "hardCap": 25,
+    "hardCapMessage": "Maximum deck size reached. You must remove a card before adding another.",
+    "standardDeckSize": 36,
+    "suits": ["Hearts", "Diamonds", "Clubs", "Spades"],
+    "ranks": ["Six", "Seven", "Eight", "Nine", "Ten", "Jack", "Queen", "King", "Ace"],
+    "designNote": "The full Durak deck is 36 cards (6-A in 4 suits). Players start with 12 of these. Deck thinning toward 10 cards is optimal for combo consistency."
+  },
+
+  "burdens": [
+    {
+      "id": "rattled_nerves",
+      "name": "Rattled Nerves",
+      "description": "First defense each bout must use your highest-rank card.",
+      "effect": "force_highest_defense_first",
+      "severity": "moderate",
+      "designNote": "Forces suboptimal defense, burning your best cards early. Particularly punishing for defensive archetypes."
+    },
+    {
+      "id": "heavy_purse",
+      "name": "Heavy Purse",
+      "description": "Starting hand size is 7 instead of 6.",
+      "effect": "increase_starting_hand",
+      "severity": "mild",
+      "designNote": "Counterintuitively bad in Durak. More cards in hand means more cards to defend with, but also harder to empty your hand (the win condition)."
+    },
+    {
+      "id": "marked_cards",
+      "name": "Marked Cards",
+      "description": "Opponent can see 1 random card in your hand.",
+      "effect": "reveal_random_card",
+      "severity": "moderate",
+      "designNote": "Information disadvantage. Opponent can plan attacks around your visible card, making bluffs less effective."
+    },
+    {
+      "id": "clumsy_fingers",
+      "name": "Clumsy Fingers",
+      "description": "Once per match, a random ability activation fizzles.",
+      "effect": "fizzle_random_ability",
+      "severity": "severe",
+      "designNote": "Ability-heavy builds suffer most. The uncertainty of WHICH ability fizzles creates constant anxiety."
+    },
+    {
+      "id": "bad_reputation",
+      "name": "Bad Reputation",
+      "description": "Shop prices are 20% higher.",
+      "effect": "increase_shop_prices_20pct",
+      "severity": "mild",
+      "designNote": "Economic pressure. Compounds over a run as missed purchases cascade into weaker builds."
+    }
+  ],
+
+  "cardRewards": {
+    "afterMatch": {
+      "count": 3,
+      "canSkip": true,
+      "description": "Choose 1 of 3 offered abilities (or skip). Offerings weighted toward player's doctrine/archetype."
+    },
+    "afterElite": {
+      "count": 3,
+      "canSkip": true,
+      "guaranteedRelic": true,
+      "description": "Choose 1 of 3 abilities (or skip) + guaranteed trinket reward."
+    },
+    "rarityByAct": {
+      "1": { "common": 0.70, "uncommon": 0.25, "rare": 0.05 },
+      "2": { "common": 0.55, "uncommon": 0.35, "rare": 0.10 },
+      "3": { "common": 0.40, "uncommon": 0.40, "rare": 0.20 },
+      "4": { "common": 0.25, "uncommon": 0.45, "rare": 0.30 },
+      "5": { "common": 0.10, "uncommon": 0.40, "rare": 0.50 }
+    }
+  },
+
+  "mapGeneration": {
+    "designPrinciples": [
+      "Every act except Act 5 guarantees at least 1 shop and 1 rest node.",
+      "First column always contains at least 1 match node.",
+      "Elite nodes appear in column 2+ for acts 2-4.",
+      "Act 5 has only 1-2 preparation nodes before the boss.",
+      "Boss node is always the final node in the act and cannot be avoided.",
+      "Players choose 1 node per column, creating meaningful path decisions."
+    ],
+    "nodeTypeDescriptions": {
+      "RivalMatch": "Standard opponent. Win to receive ability offerings and Florins.",
+      "EliteMatch": "Harder opponent with a house rule active. Guaranteed trinket + ability offerings on victory.",
+      "BossMatch": "Act boss. Defeating them advances to the next act. Cannot be avoided.",
+      "Shop": "Spend Florins on abilities, trinkets, or burden removal.",
+      "Rest": "Choose one: Prune (remove card), Mend (remove burden), or Recuperate (restore prestige).",
+      "Rumor": "Narrative event with 2-3 choices and varying risk/reward outcomes."
+    }
+  },
+
+  "houseRules": {
+    "description": "Special match modifiers used by elite opponents and the boss. These change the fundamental rules of the Durak match.",
+    "rules": [
+      {
+        "id": "NoTrumpsBeforeDusk",
+        "name": "No Trumps Before Dusk",
+        "description": "Trump cards cannot be played for the first 3 bouts.",
+        "eliteOnly": false
+      },
+      {
+        "id": "TheGauntlet",
+        "name": "The Gauntlet",
+        "description": "Maximum attacks per bout increased by 2.",
+        "eliteOnly": true
+      },
+      {
+        "id": "HeavyHands",
+        "name": "Heavy Hands",
+        "description": "Both players draw 2 extra cards at match start.",
+        "eliteOnly": false
+      },
+      {
+        "id": "Cutthroat",
+        "name": "Cutthroat",
+        "description": "Failed defense costs the defender 2 extra cards from the deck.",
+        "eliteOnly": true
+      },
+      {
+        "id": "DoubleOrNothing",
+        "name": "Double or Nothing",
+        "description": "When a player successfully defends all attacks, the next bout has double max attacks.",
+        "eliteOnly": true
+      },
+      {
+        "id": "TheMirror",
+        "name": "The Mirror",
+        "description": "Whenever a player uses an ability, the opponent may use their equivalent ability for free.",
+        "eliteOnly": true
+      }
+    ]
+  },
+
+  "meta": {
+    "version": "1.0.0",
+    "lastUpdated": "2026-05-25",
+    "designNotes": {
+      "economyPhilosophy": "The economy is designed to create tension between spending on immediate power (shop purchases) and saving for later acts. Average Florin income per act is 30-50, while good purchases cost 10-18. Players should feel like they never have quite enough.",
+      "difficultyArc": "Act 1 teaches. Act 2 tests. Act 3 challenges. Act 4 punishes. Act 5 demands mastery. The ideal win rate for experienced players is 25-35%.",
+      "eventDesign": "Events provide variance and narrative texture. The best events offer a clear risk/reward calculation that is informed by the player's current run state (Florins, burdens, prestige, ability slots). No event should feel mandatory or trivially correct.",
+      "restScarcity": "Rest stops are intentionally rare (10-15% of nodes). This makes the choice between Prune/Mend/Recuperate feel weighty. Players should agonize over this decision.",
+      "burdenDesign": "Burdens are designed to be annoying but not run-ending on their own. Stacking 3+ burdens should feel oppressive and motivate rest stop visits or shop burden removal."
+    }
+  }
+}

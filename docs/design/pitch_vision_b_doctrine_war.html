@@ -1,0 +1,1701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vision B: The Doctrine War &mdash; Wits &amp; Fools Design Pitch</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --gold: #D4A843;
+    --gold-bright: #F5D076;
+    --gold-dim: #8B6914;
+    --parchment: #F2E8D5;
+    --ink: #12100E;
+    --ink-light: #1E1A16;
+    --wood: #3D2B1F;
+
+    /* Archetype colors */
+    --schemer-teal: #1A8A7A;
+    --schemer-glow: #2DD4BF;
+    --brute-red: #A83232;
+    --brute-glow: #EF4444;
+    --trickster-violet: #7C3AED;
+    --trickster-glow: #A78BFA;
+    --hoarder-amber: #B45309;
+    --hoarder-glow: #F59E0B;
+
+    --trump-blue: #2563EB;
+    --trump-glow: #60A5FA;
+    --neutral-gray: #6B7280;
+    --relic-gold: #D4A843;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--ink);
+    color: var(--parchment);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    background:
+      radial-gradient(ellipse 40% 60% at 20% 30%, rgba(26,138,122,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(168,50,50,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 35% 80%, rgba(124,58,237,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 65% 80%, rgba(180,83,9,0.06) 0%, transparent 70%),
+      var(--ink);
+    padding: 4rem 2rem;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='80' height='80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 10 L45 35 L70 40 L45 45 L40 70 L35 45 L10 40 L35 35Z' fill='none' stroke='%23D4A84306' stroke-width='0.5'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+  .hero-badge {
+    display: inline-block;
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    padding: 0.4rem 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  .hero h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow: 0 0 60px rgba(212,168,67,0.25);
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  .hero h1 span {
+    display: block;
+    font-size: 0.35em;
+    font-weight: 400;
+    color: var(--parchment);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    text-shadow: none;
+    opacity: 0.7;
+  }
+  .hero-tagline {
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--gold-bright);
+    opacity: 0.8;
+    max-width: 650px;
+    margin: 1.5rem auto 3rem;
+    position: relative;
+    z-index: 1;
+  }
+  .hero-archetypes {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+  }
+  .archetype-pill {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 1.2rem;
+    border-radius: 2rem;
+    border: 1px solid;
+  }
+  .archetype-pill.schemer { border-color: var(--schemer-teal); color: var(--schemer-glow); background: rgba(26,138,122,0.1); }
+  .archetype-pill.brute { border-color: var(--brute-red); color: var(--brute-glow); background: rgba(168,50,50,0.1); }
+  .archetype-pill.trickster { border-color: var(--trickster-violet); color: var(--trickster-glow); background: rgba(124,58,237,0.1); }
+  .archetype-pill.hoarder { border-color: var(--hoarder-amber); color: var(--hoarder-glow); background: rgba(180,83,9,0.1); }
+
+  /* ---- SECTIONS ---- */
+  section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+  section h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  section h2 + .subtitle {
+    font-style: italic;
+    color: var(--gold-dim);
+    margin-bottom: 2.5rem;
+    font-size: 1.1rem;
+  }
+  section h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    color: var(--gold-bright);
+    margin: 2rem 0 0.75rem;
+  }
+
+  /* ---- DIVIDER ---- */
+  .divider {
+    text-align: center;
+    padding: 3rem 0;
+    position: relative;
+  }
+  .divider::before {
+    content: '';
+    position: absolute;
+    left: 10%; right: 10%;
+    top: 50%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+  .divider span {
+    background: var(--ink);
+    padding: 0 1.5rem;
+    position: relative;
+    color: var(--gold-dim);
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+  }
+
+  /* ---- ARCHETYPE PANELS ---- */
+  .archetype-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  @media (max-width: 700px) { .archetype-grid { grid-template-columns: 1fr; } }
+  .archetype-panel {
+    border-radius: 10px;
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .archetype-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .archetype-panel.schemer {
+    background: linear-gradient(160deg, rgba(26,138,122,0.12), rgba(18,16,14,0.95));
+    border: 1px solid rgba(26,138,122,0.3);
+  }
+  .archetype-panel.schemer::before { background: linear-gradient(90deg, transparent, var(--schemer-teal), transparent); }
+  .archetype-panel.brute {
+    background: linear-gradient(160deg, rgba(168,50,50,0.12), rgba(18,16,14,0.95));
+    border: 1px solid rgba(168,50,50,0.3);
+  }
+  .archetype-panel.brute::before { background: linear-gradient(90deg, transparent, var(--brute-red), transparent); }
+  .archetype-panel.trickster {
+    background: linear-gradient(160deg, rgba(124,58,237,0.12), rgba(18,16,14,0.95));
+    border: 1px solid rgba(124,58,237,0.3);
+  }
+  .archetype-panel.trickster::before { background: linear-gradient(90deg, transparent, var(--trickster-violet), transparent); }
+  .archetype-panel.hoarder {
+    background: linear-gradient(160deg, rgba(180,83,9,0.12), rgba(18,16,14,0.95));
+    border: 1px solid rgba(180,83,9,0.3);
+  }
+  .archetype-panel.hoarder::before { background: linear-gradient(90deg, transparent, var(--hoarder-amber), transparent); }
+
+  .archetype-panel .ap-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .archetype-panel .ap-icon {
+    font-size: 2rem;
+    width: 2.5rem;
+    text-align: center;
+  }
+  .archetype-panel .ap-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  .archetype-panel.schemer .ap-title { color: var(--schemer-glow); }
+  .archetype-panel.brute .ap-title { color: var(--brute-glow); }
+  .archetype-panel.trickster .ap-title { color: var(--trickster-glow); }
+  .archetype-panel.hoarder .ap-title { color: var(--hoarder-glow); }
+  .archetype-panel .ap-philosophy {
+    font-style: italic;
+    font-size: 0.9rem;
+    opacity: 0.6;
+    margin-bottom: 0.75rem;
+  }
+  .archetype-panel .ap-desc {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+  }
+  .archetype-panel .ap-keywords {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+  .archetype-panel .kw {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--parchment);
+    opacity: 0.7;
+  }
+
+  /* ---- CARD SHOWCASE ---- */
+  .card-showcase {
+    display: flex;
+    gap: 1.75rem;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 2rem 0;
+  }
+  .game-card {
+    width: 210px;
+    min-height: 320px;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .game-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  }
+  .gc-inner {
+    height: 100%;
+    border: 2px solid;
+    border-radius: 12px;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .game-card.schemer .gc-inner {
+    background: linear-gradient(160deg, #0f2420, #0a1614);
+    border-color: var(--schemer-teal);
+  }
+  .game-card.brute .gc-inner {
+    background: linear-gradient(160deg, #240f0f, #180a0a);
+    border-color: var(--brute-red);
+  }
+  .game-card.trickster .gc-inner {
+    background: linear-gradient(160deg, #1a0f2e, #100a1e);
+    border-color: var(--trickster-violet);
+  }
+  .game-card.hoarder .gc-inner {
+    background: linear-gradient(160deg, #1e1508, #140e04);
+    border-color: var(--hoarder-amber);
+  }
+  .game-card.neutral .gc-inner {
+    background: linear-gradient(160deg, #1a1816, #12100e);
+    border-color: var(--neutral-gray);
+  }
+  .gc-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.25rem;
+  }
+  .gc-suit-rank {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+  .gc-suit-rank.red { color: #EF4444; }
+  .gc-suit-rank.black { color: var(--parchment); }
+  .gc-archetype-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .gc-archetype-badge.schemer { background: rgba(26,138,122,0.25); color: var(--schemer-glow); }
+  .gc-archetype-badge.brute { background: rgba(168,50,50,0.25); color: var(--brute-glow); }
+  .gc-archetype-badge.trickster { background: rgba(124,58,237,0.25); color: var(--trickster-glow); }
+  .gc-archetype-badge.hoarder { background: rgba(180,83,9,0.25); color: var(--hoarder-glow); }
+  .gc-archetype-badge.neutral { background: rgba(107,114,128,0.25); color: var(--neutral-gray); }
+  .gc-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gold);
+    text-align: center;
+    margin: 0.4rem 0;
+    letter-spacing: 0.03em;
+  }
+  .gc-art {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    opacity: 0.5;
+    min-height: 70px;
+  }
+  .gc-ability {
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1.4;
+    text-align: center;
+    margin-top: auto;
+  }
+  .game-card.schemer .gc-ability { background: rgba(26,138,122,0.12); border: 1px solid rgba(26,138,122,0.25); }
+  .game-card.brute .gc-ability { background: rgba(168,50,50,0.12); border: 1px solid rgba(168,50,50,0.25); }
+  .game-card.trickster .gc-ability { background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.25); }
+  .game-card.hoarder .gc-ability { background: rgba(180,83,9,0.12); border: 1px solid rgba(180,83,9,0.25); }
+  .game-card.neutral .gc-ability { background: rgba(107,114,128,0.08); border: 1px solid rgba(107,114,128,0.2); }
+
+  .gc-trigger {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.25rem;
+  }
+  .game-card.schemer .gc-trigger { color: var(--schemer-glow); }
+  .game-card.brute .gc-trigger { color: var(--brute-glow); }
+  .game-card.trickster .gc-trigger { color: var(--trickster-glow); }
+  .game-card.hoarder .gc-trigger { color: var(--hoarder-glow); }
+
+  .gc-annotation {
+    text-align: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+  }
+
+  /* ---- BATTLE SECTION ---- */
+  .battle-section {
+    background:
+      radial-gradient(ellipse 80% 40% at 50% 100%, rgba(61,43,31,0.25) 0%, transparent 70%),
+      var(--ink);
+    padding: 5rem 0;
+  }
+  .battle-flow {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  /* Battle HUD */
+  .battle-hud {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(61,43,31,0.3), rgba(18,16,14,0.9));
+    border: 1px solid var(--gold-dim);
+    border-radius: 10px;
+    align-items: center;
+  }
+  .hud-player {
+    text-align: left;
+  }
+  .hud-enemy {
+    text-align: right;
+  }
+  .hud-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 0.25rem;
+  }
+  .hud-archetype {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .hud-player .hud-archetype { color: var(--schemer-glow); }
+  .hud-enemy .hud-archetype { color: var(--brute-glow); }
+  .hud-stats {
+    display: flex;
+    gap: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+  }
+  .hud-enemy .hud-stats { justify-content: flex-end; }
+  .hud-stat {
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(0,0,0,0.3);
+  }
+  .hud-stat .stat-label {
+    color: var(--gold-dim);
+    font-size: 0.6rem;
+  }
+  .hud-vs {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    color: var(--gold-dim);
+    letter-spacing: 0.2em;
+    text-align: center;
+  }
+  .hud-trump {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 0.25rem;
+  }
+
+  /* Bout */
+  .bout {
+    position: relative;
+    margin-bottom: 2.5rem;
+    padding-left: 3rem;
+  }
+  .bout::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: -2.5rem;
+    width: 2px;
+    background: linear-gradient(180deg, var(--gold-dim), transparent);
+  }
+  .bout:last-child::before { bottom: 0; }
+  .bout-marker {
+    position: absolute;
+    left: 0;
+    top: 0.2rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .bout-header {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+  .bout-cards {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+  }
+  .bout-mini {
+    border-radius: 6px;
+    padding: 0.5rem 0.65rem;
+    min-width: 110px;
+    border: 1.5px solid;
+  }
+  .bout-mini.schemer-card { border-color: var(--schemer-teal); background: rgba(26,138,122,0.08); }
+  .bout-mini.brute-card { border-color: var(--brute-red); background: rgba(168,50,50,0.08); }
+  .bout-mini.trickster-card { border-color: var(--trickster-violet); background: rgba(124,58,237,0.08); }
+  .bout-mini.hoarder-card { border-color: var(--hoarder-amber); background: rgba(180,83,9,0.08); }
+  .bout-mini.neutral-card { border-color: var(--neutral-gray); background: rgba(107,114,128,0.06); }
+  .bout-mini .bm-rank {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .bout-mini .bm-rank.red { color: #EF4444; }
+  .bout-mini .bm-rank.black { color: var(--parchment); }
+  .bout-mini .bm-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    color: var(--gold-dim);
+    margin-top: 0.15rem;
+  }
+  .bout-mini .bm-ability {
+    font-size: 0.6rem;
+    margin-top: 0.2rem;
+    font-style: italic;
+    line-height: 1.2;
+  }
+  .bout-mini.schemer-card .bm-ability { color: var(--schemer-glow); }
+  .bout-mini.brute-card .bm-ability { color: var(--brute-glow); }
+  .bout-mini.trickster-card .bm-ability { color: var(--trickster-glow); }
+  .bout-mini.hoarder-card .bm-ability { color: var(--hoarder-glow); }
+  .bout-vs { font-family: 'Cinzel', serif; font-size: 0.7rem; color: var(--gold-dim); letter-spacing: 0.15em; }
+
+  /* Ability trigger callout */
+  .ability-trigger {
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    margin: 0.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  .ability-trigger.schemer { background: rgba(26,138,122,0.1); border: 1px solid rgba(26,138,122,0.25); }
+  .ability-trigger.brute { background: rgba(168,50,50,0.1); border: 1px solid rgba(168,50,50,0.25); }
+  .ability-trigger.trickster { background: rgba(124,58,237,0.1); border: 1px solid rgba(124,58,237,0.25); }
+  .ability-trigger.hoarder { background: rgba(180,83,9,0.1); border: 1px solid rgba(180,83,9,0.25); }
+  .ability-trigger .at-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+  .ability-trigger .at-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.15rem;
+  }
+  .ability-trigger.schemer .at-label { color: var(--schemer-glow); }
+  .ability-trigger.brute .at-label { color: var(--brute-glow); }
+  .ability-trigger.trickster .at-label { color: var(--trickster-glow); }
+  .ability-trigger.hoarder .at-label { color: var(--hoarder-glow); }
+
+  .bout-narrative {
+    font-style: italic;
+    color: var(--parchment);
+    opacity: 0.7;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-top: 0.5rem;
+  }
+
+  /* Hand state */
+  .hand-state {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(212,168,67,0.15);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    display: flex;
+    gap: 1.5rem;
+    font-size: 0.8rem;
+    flex-wrap: wrap;
+  }
+  .hand-state .hs-section {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .hand-state .hs-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+  }
+  .hand-state .hs-pips {
+    display: flex;
+    gap: 2px;
+  }
+  .hand-state .hs-pip {
+    width: 18px;
+    height: 24px;
+    border-radius: 2px;
+    border: 1px solid;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.5rem;
+    font-weight: 700;
+  }
+  .hs-pip.s { border-color: var(--schemer-teal); color: var(--schemer-glow); }
+  .hs-pip.b { border-color: var(--brute-red); color: var(--brute-glow); }
+  .hs-pip.t { border-color: var(--trickster-violet); color: var(--trickster-glow); }
+  .hs-pip.h { border-color: var(--hoarder-amber); color: var(--hoarder-glow); }
+  .hs-pip.n { border-color: var(--neutral-gray); color: var(--neutral-gray); }
+  .hs-pip.empty { border-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.15); }
+  .hs-pip.drawn {
+    animation: card-drawn 0.6s ease;
+    box-shadow: 0 0 6px rgba(45,212,191,0.4);
+  }
+
+  @keyframes card-drawn {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ---- RELIC SECTION ---- */
+  .relic-section {
+    background: linear-gradient(180deg, var(--ink), rgba(212,168,67,0.03), var(--ink));
+    padding: 5rem 0;
+  }
+  .relic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin: 2rem 0;
+  }
+  .relic {
+    background: linear-gradient(160deg, rgba(61,43,31,0.4), rgba(18,16,14,0.9));
+    border: 1px solid var(--gold-dim);
+    border-radius: 10px;
+    padding: 1.25rem;
+    text-align: center;
+    transition: transform 0.3s ease;
+  }
+  .relic:hover { transform: translateY(-3px); }
+  .relic .r-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  .relic .r-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 0.3rem;
+  }
+  .relic .r-desc {
+    font-size: 0.75rem;
+    color: var(--parchment);
+    opacity: 0.7;
+    line-height: 1.3;
+  }
+  .relic .r-synergy {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.6rem;
+    margin-top: 0.5rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .relic .r-synergy.schemer { background: rgba(26,138,122,0.15); color: var(--schemer-glow); }
+  .relic .r-synergy.brute { background: rgba(168,50,50,0.15); color: var(--brute-glow); }
+  .relic .r-synergy.trickster { background: rgba(124,58,237,0.15); color: var(--trickster-glow); }
+  .relic .r-synergy.hoarder { background: rgba(180,83,9,0.15); color: var(--hoarder-glow); }
+  .relic .r-synergy.any { background: rgba(212,168,67,0.1); color: var(--gold); }
+
+  /* ---- DECK BUILDER MOCKUP ---- */
+  .deckbuilder-section {
+    background: linear-gradient(180deg, var(--ink), rgba(124,58,237,0.03), var(--ink));
+    padding: 5rem 0;
+  }
+  .deck-mockup {
+    max-width: 750px;
+    margin: 2rem auto;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--gold-dim);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .dm-header {
+    background: linear-gradient(90deg, rgba(212,168,67,0.08), rgba(212,168,67,0.04));
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(212,168,67,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .dm-header h4 {
+    font-family: 'Cinzel', serif;
+    color: var(--gold);
+    font-size: 1rem;
+  }
+  .dm-header .dm-decksize {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+  }
+  .dm-header .dm-decksize .count { color: var(--gold-bright); font-weight: 700; }
+  .dm-header .dm-decksize .limit { color: var(--gold-dim); }
+  .dm-body { padding: 1.25rem; }
+  .dm-composition {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+  .dm-pip {
+    width: 44px;
+    height: 58px;
+    border-radius: 4px;
+    border: 1.5px solid;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.55rem;
+    gap: 0.1rem;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .dm-pip:hover {
+    transform: scale(1.1);
+    z-index: 1;
+  }
+  .dm-pip .pip-rank { font-weight: 700; font-size: 0.7rem; }
+  .dm-pip .pip-name { font-family: 'Cinzel', serif; font-size: 0.4rem; letter-spacing: 0.03em; color: var(--gold-dim); line-height: 1; }
+  .dm-pip.s { border-color: var(--schemer-teal); background: rgba(26,138,122,0.08); }
+  .dm-pip.s .pip-rank { color: var(--schemer-glow); }
+  .dm-pip.b { border-color: var(--brute-red); background: rgba(168,50,50,0.08); }
+  .dm-pip.b .pip-rank { color: var(--brute-glow); }
+  .dm-pip.t { border-color: var(--trickster-violet); background: rgba(124,58,237,0.08); }
+  .dm-pip.t .pip-rank { color: var(--trickster-glow); }
+  .dm-pip.n { border-color: var(--neutral-gray); background: rgba(107,114,128,0.05); }
+  .dm-pip.n .pip-rank { color: var(--neutral-gray); }
+
+  .dm-breakdown {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .dm-breakdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+  }
+  .dm-breakdown-item .db-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+  }
+  .db-swatch.s { background: var(--schemer-teal); }
+  .db-swatch.b { background: var(--brute-red); }
+  .db-swatch.t { background: var(--trickster-violet); }
+  .db-swatch.n { background: var(--neutral-gray); }
+
+  .dm-warning {
+    margin-top: 1rem;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    background: rgba(180,83,9,0.1);
+    border: 1px solid rgba(180,83,9,0.25);
+    font-size: 0.8rem;
+    color: var(--hoarder-glow);
+    text-align: center;
+  }
+
+  /* ---- ENEMY ROSTER ---- */
+  .enemy-section {
+    padding: 5rem 0;
+  }
+  .enemy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin: 2rem 0;
+  }
+  .enemy-card {
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 1px solid;
+    position: relative;
+    overflow: hidden;
+  }
+  .enemy-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40%;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.4));
+    pointer-events: none;
+  }
+  .enemy-card.e-brute {
+    background: linear-gradient(160deg, rgba(168,50,50,0.15), rgba(18,16,14,0.95));
+    border-color: rgba(168,50,50,0.3);
+  }
+  .enemy-card.e-trickster {
+    background: linear-gradient(160deg, rgba(124,58,237,0.15), rgba(18,16,14,0.95));
+    border-color: rgba(124,58,237,0.3);
+  }
+  .enemy-card.e-schemer {
+    background: linear-gradient(160deg, rgba(26,138,122,0.15), rgba(18,16,14,0.95));
+    border-color: rgba(26,138,122,0.3);
+  }
+  .enemy-card.e-mixed {
+    background: linear-gradient(160deg, rgba(212,168,67,0.1), rgba(18,16,14,0.95));
+    border-color: rgba(212,168,67,0.25);
+  }
+  .enemy-card .ec-icon { font-size: 2rem; margin-bottom: 0.5rem; display: block; }
+  .enemy-card .ec-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 0.15rem;
+  }
+  .enemy-card .ec-type {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+  .enemy-card.e-brute .ec-type { color: var(--brute-glow); }
+  .enemy-card.e-trickster .ec-type { color: var(--trickster-glow); }
+  .enemy-card.e-schemer .ec-type { color: var(--schemer-glow); }
+  .enemy-card.e-mixed .ec-type { color: var(--gold); }
+  .enemy-card .ec-desc {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
+  }
+  .enemy-card .ec-threat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    margin-top: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    background: rgba(0,0,0,0.3);
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ---- MAP SECTION ---- */
+  .map-section {
+    background: linear-gradient(180deg, var(--ink), rgba(61,43,31,0.08), var(--ink));
+    padding: 5rem 0;
+  }
+  .map-mockup {
+    max-width: 700px;
+    margin: 2rem auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: center;
+  }
+  .map-row {
+    display: flex;
+    gap: 1rem;
+    position: relative;
+    margin-bottom: 0.25rem;
+  }
+  .map-node {
+    width: 80px;
+    height: 52px;
+    border-radius: 6px;
+    border: 1.5px solid;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.05em;
+    transition: all 0.3s;
+    cursor: default;
+  }
+  .map-node:hover { transform: scale(1.08); }
+  .map-node .mn-icon { font-size: 1.2rem; line-height: 1; }
+  .map-node.match {
+    border-color: var(--brute-red);
+    background: rgba(168,50,50,0.12);
+    color: var(--brute-glow);
+  }
+  .map-node.elite {
+    border-color: var(--gold);
+    background: rgba(212,168,67,0.1);
+    color: var(--gold);
+  }
+  .map-node.shop {
+    border-color: var(--schemer-teal);
+    background: rgba(26,138,122,0.1);
+    color: var(--schemer-glow);
+  }
+  .map-node.rest {
+    border-color: var(--hoarder-amber);
+    background: rgba(180,83,9,0.08);
+    color: var(--hoarder-glow);
+  }
+  .map-node.rumor {
+    border-color: var(--trickster-violet);
+    background: rgba(124,58,237,0.08);
+    color: var(--trickster-glow);
+  }
+  .map-node.boss {
+    border-color: var(--gold);
+    background: linear-gradient(160deg, rgba(212,168,67,0.15), rgba(168,50,50,0.1));
+    color: var(--gold);
+    width: 120px;
+    height: 60px;
+    font-size: 0.65rem;
+  }
+  .map-connector {
+    width: 2px;
+    height: 20px;
+    background: rgba(212,168,67,0.2);
+    margin: 0 auto;
+  }
+  .map-connectors {
+    display: flex;
+    justify-content: center;
+    gap: 5rem;
+    margin: 0;
+  }
+  .map-legend {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+  .map-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: var(--gold-dim);
+  }
+  .map-legend-item .ml-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+  }
+
+  /* ---- SUMMARY ---- */
+  .summary-section {
+    padding: 5rem 2rem;
+    text-align: center;
+    background: radial-gradient(ellipse 60% 50% at 50% 80%, rgba(212,168,67,0.05) 0%, transparent 70%);
+  }
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    max-width: 900px;
+    margin: 2rem auto;
+    text-align: left;
+  }
+  .summary-item {
+    padding: 1.25rem;
+    border-left: 2px solid var(--gold-dim);
+  }
+  .summary-item .si-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.3rem;
+  }
+  .summary-item .si-value {
+    font-size: 1rem;
+    color: var(--parchment);
+  }
+  .final-quote {
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--gold);
+    max-width: 650px;
+    margin: 3rem auto 0;
+    line-height: 1.4;
+  }
+  .final-quote cite {
+    display: block;
+    font-size: 0.8rem;
+    font-style: normal;
+    color: var(--gold-dim);
+    margin-top: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 600px) {
+    .battle-hud { grid-template-columns: 1fr; text-align: center !important; }
+    .hud-enemy { text-align: center; }
+    .hud-stats { justify-content: center !important; }
+    .bout { padding-left: 2.5rem; }
+    .card-showcase { gap: 1.5rem; }
+    .game-card { width: 175px; min-height: 280px; }
+    .enemy-grid { grid-template-columns: 1fr; }
+    .map-row { gap: 0.5rem; }
+    .map-node { width: 65px; height: 45px; font-size: 0.5rem; }
+    .map-connectors { gap: 2.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<div class="hero">
+  <div class="hero-badge">Design Pitch &mdash; Vision B</div>
+  <h1>
+    The Doctrine War
+    <span>Wits &amp; Fools &bull; Deckbuilder Reimagining</span>
+  </h1>
+  <p class="hero-tagline">
+    "Build your doctrine. Master your archetype. Break their strategy."
+  </p>
+  <div class="hero-archetypes">
+    <span class="archetype-pill schemer">The Schemer</span>
+    <span class="archetype-pill brute">The Brute</span>
+    <span class="archetype-pill trickster">The Trickster</span>
+    <span class="archetype-pill hoarder">The Hoarder</span>
+  </div>
+</div>
+
+<!-- ============ CORE CONCEPT ============ -->
+<section>
+  <h2>The Core Idea</h2>
+  <p class="subtitle">Durak with abilities. Your deck is your character build.</p>
+
+  <p>Every card still has a suit and rank &mdash; Durak combat resolves the same way. But each card also has an <strong>Ability</strong> that triggers at specific moments: when you attack, when you defend, or passively from your hand. Build around <strong>archetypes</strong> whose abilities synergize, creating emergent strategies that transform how Durak plays.</p>
+
+  <div class="archetype-grid">
+    <div class="archetype-panel schemer">
+      <div class="ap-header">
+        <div class="ap-icon">&#128065;</div>
+        <div class="ap-title">The Schemer</div>
+      </div>
+      <div class="ap-philosophy">"Knowledge is the sharpest blade."</div>
+      <div class="ap-desc">Card draw, deck manipulation, information warfare. Schemers see more cards, cycle faster, and always know what's coming. They win through inevitability &mdash; grinding opponents down with card advantage and perfect information.</div>
+      <div class="ap-keywords">
+        <span class="kw">Draw</span>
+        <span class="kw">Scry</span>
+        <span class="kw">Reveal</span>
+        <span class="kw">Cycle</span>
+        <span class="kw">Mill</span>
+      </div>
+    </div>
+
+    <div class="archetype-panel brute">
+      <div class="ap-header">
+        <div class="ap-icon">&#9876;</div>
+        <div class="ap-title">The Brute</div>
+      </div>
+      <div class="ap-philosophy">"Overwhelming force needs no subtlety."</div>
+      <div class="ap-desc">Raw numbers, forced pick-ups, relentless pressure. Brutes pump their cards' effective ranks, attack with multiple cards, and punish failed defenses. They win by making every bout a losing proposition for the defender.</div>
+      <div class="ap-keywords">
+        <span class="kw">+Rank</span>
+        <span class="kw">Multi-attack</span>
+        <span class="kw">Punish</span>
+        <span class="kw">Force pickup</span>
+        <span class="kw">Overwhelm</span>
+      </div>
+    </div>
+
+    <div class="archetype-panel trickster">
+      <div class="ap-header">
+        <div class="ap-icon">&#127183;</div>
+        <div class="ap-title">The Trickster</div>
+      </div>
+      <div class="ap-philosophy">"The rules are just suggestions."</div>
+      <div class="ap-desc">Trump manipulation, suit-shifting, rule-bending. Tricksters change the trump suit mid-bout, make cards count as different suits, and invalidate the opponent's carefully planned defense. They win by making the game play by their rules.</div>
+      <div class="ap-keywords">
+        <span class="kw">Trump shift</span>
+        <span class="kw">Wild suit</span>
+        <span class="kw">Redirect</span>
+        <span class="kw">Nullify</span>
+        <span class="kw">Transmute</span>
+      </div>
+    </div>
+
+    <div class="archetype-panel hoarder">
+      <div class="ap-header">
+        <div class="ap-icon">&#128176;</div>
+        <div class="ap-title">The Hoarder</div>
+      </div>
+      <div class="ap-philosophy">"The one with the most cards wins... eventually."</div>
+      <div class="ap-desc">Benefits from large hands, long games, and attrition. Hoarders gain power the more cards they hold, turn failed defenses (picking up cards) into advantages, and outlast opponents. They win by flipping Durak's core rule on its head.</div>
+      <div class="ap-keywords">
+        <span class="kw">Hand size</span>
+        <span class="kw">Attrition</span>
+        <span class="kw">On pickup</span>
+        <span class="kw">Stockpile</span>
+        <span class="kw">Endgame</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><span>CARD EXAMPLES</span></div>
+
+<!-- ============ CARD SHOWCASE ============ -->
+<section>
+  <h2>Cards with Abilities</h2>
+  <p class="subtitle">Each card has suit, rank, ability text, and an archetype tag. Neutral cards have no ability.</p>
+
+  <div class="card-showcase">
+
+    <!-- Schemer card -->
+    <div class="game-card schemer">
+      <div class="gc-inner">
+        <div class="gc-top">
+          <span class="gc-suit-rank black">J&#9824;</span>
+          <span class="gc-archetype-badge schemer">Schemer</span>
+        </div>
+        <div class="gc-name">The Informant</div>
+        <div class="gc-art">&#128065;</div>
+        <div class="gc-ability">
+          <span class="gc-trigger">On Defend</span>
+          Draw 2 cards. Look at the top card of the opponent's deck.
+        </div>
+      </div>
+      <div class="gc-annotation">Card Advantage</div>
+    </div>
+
+    <!-- Brute card -->
+    <div class="game-card brute">
+      <div class="gc-inner">
+        <div class="gc-top">
+          <span class="gc-suit-rank red">K&#9829;</span>
+          <span class="gc-archetype-badge brute">Brute</span>
+        </div>
+        <div class="gc-name">The Condottiero</div>
+        <div class="gc-art">&#9876;</div>
+        <div class="gc-ability">
+          <span class="gc-trigger">On Attack</span>
+          This card's rank is +3. If unbeaten, opponent picks up 2 extra cards from their own deck.
+        </div>
+      </div>
+      <div class="gc-annotation">Overwhelming Force</div>
+    </div>
+
+    <!-- Trickster card -->
+    <div class="game-card trickster">
+      <div class="gc-inner">
+        <div class="gc-top">
+          <span class="gc-suit-rank red">9&#9830;</span>
+          <span class="gc-archetype-badge trickster">Trickster</span>
+        </div>
+        <div class="gc-name">The Mask</div>
+        <div class="gc-art">&#127917;</div>
+        <div class="gc-ability">
+          <span class="gc-trigger">On Defend</span>
+          This card counts as any suit. Change the trump suit to this card's actual suit.
+        </div>
+      </div>
+      <div class="gc-annotation">Rule Bender</div>
+    </div>
+
+    <!-- Hoarder card -->
+    <div class="game-card hoarder">
+      <div class="gc-inner">
+        <div class="gc-top">
+          <span class="gc-suit-rank black">8&#9827;</span>
+          <span class="gc-archetype-badge hoarder">Hoarder</span>
+        </div>
+        <div class="gc-name">The Miser</div>
+        <div class="gc-art">&#128176;</div>
+        <div class="gc-ability">
+          <span class="gc-trigger">Passive</span>
+          +1 effective rank for each card in your hand beyond 5. (Currently in a hand of 8 = +3 rank.)
+        </div>
+      </div>
+      <div class="gc-annotation">Scales with Grip</div>
+    </div>
+
+    <!-- Neutral card -->
+    <div class="game-card neutral">
+      <div class="gc-inner">
+        <div class="gc-top">
+          <span class="gc-suit-rank red">A&#9829;</span>
+          <span class="gc-archetype-badge neutral">Neutral</span>
+        </div>
+        <div class="gc-name">Ace of Hearts</div>
+        <div class="gc-art" style="opacity: 0.3;">&#9829;</div>
+        <div class="gc-ability">
+          <span class="gc-trigger" style="color: var(--neutral-gray);">No Ability</span>
+          High rank. Reliable in any deck. No synergy.
+        </div>
+      </div>
+      <div class="gc-annotation">Filler / Staple</div>
+    </div>
+
+  </div>
+</section>
+
+<div class="divider"><span>SAMPLE BATTLE</span></div>
+
+<!-- ============ BATTLE FLOW ============ -->
+<div class="battle-section">
+  <section>
+    <h2>A Match in Motion</h2>
+    <p class="subtitle">Act 2 &mdash; The Merchant's Rest. Your Schemer deck vs. Rocco the Brute. Trump: &#9829; Hearts.</p>
+
+    <!-- Battle HUD -->
+    <div class="battle-hud">
+      <div class="hud-player">
+        <div class="hud-name">You</div>
+        <div class="hud-archetype">Schemer / Trickster Splash</div>
+        <div class="hud-stats">
+          <div class="hud-stat"><span class="stat-label">Deck </span>12</div>
+          <div class="hud-stat"><span class="stat-label">Hand </span>6</div>
+        </div>
+      </div>
+      <div class="hud-vs">
+        VS
+        <div class="hud-trump">Trump: <span style="color: #EF4444;">&#9829;</span></div>
+      </div>
+      <div class="hud-enemy">
+        <div class="hud-name">Rocco</div>
+        <div class="hud-archetype">Pure Brute</div>
+        <div class="hud-stats">
+          <div class="hud-stat"><span class="stat-label">Deck </span>16</div>
+          <div class="hud-stat"><span class="stat-label">Hand </span>6</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Starting hands -->
+    <div class="hand-state">
+      <div class="hs-section">
+        <span class="hs-label">Your Hand:</span>
+        <div class="hs-pips">
+          <div class="hs-pip s" title="The Informant">J</div>
+          <div class="hs-pip s" title="Spyglass">7</div>
+          <div class="hs-pip t" title="The Mask">9</div>
+          <div class="hs-pip n" title="Ace of Hearts">A</div>
+          <div class="hs-pip s" title="Whisper Network">Q</div>
+          <div class="hs-pip n" title="8 of Clubs">8</div>
+        </div>
+      </div>
+      <div class="hs-section">
+        <span class="hs-label">Rocco's Hand:</span>
+        <div class="hs-pips">
+          <div class="hs-pip b">K</div>
+          <div class="hs-pip b">10</div>
+          <div class="hs-pip b">J</div>
+          <div class="hs-pip n">Q</div>
+          <div class="hs-pip n">9</div>
+          <div class="hs-pip b">7</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="battle-flow">
+
+      <!-- Bout 1: Rocco attacks -->
+      <div class="bout">
+        <div class="bout-marker">1</div>
+        <div class="bout-header">Bout 1 &mdash; Rocco Attacks</div>
+        <div class="bout-cards">
+          <div class="bout-mini brute-card">
+            <div class="bm-rank red">K&#9829;</div>
+            <div class="bm-name">The Condottiero</div>
+            <div class="bm-ability">+3 rank on attack. If unbeaten: +2 pickup.</div>
+          </div>
+          <div class="bout-vs">vs</div>
+          <div class="bout-mini neutral-card">
+            <div class="bm-rank red">A&#9829;</div>
+            <div class="bm-name">Ace of Hearts</div>
+          </div>
+        </div>
+        <div class="ability-trigger brute">
+          <div class="at-icon">&#9876;</div>
+          <div>
+            <span class="at-label">Brute Ability Triggers</span>
+            The Condottiero's rank becomes K+3 = effective 16. But your Ace (rank 14 in standard Durak) still beats it &mdash; Aces are supreme. The Brute's raw power falls short.
+          </div>
+        </div>
+        <p class="bout-narrative">Rocco opens with his heaviest hitter. You burn your Ace to stop it &mdash; a neutral card, no synergy, but it does the job. Brute power neutralized, but your hand is thinner.</p>
+      </div>
+
+      <!-- Bout 2: You attack -->
+      <div class="bout">
+        <div class="bout-marker">2</div>
+        <div class="bout-header">Bout 2 &mdash; You Attack</div>
+        <div class="bout-cards">
+          <div class="bout-mini schemer-card">
+            <div class="bm-rank black">7&#9824;</div>
+            <div class="bm-name">Spyglass</div>
+            <div class="bm-ability">On attack: look at 3 cards from opponent's deck.</div>
+          </div>
+          <div class="bout-vs">&rarr;</div>
+          <div class="bout-mini brute-card">
+            <div class="bm-rank black">10&#9824;</div>
+            <div class="bm-name">Hired Muscle</div>
+            <div class="bm-ability">On defend: +2 rank.</div>
+          </div>
+        </div>
+        <div class="ability-trigger schemer">
+          <div class="at-icon">&#128065;</div>
+          <div>
+            <span class="at-label">Schemer Ability Triggers</span>
+            Spyglass fires on attack regardless of outcome. You see Rocco's next 3 cards: <strong>Battering Ram (J&#9827;, Brute)</strong>, <strong>6 of Diamonds (Neutral)</strong>, <strong>War Cry (10&#9829;, Brute)</strong>. You now know his upcoming draws.
+          </div>
+        </div>
+        <p class="bout-narrative">Your 7 gets beaten by his 10 (boosted to effective 12). You lose the bout. But that was the plan &mdash; the Spyglass already gave you the intel you needed. You know Rocco's next three draws. The Schemer plays the long game.</p>
+      </div>
+
+      <!-- Bout 3: Rocco attacks, you defend with Trickster -->
+      <div class="bout">
+        <div class="bout-marker">3</div>
+        <div class="bout-header">Bout 3 &mdash; Rocco Attacks (The Trap)</div>
+        <div class="bout-cards">
+          <div class="bout-mini brute-card">
+            <div class="bm-rank black">J&#9827;</div>
+            <div class="bm-name">Battering Ram</div>
+            <div class="bm-ability">+2 rank. If 2+ brute cards attack: +4 instead.</div>
+          </div>
+          <div class="bout-vs">vs</div>
+          <div class="bout-mini trickster-card">
+            <div class="bm-rank red">9&#9830;</div>
+            <div class="bm-name">The Mask</div>
+            <div class="bm-ability">Counts as any suit. Changes trump.</div>
+          </div>
+        </div>
+        <div class="ability-trigger trickster">
+          <div class="at-icon">&#127917;</div>
+          <div>
+            <span class="at-label">Trickster Ability Triggers</span>
+            The Mask counts as any suit when defending &mdash; it can match Clubs. And it <strong>changes the trump suit to Diamonds</strong>. Rocco's hand was built around Hearts as trump. Suddenly, his trump cards are just... cards.
+          </div>
+        </div>
+        <p class="bout-narrative"><strong>This is the moment.</strong> You knew the Battering Ram was coming (thanks, Spyglass). You saved The Mask for exactly this. The 9 defends against the Jack by matching suit &mdash; and the trump shift devastates Rocco's Brute strategy. His remaining Hearts trump cards? Worthless. Your Schemer saw it coming. Your Trickster splash delivered the blow.</p>
+      </div>
+
+      <!-- Updated hand state -->
+      <div class="hand-state">
+        <div class="hs-section">
+          <span class="hs-label">Your Hand:</span>
+          <div class="hs-pips">
+            <div class="hs-pip s" title="The Informant">J</div>
+            <div class="hs-pip s" title="Whisper Network">Q</div>
+            <div class="hs-pip n" title="8 of Clubs">8</div>
+            <div class="hs-pip s drawn" title="(drawn)">5</div>
+          </div>
+        </div>
+        <div class="hs-section">
+          <span class="hs-label">Trump:</span>
+          <span style="color: #EF4444; text-decoration: line-through; font-size: 0.9rem;">&#9829;</span>
+          <span style="color: var(--trickster-glow); font-size: 0.9rem; margin-left: 0.3rem;">&#9830; NEW</span>
+        </div>
+      </div>
+
+      <!-- Bout 4: You attack with Schemer synergy -->
+      <div class="bout">
+        <div class="bout-marker">4</div>
+        <div class="bout-header">Bout 4 &mdash; You Attack (Card Advantage)</div>
+        <div class="bout-cards">
+          <div class="bout-mini schemer-card">
+            <div class="bm-rank black">Q&#9824;</div>
+            <div class="bm-name">Whisper Network</div>
+            <div class="bm-ability">On attack: if you've drawn 3+ cards this match, draw 1 more.</div>
+          </div>
+          <div class="bout-vs">&rarr;</div>
+          <div class="bout-mini neutral-card" style="opacity: 0.5;">
+            <div class="bm-rank" style="color: var(--brute-glow);">&#10007;</div>
+            <div class="bm-name">Can't defend</div>
+          </div>
+        </div>
+        <div class="ability-trigger schemer">
+          <div class="at-icon">&#128065;</div>
+          <div>
+            <span class="at-label">Synergy Chain!</span>
+            Whisper Network triggers: you've drawn 4 cards this match (including draws from The Informant and natural draws). Draw 1 more card. Rocco, with his trump suit gone and his hand dwindling, can't find a Spade to cover your Queen. He picks up.
+          </div>
+        </div>
+        <p class="bout-narrative">The Schemer engine is humming. Every card drawn fuels the next ability. Rocco's Brute deck wants fast, overwhelming attacks &mdash; but with his trump gone and your hand refilling, he's running out of options. You have 4 cards. He's bloating to 8 from forced pickups, but none of them synergize with the new trump.</p>
+      </div>
+
+      <!-- Bout 5: Finishing blow -->
+      <div class="bout">
+        <div class="bout-marker">5</div>
+        <div class="bout-header">Bout 5 &mdash; You Attack (Closing the Net)</div>
+        <div class="bout-cards">
+          <div class="bout-mini schemer-card">
+            <div class="bm-rank black">J&#9824;</div>
+            <div class="bm-name">The Informant</div>
+            <div class="bm-ability">On defend: draw 2. (Unused on attack, but rank still fights.)</div>
+          </div>
+          <div class="bout-mini schemer-card">
+            <div class="bm-rank black">8&#9827;</div>
+            <div class="bm-name">8 of Clubs</div>
+          </div>
+          <div class="bout-vs">&rarr;</div>
+          <div class="bout-mini neutral-card" style="opacity: 0.4;">
+            <div class="bm-rank" style="color: #666;">?</div>
+            <div class="bm-name">Scrambling...</div>
+          </div>
+        </div>
+        <p class="bout-narrative">You dump your remaining cards. Rocco's bloated hand of misfired Brute cards can't organize a defense &mdash; his "+rank" abilities need him to attack, not defend. You empty your hand. <strong>Match over.</strong></p>
+      </div>
+
+    </div>
+
+    <!-- Victory callout -->
+    <div class="battle-hud" style="border-color: var(--gold); background: linear-gradient(135deg, rgba(212,168,67,0.1), rgba(18,16,14,0.95));">
+      <div class="hud-player">
+        <div class="hud-name" style="color: var(--schemer-glow);">Victory</div>
+        <div class="hud-archetype" style="color: var(--parchment); opacity: 0.7;">Hand emptied in 5 bouts</div>
+      </div>
+      <div class="hud-vs" style="font-size: 1rem; color: var(--gold);">&#9733;</div>
+      <div class="hud-enemy">
+        <div class="hud-name" style="color: var(--brute-glow); opacity: 0.5;">Rocco</div>
+        <div class="hud-archetype" style="color: var(--parchment); opacity: 0.5;">8 cards remaining</div>
+      </div>
+    </div>
+
+  </section>
+</div>
+
+<div class="divider"><span>RELICS &amp; ARTIFACTS</span></div>
+
+<!-- ============ RELICS ============ -->
+<div class="relic-section">
+  <section>
+    <h2>Relics</h2>
+    <p class="subtitle">Persistent bonuses found on the map. They shape your build and unlock new strategies.</p>
+
+    <div class="relic-grid">
+      <div class="relic">
+        <span class="r-icon">&#128218;</span>
+        <div class="r-name">Scholar's Lens</div>
+        <div class="r-desc">Start each match by looking at the opponent's entire hand.</div>
+        <span class="r-synergy schemer">Schemer</span>
+      </div>
+      <div class="relic">
+        <span class="r-icon">&#9876;</span>
+        <div class="r-name">Iron Gauntlet</div>
+        <div class="r-desc">Your first attack each match: +5 rank.</div>
+        <span class="r-synergy brute">Brute</span>
+      </div>
+      <div class="relic">
+        <span class="r-icon">&#127917;</span>
+        <div class="r-name">Two-Faced Coin</div>
+        <div class="r-desc">At match start, choose: keep trump or flip to a random new one.</div>
+        <span class="r-synergy trickster">Trickster</span>
+      </div>
+      <div class="relic">
+        <span class="r-icon">&#128184;</span>
+        <div class="r-name">Bottomless Purse</div>
+        <div class="r-desc">Start with 2 extra cards in hand. No hand size limit.</div>
+        <span class="r-synergy hoarder">Hoarder</span>
+      </div>
+      <div class="relic">
+        <span class="r-icon">&#128293;</span>
+        <div class="r-name">Candle Stub</div>
+        <div class="r-desc">Remove 1 neutral card from your deck at the start of each Act.</div>
+        <span class="r-synergy any">Any Build</span>
+      </div>
+      <div class="relic">
+        <span class="r-icon">&#128172;</span>
+        <div class="r-name">Forked Tongue</div>
+        <div class="r-desc">Once per match: after seeing opponent's attack, swap it with a random card from their hand.</div>
+        <span class="r-synergy schemer">Schemer</span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="divider"><span>DECK COMPOSITION</span></div>
+
+<!-- ============ DECK BUILDER MOCKUP ============ -->
+<div class="deckbuilder-section">
+  <section>
+    <h2>Your Deck is Your Build</h2>
+    <p class="subtitle">A Schemer/Trickster hybrid after Act 2. 12 cards, tight and synergistic.</p>
+
+    <div class="deck-mockup">
+      <div class="dm-header">
+        <h4>Current Deck</h4>
+        <div class="dm-decksize"><span class="count">12</span> <span class="limit">cards</span></div>
+      </div>
+      <div class="dm-body">
+        <div class="dm-composition">
+          <div class="dm-pip s"><span class="pip-rank">J&#9824;</span><span class="pip-name">Informant</span></div>
+          <div class="dm-pip s"><span class="pip-rank">Q&#9824;</span><span class="pip-name">Whisper</span></div>
+          <div class="dm-pip s"><span class="pip-rank">7&#9824;</span><span class="pip-name">Spyglass</span></div>
+          <div class="dm-pip s"><span class="pip-rank">5&#9827;</span><span class="pip-name">Courier</span></div>
+          <div class="dm-pip s"><span class="pip-rank">10&#9830;</span><span class="pip-name">Cipher</span></div>
+          <div class="dm-pip t"><span class="pip-rank">9&#9830;</span><span class="pip-name">Mask</span></div>
+          <div class="dm-pip t"><span class="pip-rank">6&#9829;</span><span class="pip-name">Mirror</span></div>
+          <div class="dm-pip t"><span class="pip-rank">J&#9830;</span><span class="pip-name">Decoy</span></div>
+          <div class="dm-pip n"><span class="pip-rank">A&#9829;</span><span class="pip-name">Ace</span></div>
+          <div class="dm-pip n"><span class="pip-rank">K&#9824;</span><span class="pip-name">King</span></div>
+          <div class="dm-pip n"><span class="pip-rank">8&#9827;</span><span class="pip-name">Eight</span></div>
+          <div class="dm-pip n"><span class="pip-rank">Q&#9829;</span><span class="pip-name">Queen</span></div>
+        </div>
+        <div class="dm-breakdown">
+          <div class="dm-breakdown-item"><div class="db-swatch s"></div> 5 Schemer</div>
+          <div class="dm-breakdown-item"><div class="db-swatch t"></div> 3 Trickster</div>
+          <div class="dm-breakdown-item"><div class="db-swatch n"></div> 4 Neutral</div>
+        </div>
+        <div class="dm-warning">Adding a 13th card slows your cycle. Schemer synergies fire best in decks under 12.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="divider"><span>ENEMY ROSTER</span></div>
+
+<!-- ============ ENEMY ROSTER ============ -->
+<div class="enemy-section">
+  <section>
+    <h2>Enemies Have Archetypes Too</h2>
+    <p class="subtitle">Learn their doctrine. Counter-draft. Adapt.</p>
+
+    <div class="enemy-grid">
+      <div class="enemy-card e-brute">
+        <span class="ec-icon">&#128170;</span>
+        <div class="ec-name">Rocco the Enforcer</div>
+        <div class="ec-type">Pure Brute &bull; Act 2</div>
+        <div class="ec-desc">16-card deck loaded with +rank cards. Opens with his heaviest hitters. Punishes failed defenses with extra pickups. Crumbles if you change trump or survive the initial onslaught.</div>
+        <div class="ec-threat">Threat: Overwhelming early pressure</div>
+      </div>
+
+      <div class="enemy-card e-trickster">
+        <span class="ec-icon">&#128123;</span>
+        <div class="ec-name">La Strega</div>
+        <div class="ec-type">Pure Trickster &bull; Act 3</div>
+        <div class="ec-desc">14-card deck. Changes trump constantly. Every defense shifts the rules. Your carefully-hoarded trump cards become dead weight mid-bout. Beatable with raw numbers or fast cycling.</div>
+        <div class="ec-threat">Threat: Invalidates trump-dependent builds</div>
+      </div>
+
+      <div class="enemy-card e-schemer">
+        <span class="ec-icon">&#128373;</span>
+        <div class="ec-name">The Cardinal</div>
+        <div class="ec-type">Schemer &bull; Act 4</div>
+        <div class="ec-desc">12-card deck. Sees your hand, knows your draws, always has the perfect counter. Never attacks recklessly. Outpaces you in card advantage. Beat by going faster or going bigger.</div>
+        <div class="ec-threat">Threat: Perfect information, perfect responses</div>
+      </div>
+
+      <div class="enemy-card e-mixed">
+        <span class="ec-icon">&#128081;</span>
+        <div class="ec-name">Il Doge</div>
+        <div class="ec-type">Brute / Schemer Hybrid &bull; Act 5 Boss</div>
+        <div class="ec-desc">20-card deck with the best of both worlds. Scouts your hand then lands devastating attacks at your weakest point. Has unique legendary cards: "Decree" (change trump + draw 3) and "Conscription" (force you to pick up 4).</div>
+        <div class="ec-threat">Threat: No single weakness. Requires a refined build.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="divider"><span>THE MAP</span></div>
+
+<!-- ============ MAP ============ -->
+<div class="map-section">
+  <section>
+    <h2>Act 2 &mdash; The Merchant's Rest</h2>
+    <p class="subtitle">STS-style branching paths. Every choice shapes your deck.</p>
+
+    <div class="map-mockup">
+      <!-- Row 1: Start -->
+      <div class="map-row">
+        <div class="map-node match"><span class="mn-icon">&#9876;</span>Match</div>
+      </div>
+      <div class="map-connectors"><div class="map-connector"></div><div class="map-connector"></div></div>
+      <!-- Row 2 -->
+      <div class="map-row">
+        <div class="map-node match"><span class="mn-icon">&#9876;</span>Match</div>
+        <div class="map-node rumor"><span class="mn-icon">&#128172;</span>Rumor</div>
+        <div class="map-node shop"><span class="mn-icon">&#128176;</span>Shop</div>
+      </div>
+      <div class="map-connectors"><div class="map-connector"></div><div class="map-connector"></div><div class="map-connector"></div></div>
+      <!-- Row 3 -->
+      <div class="map-row">
+        <div class="map-node elite"><span class="mn-icon">&#9733;</span>Elite</div>
+        <div class="map-node rest"><span class="mn-icon">&#128293;</span>Rest</div>
+        <div class="map-node match"><span class="mn-icon">&#9876;</span>Match</div>
+      </div>
+      <div class="map-connectors"><div class="map-connector"></div><div class="map-connector"></div></div>
+      <!-- Row 4 -->
+      <div class="map-row">
+        <div class="map-node shop"><span class="mn-icon">&#128176;</span>Shop</div>
+        <div class="map-node rumor"><span class="mn-icon">&#128172;</span>Rumor</div>
+      </div>
+      <div class="map-connectors"><div class="map-connector"></div></div>
+      <!-- Boss -->
+      <div class="map-row">
+        <div class="map-node boss"><span class="mn-icon">&#128081;</span>Act Boss<br>Signora Valenti</div>
+      </div>
+    </div>
+
+    <div class="map-legend">
+      <div class="map-legend-item"><div class="ml-dot" style="background: var(--brute-red);"></div> Match (card reward)</div>
+      <div class="map-legend-item"><div class="ml-dot" style="background: var(--gold);"></div> Elite (relic + card)</div>
+      <div class="map-legend-item"><div class="ml-dot" style="background: var(--schemer-teal);"></div> Shop (buy/remove)</div>
+      <div class="map-legend-item"><div class="ml-dot" style="background: var(--hoarder-amber);"></div> Rest (heal or upgrade)</div>
+      <div class="map-legend-item"><div class="ml-dot" style="background: var(--trickster-violet);"></div> Rumor (event)</div>
+    </div>
+  </section>
+</div>
+
+<div class="divider"><span>DESIGN SUMMARY</span></div>
+
+<!-- ============ SUMMARY ============ -->
+<div class="summary-section">
+  <section>
+    <h2>Why This Vision Works</h2>
+
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="si-label">Strategic Identity</div>
+        <div class="si-value">"I'm a Schemer with Trickster splash" is a fundamentally different experience than "Pure Brute." Every run is a new character.</div>
+      </div>
+      <div class="summary-item">
+        <div class="si-label">One More Run</div>
+        <div class="si-value">"What if I go Hoarder with the Bottomless Purse relic? I could hold 12 cards and make The Miser's passive insane..."</div>
+      </div>
+      <div class="summary-item">
+        <div class="si-label">Durak Depth</div>
+        <div class="si-value">Defending isn't just "play higher." It's "play THIS card because its defense trigger draws me 2." Attack isn't just aggression &mdash; it's information warfare.</div>
+      </div>
+      <div class="summary-item">
+        <div class="si-label">Enemy Variety</div>
+        <div class="si-value">Each enemy archetype creates a distinct puzzle. You learn the roster, counter-draft, adapt mid-run. No two fights feel the same.</div>
+      </div>
+      <div class="summary-item">
+        <div class="si-label">Deck Tension</div>
+        <div class="si-value">Adding a powerful Brute card to your Schemer deck is tempting &mdash; but it dilutes synergy AND slows your cycle. Real agony on every reward screen.</div>
+      </div>
+      <div class="summary-item">
+        <div class="si-label">Growth Path</div>
+        <div class="si-value">Start with 2 archetypes, expand to 4. Start with simple abilities, unlock complex ones. The game grows with the player.</div>
+      </div>
+    </div>
+
+    <div class="final-quote">
+      "In the end, it's not about the cards in your hand &mdash; it's about the doctrine behind them."
+      <cite>&mdash; The Doctrine War design philosophy</cite>
+    </div>
+  </section>
+</div>
+
+</body>
+</html>
