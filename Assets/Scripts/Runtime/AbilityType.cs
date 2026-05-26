@@ -337,9 +337,9 @@ namespace WitsAndFools
             AbilityType.Desperation => "Discard hand, auto-defend all attacks, draw 4.",
             AbilityType.SteadyHand => "At bout start, if hand has 3 or fewer cards, draw 1.",
             AbilityType.ResourceGain => "Gain 1 resource.",
-            AbilityType.Masterstroke => "Spend 3 Intel. Opponent discards their 2 highest-rank cards. Draw 1.",
+            AbilityType.Masterstroke => "Spend 4 Intel. Opponent discards their 2 highest-rank cards. Draw 1.",
             AbilityType.Onslaught => "Spend 3 Fury. Play top 3 deck cards as attacks.",
-            AbilityType.Masquerade => "Spend 3 Favor. Swap your entire hand with opponent's.",
+            AbilityType.Masquerade => "Spend 2 Favor. Swap your entire hand with opponent's.",
             AbilityType.Monopoly => "Spend 2 Luck. Draw until you have 7 cards. Opponent discards down to 5.",
             _ => ""
         };
@@ -387,9 +387,9 @@ namespace WitsAndFools
             AbilityType.Misdeal => 0,
             AbilityType.WildCard => 0,
             AbilityType.Deflect => 0,
-            AbilityType.Masterstroke => 3,
+            AbilityType.Masterstroke => 4,
             AbilityType.Onslaught => 3,
-            AbilityType.Masquerade => 3,
+            AbilityType.Masquerade => 2,
             AbilityType.Monopoly => 2,
             // Powerful free-trigger abilities cost 2
             AbilityType.Haymaker => 2,
