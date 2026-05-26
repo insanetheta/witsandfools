@@ -387,10 +387,10 @@ namespace WitsAndFools
             AbilityType.Misdeal => 0,
             AbilityType.WildCard => 0,
             AbilityType.Deflect => 0,
-            AbilityType.Masterstroke => 0,
-            AbilityType.Onslaught => 0,
-            AbilityType.Masquerade => 0,
-            AbilityType.Monopoly => 0,
+            AbilityType.Masterstroke => 3,
+            AbilityType.Onslaught => 3,
+            AbilityType.Masquerade => 3,
+            AbilityType.Monopoly => 3,
             // Powerful free-trigger abilities cost 2
             AbilityType.Haymaker => 2,
             // Standard trigger cost

@@ -42,11 +42,11 @@
       "rank": 7,
       "doctrine": "Schemer",
       "trigger": "OnDefend",
-      "ability": "Draw 2 cards from your deck.",
+      "ability": "Scry 2, then draw 1 if you see a trump card.",
       "flavorText": "Every whisper has a price.",
       "rarity": "Common",
       "startingDeck": true,
-      "abilityType": "Brace"
+      "abilityType": "Peek"
     },
     {
       "id": "schemer_spyglass",
@@ -54,8 +54,8 @@
       "suit": "Diamonds",
       "rank": 6,
       "doctrine": "Schemer",
-      "trigger": "None",
-      "ability": "Discard to activate: Scry 3 — look at the top 3 cards of your deck and reorder them.",
+      "trigger": "OnDefend",
+      "ability": "Scry the top 3 cards of the deck.",
       "flavorText": "From the campanile, all Venice lies bare.",
       "rarity": "Common",
       "startingDeck": true,
@@ -68,11 +68,11 @@
       "rank": 8,
       "doctrine": "Schemer",
       "trigger": "OnAttack",
-      "ability": "Force opponent to discard 1 random card.",
+      "ability": "Scry the top 3 cards of the opponent's deck.",
       "flavorText": "The code reveals more than its author intended.",
       "rarity": "Common",
       "startingDeck": true,
-      "abilityType": "Riposte"
+      "abilityType": "Peek"
     },
     {
       "id": "schemer_cartographer",
@@ -145,12 +145,12 @@
       "suit": "Spades",
       "rank": 6,
       "doctrine": "Schemer",
-      "trigger": "None",
-      "ability": "Discard to activate: Force opponent to put the top 3 cards of their deck on the bottom.",
+      "trigger": "OnAttack",
+      "ability": "Spend 1 Intel. Opponent discards 1 random card.",
       "flavorText": "A slow death, sweetened with wine.",
       "rarity": "Common",
       "startingDeck": false,
-      "abilityType": "Peek"
+      "abilityType": "Riposte"
     },
     {
       "id": "schemer_scribe",
@@ -223,8 +223,8 @@
       "suit": "Diamonds",
       "rank": 8,
       "doctrine": "Schemer",
-      "trigger": "None",
-      "ability": "Discard to activate: Look at opponent's hand and put 1 card from it on top of their deck.",
+      "trigger": "OnDefend",
+      "ability": "Rearrange the top 3 cards of the deck.",
       "flavorText": "The strings are invisible, but the dance is unmistakable.",
       "rarity": "Rare",
       "startingDeck": false,
@@ -301,8 +301,8 @@
       "suit": "Clubs",
       "rank": 14,
       "doctrine": "Schemer",
-      "trigger": "None",
-      "ability": "Masterstroke: spend 3 Intel — opponent discards their 2 highest-rank cards, you draw 1.",
+      "trigger": "OnAttack",
+      "ability": "Masterstroke: spend 3 Intel \u2014 opponent discards their 2 highest-rank cards, you draw 1.",
       "flavorText": "His questions have only one answer, and it is always confession.",
       "rarity": "Rare",
       "startingDeck": true,
@@ -418,8 +418,8 @@
       "suit": "Clubs",
       "rank": 6,
       "doctrine": "Brute",
-      "trigger": "None",
-      "ability": "Discard to activate: Force opponent to discard 1 card of their choice.",
+      "trigger": "OnAttack",
+      "ability": "Spend 1 Fury. Opponent discards 1 random card.",
       "flavorText": "The tunnel was finished before dawn.",
       "rarity": "Common",
       "startingDeck": false,
@@ -432,11 +432,11 @@
       "rank": 13,
       "doctrine": "Brute",
       "trigger": "OnAttack",
-      "ability": "This card attacks with +1 rank.",
+      "ability": "Spend 1 Fury. Opponent discards 1 random non-trump card.",
       "flavorText": "The crowd roars. He does not hear them.",
       "rarity": "Uncommon",
       "startingDeck": true,
-      "abilityType": "Conquer"
+      "abilityType": "Intimidate"
     },
     {
       "id": "brute_pillager",
@@ -496,12 +496,12 @@
       "suit": "Diamonds",
       "rank": 7,
       "doctrine": "Brute",
-      "trigger": "None",
-      "ability": "Discard to activate: Force opponent to discard their lowest-rank card.",
+      "trigger": "OnAttack",
+      "ability": "Spend 1 Fury. Opponent discards 1 non-trump card.",
       "flavorText": "From the ashes, nothing grows back.",
       "rarity": "Common",
       "startingDeck": false,
-      "abilityType": "Riposte"
+      "abilityType": "Intimidate"
     },
     {
       "id": "brute_iron_duke",
@@ -561,8 +561,8 @@
       "suit": "Diamonds",
       "rank": 14,
       "doctrine": "Brute",
-      "trigger": "None",
-      "ability": "Onslaught: spend 3 Fury — play top 3 cards from your deck as attacks.",
+      "trigger": "OnAttack",
+      "ability": "Onslaught: spend 3 Fury \u2014 play top 3 cards from your deck as attacks.",
       "flavorText": "When the Titan charges, the earth itself retreats.",
       "rarity": "Rare",
       "startingDeck": true,
@@ -575,11 +575,11 @@
       "rank": 13,
       "doctrine": "Brute",
       "trigger": "OnAttack",
-      "ability": "This card attacks with +2 rank.",
+      "ability": "Play one extra attack ignoring the rank-match rule.",
       "flavorText": "It crushes friend and foe with equal indifference.",
       "rarity": "Uncommon",
       "startingDeck": true,
-      "abilityType": "Conquer"
+      "abilityType": "DoubleTrouble"
     },
     {
       "id": "trickster_courtesan",
@@ -600,8 +600,8 @@
       "suit": "Diamonds",
       "rank": 6,
       "doctrine": "Trickster",
-      "trigger": "None",
-      "ability": "Discard to activate: Change this bout's trump suit to any suit you choose.",
+      "trigger": "OnDefend",
+      "ability": "Change the trump suit to this card's suit.",
       "flavorText": "Lead into gold? Child's play. Try turning hearts into spades.",
       "rarity": "Uncommon",
       "startingDeck": true,
@@ -665,8 +665,8 @@
       "suit": "Clubs",
       "rank": 8,
       "doctrine": "Trickster",
-      "trigger": "None",
-      "ability": "Discard to activate: Spend 2 Favor — attacker must pick up their own attack card.",
+      "trigger": "OnDefend",
+      "ability": "Spend 2 Favor. Return 1 undefended attack to attacker's hand.",
       "flavorText": "The stars say you will lose. The stars are never wrong.",
       "rarity": "Uncommon",
       "startingDeck": true,
@@ -769,8 +769,8 @@
       "suit": "Clubs",
       "rank": 7,
       "doctrine": "Trickster",
-      "trigger": "None",
-      "ability": "Discard to activate: Spend 3 Favor to nullify all remaining undefended attacks this bout; attack cards return to attacker's hand.",
+      "trigger": "OnDefend",
+      "ability": "Discard undefended attacks instead of eating them.",
       "flavorText": "The chains were real. The locks were not.",
       "rarity": "Rare",
       "startingDeck": false,
@@ -834,9 +834,9 @@
       "suit": "Hearts",
       "rank": 13,
       "doctrine": "Trickster",
-      "trigger": "None",
-      "ability": "Masquerade: spend 3 Favor — swap your entire hand with opponent's.",
-      "flavorText": "Behind the final mask is another mask, and behind that — your face.",
+      "trigger": "OnAttack",
+      "ability": "Masquerade: spend 3 Favor \u2014 swap your entire hand with opponent's.",
+      "flavorText": "Behind the final mask is another mask, and behind that \u2014 your face.",
       "rarity": "Rare",
       "startingDeck": true,
       "abilityType": "Masquerade"
@@ -977,8 +977,8 @@
       "suit": "Hearts",
       "rank": 7,
       "doctrine": "Hoarder",
-      "trigger": "None",
-      "ability": "Discard to activate: Draw cards until you have as many cards as your opponent.",
+      "trigger": "OnAttack",
+      "ability": "Draw 1 card.",
       "flavorText": "The interest compounds. It always compounds.",
       "rarity": "Rare",
       "startingDeck": false,
@@ -990,12 +990,12 @@
       "suit": "Clubs",
       "rank": 7,
       "doctrine": "Hoarder",
-      "trigger": "None",
-      "ability": "Discard to activate: Retrieve the last 2 cards from your discard pile into your hand.",
+      "trigger": "OnDefend",
+      "ability": "Gain 1 Luck.",
       "flavorText": "Nothing is wasted in my shop. Nothing.",
       "rarity": "Uncommon",
       "startingDeck": false,
-      "abilityType": "WildCard"
+      "abilityType": "ResourceGain"
     },
     {
       "id": "hoarder_auctioneer",
@@ -1042,8 +1042,8 @@
       "suit": "Spades",
       "rank": 14,
       "doctrine": "Hoarder",
-      "trigger": "None",
-      "ability": "Monopoly: spend 3 Luck — draw cards until you have 8 in hand, opponent discards down to 5.",
+      "trigger": "OnAttack",
+      "ability": "Monopoly: spend 3 Luck \u2014 draw cards until you have 8 in hand, opponent discards down to 5.",
       "flavorText": "When one man owns everything, the game is already over.",
       "rarity": "Rare",
       "startingDeck": true,
@@ -1133,11 +1133,12 @@
       "suit": "Spades",
       "rank": 14,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "This card attacks with +1 rank.",
       "flavorText": "Honor is its own reward.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Conquer"
     },
     {
       "id": "neutral_bishop",
@@ -1145,11 +1146,12 @@
       "suit": "Hearts",
       "rank": 14,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnDefend",
+      "ability": "Draw 2 cards.",
       "flavorText": "The church answers to a higher authority.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Brace"
     },
     {
       "id": "neutral_guild_knight",
@@ -1157,11 +1159,12 @@
       "suit": "Clubs",
       "rank": 14,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "Play one extra attack ignoring the rank-match rule.",
       "flavorText": "The guilds protect their own.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "DoubleTrouble"
     },
     {
       "id": "neutral_crown_jewel",
@@ -1169,11 +1172,12 @@
       "suit": "Diamonds",
       "rank": 14,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnDefend",
+      "ability": "Auto-defend first undefended attack.",
       "flavorText": "Worth more than the throne it adorns.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Fortify"
     },
     {
       "id": "neutral_duke",
@@ -1181,11 +1185,12 @@
       "suit": "Spades",
       "rank": 13,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "Gain 1 resource.",
       "flavorText": "Power answers to power.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "neutral_cardinal",
@@ -1193,11 +1198,12 @@
       "suit": "Hearts",
       "rank": 13,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnDefend",
+      "ability": "This card covers two undefended attack slots.",
       "flavorText": "The scarlet robes conceal much.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "DoubleDefense"
     },
     {
       "id": "neutral_magistrate",
@@ -1205,11 +1211,12 @@
       "suit": "Clubs",
       "rank": 13,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "No more attacks can be added this bout.",
       "flavorText": "The law is the law. Except when it isn't.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Blocker"
     },
     {
       "id": "neutral_queen_regent",
@@ -1217,11 +1224,12 @@
       "suit": "Hearts",
       "rank": 12,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnDefend",
+      "ability": "You become the attacker after this bout resolves.",
       "flavorText": "She rules while the king plays at war.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "SeizeInitiative"
     },
     {
       "id": "neutral_castellan",
@@ -1229,11 +1237,12 @@
       "suit": "Spades",
       "rank": 12,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnDefend",
+      "ability": "Draw 2 cards.",
       "flavorText": "The fortress holds. It always holds.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Brace"
     },
     {
       "id": "neutral_treasurer",
@@ -1241,11 +1250,12 @@
       "suit": "Diamonds",
       "rank": 12,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "Gain 1 resource.",
       "flavorText": "Every florin accounted for. Almost.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "ResourceGain"
     },
     {
       "id": "neutral_herald",
@@ -1253,11 +1263,12 @@
       "suit": "Clubs",
       "rank": 11,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "Look at the top 3 cards of the deck.",
       "flavorText": "He announces what cannot be unannounced.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Peek"
     },
     {
       "id": "neutral_squire",
@@ -1265,11 +1276,12 @@
       "suit": "Spades",
       "rank": 11,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnDefend",
+      "ability": "Draw 1 card.",
       "flavorText": "Every knight was once a squire.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "ExtraDraw"
     },
     {
       "id": "neutral_merchant_prince",
@@ -1277,11 +1289,12 @@
       "suit": "Diamonds",
       "rank": 11,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "Draw 1 card.",
       "flavorText": "Commerce is the truest form of diplomacy.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "ExtraDraw"
     },
     {
       "id": "neutral_footman",
@@ -1289,11 +1302,12 @@
       "suit": "Clubs",
       "rank": 10,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnAttack",
+      "ability": "This card attacks with +1 rank.",
       "flavorText": "He carries the banner and asks no questions.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Conquer"
     },
     {
       "id": "neutral_courser",
@@ -1301,11 +1315,12 @@
       "suit": "Hearts",
       "rank": 10,
       "doctrine": "Neutral",
-      "trigger": "None",
-      "ability": null,
+      "trigger": "OnDefend",
+      "ability": "Look at the top 3 cards of the deck.",
       "flavorText": "Speed is the first and last defense.",
       "rarity": "Common",
-      "startingDeck": false
+      "startingDeck": false,
+      "abilityType": "Peek"
     }
   ],
   "startingDecks": {

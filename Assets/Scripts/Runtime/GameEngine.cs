@@ -48,6 +48,7 @@ namespace WitsAndFools
         bool[] _luckyDrawUsed = new bool[2];
         readonly int[] _resource = new int[2];
         bool[] _attackedThisBout = new bool[2];
+        bool[] _usedAbilityThisBout = new bool[2];
         bool[] _shadowReflexesUsedThisBout = new bool[2];
         readonly List<Rank> _pendingBonusRanks = new();
 
@@ -413,6 +414,7 @@ namespace WitsAndFools
                 if (canFire)
                 {
                     ApplyAbility(card.Ability.Value, playerIndex, card, -1);
+                    _usedAbilityThisBout[playerIndex] = true;
                     OnAbilityUsed?.Invoke(playerIndex, card, card.Ability.Value);
                 }
             }
@@ -467,6 +469,7 @@ namespace WitsAndFools
                 if (canFire)
                 {
                     ApplyAbility(card.Ability.Value, playerIndex, card, slot);
+                    _usedAbilityThisBout[playerIndex] = true;
                     OnAbilityUsed?.Invoke(playerIndex, card, card.Ability.Value);
                 }
             }
@@ -670,6 +673,7 @@ namespace WitsAndFools
                 OnDrew?.Invoke(playerIndex, 1);
             }
 
+            _usedAbilityThisBout[playerIndex] = true;
             OnAbilityUsed?.Invoke(playerIndex, card, ability);
             return true;
         }
@@ -807,13 +811,13 @@ namespace WitsAndFools
                     return true;
 
                 case AbilityType.Masterstroke:
-                    return Phase == Phase.Attack && _resource[playerIndex] >= 3 && _hands[1 - playerIndex].Count > 0;
+                    return _hands[1 - playerIndex].Count > 0;
                 case AbilityType.Onslaught:
-                    return Phase == Phase.Attack && _resource[playerIndex] >= 3 && DeckCountFor(playerIndex) >= 3;
+                    return DeckCountFor(playerIndex) >= 3;
                 case AbilityType.Masquerade:
-                    return _resource[playerIndex] >= 3 && _hands[1 - playerIndex].Count > 0;
+                    return _hands[1 - playerIndex].Count > 0;
                 case AbilityType.Monopoly:
-                    return _resource[playerIndex] >= 3 && DeckCountFor(playerIndex) > 0;
+                    return DeckCountFor(playerIndex) > 0;
 
                 default:
                     return true;
@@ -1325,14 +1329,12 @@ namespace WitsAndFools
                     break;
 
                 case AbilityType.Masterstroke:
-                    SpendResource(playerIndex, 3);
                     DiscardHighestCards(opponent, 2);
                     DrawCards(playerIndex, 1);
                     break;
 
                 case AbilityType.Onslaught:
                 {
-                    SpendResource(playerIndex, 3);
                     int onsPlayed = 0;
                     while (onsPlayed < 3 && CanDrawFromDeck(playerIndex))
                     {
@@ -1347,7 +1349,6 @@ namespace WitsAndFools
 
                 case AbilityType.Masquerade:
                 {
-                    SpendResource(playerIndex, 3);
                     var myCards = new List<Card>(_hands[playerIndex].Cards);
                     var theirCards = new List<Card>(_hands[opponent].Cards);
                     _hands[playerIndex].Clear();
@@ -1359,7 +1360,6 @@ namespace WitsAndFools
 
                 case AbilityType.Monopoly:
                 {
-                    SpendResource(playerIndex, 3);
                     int need = 8 - _hands[playerIndex].Count;
                     if (need > 0) DrawCards(playerIndex, need);
                     while (_hands[opponent].Count > 5)
@@ -1658,8 +1658,8 @@ namespace WitsAndFools
                     case ResourceType.Luck:
                         if (_resource[p] > 0)
                         {
-                            _resource[p] = 0;
-                            OnResourceChanged?.Invoke(p, rt.Value, 0);
+                            _resource[p]--;
+                            OnResourceChanged?.Invoke(p, rt.Value, _resource[p]);
                         }
                         break;
                     case ResourceType.Fury:
@@ -1669,8 +1669,16 @@ namespace WitsAndFools
                             OnResourceChanged?.Invoke(p, rt.Value, _resource[p]);
                         }
                         break;
+                    case ResourceType.Favor:
+                        if (!_usedAbilityThisBout[p] && _resource[p] > 0)
+                        {
+                            _resource[p]--;
+                            OnResourceChanged?.Invoke(p, rt.Value, _resource[p]);
+                        }
+                        break;
                 }
                 _attackedThisBout[p] = false;
+                _usedAbilityThisBout[p] = false;
             }
         }
 

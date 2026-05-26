@@ -10,9 +10,9 @@
       "randomMoveChance": 0.35,
       "description": "A wiry dockhand who learned cards in the hold of a grain ship. Plays fast, hits hard, thinks never.",
       "visualHook": "Rat-bitten ear, rope-burned hands, a single gold tooth",
-      "deckSize": 10,
+      "deckSize": 11,
       "deckComposition": {
-        "doctrine": 6,
+        "doctrine": 7,
         "neutral": 4,
         "cardIds": [
           "brute_gladiator",
@@ -24,7 +24,8 @@
           "neutral_magistrate",
           "brute_cannon_master",
           "brute_sapper",
-          "brute_vanguard"
+          "brute_vanguard",
+          "brute_titan"
         ]
       },
       "relics": [],
@@ -43,9 +44,9 @@
       "randomMoveChance": 0.35,
       "description": "A fishwife who hoards cards the way she hoards grudges \u2014 patiently, and with interest.",
       "visualHook": "Flame-red hair under a dirty kerchief, calloused fingers, shrewd squint",
-      "deckSize": 11,
+      "deckSize": 12,
       "deckComposition": {
-        "doctrine": 6,
+        "doctrine": 7,
         "neutral": 5,
         "cardIds": [
           "hoarder_antiquarian",
@@ -58,7 +59,8 @@
           "neutral_bishop",
           "neutral_duke",
           "hoarder_collector",
-          "hoarder_treasure_hunter"
+          "hoarder_treasure_hunter",
+          "hoarder_monopolist"
         ]
       },
       "relics": [],
@@ -77,9 +79,9 @@
       "randomMoveChance": 0.35,
       "description": "An enormous cook who smells of garlic and cheap wine. Slams cards on the table like he's tenderizing meat.",
       "visualHook": "Enormous belly, stained apron he never removes, a cleaver scar across his knuckles",
-      "deckSize": 12,
+      "deckSize": 13,
       "deckComposition": {
-        "doctrine": 7,
+        "doctrine": 8,
         "neutral": 5,
         "cardIds": [
           "brute_pillager",
@@ -93,7 +95,8 @@
           "neutral_treasurer",
           "neutral_castellan",
           "brute_cannon_master",
-          "brute_sapper"
+          "brute_sapper",
+          "brute_titan"
         ]
       },
       "relics": [],
@@ -112,9 +115,9 @@
       "randomMoveChance": 0.3,
       "description": "A retired mercenary captain who plays cards the way he fought \u2014 overwhelming force, no quarter given.",
       "visualHook": "Iron prosthetic hand, military medals pinned to a threadbare doublet, deep voice",
-      "deckSize": 12,
+      "deckSize": 13,
       "deckComposition": {
-        "doctrine": 7,
+        "doctrine": 8,
         "neutral": 5,
         "cardIds": [
           "brute_executioner",
@@ -128,7 +131,8 @@
           "neutral_knight",
           "neutral_herald",
           "brute_cannon_master",
-          "brute_sapper"
+          "brute_sapper",
+          "brute_titan"
         ]
       },
       "relics": [],
@@ -147,9 +151,9 @@
       "randomMoveChance": 0.3,
       "description": "A dockside fortune teller who always seems to know what you're holding. Her smile never reaches her eyes.",
       "visualHook": "Green headscarf, kohl-lined eyes, silver serpent ring on every finger",
-      "deckSize": 11,
+      "deckSize": 12,
       "deckComposition": {
-        "doctrine": 6,
+        "doctrine": 7,
         "neutral": 5,
         "cardIds": [
           "schemer_forger",
@@ -162,7 +166,8 @@
           "neutral_treasurer",
           "neutral_squire",
           "schemer_spyglass",
-          "schemer_librarian"
+          "schemer_librarian",
+          "schemer_grand_inquisitor"
         ]
       },
       "relics": [],
@@ -181,9 +186,9 @@
       "randomMoveChance": 0.25,
       "description": "The undisputed king of the Bilge Rat Tavern. A former galley slave who bought this dive with his winnings and rules it with an iron fist. Nobody leaves his table without paying \u2014 one way or another.",
       "visualHook": "Massive scarred forearms, a necklace of lucky coins, permanent scowl, missing two fingers on his left hand",
-      "deckSize": 12,
+      "deckSize": 13,
       "deckComposition": {
-        "doctrine": 7,
+        "doctrine": 8,
         "neutral": 5,
         "cardIds": [
           "brute_siege_tower",
@@ -197,7 +202,8 @@
           "neutral_magistrate",
           "neutral_duke",
           "brute_sapper",
-          "brute_vanguard"
+          "brute_vanguard",
+          "brute_titan"
         ]
       },
       "relics": [],
@@ -216,9 +222,9 @@
       "randomMoveChance": 0.2,
       "description": "A spice merchant who counts cards the way he counts peppercorns \u2014 obsessively. Never wastes a single play.",
       "visualHook": "Thick spectacles, ink-stained fingers, a ledger he consults between rounds",
-      "deckSize": 12,
+      "deckSize": 13,
       "deckComposition": {
-        "doctrine": 7,
+        "doctrine": 8,
         "neutral": 5,
         "cardIds": [
           "hoarder_dynasty_heir",
@@ -232,7 +238,8 @@
           "neutral_treasurer",
           "neutral_herald",
           "hoarder_collector",
-          "hoarder_treasure_hunter"
+          "hoarder_treasure_hunter",
+          "hoarder_monopolist"
         ]
       },
       "relics": [],
@@ -251,9 +258,9 @@
       "randomMoveChance": 0.2,
       "description": "A traveling silk trader who plays cards in every inn from Venice to Naples. Reads opponents like contracts.",
       "visualHook": "Fox-fur collar, quick darting eyes, a beauty mark painted on her cheek",
-      "deckSize": 13,
+      "deckSize": 14,
       "deckComposition": {
-        "doctrine": 8,
+        "doctrine": 9,
         "neutral": 5,
         "cardIds": [
           "schemer_interceptor",
@@ -268,7 +275,8 @@
           "neutral_queen_regent",
           "neutral_duke",
           "schemer_librarian",
-          "schemer_poisoner"
+          "schemer_poisoner",
+          "schemer_grand_inquisitor"
         ]
       },
       "relics": [],
@@ -287,9 +295,9 @@
       "randomMoveChance": 0.2,
       "description": "A lean, quiet cutpurse who picked up cards in prison. Waits for one perfect moment, then strikes.",
       "visualHook": "Thin knife-scar from ear to chin, nervous fingers always shuffling a coin, worn leather gloves",
-      "deckSize": 12,
+      "deckSize": 13,
       "deckComposition": {
-        "doctrine": 7,
+        "doctrine": 8,
         "neutral": 5,
         "cardIds": [
           "trickster_illusionist",
@@ -303,7 +311,8 @@
           "neutral_queen_regent",
           "neutral_crown_jewel",
           "trickster_jester",
-          "trickster_pickpocket"
+          "trickster_pickpocket",
+          "trickster_grand_masquerader"
         ]
       },
       "relics": [],
@@ -322,9 +331,9 @@
       "randomMoveChance": 0.15,
       "description": "A retired banker who ruined three noble families at the card table. Plays with the cold precision of a man foreclosing on a loan.",
       "visualHook": "Silver hair swept back, immaculate black doublet, a signet ring he taps when thinking",
-      "deckSize": 14,
+      "deckSize": 15,
       "deckComposition": {
-        "doctrine": 9,
+        "doctrine": 10,
         "neutral": 5,
         "cardIds": [
           "schemer_mastermind",
@@ -340,7 +349,8 @@
           "neutral_queen_regent",
           "neutral_merchant_prince",
           "neutral_courser",
-          "schemer_spyglass"
+          "schemer_spyglass",
+          "schemer_grand_inquisitor"
         ]
       },
       "relics": [
@@ -361,9 +371,9 @@
       "randomMoveChance": 0.15,
       "description": "An elderly midwife who has delivered half the babies in the merchant quarter. She plays with infinite patience \u2014 and an impossibly large hand.",
       "visualHook": "Ash-grey shawl, warm but calculating eyes, rosary beads wrapped around her wrist like armor",
-      "deckSize": 14,
+      "deckSize": 15,
       "deckComposition": {
-        "doctrine": 9,
+        "doctrine": 10,
         "neutral": 5,
         "cardIds": [
           "hoarder_usurer",
@@ -379,7 +389,8 @@
           "neutral_squire",
           "neutral_merchant_prince",
           "neutral_queen_regent",
-          "hoarder_collector"
+          "hoarder_collector",
+          "hoarder_monopolist"
         ]
       },
       "relics": [
@@ -400,9 +411,9 @@
       "randomMoveChance": 0.1,
       "description": "A legendary merchant captain who has sailed every trade route in the Mediterranean. He treats cards the way he treats business \u2014 the rules are whatever he says they are. They say he once won a ship in a single hand by changing the trump suit mid-play.",
       "visualHook": "Magnificent feathered hat, waxed mustache, a compass rose tattooed on the back of his hand, always smells of exotic spices",
-      "deckSize": 14,
+      "deckSize": 15,
       "deckComposition": {
-        "doctrine": 9,
+        "doctrine": 10,
         "neutral": 5,
         "cardIds": [
           "trickster_puppet_master",
@@ -418,7 +429,8 @@
           "neutral_castellan",
           "neutral_queen_regent",
           "neutral_squire",
-          "trickster_alchemist"
+          "trickster_alchemist",
+          "trickster_grand_masquerader"
         ]
       },
       "relics": [
@@ -439,9 +451,9 @@
       "randomMoveChance": 0.1,
       "description": "The guild's official record-keeper. She has memorized every card played in this hall for the last decade. Never forgets a discard.",
       "visualHook": "Round spectacles on a brass chain, quill perpetually tucked behind her ear, ink-stained sleeves",
-      "deckSize": 14,
+      "deckSize": 15,
       "deckComposition": {
-        "doctrine": 9,
+        "doctrine": 10,
         "neutral": 5,
         "cardIds": [
           "schemer_cryptanalyst",
@@ -457,7 +469,8 @@
           "neutral_footman",
           "neutral_duke",
           "neutral_bishop",
-          "schemer_cartographer"
+          "schemer_cartographer",
+          "schemer_grand_inquisitor"
         ]
       },
       "relics": [
@@ -478,9 +491,9 @@
       "randomMoveChance": 0.1,
       "description": "The blacksmith guild's champion player. Plays with the relentless rhythm of a hammer on an anvil \u2014 strike, strike, strike.",
       "visualHook": "Arms like tree trunks, a leather apron over fine clothes, burn scars on both hands",
-      "deckSize": 15,
+      "deckSize": 16,
       "deckComposition": {
-        "doctrine": 10,
+        "doctrine": 11,
         "neutral": 5,
         "cardIds": [
           "brute_siege_tower",
@@ -497,7 +510,8 @@
           "neutral_bishop",
           "neutral_footman",
           "neutral_duke",
-          "neutral_treasurer"
+          "neutral_treasurer",
+          "brute_titan"
         ]
       },
       "relics": [
@@ -518,9 +532,9 @@
       "randomMoveChance": 0.1,
       "description": "A jeweler's daughter who plays with the patience of someone who has watched gems cut one facet at a time. Her hand grows while yours shrinks.",
       "visualHook": "Amber pendant at her throat, meticulously manicured nails, a velvet card case",
-      "deckSize": 16,
+      "deckSize": 17,
       "deckComposition": {
-        "doctrine": 12,
+        "doctrine": 13,
         "neutral": 4,
         "cardIds": [
           "hoarder_warehouse_keeper",
@@ -538,7 +552,8 @@
           "neutral_bishop",
           "neutral_duke",
           "neutral_cardinal",
-          "neutral_knight"
+          "neutral_knight",
+          "hoarder_monopolist"
         ]
       },
       "relics": [
@@ -559,9 +574,9 @@
       "randomMoveChance": 0.08,
       "description": "A guild arbitrator who adjudicates trade disputes by day and destroys opponents at cards by night. Knows every rule and exploits every loophole.",
       "visualHook": "Fur-trimmed judicial robes, a gavel he uses as a card weight, piercing grey eyes behind half-moon spectacles",
-      "deckSize": 15,
+      "deckSize": 16,
       "deckComposition": {
-        "doctrine": 11,
+        "doctrine": 12,
         "neutral": 4,
         "cardIds": [
           "schemer_archivist",
@@ -578,7 +593,8 @@
           "neutral_magistrate",
           "neutral_squire",
           "neutral_crown_jewel",
-          "neutral_footman"
+          "neutral_footman",
+          "schemer_grand_inquisitor"
         ]
       },
       "relics": [
@@ -600,9 +616,9 @@
       "randomMoveChance": 0.08,
       "description": "A courtesan who plays cards in the private rooms above the guild hall. She lures opponents into false confidence, then devours their hand.",
       "visualHook": "Black lace mask, emerald-green dress, a stiletto she uses as a letter opener, jasmine perfume",
-      "deckSize": 15,
+      "deckSize": 16,
       "deckComposition": {
-        "doctrine": 11,
+        "doctrine": 12,
         "neutral": 4,
         "cardIds": [
           "trickster_escape_artist",
@@ -619,7 +635,8 @@
           "neutral_queen_regent",
           "neutral_courser",
           "neutral_squire",
-          "neutral_herald"
+          "neutral_herald",
+          "trickster_grand_masquerader"
         ]
       },
       "relics": [
@@ -641,9 +658,9 @@
       "randomMoveChance": 0.05,
       "description": "The Guildmaster himself. A self-made man who rose from apprentice to master of the most powerful guild in the city. He has never lost at his own table \u2014 his hand always seems impossibly full, and just when you think you have him cornered, he reveals reserves you never knew existed.",
       "visualHook": "Gold chain of office, hands covered in guild rings, a magnificent carved chair that functions as a throne, silver-streaked beard kept immaculate",
-      "deckSize": 16,
+      "deckSize": 17,
       "deckComposition": {
-        "doctrine": 12,
+        "doctrine": 13,
         "neutral": 4,
         "cardIds": [
           "hoarder_dynasty_heir",
@@ -661,7 +678,8 @@
           "neutral_magistrate",
           "neutral_bishop",
           "neutral_treasurer",
-          "neutral_crown_jewel"
+          "neutral_crown_jewel",
+          "hoarder_monopolist"
         ]
       },
       "relics": [
@@ -683,9 +701,9 @@
       "randomMoveChance": 0.04,
       "description": "A monk who has taken a vow of silence \u2014 but his cards speak volumes. He knows what you hold before you play it.",
       "visualHook": "Brown Franciscan robes, a hood perpetually shadowing his face, unnervingly still hands",
-      "deckSize": 16,
+      "deckSize": 17,
       "deckComposition": {
-        "doctrine": 12,
+        "doctrine": 13,
         "neutral": 4,
         "cardIds": [
           "schemer_archivist",
@@ -703,7 +721,8 @@
           "neutral_magistrate",
           "neutral_squire",
           "neutral_bishop",
-          "neutral_courser"
+          "neutral_courser",
+          "schemer_grand_inquisitor"
         ]
       },
       "relics": [
@@ -725,9 +744,9 @@
       "randomMoveChance": 0.04,
       "description": "A minor noblewoman exiled from court for cheating at primero. She didn't cheat \u2014 she simply played a different game than everyone else.",
       "visualHook": "Violet silk gloves, a monocle on a chain, a beauty mark that changes position each time you see her",
-      "deckSize": 17,
+      "deckSize": 18,
       "deckComposition": {
-        "doctrine": 13,
+        "doctrine": 14,
         "neutral": 4,
         "cardIds": [
           "trickster_puppet_master",
@@ -746,7 +765,8 @@
           "neutral_castellan",
           "neutral_treasurer",
           "neutral_courser",
-          "neutral_duke"
+          "neutral_duke",
+          "trickster_grand_masquerader"
         ]
       },
       "relics": [
@@ -768,9 +788,9 @@
       "randomMoveChance": 0.04,
       "description": "A papal enforcer who collects debts and broken fingers with equal enthusiasm. At the card table, he plays with the same philosophy \u2014 make them fear you.",
       "visualHook": "Blood-red doublet, a heavy gold crucifix, hands like sides of beef, a quiet menace in every gesture",
-      "deckSize": 16,
+      "deckSize": 17,
       "deckComposition": {
-        "doctrine": 13,
+        "doctrine": 14,
         "neutral": 3,
         "cardIds": [
           "brute_cannon_master",
@@ -788,7 +808,8 @@
           "brute_enforcer",
           "neutral_squire",
           "neutral_merchant_prince",
-          "neutral_herald"
+          "neutral_herald",
+          "brute_titan"
         ]
       },
       "relics": [
@@ -810,9 +831,9 @@
       "randomMoveChance": 0.02,
       "description": "The Cardinal's personal spymaster. No one knows her real name. She plays cards the way she runs agents \u2014 invisibly, until the trap is already sprung.",
       "visualHook": "Plain grey dress that makes her forgettable, unremarkable face, but her eyes miss nothing \u2014 a single black pearl earring is her only tell",
-      "deckSize": 17,
+      "deckSize": 18,
       "deckComposition": {
-        "doctrine": 14,
+        "doctrine": 15,
         "neutral": 3,
         "cardIds": [
           "schemer_puppeteer",
@@ -831,7 +852,8 @@
           "schemer_librarian",
           "neutral_footman",
           "neutral_queen_regent",
-          "neutral_guild_knight"
+          "neutral_guild_knight",
+          "schemer_grand_inquisitor"
         ]
       },
       "relics": [
@@ -854,9 +876,9 @@
       "randomMoveChance": 0.02,
       "description": "A Dominican inquisitor who views card games as trials by ordeal. Every attack is a judgment. Every forced pickup is a penance.",
       "visualHook": "White robes with black mantle, a scourge hanging from his belt, sunken fanatical eyes, tonsured head",
-      "deckSize": 18,
+      "deckSize": 19,
       "deckComposition": {
-        "doctrine": 14,
+        "doctrine": 15,
         "neutral": 4,
         "cardIds": [
           "brute_battering_shield",
@@ -876,7 +898,8 @@
           "neutral_treasurer",
           "neutral_duke",
           "neutral_guild_knight",
-          "neutral_merchant_prince"
+          "neutral_merchant_prince",
+          "brute_titan"
         ]
       },
       "relics": [
@@ -899,9 +922,9 @@
       "randomMoveChance": 0.02,
       "description": "The Cardinal himself. A prince of the Church who treats the card table as another battlefield in the eternal war for power. He has spies in every court, agents in every guild, and informants in every tavern. When he plays, he already knows your entire hand \u2014 the game is merely a formality.",
       "visualHook": "Scarlet robes and biretta, ruby ring of office, manicured hands that never tremble, a faint smile that suggests he knows something you don't \u2014 because he always does",
-      "deckSize": 18,
+      "deckSize": 19,
       "deckComposition": {
-        "doctrine": 14,
+        "doctrine": 15,
         "neutral": 4,
         "cardIds": [
           "schemer_doge_spymaster",
@@ -921,7 +944,8 @@
           "neutral_treasurer",
           "neutral_magistrate",
           "neutral_bishop",
-          "neutral_queen_regent"
+          "neutral_queen_regent",
+          "schemer_grand_inquisitor"
         ]
       },
       "relics": [
@@ -944,9 +968,9 @@
       "randomMoveChance": 0.0,
       "description": "A hawk-faced nobleman who breeds falcons and plays cards with the same predatory patience. Circles, circles, then a devastating strike.",
       "visualHook": "A live falcon on a jeweled gauntlet beside him, aquiline nose, eyes like a raptor, silver-grey hair",
-      "deckSize": 14,
+      "deckSize": 15,
       "deckComposition": {
-        "doctrine": 12,
+        "doctrine": 13,
         "neutral": 2,
         "cardIds": [
           "trickster_pickpocket",
@@ -962,7 +986,8 @@
           "trickster_venetian_noble",
           "trickster_mask_maker",
           "neutral_merchant_prince",
-          "neutral_guild_knight"
+          "neutral_guild_knight",
+          "trickster_grand_masquerader"
         ]
       },
       "relics": [
@@ -985,9 +1010,9 @@
       "randomMoveChance": 0.0,
       "description": "A princess from a minor house who compensates for her lack of political power with an overwhelming card game. She buries opponents in resources they cannot match.",
       "visualHook": "Snow-white dress with gold embroidery, a tiara of small diamonds, impossibly composed expression, pearl-drop earrings",
-      "deckSize": 15,
+      "deckSize": 16,
       "deckComposition": {
-        "doctrine": 14,
+        "doctrine": 15,
         "neutral": 1,
         "cardIds": [
           "hoarder_miser",
@@ -1004,7 +1029,8 @@
           "hoarder_warehouse_keeper",
           "hoarder_speculator",
           "hoarder_packrat",
-          "neutral_magistrate"
+          "neutral_magistrate",
+          "hoarder_monopolist"
         ]
       },
       "relics": [
@@ -1027,9 +1053,9 @@
       "randomMoveChance": 0.0,
       "description": "A mercenary general who conquered three city-states before retiring to the card table. Unlike common brutes, he saves his overwhelming force for the exact right moment.",
       "visualHook": "Black plate armor worn even at the card table, a war-hammer leaning against his chair, a livid scar bisecting his left eyebrow",
-      "deckSize": 16,
+      "deckSize": 17,
       "deckComposition": {
-        "doctrine": 14,
+        "doctrine": 15,
         "neutral": 2,
         "cardIds": [
           "brute_pillager",
@@ -1047,7 +1073,8 @@
           "brute_arsonist",
           "brute_siege_tower",
           "neutral_treasurer",
-          "neutral_cardinal"
+          "neutral_cardinal",
+          "brute_titan"
         ]
       },
       "relics": [
@@ -1070,9 +1097,9 @@
       "randomMoveChance": 0.0,
       "description": "A genius polymath who designs fortresses, war machines, and card strategies with equal brilliance. He sees twelve moves ahead and builds his victory like a cathedral \u2014 one perfectly placed stone at a time.",
       "visualHook": "Paint-stained fingers, wild unkempt hair, sketches on scraps of paper scattered around him, a bronze astrolabe he fidgets with",
-      "deckSize": 15,
+      "deckSize": 16,
       "deckComposition": {
-        "doctrine": 14,
+        "doctrine": 15,
         "neutral": 1,
         "cardIds": [
           "schemer_puppeteer",
@@ -1089,7 +1116,8 @@
           "schemer_librarian",
           "schemer_poisoner",
           "schemer_double_agent",
-          "neutral_knight"
+          "neutral_knight",
+          "schemer_grand_inquisitor"
         ]
       },
       "relics": [
@@ -1113,9 +1141,9 @@
       "randomMoveChance": 0.0,
       "description": "They call her the Witch, and no one is sure if it's a metaphor. She breaks every rule of the game \u2014 not by cheating, but by playing in ways no one thought possible. Cards change suits in her hands. Trumps appear from nowhere. Reality bends at her table.",
       "visualHook": "Wild black hair streaked with silver, mismatched eyes (one green, one amber), a deck of cards that seems to shimmer, rings carved from bone",
-      "deckSize": 14,
+      "deckSize": 15,
       "deckComposition": {
-        "doctrine": 14,
+        "doctrine": 15,
         "neutral": 0,
         "cardIds": [
           "trickster_doppelganger",
@@ -1131,7 +1159,8 @@
           "trickster_illusionist",
           "trickster_con_artist",
           "trickster_card_sharp",
-          "trickster_venetian_noble"
+          "trickster_venetian_noble",
+          "trickster_grand_masquerader"
         ]
       },
       "relics": [
@@ -1155,7 +1184,7 @@
       "randomMoveChance": 0.0,
       "description": "The Duke himself. The most powerful man in the city and the greatest card player in all of Italy. He is both the iron fist and the velvet glove \u2014 a Brute's overwhelming force guided by a Schemer's perfect information. They say he has never lost a match in his own salon. They say the last person who beat him disappeared. You are here to prove them wrong.",
       "visualHook": "Ermine-trimmed crimson robe, the ducal crown resting casually on the table beside him, fingers heavy with rings of state, a calm expression that never changes whether winning or losing \u2014 because he never loses",
-      "deckSize": 16,
+      "deckSize": 17,
       "deckComposition": {
         "doctrine": 16,
         "neutral": 0,
@@ -1179,7 +1208,8 @@
           "schemer_puppeteer",
           "schemer_ambassador",
           "schemer_shadow_courier",
-          "schemer_inquisitor"
+          "schemer_inquisitor",
+          "brute_titan"
         ]
       },
       "relics": [
