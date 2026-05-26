@@ -19,6 +19,7 @@ namespace WitsAndFools
         public TMP_Text CenterPip;
         public RectTransform BackRoot;
         public Image BackImage;
+        public TMP_Text NameLabel;
         public TMP_Text AbilityBadge;
 
         [Header("Visual settings")]
@@ -81,12 +82,28 @@ namespace WitsAndFools
             if (RankTopLeft) { RankTopLeft.text = label; RankTopLeft.color = color; }
             if (RankBottomRight) { RankBottomRight.text = label; RankBottomRight.color = color; }
             if (CenterPip) { CenterPip.text = _card.Suit.Glyph(); CenterPip.color = color; }
+            if (NameLabel)
+            {
+                if (_card.DefinitionId != null && CardCatalog.TryGet(_card.DefinitionId, out var def))
+                {
+                    NameLabel.gameObject.SetActive(true);
+                    NameLabel.text = def.Name;
+                    NameLabel.color = color;
+                }
+                else NameLabel.gameObject.SetActive(false);
+            }
             if (AbilityBadge)
             {
                 if (_card.HasAbility)
                 {
                     AbilityBadge.gameObject.SetActive(true);
-                    AbilityBadge.text = _card.Ability.Value.ShortName();
+                    string triggerPrefix = _card.Trigger switch {
+                        TriggerTiming.OnAttack => "ATK ",
+                        TriggerTiming.OnDefend => "DEF ",
+                        TriggerTiming.Passive => "PAS ",
+                        _ => ""
+                    };
+                    AbilityBadge.text = triggerPrefix + _card.Ability.Value.ShortName();
                     AbilityBadge.color = AbilityBadgeColor(_card.Ability.Value);
                 }
                 else AbilityBadge.gameObject.SetActive(false);

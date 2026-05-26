@@ -504,7 +504,16 @@ namespace WitsAndFools
             if (PrestigeLabel) PrestigeLabel.text = $"Prestige: {new string('♥', _run.Prestige)}";
             if (FlorinsLabel) FlorinsLabel.text = $"Florins: {_run.Florins}";
             if (ActLabel) ActLabel.text = $"Act {_run.CurrentAct + 1} of 5";
-            if (AbilitiesLabel) AbilitiesLabel.text = $"Abilities: {_run.PlayerAbilities.Count}/{_run.MaxAbilitySlots}";
+            if (AbilitiesLabel)
+            {
+                if (_run.UseDualDeck && _run.PlayerDoctrine.HasValue)
+                {
+                    var doc = _run.PlayerDoctrine.Value;
+                    AbilitiesLabel.text = $"{doc.DisplayName()} | Deck: {_run.PlayerDeckCardIds.Count}";
+                }
+                else
+                    AbilitiesLabel.text = $"Abilities: {_run.PlayerAbilities.Count}/{_run.MaxAbilitySlots}";
+            }
         }
 
         // ---------- Archetype Select ----------
@@ -2170,12 +2179,17 @@ namespace WitsAndFools
             if (RunOverStatsLabel)
             {
                 string archName = _selectedArchetype.HasValue ? _selectedArchetype.Value.DisplayName() : "Unknown";
-                string stats = $"<color=#D4A846>{archName}</color>\n\n" +
+                string docLine = _run.UseDualDeck && _run.PlayerDoctrine.HasValue
+                    ? $"<color=#D4A846>{_run.PlayerDoctrine.Value.DisplayName()}</color> ({archName})"
+                    : $"<color=#D4A846>{archName}</color>";
+                string deckLine = _run.UseDualDeck
+                    ? $"Deck  <color=#99CCEE>{_run.PlayerDeckCardIds.Count} cards</color>    Relics  <color=#99CCEE>{_run.PlayerTrinkets.Count}</color>"
+                    : $"Abilities  <color=#99CCEE>{_run.PlayerAbilities.Count}</color>    Trinkets  <color=#99CCEE>{_run.PlayerTrinkets.Count}</color>";
+                string stats = $"{docLine}\n\n" +
                     $"Acts completed  <color=#99CCEE>{_run.CurrentAct}/5</color>\n" +
                     $"Matches won  <color=#99CCEE>{_run.MatchesWon}/{_run.MatchesPlayed}</color>\n" +
                     $"Florins earned  <color=#D4A846>{_run.Florins}</color>\n" +
-                    $"Abilities  <color=#99CCEE>{_run.PlayerAbilities.Count}</color>    " +
-                    $"Trinkets  <color=#99CCEE>{_run.PlayerTrinkets.Count}</color>\n\n" +
+                    $"{deckLine}\n\n" +
                     $"<color=#66B866>+{repEarned} Reputation</color>  (Total: {repData.TotalReputation})";
                 RunOverStatsLabel.text = stats;
                 RunOverStatsLabel.richText = true;

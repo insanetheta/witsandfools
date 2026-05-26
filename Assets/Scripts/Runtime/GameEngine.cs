@@ -84,6 +84,8 @@ namespace WitsAndFools
         public Hand HandOf(int playerIndex) => _hands[playerIndex];
         public MatchConfig Config => _config;
         public int BoutCount => _boutCount;
+        public int HandCount(int playerIndex) => _hands[playerIndex].Count;
+        public int UndefendedCount => _bout.AttackCount - CountDefended();
 
         public event Action OnSetupComplete;
         public event Action<int> OnTurnBegan;

@@ -18,6 +18,7 @@ namespace WitsAndFools
         public TMP_Text DeckCountLabel;
         public RectTransform TrumpSlot;
         public RectTransform DiscardSlot;
+        public TMP_Text DiscardCountLabel;
         public RectTransform BoutArea;       // parent for attacker/defender card positions
         public RectTransform CardSpawnRoot;  // where transient cards (deal animations) start
 
@@ -25,19 +26,21 @@ namespace WitsAndFools
         public float BoutSlotSpacing = 130f;
         public float DefenseOffset = 28f;     // defense card offsets down-right relative to its attack
 
-        // Position assumes the bout pivots around BoutArea center (0,0)
-        // and grows symmetrically as cards are added. Caller passes total slot count.
+        public float AttackRowY = 80f;
+        public float DefenseRowY = -80f;
+
         public Vector2 BoutAttackSlotPos(int slot, int totalSlots)
         {
             int n = Mathf.Max(1, totalSlots);
             float startX = -(n - 1) * 0.5f * BoutSlotSpacing;
-            return new Vector2(startX + slot * BoutSlotSpacing, 0);
+            return new Vector2(startX + slot * BoutSlotSpacing, AttackRowY);
         }
 
         public Vector2 BoutDefenseSlotPos(int slot, int totalSlots)
         {
-            var atk = BoutAttackSlotPos(slot, totalSlots);
-            return new Vector2(atk.x + DefenseOffset, atk.y - DefenseOffset);
+            int n = Mathf.Max(1, totalSlots);
+            float startX = -(n - 1) * 0.5f * BoutSlotSpacing;
+            return new Vector2(startX + slot * BoutSlotSpacing, DefenseRowY);
         }
     }
 }

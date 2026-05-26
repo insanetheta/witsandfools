@@ -56,6 +56,17 @@ namespace WitsAndFools.EditorTools
             // visible overflow when cards are fanned). Top-left rank + center pip is enough.
             TMP_Text rankBR = null;
 
+            var nameLabel = CreateChildText(faceRoot.transform, "NameLabel", "",
+                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(0.5f, 1),
+                position: new Vector2(0, -34),
+                size: new Vector2(0, 18),
+                alignment: TextAlignmentOptions.Center,
+                fontSize: 9);
+            nameLabel.enableWordWrapping = true;
+            nameLabel.fontStyle = FontStyles.Italic;
+            nameLabel.color = ThemePalette.BlackSuit;
+
             var center = CreateChildText(faceRoot.transform, "CenterPip", "♥",
                 anchorMin: new Vector2(0.5f, 0.5f), anchorMax: new Vector2(0.5f, 0.5f),
                 pivot: new Vector2(0.5f, 0.5f),
@@ -115,6 +126,7 @@ namespace WitsAndFools.EditorTools
             view.RankTopLeft = rankTL;
             view.RankBottomRight = rankBR;
             view.CenterPip = center;
+            view.NameLabel = nameLabel;
             view.BackRoot = backRT;
             view.BackImage = backImage;
             view.AbilityBadge = abilityBadge;

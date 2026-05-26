@@ -21,6 +21,11 @@ namespace WitsAndFools
         public TMP_Text OpponentNameLabel;
         public TMP_Text OpponentArchetypeLabel;
 
+        [Header("Bout State")]
+        public TMP_Text BoutStateBanner;
+        public TMP_Text PlayerHandCount;
+        public TMP_Text OpponentHandCount;
+
         [Header("Trinket Info")]
         public TMP_Text DeckTopLabel;
         public TMP_Text InfoLabel;
@@ -28,6 +33,9 @@ namespace WitsAndFools
         [Header("Resources")]
         public TMP_Text PlayerResourceLabel;
         public TMP_Text OpponentResourceLabel;
+
+        [Header("Ability Feedback")]
+        public TMP_Text AbilityFeedbackLabel;
 
         [Header("Tooltip")]
         public TMP_Text TooltipLabel;
@@ -123,7 +131,39 @@ namespace WitsAndFools
             _ => Color.white
         };
 
+        public void SetBoutState(string text, Color bgColor)
+        {
+            if (!BoutStateBanner) return;
+            BoutStateBanner.gameObject.SetActive(true);
+            BoutStateBanner.text = text;
+            BoutStateBanner.color = bgColor;
+        }
+        public void HideBoutState() { if (BoutStateBanner) BoutStateBanner.gameObject.SetActive(false); }
+
+        public void SetHandCounts(int playerCards, int opponentCards)
+        {
+            if (PlayerHandCount) { PlayerHandCount.gameObject.SetActive(true); PlayerHandCount.text = $"Your Hand: {playerCards}"; }
+            if (OpponentHandCount) { OpponentHandCount.gameObject.SetActive(true); OpponentHandCount.text = $"Foe Hand: {opponentCards}"; }
+        }
+
         public void ShowTooltip(string text) { if (TooltipLabel) { TooltipLabel.gameObject.SetActive(true); TooltipLabel.text = text; } }
         public void HideTooltip() { if (TooltipLabel) TooltipLabel.gameObject.SetActive(false); }
+
+        public void ShowAbilityFeedback(string text, Color color)
+        {
+            if (!AbilityFeedbackLabel) return;
+            var panel = AbilityFeedbackLabel.transform.parent;
+            if (panel) panel.gameObject.SetActive(true);
+            else AbilityFeedbackLabel.gameObject.SetActive(true);
+            AbilityFeedbackLabel.text = text;
+            AbilityFeedbackLabel.color = color;
+        }
+        public void HideAbilityFeedback()
+        {
+            if (!AbilityFeedbackLabel) return;
+            var panel = AbilityFeedbackLabel.transform.parent;
+            if (panel && panel.name == "AbilityFeedbackPanel") panel.gameObject.SetActive(false);
+            else AbilityFeedbackLabel.gameObject.SetActive(false);
+        }
     }
 }

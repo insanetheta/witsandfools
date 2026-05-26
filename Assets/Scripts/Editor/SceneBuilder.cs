@@ -142,17 +142,17 @@ namespace WitsAndFools.EditorTools
             nameplate.anchorMin = new Vector2(0, 1);
             nameplate.anchorMax = new Vector2(0, 1);
             nameplate.pivot = new Vector2(0, 1);
-            nameplate.sizeDelta = new Vector2(520, 200);
+            nameplate.sizeDelta = new Vector2(360, 70);
             nameplate.anchoredPosition = new Vector2(16, -76);
             var nameplateBg = nameplate.gameObject.AddComponent<Image>();
-            nameplateBg.color = new Color(0, 0, 0, 0.5f);
+            nameplateBg.color = new Color(0, 0, 0, 0.55f);
             nameplateBg.raycastTarget = false;
 
             var portraitRT = NewChild(nameplate, "Portrait");
             portraitRT.anchorMin = new Vector2(0, 0);
             portraitRT.anchorMax = new Vector2(0, 1);
             portraitRT.pivot = new Vector2(0, 0.5f);
-            portraitRT.sizeDelta = new Vector2(190, 190);
+            portraitRT.sizeDelta = new Vector2(60, 60);
             portraitRT.anchoredPosition = new Vector2(5, 0);
             var portraitImg = portraitRT.gameObject.AddComponent<Image>();
             portraitImg.color = ThemePalette.WarmSlate;
@@ -162,17 +162,17 @@ namespace WitsAndFools.EditorTools
             var oppNameLabel = AddText(nameplate, "OpponentName", "Opponent",
                 anchorMin: new Vector2(0, 0.5f), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(0, 1), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 36, color: ThemePalette.Parchment, font: HeadingFont);
+                fontSize: 22, color: ThemePalette.Parchment, font: HeadingFont);
             var oppNameRT = (RectTransform)oppNameLabel.transform;
-            oppNameRT.offsetMin = new Vector2(200, 0);
-            oppNameRT.offsetMax = new Vector2(-8, -4);
+            oppNameRT.offsetMin = new Vector2(70, 0);
+            oppNameRT.offsetMax = new Vector2(-8, -2);
 
             var oppArchLabel = AddText(nameplate, "OpponentArchetype", "The Fox",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(1, 0.5f),
                 pivot: new Vector2(0, 0), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 28, color: ThemePalette.DustyTan);
+                fontSize: 16, color: ThemePalette.DustyTan);
             var oppArchRT = (RectTransform)oppArchLabel.transform;
-            oppArchRT.offsetMin = new Vector2(200, 4);
+            oppArchRT.offsetMin = new Vector2(70, 2);
             oppArchRT.offsetMax = new Vector2(-8, 0);
 
             // ----- End-bout button (bottom-right, above run HUD) -----
@@ -238,6 +238,12 @@ namespace WitsAndFools.EditorTools
                 pivot: new Vector2(0.5f, 0),
                 alignment: TextAlignmentOptions.Center, fontSize: 18,
                 color: new Color(1, 1, 1, 0.5f));
+            var discardCountLabel = AddText(discardSlot, "DiscardCountLabel", "0",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(1, 0),
+                pivot: new Vector2(0.5f, 0),
+                alignment: TextAlignmentOptions.Center, fontSize: 20,
+                color: ThemePalette.Parchment, font: MonoFont);
+            discardCountLabel.fontStyle = FontStyles.Bold;
 
             var boutArea = NewChild(canvasRT, "BoutArea");
             boutArea.anchorMin = new Vector2(0.5f, 0.5f);
@@ -275,6 +281,7 @@ namespace WitsAndFools.EditorTools
             table.DeckCountLabel = deckCountLabel;
             table.TrumpSlot = trumpSlot;
             table.DiscardSlot = discardSlot;
+            table.DiscardCountLabel = discardCountLabel;
             table.BoutArea = boutArea;
             table.CardSpawnRoot = canvasRT;
 
@@ -395,29 +402,91 @@ namespace WitsAndFools.EditorTools
             infoLabel.gameObject.SetActive(false);
             hud.InfoLabel = infoLabel;
 
-            // ----- Player resource label (bottom-left, near hand) -----
+            // ----- Player resource label (left side, above hand, large and prominent) -----
             var playerResLabel = AddText(canvasRT, "PlayerResourceLabel", "",
-                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.3f, 0),
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.25f, 0),
                 pivot: new Vector2(0, 0),
-                alignment: TextAlignmentOptions.BottomLeft, fontSize: 18,
+                alignment: TextAlignmentOptions.BottomLeft, fontSize: 32,
                 color: ThemePalette.Gold, font: MonoFont);
+            playerResLabel.fontStyle = FontStyles.Bold;
             var playerResRT = (RectTransform)playerResLabel.transform;
-            playerResRT.sizeDelta = new Vector2(0, 30);
-            playerResRT.anchoredPosition = new Vector2(16, 170);
+            playerResRT.sizeDelta = new Vector2(0, 44);
+            playerResRT.anchoredPosition = new Vector2(16, 200);
             playerResLabel.gameObject.SetActive(false);
             hud.PlayerResourceLabel = playerResLabel;
 
-            // ----- Opponent resource label (top-left, near opponent area) -----
+            // ----- Opponent resource label (top-right, near opponent hand, prominent) -----
             var oppResLabel = AddText(canvasRT, "OpponentResourceLabel", "",
-                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(0.3f, 1),
-                pivot: new Vector2(0, 1),
-                alignment: TextAlignmentOptions.TopLeft, fontSize: 20,
+                anchorMin: new Vector2(0.65f, 1), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(1, 1),
+                alignment: TextAlignmentOptions.TopRight, fontSize: 26,
                 color: ThemePalette.Gold, font: MonoFont);
+            oppResLabel.fontStyle = FontStyles.Bold;
             var oppResRT = (RectTransform)oppResLabel.transform;
-            oppResRT.sizeDelta = new Vector2(0, 30);
-            oppResRT.anchoredPosition = new Vector2(16, -210);
+            oppResRT.sizeDelta = new Vector2(0, 40);
+            oppResRT.anchoredPosition = new Vector2(-16, -50);
             oppResLabel.gameObject.SetActive(false);
             hud.OpponentResourceLabel = oppResLabel;
+
+            // ----- Bout state banner (top-center, prominent phase indicator) -----
+            var boutBanner = AddText(canvasRT, "BoutStateBanner", "",
+                anchorMin: new Vector2(0.25f, 1), anchorMax: new Vector2(0.75f, 1),
+                pivot: new Vector2(0.5f, 1),
+                alignment: TextAlignmentOptions.Center, fontSize: 24,
+                color: Color.white, font: MonoFont);
+            boutBanner.fontStyle = FontStyles.Bold;
+            var boutBannerRT = (RectTransform)boutBanner.transform;
+            boutBannerRT.sizeDelta = new Vector2(0, 40);
+            boutBannerRT.anchoredPosition = new Vector2(0, -76);
+            boutBanner.gameObject.SetActive(false);
+            hud.BoutStateBanner = boutBanner;
+
+            // ----- Player hand count (bottom-right, near hand) -----
+            var playerHandCount = AddText(canvasRT, "PlayerHandCount", "",
+                anchorMin: new Vector2(1, 0), anchorMax: new Vector2(1, 0),
+                pivot: new Vector2(1, 0),
+                alignment: TextAlignmentOptions.BottomRight, fontSize: 22,
+                color: ThemePalette.Parchment, font: MonoFont);
+            playerHandCount.fontStyle = FontStyles.Bold;
+            var playerHCRT = (RectTransform)playerHandCount.transform;
+            playerHCRT.sizeDelta = new Vector2(120, 30);
+            playerHCRT.anchoredPosition = new Vector2(-16, 170);
+            playerHandCount.gameObject.SetActive(false);
+            hud.PlayerHandCount = playerHandCount;
+
+            // ----- Opponent hand count (top-left, near opponent hand) -----
+            var oppHandCount = AddText(canvasRT, "OpponentHandCount", "",
+                anchorMin: new Vector2(1, 1), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(1, 1),
+                alignment: TextAlignmentOptions.TopRight, fontSize: 22,
+                color: ThemePalette.Parchment, font: MonoFont);
+            oppHandCount.fontStyle = FontStyles.Bold;
+            var oppHCRT = (RectTransform)oppHandCount.transform;
+            oppHCRT.sizeDelta = new Vector2(180, 30);
+            oppHCRT.anchoredPosition = new Vector2(-16, -46);
+            oppHandCount.gameObject.SetActive(false);
+            hud.OpponentHandCount = oppHandCount;
+
+            // ----- Ability trigger feedback banner (center screen, with background panel) -----
+            var feedbackPanel = NewChild(canvasRT, "AbilityFeedbackPanel");
+            feedbackPanel.anchorMin = new Vector2(0.15f, 0.55f);
+            feedbackPanel.anchorMax = new Vector2(0.85f, 0.63f);
+            feedbackPanel.offsetMin = Vector2.zero;
+            feedbackPanel.offsetMax = Vector2.zero;
+            var feedbackBg = feedbackPanel.gameObject.AddComponent<Image>();
+            feedbackBg.color = new Color(0, 0, 0, 0.7f);
+            feedbackBg.raycastTarget = false;
+            feedbackPanel.gameObject.SetActive(false);
+
+            var feedbackLabel = AddText(feedbackPanel, "AbilityFeedbackLabel", "",
+                anchorMin: Vector2.zero, anchorMax: Vector2.one,
+                pivot: new Vector2(0.5f, 0.5f),
+                alignment: TextAlignmentOptions.Center, fontSize: 28,
+                color: ThemePalette.Gold, font: MonoFont);
+            feedbackLabel.fontStyle = FontStyles.Bold;
+            feedbackLabel.enableWordWrapping = true;
+            feedbackLabel.raycastTarget = false;
+            hud.AbilityFeedbackLabel = feedbackLabel;
 
             // ----- Vignette overlay (on top of all game elements) -----
             var vignette = NewChild(canvasRT, "VignetteOverlay");
@@ -451,6 +520,12 @@ namespace WitsAndFools.EditorTools
             ((RectTransform)tooltipLabel.transform).SetParent(matchPanel, true);
             ((RectTransform)deckTopLabel.transform).SetParent(matchPanel, true);
             ((RectTransform)infoLabel.transform).SetParent(matchPanel, true);
+            ((RectTransform)boutBanner.transform).SetParent(matchPanel, true);
+            ((RectTransform)playerHandCount.transform).SetParent(matchPanel, true);
+            ((RectTransform)oppHandCount.transform).SetParent(matchPanel, true);
+            ((RectTransform)playerResLabel.transform).SetParent(matchPanel, true);
+            ((RectTransform)oppResLabel.transform).SetParent(matchPanel, true);
+            feedbackPanel.SetParent(matchPanel, true);
             matchPanel.gameObject.SetActive(false);
 
             // ----- Map Panel (branching path layout) -----

@@ -212,6 +212,13 @@ namespace WitsAndFools
             WireEngineEvents();
             WireHudButtons();
             _loop.Start();
+            StartCoroutine(AutoHideInfo(3f));
+        }
+
+        IEnumerator AutoHideInfo(float delay)
+        {
+            yield return new WaitForSecondsRealtime(delay);
+            Hud?.SetInfo(null);
         }
 
         public void BeginNewGame()
@@ -557,8 +564,29 @@ namespace WitsAndFools
                 view2.Bind(card, faceUp: true);
                 StartCoroutine(MoveAndDestroy(view2, Table.DiscardSlot.position, MoveSeconds));
             }
+            ShowAbilityFeedback(playerIndex, card, ability);
             UpdateHud();
             ApplyHighlightForPhase();
+        }
+
+        Coroutine _feedbackCoroutine;
+        void ShowAbilityFeedback(int playerIndex, Card card, AbilityType ability)
+        {
+            if (Hud == null) return;
+            string who = playerIndex == HumanPlayerIndex ? "You" : OpponentName;
+            string name = card.DefinitionId != null && CardCatalog.TryGet(card.DefinitionId, out var def) ? def.Name : card.ToString();
+            string text = $"{who}: {name} → {ability.ShortName()}";
+            var color = playerIndex == HumanPlayerIndex ? ThemePalette.Gold : ThemePalette.VenetianRed;
+            Hud.ShowAbilityFeedback(text, color);
+            if (_feedbackCoroutine != null) StopCoroutine(_feedbackCoroutine);
+            _feedbackCoroutine = StartCoroutine(HideFeedbackAfter(1.2f));
+        }
+
+        IEnumerator HideFeedbackAfter(float seconds)
+        {
+            yield return new WaitForSeconds(seconds);
+            Hud?.HideAbilityFeedback();
+            _feedbackCoroutine = null;
         }
 
         bool AbilityValidForPhase(AbilityType ability) => ability switch
@@ -673,13 +701,32 @@ namespace WitsAndFools
                 Table.DeckCountLabel.text = Engine.DeckCount.ToString();
             Hud.SetTrump(Engine.Trump);
             string phase;
-            if (Engine.Phase == Phase.GameOver) phase = "Game over";
+            Color boutColor;
+            if (Engine.Phase == Phase.GameOver) { phase = "Game over"; boutColor = ThemePalette.WarmSlate; }
             else if (Engine.Phase == Phase.Attack)
-                phase = Engine.AttackerIndex == HumanPlayerIndex ? "Your move — attack" : $"{OpponentName} attacks";
+            {
+                bool yourTurn = Engine.AttackerIndex == HumanPlayerIndex;
+                int undefended = Engine.UndefendedCount;
+                phase = yourTurn ? $"YOUR ATTACK  |  Undefended: {undefended}" : $"{OpponentName.ToUpper()} ATTACKS  |  Undefended: {undefended}";
+                boutColor = yourTurn ? ThemePalette.Sage : ThemePalette.VenetianRed;
+            }
             else if (Engine.Phase == Phase.Defense)
-                phase = Engine.DefenderIndex == HumanPlayerIndex ? "Defend!" : $"{OpponentName} defends";
-            else phase = "...";
-            Hud.SetTurn(phase);
+            {
+                bool yourTurn = Engine.DefenderIndex == HumanPlayerIndex;
+                int undefended = Engine.UndefendedCount;
+                phase = yourTurn ? $"DEFEND!  |  Undefended: {undefended}" : $"{OpponentName.ToUpper()} DEFENDS  |  Undefended: {undefended}";
+                boutColor = yourTurn ? ThemePalette.VenetianRed : ThemePalette.Sage;
+            }
+            else { phase = "..."; boutColor = ThemePalette.WarmSlate; }
+            Hud.SetTurn("");
+            Hud.SetBoutState(phase, boutColor);
+
+            int playerCards = Engine.HandCount(HumanPlayerIndex);
+            int oppCards = Engine.HandCount(1 - HumanPlayerIndex);
+            Hud.SetHandCounts(playerCards, oppCards);
+
+            if (Table && Table.DiscardCountLabel)
+                Table.DiscardCountLabel.text = Engine.Discard.Count.ToString();
 
             if (Engine.Config.SpysMonocle[HumanPlayerIndex])
                 Hud.SetDeckTop(Engine.DeckTopCard);
