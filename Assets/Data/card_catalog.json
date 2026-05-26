@@ -42,11 +42,11 @@
       "rank": 7,
       "doctrine": "Schemer",
       "trigger": "OnDefend",
-      "ability": "Scry 2, then draw 1 if you see a trump card.",
+      "ability": "Spend 1 Intel. Opponent discards 1 random card.",
       "flavorText": "Every whisper has a price.",
       "rarity": "Common",
       "startingDeck": true,
-      "abilityType": "Peek"
+      "abilityType": "Riposte"
     },
     {
       "id": "schemer_spyglass",
@@ -55,11 +55,11 @@
       "rank": 6,
       "doctrine": "Schemer",
       "trigger": "OnDefend",
-      "ability": "Scry the top 3 cards of the deck.",
+      "ability": "Draw top deck card. Put 1 card from hand on top of deck.",
       "flavorText": "From the campanile, all Venice lies bare.",
       "rarity": "Common",
       "startingDeck": true,
-      "abilityType": "Peek"
+      "abilityType": "SleightOfHand"
     },
     {
       "id": "schemer_cipher",
@@ -224,11 +224,11 @@
       "rank": 8,
       "doctrine": "Schemer",
       "trigger": "OnDefend",
-      "ability": "Rearrange the top 3 cards of the deck.",
+      "ability": "Spend 2 Intel. Opponent discards their 2 highest-rank cards.",
       "flavorText": "The strings are invisible, but the dance is unmistakable.",
       "rarity": "Rare",
       "startingDeck": false,
-      "abilityType": "Peek"
+      "abilityType": "Blackmail"
     },
     {
       "id": "schemer_archivist",
@@ -237,11 +237,11 @@
       "rank": 9,
       "doctrine": "Schemer",
       "trigger": "OnDefend",
-      "ability": "Scry 2.",
+      "ability": "Put 1 card from hand on top of deck. Draw 2.",
       "flavorText": "Nothing is ever truly lost in these vaults.",
       "rarity": "Rare",
       "startingDeck": false,
-      "abilityType": "Peek"
+      "abilityType": "StackTheDeck"
     },
     {
       "id": "schemer_ambassador",
@@ -276,11 +276,11 @@
       "rank": 10,
       "doctrine": "Schemer",
       "trigger": "OnDefend",
-      "ability": "Reveal the card you defend with before playing; gain 1 Intel.",
+      "ability": "Cycle 1: discard 1 card, draw 1 card.",
       "flavorText": "The mirror shows not what is, but what will be.",
       "rarity": "Common",
       "startingDeck": false,
-      "abilityType": "ResourceGain"
+      "abilityType": "SleightOfHand"
     },
     {
       "id": "schemer_doge_spymaster",
@@ -367,11 +367,11 @@
       "rank": 12,
       "doctrine": "Brute",
       "trigger": "OnAttack",
-      "ability": "Gain 1 Fury.",
+      "ability": "Spend 1 Fury. Opponent discards 1 random non-trump card.",
       "flavorText": "Peace is merely the pause between profitable conflicts.",
       "rarity": "Common",
       "startingDeck": true,
-      "abilityType": "ResourceGain"
+      "abilityType": "Intimidate"
     },
     {
       "id": "brute_pit_fighter",
@@ -392,12 +392,12 @@
       "suit": "Diamonds",
       "rank": 6,
       "doctrine": "Brute",
-      "trigger": "OnAttack",
-      "ability": "Attack all defended cards with +1 rank this bout.",
+      "trigger": "OnDefend",
+      "ability": "No more attacks can be added this bout.",
       "flavorText": "The walls of Constantinople fell to lesser guns.",
       "rarity": "Rare",
       "startingDeck": false,
-      "abilityType": "Conquer"
+      "abilityType": "Blocker"
     },
     {
       "id": "brute_mercenary_captain",
@@ -405,7 +405,7 @@
       "suit": "Hearts",
       "rank": 8,
       "doctrine": "Brute",
-      "trigger": "OnAttack",
+      "trigger": "OnDefend",
       "ability": "You may play 1 additional attack card this bout.",
       "flavorText": "Loyalty lasts exactly as long as the contract.",
       "rarity": "Uncommon",
@@ -431,7 +431,7 @@
       "suit": "Hearts",
       "rank": 13,
       "doctrine": "Brute",
-      "trigger": "OnAttack",
+      "trigger": "OnDefend",
       "ability": "Spend 1 Fury. Opponent discards 1 random non-trump card.",
       "flavorText": "The crowd roars. He does not hear them.",
       "rarity": "Uncommon",
@@ -458,11 +458,11 @@
       "rank": 14,
       "doctrine": "Brute",
       "trigger": "OnAttack",
-      "ability": "Gain 1 Fury.",
+      "ability": "This card attacks with +2 rank.",
       "flavorText": "Armies are merely the extension of one man's will.",
       "rarity": "Uncommon",
       "startingDeck": true,
-      "abilityType": "ResourceGain"
+      "abilityType": "Conquer"
     },
     {
       "id": "brute_battering_shield",
@@ -483,7 +483,7 @@
       "suit": "Hearts",
       "rank": 6,
       "doctrine": "Brute",
-      "trigger": "OnAttack",
+      "trigger": "OnDefend",
       "ability": "Your next attack card this bout gets +2 rank.",
       "flavorText": "First through the breach, last to fall.",
       "rarity": "Common",
@@ -939,11 +939,11 @@
       "rank": 14,
       "doctrine": "Hoarder",
       "trigger": "OnAttack",
-      "ability": "Gain 1 Luck.",
+      "ability": "Spend 1 Luck. Draw 2 cards, discard your lowest.",
       "flavorText": "Gold flows to those who already have it.",
       "rarity": "Uncommon",
       "startingDeck": true,
-      "abilityType": "ResourceGain"
+      "abilityType": "DoubleOrNothing"
     },
     {
       "id": "hoarder_antiquarian",
@@ -1069,11 +1069,11 @@
       "rank": 12,
       "doctrine": "Hoarder",
       "trigger": "OnDefend",
-      "ability": "Gain 1 Luck.",
+      "ability": "Spend 1 Luck. Draw 2, put 1 on bottom.",
       "flavorText": "Holy bones and sacred teeth. All genuine, of course.",
       "rarity": "Rare",
       "startingDeck": false,
-      "abilityType": "ResourceGain"
+      "abilityType": "SecondDeal"
     },
     {
       "id": "hoarder_fence",
@@ -1133,7 +1133,7 @@
       "suit": "Spades",
       "rank": 14,
       "doctrine": "Neutral",
-      "trigger": "OnAttack",
+      "trigger": "OnDefend",
       "ability": "This card attacks with +1 rank.",
       "flavorText": "Honor is its own reward.",
       "rarity": "Common",
@@ -1186,11 +1186,11 @@
       "rank": 13,
       "doctrine": "Neutral",
       "trigger": "OnAttack",
-      "ability": "Gain 1 resource.",
+      "ability": "You become the attacker after this bout resolves.",
       "flavorText": "Power answers to power.",
       "rarity": "Common",
       "startingDeck": false,
-      "abilityType": "ResourceGain"
+      "abilityType": "SeizeInitiative"
     },
     {
       "id": "neutral_cardinal",
@@ -1250,12 +1250,12 @@
       "suit": "Diamonds",
       "rank": 12,
       "doctrine": "Neutral",
-      "trigger": "OnAttack",
-      "ability": "Gain 1 resource.",
+      "trigger": "OnDefend",
+      "ability": "Draw 1 card.",
       "flavorText": "Every florin accounted for. Almost.",
       "rarity": "Common",
       "startingDeck": false,
-      "abilityType": "ResourceGain"
+      "abilityType": "ExtraDraw"
     },
     {
       "id": "neutral_herald",
@@ -1263,7 +1263,7 @@
       "suit": "Clubs",
       "rank": 11,
       "doctrine": "Neutral",
-      "trigger": "OnAttack",
+      "trigger": "OnDefend",
       "ability": "Look at the top 3 cards of the deck.",
       "flavorText": "He announces what cannot be unannounced.",
       "rarity": "Common",
@@ -1302,7 +1302,7 @@
       "suit": "Clubs",
       "rank": 10,
       "doctrine": "Neutral",
-      "trigger": "OnAttack",
+      "trigger": "OnDefend",
       "ability": "This card attacks with +1 rank.",
       "flavorText": "He carries the banner and asks no questions.",
       "rarity": "Common",

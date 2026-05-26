@@ -1663,11 +1663,7 @@ namespace WitsAndFools
                         }
                         break;
                     case ResourceType.Fury:
-                        if (!_attackedThisBout[p] && _resource[p] > 0)
-                        {
-                            _resource[p]--;
-                            OnResourceChanged?.Invoke(p, rt.Value, _resource[p]);
-                        }
+                        // Fury no longer decays per bout — balanced by fewer generators
                         break;
                     case ResourceType.Favor:
                         if (!_usedAbilityThisBout[p] && _resource[p] > 0)
