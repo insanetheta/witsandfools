@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
@@ -24,8 +25,14 @@ namespace WitsAndFools.EditorTools
         {
             if (!CardCatalog.IsInitialized)
             {
-                Debug.LogError("CardCatalog not initialized. Load card_catalog.json first.");
-                return;
+                string path = Path.Combine(Application.dataPath, "Data", "card_catalog.json");
+                if (!File.Exists(path))
+                {
+                    Debug.LogError($"Card catalog not found at: {path}");
+                    return;
+                }
+                CardCatalogLoader.LoadFromJson(File.ReadAllText(path));
+                Debug.Log($"Loaded {CardCatalog.Count} cards from catalog.");
             }
 
             var sb = new StringBuilder();

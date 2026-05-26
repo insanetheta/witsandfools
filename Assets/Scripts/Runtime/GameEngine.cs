@@ -1418,7 +1418,6 @@ namespace WitsAndFools
                 case AbilityType.BattleHardened: _config.BattleHardened[player] = true; break;
                 case AbilityType.ThickSkin: _config.ThickSkin[player] = true; break;
                 case AbilityType.Bloodlust: _config.Bloodlust[player] = true; break;
-                case AbilityType.ShadowReflexes: _config.ShadowReflexes[player] = true; break;
                 case AbilityType.EndgameSpecialist: _config.EndgameSpecialist[player] = true; break;
                 case AbilityType.SleightOfMind: _config.SleightOfMind[player] = true; break;
                 case AbilityType.CardCounter: _config.CardCounter[player] = true; break;
@@ -1427,8 +1426,6 @@ namespace WitsAndFools
                 case AbilityType.GracefulManners: _config.GracefulManners[player] = true; break;
                 case AbilityType.PatienceRewarded: _config.PatienceRewarded[player] = true; break;
                 case AbilityType.Jackpot: _config.Jackpot[player] = true; break;
-                case AbilityType.CourtFavor: _config.CourtFavor[player] = true; break;
-                case AbilityType.LoadedDice: _config.LoadedDice[player] = true; break;
             }
         }
 
