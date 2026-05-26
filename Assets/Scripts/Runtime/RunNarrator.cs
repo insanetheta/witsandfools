@@ -56,6 +56,7 @@ namespace WitsAndFools
                 return;
             }
 
+            _rm.OnShopAction += OnShopActionFired;
             _rm.StartAutoRun();
             Time.timeScale = NarratorTimeScale;
             _gm.AiThinkSeconds = AiThinkDelay;
@@ -247,12 +248,22 @@ namespace WitsAndFools
             AbilityType.SeizeInitiative => "seizes initiative",
             AbilityType.SlipAway => "discards undefended attacks",
             AbilityType.SmokeBomb => "ends bout, all cards discarded",
+            AbilityType.BlindSwap => "swaps card with opponent",
+            AbilityType.Masterstroke => "ULTIMATE: opponent loses 2 best cards, draws 1",
+            AbilityType.Onslaught => "ULTIMATE: 3 deck cards become attacks",
+            AbilityType.Masquerade => "ULTIMATE: swaps entire hand with opponent",
+            AbilityType.Monopoly => "ULTIMATE: draws to 8, opponent discards to 5",
             _ => a.DisplayName(),
         };
 
         void OnTrumpChanged(Suit newTrump)
         {
             _matchLog.AppendLine($"  ♦ Trump changed to {newTrump}!");
+        }
+
+        void OnShopActionFired(string action)
+        {
+            Log("shop-action", "Shop Decision", action);
         }
 
         void OnDesperation(int player, int cardsDiscarded)
@@ -321,7 +332,11 @@ namespace WitsAndFools
         {
             var run = GetRunState();
             if (run == null) return "Browsing wares...";
-            return $"Florins: {run.Florins} | The auto-runner buys an ability if affordable and a slot is open.";
+            if (run.UseDualDeck)
+                return $"Florins: {run.Florins} | Deck: {run.PlayerDeckCardIds.Count} cards\n" +
+                       $"Removals used: {run.CardRemovalsPurchased}/3\n" +
+                       "The gambler surveys the wares...";
+            return $"Florins: {run.Florins} | The auto-runner buys an ability if affordable.";
         }
 
         string DescribeRest()
@@ -484,6 +499,7 @@ namespace WitsAndFools
         void OnDestroy()
         {
             UnsubscribeEngine();
+            if (_rm) _rm.OnShopAction -= OnShopActionFired;
         }
     }
 }

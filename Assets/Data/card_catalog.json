@@ -66,7 +66,7 @@
       "rank": 8,
       "doctrine": "Schemer",
       "trigger": "OnAttack",
-      "ability": "Reveal the top card of opponent's deck; if rank 10+, draw 1.",
+      "ability": "Force opponent to discard 1 random card.",
       "flavorText": "The code reveals more than its author intended.",
       "rarity": "Common",
       "startingDeck": true
@@ -114,7 +114,7 @@
       "rank": 10,
       "doctrine": "Schemer",
       "trigger": "OnDefend",
-      "ability": "Reveal opponent's top card; if it matches this card's suit, discard it.",
+      "ability": "Seize the initiative; you become the attacker after this bout.",
       "flavorText": "The message never arrived.",
       "rarity": "Uncommon",
       "startingDeck": true
@@ -126,7 +126,7 @@
       "rank": 8,
       "doctrine": "Schemer",
       "trigger": "OnAttack",
-      "ability": "Draw 1 card; opponent must reveal 1 random card from their hand.",
+      "ability": "Steal 1 random card from opponent's hand.",
       "flavorText": "He serves two masters and betrays them both.",
       "rarity": "Common",
       "startingDeck": true
@@ -276,6 +276,18 @@
       "startingDeck": false
     },
     {
+      "id": "schemer_grand_inquisitor",
+      "name": "The Grand Inquisitor",
+      "suit": "Clubs",
+      "rank": 14,
+      "doctrine": "Schemer",
+      "trigger": "None",
+      "ability": "Masterstroke: spend 3 Intel — opponent discards their 2 highest-rank cards, you draw 1.",
+      "flavorText": "His questions have only one answer, and it is always confession.",
+      "rarity": "Rare",
+      "startingDeck": false
+    },
+    {
       "id": "brute_condottiero",
       "name": "The Condottiero",
       "suit": "Clubs",
@@ -402,7 +414,7 @@
       "rank": 11,
       "doctrine": "Brute",
       "trigger": "OnAttack",
-      "ability": "If defender picks up, draw 1 card.",
+      "ability": "This card attacks with +2 rank.",
       "flavorText": "What the sword takes, the sack carries away.",
       "rarity": "Common",
       "startingDeck": true
@@ -500,6 +512,18 @@
       "trigger": "OnAttack",
       "ability": "Spend 3 Fury: this card attacks with +4 rank.",
       "flavorText": "The sentence is always the same.",
+      "rarity": "Rare",
+      "startingDeck": false
+    },
+    {
+      "id": "brute_titan",
+      "name": "The Titan",
+      "suit": "Diamonds",
+      "rank": 14,
+      "doctrine": "Brute",
+      "trigger": "None",
+      "ability": "Onslaught: spend 3 Fury — play top 3 cards from your deck as attacks.",
+      "flavorText": "When the Titan charges, the earth itself retreats.",
       "rarity": "Rare",
       "startingDeck": false
     },
@@ -738,10 +762,22 @@
       "rank": 12,
       "doctrine": "Trickster",
       "trigger": "OnAttack",
-      "ability": "Draw 1 card, then discard 1 card.",
+      "ability": "Swap 1 random card with opponent.",
       "flavorText": "His elixir cures nothing, but his tongue cures doubt.",
       "rarity": "Uncommon",
       "startingDeck": true
+    },
+    {
+      "id": "trickster_grand_masquerader",
+      "name": "The Grand Masquerader",
+      "suit": "Hearts",
+      "rank": 13,
+      "doctrine": "Trickster",
+      "trigger": "None",
+      "ability": "Masquerade: spend 3 Favor — swap your entire hand with opponent's.",
+      "flavorText": "Behind the final mask is another mask, and behind that — your face.",
+      "rarity": "Rare",
+      "startingDeck": false
     },
     {
       "id": "trickster_contessa",
@@ -921,6 +957,18 @@
       "ability": null,
       "flavorText": "The guilds control the flow of everything worth having.",
       "rarity": "Uncommon",
+      "startingDeck": false
+    },
+    {
+      "id": "hoarder_monopolist",
+      "name": "The Monopolist",
+      "suit": "Spades",
+      "rank": 14,
+      "doctrine": "Hoarder",
+      "trigger": "None",
+      "ability": "Monopoly: spend 3 Luck — draw cards until you have 8 in hand, opponent discards down to 5.",
+      "flavorText": "When one man owns everything, the game is already over.",
+      "rarity": "Rare",
       "startingDeck": false
     },
     {

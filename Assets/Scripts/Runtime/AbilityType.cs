@@ -100,6 +100,12 @@ namespace WitsAndFools
 
         // --- Doctrine resource gain (auto-trigger) ---
         ResourceGain,
+
+        // --- Doctrine ultimates (3-cost) ---
+        Masterstroke,
+        Onslaught,
+        Masquerade,
+        Monopoly,
     }
 
     public static class AbilityTypeExtensions
@@ -175,6 +181,10 @@ namespace WitsAndFools
             AbilityType.Desperation => "Desperation",
             AbilityType.SteadyHand => "Steady Hand",
             AbilityType.ResourceGain => "Resource Gain",
+            AbilityType.Masterstroke => "Masterstroke",
+            AbilityType.Onslaught => "Onslaught",
+            AbilityType.Masquerade => "Masquerade",
+            AbilityType.Monopoly => "Monopoly",
             _ => a.ToString()
         };
 
@@ -249,6 +259,10 @@ namespace WitsAndFools
             AbilityType.Desperation => "DESPR",
             AbilityType.SteadyHand => "STEDY",
             AbilityType.ResourceGain => "RSRC+",
+            AbilityType.Masterstroke => "MSTRK",
+            AbilityType.Onslaught => "ONSLT",
+            AbilityType.Masquerade => "MASQR",
+            AbilityType.Monopoly => "MONOP",
             _ => "?"
         };
 
@@ -323,6 +337,10 @@ namespace WitsAndFools
             AbilityType.Desperation => "Discard hand, auto-defend all attacks, draw 4.",
             AbilityType.SteadyHand => "At bout start, if hand has 3 or fewer cards, draw 1.",
             AbilityType.ResourceGain => "Gain 1 resource.",
+            AbilityType.Masterstroke => "Spend 3 Intel. Opponent discards their 2 highest-rank cards. Draw 1.",
+            AbilityType.Onslaught => "Spend 3 Fury. Play top 3 deck cards as attacks.",
+            AbilityType.Masquerade => "Spend 3 Favor. Swap your entire hand with opponent's.",
+            AbilityType.Monopoly => "Spend 3 Luck. Draw until you have 8 cards. Opponent discards down to 5.",
             _ => ""
         };
 
@@ -369,6 +387,10 @@ namespace WitsAndFools
             AbilityType.Misdeal => 0,
             AbilityType.WildCard => 0,
             AbilityType.Deflect => 0,
+            AbilityType.Masterstroke => 0,
+            AbilityType.Onslaught => 0,
+            AbilityType.Masquerade => 0,
+            AbilityType.Monopoly => 0,
             // Powerful free-trigger abilities cost 2
             AbilityType.Haymaker => 2,
             // Standard trigger cost

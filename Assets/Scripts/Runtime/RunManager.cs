@@ -95,6 +95,7 @@ namespace WitsAndFools
         RunState _run;
         RunPhase _phase;
         public RunPhase CurrentPhase => _phase;
+        public event Action<string> OnShopAction;
         int _currentColumn;
         System.Random _rng;
         MapNode _currentNode;
@@ -323,9 +324,11 @@ namespace WitsAndFools
                 string weakest = FindWeakestDeckCard();
                 if (weakest != null)
                 {
+                    string removedName = CardCatalog.TryGet(weakest, out var wDef) ? wDef.Name : weakest;
                     _run.PlayerDeckCardIds.Remove(weakest);
                     _run.Florins -= 8;
                     _run.CardRemovalsPurchased++;
+                    OnShopAction?.Invoke($"Removed '{removedName}' from deck (-8 florins, {_run.Florins} remaining)");
                     OnResultContinue();
                     return;
                 }
@@ -337,10 +340,12 @@ namespace WitsAndFools
                 {
                     _run.PlayerDeckCardIds.Add(card.Id);
                     _run.Florins -= 6;
+                    OnShopAction?.Invoke($"Added '{card.Name}' to deck (-6 florins, {_run.Florins} remaining)");
                     OnResultContinue();
                     return;
                 }
             }
+            OnShopAction?.Invoke("Browsed but bought nothing.");
             OnResultContinue();
         }
 

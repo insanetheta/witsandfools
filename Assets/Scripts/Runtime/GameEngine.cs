@@ -806,6 +806,15 @@ namespace WitsAndFools
                 case AbilityType.ResourceGain:
                     return true;
 
+                case AbilityType.Masterstroke:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 3 && _hands[1 - playerIndex].Count > 0;
+                case AbilityType.Onslaught:
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 3 && DeckCountFor(playerIndex) >= 3;
+                case AbilityType.Masquerade:
+                    return _resource[playerIndex] >= 3 && _hands[1 - playerIndex].Count > 0;
+                case AbilityType.Monopoly:
+                    return _resource[playerIndex] >= 3 && DeckCountFor(playerIndex) > 0;
+
                 default:
                     return true;
             }
@@ -1314,6 +1323,54 @@ namespace WitsAndFools
                 case AbilityType.ResourceGain:
                     GainResource(playerIndex, 1);
                     break;
+
+                case AbilityType.Masterstroke:
+                    SpendResource(playerIndex, 3);
+                    DiscardHighestCards(opponent, 2);
+                    DrawCards(playerIndex, 1);
+                    break;
+
+                case AbilityType.Onslaught:
+                {
+                    SpendResource(playerIndex, 3);
+                    int onsPlayed = 0;
+                    while (onsPlayed < 3 && CanDrawFromDeck(playerIndex))
+                    {
+                        var onsCard = DrawFromDeck(playerIndex);
+                        _bout.AddAttack(onsCard);
+                        Phase = Phase.Defense;
+                        OnAttackPlayed?.Invoke(playerIndex, onsCard);
+                        onsPlayed++;
+                    }
+                    break;
+                }
+
+                case AbilityType.Masquerade:
+                {
+                    SpendResource(playerIndex, 3);
+                    var myCards = new List<Card>(_hands[playerIndex].Cards);
+                    var theirCards = new List<Card>(_hands[opponent].Cards);
+                    _hands[playerIndex].Clear();
+                    _hands[opponent].Clear();
+                    foreach (var c in theirCards) _hands[playerIndex].Add(c);
+                    foreach (var c in myCards) _hands[opponent].Add(c);
+                    break;
+                }
+
+                case AbilityType.Monopoly:
+                {
+                    SpendResource(playerIndex, 3);
+                    int need = 8 - _hands[playerIndex].Count;
+                    if (need > 0) DrawCards(playerIndex, need);
+                    while (_hands[opponent].Count > 5)
+                    {
+                        var worst = FindWorstCard(_hands[opponent], Trump);
+                        if (!worst.HasValue) break;
+                        _hands[opponent].Remove(worst.Value);
+                        AddToDiscard(worst.Value, opponent);
+                    }
+                    break;
+                }
             }
         }
 
