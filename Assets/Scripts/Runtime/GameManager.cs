@@ -487,7 +487,7 @@ namespace WitsAndFools
         {
             if (Hud && Hud.AbilityChoiceVisible) return;
 
-            if (view.Card.HasAbility)
+            if (view.Card.HasAbility && view.Card.Trigger == TriggerTiming.None)
             {
                 bool canPlay = CanPlayCardNormally(view.Card);
                 bool canUse = AbilityValidForPhase(view.Card.Ability.Value);
