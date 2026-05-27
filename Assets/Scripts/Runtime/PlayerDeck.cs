@@ -100,6 +100,8 @@ namespace WitsAndFools
                 _drawPile.Insert(_rng.Next(_drawPile.Count + 1), c);
         }
 
+        public bool RemoveCard(Card card) => _drawPile.Remove(card);
+
         public void Discard(Card card) => _discardPile.Add(card);
 
         public void RemoveFromGame(Card card) => _removedFromGame.Add(card);

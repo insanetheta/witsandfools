@@ -186,6 +186,14 @@ namespace WitsAndFools
                 _discard.Add(card);
         }
 
+        void RecycleCard(Card card, int ownerIndex)
+        {
+            if (_dualDeckMode)
+                _playerDecks[ownerIndex].PutOnBottom(card);
+            else
+                _discard.Add(card);
+        }
+
         Card[] PeekTopDeck(int playerIndex, int count)
         {
             if (_dualDeckMode) return _playerDecks[playerIndex].PeekTop(count);
@@ -500,7 +508,7 @@ namespace WitsAndFools
             {
                 if (_config.GracefulRetreat[playerIndex] && cardsEaten == 0 && _bout.Defenses[0] == null)
                 {
-                    _discard.Add(c);
+                    RecycleCard(c, playerIndex);
                     cardsEaten++;
                     continue;
                 }
@@ -558,7 +566,7 @@ namespace WitsAndFools
                 if (worst.HasValue)
                 {
                     _hands[playerIndex].Remove(worst.Value);
-                    _discard.Add(worst.Value);
+                    RecycleCard(worst.Value, playerIndex);
                 }
                 GainResource(playerIndex, 1);
             }
@@ -623,7 +631,7 @@ namespace WitsAndFools
             {
                 _clumsyFingersTriggered[playerIndex] = true;
                 _hands[playerIndex].Remove(card);
-                _discard.Add(card);
+                RecycleCard(card, playerIndex);
                 OnAbilityUsed?.Invoke(playerIndex, card, ability);
                 return true;
             }
@@ -636,7 +644,7 @@ namespace WitsAndFools
             else
             {
                 _hands[playerIndex].Remove(card);
-                _discard.Add(card);
+                RecycleCard(card, playerIndex);
             }
 
             // ChaoticNature: 50% chance to return the ability card to hand
@@ -645,7 +653,10 @@ namespace WitsAndFools
                 int roll = (PseudoRandomSeed() + playerIndex) % 2;
                 if (roll == 0)
                 {
-                    _discard.Remove(card);
+                    if (_dualDeckMode)
+                        _playerDecks[playerIndex].RemoveCard(card);
+                    else
+                        _discard.Remove(card);
                     _hands[playerIndex].Add(card);
                 }
             }
@@ -658,7 +669,7 @@ namespace WitsAndFools
                 if (worst.HasValue)
                 {
                     _hands[playerIndex].Remove(worst.Value);
-                    _discard.Add(worst.Value);
+                    RecycleCard(worst.Value, playerIndex);
                 }
             }
 
@@ -915,7 +926,7 @@ namespace WitsAndFools
                     foreach (var c in toDiscard)
                     {
                         _hands[playerIndex].Remove(c);
-                        _discard.Add(c);
+                        RecycleCard(c, playerIndex);
                     }
                     int toDraw = Math.Min(count, DeckCountFor(playerIndex));
                     for (int i = 0; i < toDraw; i++)
@@ -1033,7 +1044,7 @@ namespace WitsAndFools
                         foreach (var c in toDiscard)
                         {
                             _hands[p].Remove(c);
-                            _discard.Add(c);
+                            RecycleCard(c, p);
                         }
                     }
                     for (int p = 0; p < 2; p++)
@@ -1209,7 +1220,7 @@ namespace WitsAndFools
                     if (worst.HasValue)
                     {
                         _hands[playerIndex].Remove(worst.Value);
-                        _discard.Add(worst.Value);
+                        RecycleCard(worst.Value, playerIndex);
                     }
                     break;
                 }
@@ -1299,7 +1310,7 @@ namespace WitsAndFools
                         var worst = FindWorstCard(_hands[playerIndex], Trump);
                         if (!worst.HasValue) break;
                         _hands[playerIndex].Remove(worst.Value);
-                        _discard.Add(worst.Value);
+                        RecycleCard(worst.Value, playerIndex);
                         discarded++;
                     }
                     DrawCards(playerIndex, 3);
@@ -1316,7 +1327,7 @@ namespace WitsAndFools
                     foreach (var c in toDiscard)
                     {
                         _hands[playerIndex].Remove(c);
-                        _discard.Add(c);
+                        RecycleCard(c, playerIndex);
                     }
                     for (int i = 0; i < _bout.Defenses.Count; i++)
                     {
@@ -1401,7 +1412,7 @@ namespace WitsAndFools
                 int idx = (PseudoRandomSeed() + i) % _hands[playerIndex].Count;
                 var c = _hands[playerIndex].Cards[idx];
                 _hands[playerIndex].Remove(c);
-                _discard.Add(c);
+                RecycleCard(c, playerIndex);
             }
         }
 
@@ -1416,7 +1427,7 @@ namespace WitsAndFools
                 int idx = (PseudoRandomSeed() + i) % candidates.Count;
                 var c = candidates[idx];
                 _hands[playerIndex].Remove(c);
-                _discard.Add(c);
+                RecycleCard(c, playerIndex);
                 candidates.RemoveAt(idx);
             }
         }
@@ -1436,7 +1447,7 @@ namespace WitsAndFools
                 if (highest.HasValue)
                 {
                     _hands[playerIndex].Remove(highest.Value);
-                    _discard.Add(highest.Value);
+                    RecycleCard(highest.Value, playerIndex);
                 }
             }
         }
@@ -1581,7 +1592,7 @@ namespace WitsAndFools
                             if (worst.HasValue)
                             {
                                 _hands[p].Remove(worst.Value);
-                                _discard.Add(worst.Value);
+                                RecycleCard(worst.Value, p);
                             }
                         }
                     }
@@ -1605,7 +1616,7 @@ namespace WitsAndFools
                     if (worst.HasValue)
                     {
                         _hands[p].Remove(worst.Value);
-                        _discard.Add(worst.Value);
+                        RecycleCard(worst.Value, p);
                     }
                 }
             }
@@ -1745,7 +1756,7 @@ namespace WitsAndFools
                     if (worst.HasValue)
                     {
                         _hands[playerIndex].Remove(worst.Value);
-                        _discard.Add(worst.Value);
+                        RecycleCard(worst.Value, playerIndex);
                         drawn--;
                     }
                 }
@@ -1761,7 +1772,7 @@ namespace WitsAndFools
                     {
                         _hands[playerIndex].Remove(worst.Value);
                         _hands[playerIndex].Add(DrawFromDeck(playerIndex));
-                        _discard.Add(worst.Value);
+                        RecycleCard(worst.Value, playerIndex);
                     }
                 }
             }
