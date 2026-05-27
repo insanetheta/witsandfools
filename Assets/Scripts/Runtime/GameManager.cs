@@ -51,6 +51,7 @@ namespace WitsAndFools
 
         int _stallFrames;
         int _matchFrames;
+        float _matchStartTime;
 
         void Update()
         {
@@ -62,9 +63,9 @@ namespace WitsAndFools
             if (Engine.Phase == Phase.GameOver) return;
 
             _matchFrames++;
-            if (_matchFrames > 10000)
+            if (Time.time - _matchStartTime > 600f)
             {
-                Debug.LogWarning($"[GameManager] Match exceeded 10000 frames — forcing game over. BoutCount={Engine.BoutCount}");
+                Debug.LogWarning($"[GameManager] Match exceeded 10-minute time limit — forcing game over. BoutCount={Engine.BoutCount}");
                 int cards0 = Engine.HandOf(0).Count + Engine.DeckCount;
                 int cards1 = Engine.HandOf(1).Count;
                 Engine.ForceEndGame(cards0 >= cards1 ? 0 : 1);
@@ -188,6 +189,7 @@ namespace WitsAndFools
                 engine: engine);
             _humanIsPlayerZero = true;
             _matchFrames = 0;
+            _matchStartTime = Time.time;
             WireEngineEvents();
             WireHudButtons();
             _loop.Start();
@@ -209,6 +211,7 @@ namespace WitsAndFools
                 engine: engine);
             _humanIsPlayerZero = true;
             _matchFrames = 0;
+            _matchStartTime = Time.time;
             WireEngineEvents();
             WireHudButtons();
             _loop.Start();
