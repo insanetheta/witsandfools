@@ -1804,11 +1804,8 @@ namespace WitsAndFools
 
         bool CheckGameOver(int attackerBefore, int defenderBefore, BoutOutcome outcome)
         {
-            bool deckEmpty = AnyDeckCount() == 0;
-            if (!deckEmpty) return false;
-
-            bool empty0 = _hands[0].Count == 0;
-            bool empty1 = _hands[1].Count == 0;
+            bool empty0 = _hands[0].Count == 0 && DeckCountFor(0) == 0;
+            bool empty1 = _hands[1].Count == 0 && DeckCountFor(1) == 0;
 
             if (empty0 && empty1)
             {
