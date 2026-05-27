@@ -212,6 +212,9 @@ namespace WitsAndFools
             WireEngineEvents();
             WireHudButtons();
             _loop.Start();
+            Debug.Log($"[GameManager] Match started: autoPlay={_autoPlay} autoPlaySpeed={_autoPlaySpeed} timeScale={Time.timeScale} " +
+                $"p0Hand={engine.HandOf(0).Count} p1Hand={engine.HandOf(1).Count} deckTotal={engine.DeckCount} " +
+                $"attacker={engine.AttackerIndex} controller0={_loop.Controllers[0].Kind} controller1={_loop.Controllers[1].Kind}");
             StartCoroutine(AutoHideInfo(3f));
         }
 
@@ -463,6 +466,8 @@ namespace WitsAndFools
 
         void OnGameOver(int foolIndex)
         {
+            Debug.Log($"[GameManager] GAME OVER: fool={foolIndex} boutCount={Engine?.BoutCount} matchFrames={_matchFrames} " +
+                $"stack={StackTraceUtility.ExtractStackTrace()}");
             int winnerIndex = 1 - foolIndex;
             string msg = foolIndex == HumanPlayerIndex
                 ? "You are the Fool."

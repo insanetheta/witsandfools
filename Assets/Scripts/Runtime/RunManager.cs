@@ -107,6 +107,8 @@ namespace WitsAndFools
 
         void Start()
         {
+            Time.timeScale = 1f;
+            _autoRun = false;
             if (GameManager) GameManager.AutoStartOnAwake = false;
             if (!TryLoadSave())
                 StartNewRun();
@@ -120,6 +122,7 @@ namespace WitsAndFools
             _currentColumn = save.CurrentColumn;
             _selectedArchetype = save.SelectedArchetype;
             _rng = new System.Random(_run.Seed + _run.MatchesPlayed);
+            EnsureCatalogsLoaded();
             if (Enum.TryParse<RunPhase>(save.RunPhase, out var phase)
                 && (phase == RunPhase.MapSelect || phase == RunPhase.ArchetypeSelect))
                 SetPhase(phase);
@@ -407,6 +410,8 @@ namespace WitsAndFools
         public void StartNewRun()
         {
             RunSaveSystem.Delete();
+            _autoRun = false;
+            Time.timeScale = 1f;
             int seed = Environment.TickCount;
             _rng = new System.Random(seed);
             _run = new RunState { Seed = seed };
