@@ -149,8 +149,8 @@ namespace WitsAndFools.EditorTools
             nameplateBg.raycastTarget = false;
 
             var portraitRT = NewChild(nameplate, "Portrait");
-            portraitRT.anchorMin = new Vector2(0, 0);
-            portraitRT.anchorMax = new Vector2(0, 1);
+            portraitRT.anchorMin = new Vector2(0, 0.5f);
+            portraitRT.anchorMax = new Vector2(0, 0.5f);
             portraitRT.pivot = new Vector2(0, 0.5f);
             portraitRT.sizeDelta = new Vector2(60, 60);
             portraitRT.anchoredPosition = new Vector2(5, 0);
@@ -175,13 +175,13 @@ namespace WitsAndFools.EditorTools
             oppArchRT.offsetMin = new Vector2(70, 2);
             oppArchRT.offsetMax = new Vector2(-8, 0);
 
-            // ----- End-bout button (bottom-right, above run HUD) -----
+            // ----- End-bout button (bottom-right, above player hand) -----
             var endBoutBtn = AddButton(canvasRT, "EndBoutButton", "End Bout");
             endBoutBtn.anchorMin = new Vector2(1, 0);
             endBoutBtn.anchorMax = new Vector2(1, 0);
             endBoutBtn.pivot = new Vector2(1, 0);
             endBoutBtn.sizeDelta = new Vector2(180, 52);
-            endBoutBtn.anchoredPosition = new Vector2(-16, 145);
+            endBoutBtn.anchoredPosition = new Vector2(-16, 310);
 
             // ----- Center band: deck/trump anchored to LEFT edge, discard anchored to RIGHT edge,
             // bout area in the middle. Anchoring to edges keeps everything visible at narrow aspect ratios.
@@ -361,10 +361,10 @@ namespace WitsAndFools.EditorTools
             autoPlayBtn.anchorMax = new Vector2(0, 0);
             autoPlayBtn.pivot = new Vector2(0, 0);
             autoPlayBtn.sizeDelta = new Vector2(140, 46);
-            autoPlayBtn.anchoredPosition = new Vector2(16, 145);
+            autoPlayBtn.anchoredPosition = new Vector2(16, 80);
             hud.AutoPlayButton = autoPlayBtn.GetComponent<Button>();
 
-            // ----- Tooltip label (bottom-left, above run HUD) -----
+            // ----- Tooltip label (bottom-left, above resource label) -----
             var tooltipLabel = AddText(canvasRT, "TooltipLabel", "",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 0),
                 pivot: new Vector2(0, 0),
@@ -372,7 +372,7 @@ namespace WitsAndFools.EditorTools
                 color: new Color(1, 1, 1, 0.85f));
             var tooltipRT = (RectTransform)tooltipLabel.transform;
             tooltipRT.sizeDelta = new Vector2(0, 50);
-            tooltipRT.anchoredPosition = new Vector2(16, 200);
+            tooltipRT.anchoredPosition = new Vector2(16, 250);
             tooltipLabel.enableWordWrapping = true;
             tooltipLabel.gameObject.SetActive(false);
             hud.TooltipLabel = tooltipLabel;
@@ -415,7 +415,7 @@ namespace WitsAndFools.EditorTools
             playerResLabel.gameObject.SetActive(false);
             hud.PlayerResourceLabel = playerResLabel;
 
-            // ----- Opponent resource label (top-right, near opponent hand, prominent) -----
+            // ----- Opponent resource label (top-right, between HUD bar and hand) -----
             var oppResLabel = AddText(canvasRT, "OpponentResourceLabel", "",
                 anchorMin: new Vector2(0.65f, 1), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(1, 1),
@@ -424,7 +424,7 @@ namespace WitsAndFools.EditorTools
             oppResLabel.fontStyle = FontStyles.Bold;
             var oppResRT = (RectTransform)oppResLabel.transform;
             oppResRT.sizeDelta = new Vector2(0, 40);
-            oppResRT.anchoredPosition = new Vector2(-16, -50);
+            oppResRT.anchoredPosition = new Vector2(-210, -78);
             oppResLabel.gameObject.SetActive(false);
             hud.OpponentResourceLabel = oppResLabel;
 
@@ -437,11 +437,11 @@ namespace WitsAndFools.EditorTools
             boutBanner.fontStyle = FontStyles.Bold;
             var boutBannerRT = (RectTransform)boutBanner.transform;
             boutBannerRT.sizeDelta = new Vector2(0, 40);
-            boutBannerRT.anchoredPosition = new Vector2(0, -76);
+            boutBannerRT.anchoredPosition = new Vector2(0, -112);
             boutBanner.gameObject.SetActive(false);
             hud.BoutStateBanner = boutBanner;
 
-            // ----- Player hand count (bottom-right, near hand) -----
+            // ----- Player hand count (bottom-right, above hand, below EndBout button) -----
             var playerHandCount = AddText(canvasRT, "PlayerHandCount", "",
                 anchorMin: new Vector2(1, 0), anchorMax: new Vector2(1, 0),
                 pivot: new Vector2(1, 0),
@@ -450,11 +450,11 @@ namespace WitsAndFools.EditorTools
             playerHandCount.fontStyle = FontStyles.Bold;
             var playerHCRT = (RectTransform)playerHandCount.transform;
             playerHCRT.sizeDelta = new Vector2(120, 30);
-            playerHCRT.anchoredPosition = new Vector2(-16, 170);
+            playerHCRT.anchoredPosition = new Vector2(-16, 278);
             playerHandCount.gameObject.SetActive(false);
             hud.PlayerHandCount = playerHandCount;
 
-            // ----- Opponent hand count (top-left, near opponent hand) -----
+            // ----- Opponent hand count (top-right, below HUD bar) -----
             var oppHandCount = AddText(canvasRT, "OpponentHandCount", "",
                 anchorMin: new Vector2(1, 1), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(1, 1),
@@ -463,7 +463,7 @@ namespace WitsAndFools.EditorTools
             oppHandCount.fontStyle = FontStyles.Bold;
             var oppHCRT = (RectTransform)oppHandCount.transform;
             oppHCRT.sizeDelta = new Vector2(180, 30);
-            oppHCRT.anchoredPosition = new Vector2(-16, -46);
+            oppHCRT.anchoredPosition = new Vector2(-16, -78);
             oppHandCount.gameObject.SetActive(false);
             hud.OpponentHandCount = oppHandCount;
 

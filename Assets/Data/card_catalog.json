@@ -249,7 +249,7 @@
       "suit": "Hearts",
       "rank": 14,
       "doctrine": "Schemer",
-      "trigger": "OnAttack",
+      "trigger": "OnDefend",
       "ability": "Cap attacks this bout at 2.",
       "flavorText": "His presence alone shifts the balance of power.",
       "rarity": "Uncommon",
@@ -370,7 +370,7 @@
       "ability": "Spend 1 Fury. Opponent discards 1 random non-trump card.",
       "flavorText": "Peace is merely the pause between profitable conflicts.",
       "rarity": "Common",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Intimidate"
     },
     {
@@ -396,7 +396,7 @@
       "ability": "No more attacks can be added this bout.",
       "flavorText": "The walls of Constantinople fell to lesser guns.",
       "rarity": "Rare",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "Blocker"
     },
     {
@@ -432,11 +432,11 @@
       "rank": 13,
       "doctrine": "Brute",
       "trigger": "OnDefend",
-      "ability": "Spend 1 Fury. Opponent discards 1 random non-trump card.",
+      "ability": "Gain 1 Fury.",
       "flavorText": "The crowd roars. He does not hear them.",
       "rarity": "Uncommon",
       "startingDeck": true,
-      "abilityType": "Intimidate"
+      "abilityType": "ResourceGain"
     },
     {
       "id": "brute_pillager",
@@ -613,12 +613,12 @@
       "suit": "Clubs",
       "rank": 6,
       "doctrine": "Trickster",
-      "trigger": "OnDefend",
-      "ability": "This card may defend as if it were any suit.",
+      "trigger": "OnAttack",
+      "ability": "Play one extra attack ignoring the rank-match rule.",
       "flavorText": "Only the fool may speak truth to power.",
       "rarity": "Common",
-      "startingDeck": false,
-      "abilityType": "Fortify"
+      "startingDeck": true,
+      "abilityType": "DoubleTrouble"
     },
     {
       "id": "trickster_mask_maker",
@@ -639,11 +639,11 @@
       "suit": "Spades",
       "rank": 7,
       "doctrine": "Trickster",
-      "trigger": "OnAttack",
+      "trigger": "OnDefend",
       "ability": "Opponent must defend this card before any others this bout.",
       "flavorText": "The eye sees what the hand directs.",
       "rarity": "Common",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Blocker"
     },
     {
@@ -682,7 +682,7 @@
       "ability": "After defending, steal 1 random card from opponent's hand into yours.",
       "flavorText": "Grazie, signore. You are too kind.",
       "rarity": "Rare",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "DoubleAgent"
     },
     {
@@ -708,7 +708,7 @@
       "ability": "Defend with the top card of your deck instead of a hand card.",
       "flavorText": "The customs men search the wrong crate every time.",
       "rarity": "Uncommon",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Brace"
     },
     {
@@ -718,11 +718,11 @@
       "rank": 6,
       "doctrine": "Trickster",
       "trigger": "OnDefend",
-      "ability": "After defending, return this card to your hand instead of discarding.",
+      "ability": "After defending, seize initiative; you become the attacker next bout.",
       "flavorText": "She bends but never breaks.",
       "rarity": "Uncommon",
-      "startingDeck": true,
-      "abilityType": "Brace"
+      "startingDeck": false,
+      "abilityType": "SeizeInitiative"
     },
     {
       "id": "trickster_doppelganger",
@@ -760,7 +760,7 @@
       "ability": "Opponent must reveal 1 card; that card cannot be used to defend this bout.",
       "flavorText": "Trust is the most profitable commodity.",
       "rarity": "Uncommon",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "Peek"
     },
     {
@@ -808,7 +808,7 @@
       "suit": "Spades",
       "rank": 14,
       "doctrine": "Trickster",
-      "trigger": "OnAttack",
+      "trigger": "OnDefend",
       "ability": "Cap attacks this bout at 2.",
       "flavorText": "The final act is always his to command.",
       "rarity": "Uncommon",
@@ -1211,7 +1211,7 @@
       "suit": "Clubs",
       "rank": 13,
       "doctrine": "Neutral",
-      "trigger": "OnAttack",
+      "trigger": "OnDefend",
       "ability": "No more attacks can be added this bout.",
       "flavorText": "The law is the law. Except when it isn't.",
       "rarity": "Common",
@@ -1339,29 +1339,29 @@
       "schemer_grand_inquisitor"
     ],
     "Brute": [
-      "brute_condottiero",
       "brute_siege_ram",
       "brute_berserker",
       "brute_enforcer",
-      "brute_warmonger",
       "brute_pit_fighter",
+      "brute_cannon_master",
       "brute_mercenary_captain",
       "brute_pillager",
       "brute_warlord",
+      "brute_quartermaster",
       "brute_gladiator",
       "brute_war_elephant",
       "brute_titan"
     ],
     "Trickster": [
       "trickster_courtesan",
-      "trickster_alchemist",
-      "trickster_illusionist",
+      "trickster_jester",
       "trickster_charlatan",
       "trickster_fortune_teller",
+      "trickster_pickpocket",
       "trickster_card_sharp",
-      "trickster_smuggler",
-      "trickster_acrobat",
+      "trickster_con_artist",
       "trickster_venetian_noble",
+      "trickster_mirror_mage",
       "trickster_maestro",
       "trickster_mountebank",
       "trickster_grand_masquerader"

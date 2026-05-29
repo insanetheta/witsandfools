@@ -60,9 +60,9 @@ namespace WitsAndFools.EditorTools
                 anchorMin: new Vector2(0, 1), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(0.5f, 1),
                 position: new Vector2(0, -34),
-                size: new Vector2(0, 18),
+                size: new Vector2(0, 20),
                 alignment: TextAlignmentOptions.Center,
-                fontSize: 9);
+                fontSize: 10);
             nameLabel.enableWordWrapping = true;
             nameLabel.fontStyle = FontStyles.Italic;
             nameLabel.color = ThemePalette.BlackSuit;
@@ -84,6 +84,8 @@ namespace WitsAndFools.EditorTools
                 alignment: TextAlignmentOptions.Center,
                 fontSize: 11);
             abilityBadge.fontStyle = FontStyles.Bold;
+            abilityBadge.outlineWidth = 0.2f;
+            abilityBadge.outlineColor = new Color32(0, 0, 0, 180);
             abilityBadge.gameObject.SetActive(false);
 
             // Back
