@@ -512,6 +512,43 @@ namespace WitsAndFools.EditorTools
             feedbackLabel.raycastTarget = false;
             hud.AbilityFeedbackLabel = feedbackLabel;
 
+            // ----- Peek overlay (shows actual card visuals when Peek fires) -----
+            var peekPanel = NewChild(canvasRT, "PeekPanel");
+            FillParent(peekPanel);
+            var peekScrim = peekPanel.gameObject.AddComponent<Image>();
+            peekScrim.color = new Color(0, 0, 0, 0.6f);
+            peekScrim.raycastTarget = true;
+
+            var peekTitle = AddText(peekPanel, "PeekTitle", "Deck Peek",
+                anchorMin: new Vector2(0.2f, 0.72f), anchorMax: new Vector2(0.8f, 0.82f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 32, color: ThemePalette.Gold, font: HeadingFont);
+            peekTitle.fontStyle = FontStyles.Bold;
+
+            var peekCardContainer = NewChild(peekPanel, "PeekCardContainer");
+            peekCardContainer.anchorMin = new Vector2(0.5f, 0.5f);
+            peekCardContainer.anchorMax = new Vector2(0.5f, 0.5f);
+            peekCardContainer.sizeDelta = new Vector2(400, 180);
+            peekCardContainer.anchoredPosition = new Vector2(0, 20);
+
+            var peekNextDraw = AddText(peekPanel, "PeekNextDrawLabel", "",
+                anchorMin: new Vector2(0.2f, 0.28f), anchorMax: new Vector2(0.8f, 0.36f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 20, color: ThemePalette.Parchment, font: DefaultFont);
+            peekNextDraw.fontStyle = FontStyles.Italic;
+
+            var peekDismissBtn = AddButton(peekPanel, "PeekDismissButton", "Got it");
+            peekDismissBtn.anchorMin = new Vector2(0.5f, 0.16f);
+            peekDismissBtn.anchorMax = new Vector2(0.5f, 0.16f);
+            peekDismissBtn.pivot = new Vector2(0.5f, 0.5f);
+            peekDismissBtn.sizeDelta = new Vector2(200, 55);
+
+            hud.PeekPanel = peekPanel.gameObject;
+            hud.PeekCardContainer = peekCardContainer;
+            hud.PeekNextDrawLabel = peekNextDraw;
+            hud.PeekDismissButton = peekDismissBtn.GetComponent<Button>();
+            peekPanel.gameObject.SetActive(false);
+
             // ----- Vignette overlay (on top of all game elements) -----
             var vignette = NewChild(canvasRT, "VignetteOverlay");
             var vignetteImg = vignette.gameObject.AddComponent<Image>();
@@ -548,6 +585,7 @@ namespace WitsAndFools.EditorTools
             playerInfoStrip.SetParent(matchPanel, true);
             oppInfoStrip.SetParent(matchPanel, true);
             feedbackPanel.SetParent(matchPanel, true);
+            peekPanel.SetParent(matchPanel, true);
             matchPanel.gameObject.SetActive(false);
 
             // ----- Map Panel (branching path layout) -----

@@ -37,6 +37,12 @@ namespace WitsAndFools
         [Header("Ability Feedback")]
         public TMP_Text AbilityFeedbackLabel;
 
+        [Header("Peek Overlay")]
+        public GameObject PeekPanel;
+        public RectTransform PeekCardContainer;
+        public TMP_Text PeekNextDrawLabel;
+        public Button PeekDismissButton;
+
         [Header("Tooltip")]
         public TMP_Text TooltipLabel;
 
@@ -176,6 +182,16 @@ namespace WitsAndFools
             var panel = AbilityFeedbackLabel.transform.parent;
             if (panel && panel.name == "AbilityFeedbackPanel") panel.gameObject.SetActive(false);
             else AbilityFeedbackLabel.gameObject.SetActive(false);
+        }
+
+        public void ShowPeekOverlay() { if (PeekPanel) PeekPanel.SetActive(true); }
+        public void HidePeekOverlay()
+        {
+            if (!PeekPanel) return;
+            PeekPanel.SetActive(false);
+            if (PeekCardContainer)
+                for (int i = PeekCardContainer.childCount - 1; i >= 0; i--)
+                    Destroy(PeekCardContainer.GetChild(i).gameObject);
         }
     }
 }

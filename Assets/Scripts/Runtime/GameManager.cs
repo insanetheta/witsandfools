@@ -270,8 +270,11 @@ namespace WitsAndFools
                 if (Hud.UseAbilityButton) Hud.UseAbilityButton.onClick.AddListener(OnAbilityChoiceUse);
                 if (Hud.CancelAbilityButton) Hud.CancelAbilityButton.onClick.RemoveAllListeners();
                 if (Hud.CancelAbilityButton) Hud.CancelAbilityButton.onClick.AddListener(OnAbilityChoiceCancel);
+                if (Hud.PeekDismissButton) Hud.PeekDismissButton.onClick.RemoveAllListeners();
+                if (Hud.PeekDismissButton) Hud.PeekDismissButton.onClick.AddListener(DismissPeekOverlay);
                 Hud.SetEndBoutEnabled(false);
                 Hud.HideAbilityChoice();
+                Hud.HidePeekOverlay();
             }
 
             if (Hud && Hud.AutoPlayButton)
@@ -580,20 +583,66 @@ namespace WitsAndFools
 
             if (ability == AbilityType.Peek && playerIndex == HumanPlayerIndex)
             {
-                var top = Engine.PeekTopCards(playerIndex, 3);
-                if (top.Length > 0)
-                {
-                    text += "\n" + string.Join("  ", System.Array.ConvertAll(top, c => c.ToString()));
-                    Hud.SetDeckTop(top[0]);
-                    _peekDeckTopActive = true;
-                }
+                ShowPeekOverlay(playerIndex);
+                return;
             }
 
             var color = playerIndex == HumanPlayerIndex ? ThemePalette.Gold : ThemePalette.VenetianRed;
             Hud.ShowAbilityFeedback(text, color);
-            float duration = _peekDeckTopActive ? 2.5f : 1.2f;
             if (_feedbackCoroutine != null) StopCoroutine(_feedbackCoroutine);
-            _feedbackCoroutine = StartCoroutine(HideFeedbackAfter(duration));
+            _feedbackCoroutine = StartCoroutine(HideFeedbackAfter(1.2f));
+        }
+
+        void ShowPeekOverlay(int playerIndex)
+        {
+            var top = Engine.PeekTopCards(playerIndex, 3);
+            if (top.Length == 0 || Hud == null || Hud.PeekCardContainer == null) return;
+
+            Hud.SetDeckTop(top[0]);
+            _peekDeckTopActive = true;
+
+            for (int i = 0; i < top.Length; i++)
+            {
+                var view = SpawnCardView(top[i], faceUp: true, Hud.PeekCardContainer);
+                var rt = view.GetComponent<RectTransform>();
+                float spacing = 130f;
+                float totalWidth = (top.Length - 1) * spacing;
+                rt.anchoredPosition = new Vector2(-totalWidth / 2f + i * spacing, 0);
+            }
+
+            if (Hud.PeekNextDrawLabel)
+            {
+                Hud.PeekNextDrawLabel.gameObject.SetActive(true);
+                Hud.PeekNextDrawLabel.text = $"Next draw: {top[0]}";
+            }
+
+            Hud.ShowPeekOverlay();
+
+            if (Hud.PeekDismissButton)
+            {
+                Hud.PeekDismissButton.onClick.RemoveAllListeners();
+                Hud.PeekDismissButton.onClick.AddListener(DismissPeekOverlay);
+            }
+
+            if (_autoPlay)
+                StartCoroutine(AutoDismissPeek());
+        }
+
+        IEnumerator AutoDismissPeek()
+        {
+            yield return new WaitForSeconds(0.3f);
+            DismissPeekOverlay();
+        }
+
+        void DismissPeekOverlay()
+        {
+            Hud?.HidePeekOverlay();
+            if (_peekDeckTopActive)
+            {
+                _peekDeckTopActive = false;
+                if (!Engine.Config.SpysMonocle[HumanPlayerIndex])
+                    Hud?.SetDeckTop(null);
+            }
         }
 
         IEnumerator HideFeedbackAfter(float seconds)
