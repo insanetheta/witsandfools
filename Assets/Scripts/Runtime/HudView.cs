@@ -122,23 +122,35 @@ namespace WitsAndFools
             if (label) label.gameObject.SetActive(false);
         }
 
+        static readonly Color FuryWarm  = new(0.831f, 0.451f, 0.353f);
+        static readonly Color IntelSlate = new(0.541f, 0.682f, 0.769f);
+        static readonly Color LuckOlive  = new(0.639f, 0.722f, 0.424f);
+
         static Color ResourceColor(ResourceType r) => r switch
         {
-            ResourceType.Intel => ThemePalette.RoyalBlue,
-            ResourceType.Fury => ThemePalette.VenetianRed,
+            ResourceType.Intel => IntelSlate,
+            ResourceType.Fury => FuryWarm,
             ResourceType.Favor => ThemePalette.Gold,
-            ResourceType.Luck => ThemePalette.Sage,
+            ResourceType.Luck => LuckOlive,
             _ => Color.white
         };
 
         public void SetBoutState(string text, Color bgColor)
         {
             if (!BoutStateBanner) return;
-            BoutStateBanner.gameObject.SetActive(true);
+            var panel = BoutStateBanner.transform.parent;
+            if (panel != null) panel.gameObject.SetActive(true);
+            else BoutStateBanner.gameObject.SetActive(true);
             BoutStateBanner.text = text;
             BoutStateBanner.color = bgColor;
         }
-        public void HideBoutState() { if (BoutStateBanner) BoutStateBanner.gameObject.SetActive(false); }
+        public void HideBoutState()
+        {
+            if (!BoutStateBanner) return;
+            var panel = BoutStateBanner.transform.parent;
+            if (panel != null) panel.gameObject.SetActive(false);
+            else BoutStateBanner.gameObject.SetActive(false);
+        }
 
         public void SetHandCounts(int playerCards, int opponentCards)
         {

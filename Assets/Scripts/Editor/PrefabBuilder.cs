@@ -13,6 +13,7 @@ namespace WitsAndFools.EditorTools
         const float OutlineThickness = 4f;
 
         static TMP_FontAsset DefaultFont => FontAssets.Mono;
+        static TMP_FontAsset BodyFont => FontAssets.Body;
 
         static Sprite LoadSprite(string path)
         {
@@ -66,6 +67,7 @@ namespace WitsAndFools.EditorTools
             nameLabel.enableWordWrapping = true;
             nameLabel.fontStyle = FontStyles.Italic;
             nameLabel.color = ThemePalette.BlackSuit;
+            if (BodyFont) nameLabel.font = BodyFont;
 
             var center = CreateChildText(faceRoot.transform, "CenterPip", "♥",
                 anchorMin: new Vector2(0.5f, 0.5f), anchorMax: new Vector2(0.5f, 0.5f),
@@ -84,6 +86,7 @@ namespace WitsAndFools.EditorTools
                 alignment: TextAlignmentOptions.Center,
                 fontSize: 11);
             abilityBadge.fontStyle = FontStyles.Bold;
+            if (BodyFont) abilityBadge.font = BodyFont;
             abilityBadge.outlineWidth = 0.2f;
             abilityBadge.outlineColor = new Color32(0, 0, 0, 180);
             abilityBadge.gameObject.SetActive(false);

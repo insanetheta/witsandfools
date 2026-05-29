@@ -125,12 +125,13 @@ namespace WitsAndFools.EditorTools
             hudBar.anchoredPosition = Vector2.zero;
 
             var turnLabel = AddText(hudBar, "TurnLabel", "—", anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineLeft, fontSize: 30, color: Color.white);
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineLeft, fontSize: 30, color: Color.white,
+                font: HeadingFont);
             turnLabel.margin = new Vector4(16, 0, 0, 0);
 
             var trumpLabel = AddText(hudBar, "TrumpLabel", "Trump: ♥", anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(0.7f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center, fontSize: 30, color: Color.white,
-                font: MonoFont);
+                font: DefaultFont);
 
             var deckLabel = AddText(hudBar, "DeckCountLabel", "Deck: 0", anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineRight, fontSize: 30, color: Color.white,
@@ -237,12 +238,12 @@ namespace WitsAndFools.EditorTools
                 anchorMin: new Vector2(0, 1), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(0.5f, 0),
                 alignment: TextAlignmentOptions.Center, fontSize: 18,
-                color: new Color(1, 1, 1, 0.5f));
+                color: new Color(1, 1, 1, 0.65f));
             var discardCountLabel = AddText(discardSlot, "DiscardCountLabel", "0",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(1, 0),
                 pivot: new Vector2(0.5f, 0),
                 alignment: TextAlignmentOptions.Center, fontSize: 20,
-                color: ThemePalette.Parchment, font: MonoFont);
+                color: ThemePalette.Parchment, font: DefaultFont);
             discardCountLabel.fontStyle = FontStyles.Bold;
 
             var boutArea = NewChild(canvasRT, "BoutArea");
@@ -382,7 +383,7 @@ namespace WitsAndFools.EditorTools
                 anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1f, 0),
                 pivot: new Vector2(1, 0),
                 alignment: TextAlignmentOptions.BottomRight, fontSize: 18,
-                color: ThemePalette.Gold, font: MonoFont);
+                color: ThemePalette.Gold, font: DefaultFont);
             var deckTopRT = (RectTransform)deckTopLabel.transform;
             deckTopRT.sizeDelta = new Vector2(0, 40);
             deckTopRT.anchoredPosition = new Vector2(-16, 200);
@@ -394,7 +395,7 @@ namespace WitsAndFools.EditorTools
                 anchorMin: new Vector2(0.4f, 1), anchorMax: new Vector2(1f, 1),
                 pivot: new Vector2(1, 1),
                 alignment: TextAlignmentOptions.TopRight, fontSize: 20,
-                color: ThemePalette.Amber, font: MonoFont);
+                color: ThemePalette.Amber, font: DefaultFont);
             var infoRT = (RectTransform)infoLabel.transform;
             infoRT.sizeDelta = new Vector2(0, 35);
             infoRT.anchoredPosition = new Vector2(-16, -76);
@@ -402,80 +403,93 @@ namespace WitsAndFools.EditorTools
             infoLabel.gameObject.SetActive(false);
             hud.InfoLabel = infoLabel;
 
-            // ----- Player resource label (left side, above hand, large and prominent) -----
-            var playerResLabel = AddText(canvasRT, "PlayerResourceLabel", "",
-                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.25f, 0),
-                pivot: new Vector2(0, 0),
-                alignment: TextAlignmentOptions.BottomLeft, fontSize: 32,
-                color: ThemePalette.Gold, font: MonoFont);
-            playerResLabel.fontStyle = FontStyles.Bold;
-            playerResLabel.outlineWidth = 0.3f;
-            playerResLabel.outlineColor = Color.black;
-            var playerResRT = (RectTransform)playerResLabel.transform;
-            playerResRT.sizeDelta = new Vector2(0, 44);
-            playerResRT.anchoredPosition = new Vector2(16, 200);
-            playerResLabel.gameObject.SetActive(false);
-            hud.PlayerResourceLabel = playerResLabel;
+            // ----- Opponent info strip (dark panel extending right from nameplate) -----
+            var oppInfoStrip = NewChild(canvasRT, "OpponentInfoStrip");
+            oppInfoStrip.anchorMin = new Vector2(0, 1);
+            oppInfoStrip.anchorMax = new Vector2(1, 1);
+            oppInfoStrip.pivot = new Vector2(0.5f, 1);
+            oppInfoStrip.offsetMin = new Vector2(390, -118);
+            oppInfoStrip.offsetMax = new Vector2(-16, -82);
+            var oppInfoBg = oppInfoStrip.gameObject.AddComponent<Image>();
+            oppInfoBg.color = new Color(0, 0, 0, 0.55f);
+            oppInfoBg.raycastTarget = false;
 
-            // ----- Opponent resource label (top-right, between HUD bar and hand) -----
-            var oppResLabel = AddText(canvasRT, "OpponentResourceLabel", "",
-                anchorMin: new Vector2(0.65f, 1), anchorMax: new Vector2(1, 1),
-                pivot: new Vector2(1, 1),
-                alignment: TextAlignmentOptions.TopRight, fontSize: 26,
-                color: ThemePalette.Gold, font: MonoFont);
+            var oppResLabel = AddText(oppInfoStrip, "OpponentResourceLabel", "",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.55f, 1),
+                pivot: new Vector2(0, 0.5f),
+                alignment: TextAlignmentOptions.MidlineLeft, fontSize: 22,
+                color: ThemePalette.Gold, font: DefaultFont);
             oppResLabel.fontStyle = FontStyles.Bold;
-            oppResLabel.outlineWidth = 0.3f;
-            oppResLabel.outlineColor = Color.black;
             var oppResRT = (RectTransform)oppResLabel.transform;
-            oppResRT.sizeDelta = new Vector2(0, 40);
-            oppResRT.anchoredPosition = new Vector2(-210, -78);
-            oppResLabel.gameObject.SetActive(false);
+            oppResRT.offsetMin = new Vector2(12, 0);
+            oppResRT.offsetMax = new Vector2(0, 0);
+            oppResLabel.gameObject.SetActive(true);
             hud.OpponentResourceLabel = oppResLabel;
 
-            // ----- Bout state banner (top-center, prominent phase indicator) -----
-            var boutBanner = AddText(canvasRT, "BoutStateBanner", "",
-                anchorMin: new Vector2(0.25f, 1), anchorMax: new Vector2(0.75f, 1),
-                pivot: new Vector2(0.5f, 1),
-                alignment: TextAlignmentOptions.Center, fontSize: 24,
-                color: Color.white, font: MonoFont);
-            boutBanner.fontStyle = FontStyles.Bold;
-            boutBanner.outlineWidth = 0.3f;
-            boutBanner.outlineColor = Color.black;
-            var boutBannerRT = (RectTransform)boutBanner.transform;
-            boutBannerRT.sizeDelta = new Vector2(0, 40);
-            boutBannerRT.anchoredPosition = new Vector2(0, -112);
-            boutBanner.gameObject.SetActive(false);
-            hud.BoutStateBanner = boutBanner;
+            var oppHandCount = AddText(oppInfoStrip, "OpponentHandCount", "",
+                anchorMin: new Vector2(0.55f, 0), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(1, 0.5f),
+                alignment: TextAlignmentOptions.MidlineRight, fontSize: 20,
+                color: ThemePalette.Parchment, font: DefaultFont);
+            oppHandCount.fontStyle = FontStyles.Bold;
+            var oppHCRT = (RectTransform)oppHandCount.transform;
+            oppHCRT.offsetMin = new Vector2(0, 0);
+            oppHCRT.offsetMax = new Vector2(-12, 0);
+            hud.OpponentHandCount = oppHandCount;
 
-            // ----- Player hand count (bottom-right, above hand, below EndBout button) -----
-            var playerHandCount = AddText(canvasRT, "PlayerHandCount", "",
-                anchorMin: new Vector2(1, 0), anchorMax: new Vector2(1, 0),
-                pivot: new Vector2(1, 0),
-                alignment: TextAlignmentOptions.BottomRight, fontSize: 22,
-                color: ThemePalette.Parchment, font: MonoFont);
+            // ----- Player info strip (dark panel above run HUD bar, bottom-left) -----
+            var playerInfoStrip = NewChild(canvasRT, "PlayerInfoStrip");
+            playerInfoStrip.anchorMin = new Vector2(0, 0);
+            playerInfoStrip.anchorMax = new Vector2(0.5f, 0);
+            playerInfoStrip.pivot = new Vector2(0, 0);
+            playerInfoStrip.offsetMin = new Vector2(16, 132);
+            playerInfoStrip.offsetMax = new Vector2(-16, 168);
+            var playerInfoBg = playerInfoStrip.gameObject.AddComponent<Image>();
+            playerInfoBg.color = new Color(0, 0, 0, 0.55f);
+            playerInfoBg.raycastTarget = false;
+
+            var playerResLabel = AddText(playerInfoStrip, "PlayerResourceLabel", "",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.6f, 1),
+                pivot: new Vector2(0, 0.5f),
+                alignment: TextAlignmentOptions.MidlineLeft, fontSize: 22,
+                color: ThemePalette.Gold, font: DefaultFont);
+            playerResLabel.fontStyle = FontStyles.Bold;
+            var playerResRT = (RectTransform)playerResLabel.transform;
+            playerResRT.offsetMin = new Vector2(12, 0);
+            playerResRT.offsetMax = new Vector2(0, 0);
+            playerResLabel.gameObject.SetActive(true);
+            hud.PlayerResourceLabel = playerResLabel;
+
+            var playerHandCount = AddText(playerInfoStrip, "PlayerHandCount", "",
+                anchorMin: new Vector2(0.6f, 0), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(1, 0.5f),
+                alignment: TextAlignmentOptions.MidlineRight, fontSize: 20,
+                color: ThemePalette.Parchment, font: DefaultFont);
             playerHandCount.fontStyle = FontStyles.Bold;
-            playerHandCount.outlineWidth = 0.3f;
-            playerHandCount.outlineColor = Color.black;
             var playerHCRT = (RectTransform)playerHandCount.transform;
-            playerHCRT.sizeDelta = new Vector2(120, 30);
-            playerHCRT.anchoredPosition = new Vector2(-16, 278);
-            playerHandCount.gameObject.SetActive(false);
+            playerHCRT.offsetMin = new Vector2(0, 0);
+            playerHCRT.offsetMax = new Vector2(-12, 0);
             hud.PlayerHandCount = playerHandCount;
 
-            // ----- Opponent hand count (top-right, below HUD bar) -----
-            var oppHandCount = AddText(canvasRT, "OpponentHandCount", "",
-                anchorMin: new Vector2(1, 1), anchorMax: new Vector2(1, 1),
-                pivot: new Vector2(1, 1),
-                alignment: TextAlignmentOptions.TopRight, fontSize: 22,
-                color: ThemePalette.Parchment, font: MonoFont);
-            oppHandCount.fontStyle = FontStyles.Bold;
-            oppHandCount.outlineWidth = 0.3f;
-            oppHandCount.outlineColor = Color.black;
-            var oppHCRT = (RectTransform)oppHandCount.transform;
-            oppHCRT.sizeDelta = new Vector2(180, 30);
-            oppHCRT.anchoredPosition = new Vector2(-16, -78);
-            oppHandCount.gameObject.SetActive(false);
-            hud.OpponentHandCount = oppHandCount;
+            // ----- Bout state banner (top-center, with dark panel) -----
+            var boutPanel = NewChild(canvasRT, "BoutStatePanel");
+            boutPanel.anchorMin = new Vector2(0.3f, 1);
+            boutPanel.anchorMax = new Vector2(0.7f, 1);
+            boutPanel.pivot = new Vector2(0.5f, 1);
+            boutPanel.sizeDelta = new Vector2(0, 36);
+            boutPanel.anchoredPosition = new Vector2(0, -112);
+            var boutPanelBg = boutPanel.gameObject.AddComponent<Image>();
+            boutPanelBg.color = new Color(0, 0, 0, 0.55f);
+            boutPanelBg.raycastTarget = false;
+            boutPanel.gameObject.SetActive(false);
+
+            var boutBanner = AddText(boutPanel, "BoutStateBanner", "",
+                anchorMin: Vector2.zero, anchorMax: Vector2.one,
+                pivot: new Vector2(0.5f, 0.5f),
+                alignment: TextAlignmentOptions.Center, fontSize: 24,
+                color: Color.white, font: HeadingFont);
+            boutBanner.fontStyle = FontStyles.Bold;
+            hud.BoutStateBanner = boutBanner;
 
             // ----- Ability trigger feedback banner (center screen, with background panel) -----
             var feedbackPanel = NewChild(canvasRT, "AbilityFeedbackPanel");
@@ -492,7 +506,7 @@ namespace WitsAndFools.EditorTools
                 anchorMin: Vector2.zero, anchorMax: Vector2.one,
                 pivot: new Vector2(0.5f, 0.5f),
                 alignment: TextAlignmentOptions.Center, fontSize: 28,
-                color: ThemePalette.Gold, font: MonoFont);
+                color: ThemePalette.Gold, font: DefaultFont);
             feedbackLabel.fontStyle = FontStyles.Bold;
             feedbackLabel.enableWordWrapping = true;
             feedbackLabel.raycastTarget = false;
@@ -530,11 +544,9 @@ namespace WitsAndFools.EditorTools
             ((RectTransform)tooltipLabel.transform).SetParent(matchPanel, true);
             ((RectTransform)deckTopLabel.transform).SetParent(matchPanel, true);
             ((RectTransform)infoLabel.transform).SetParent(matchPanel, true);
-            ((RectTransform)boutBanner.transform).SetParent(matchPanel, true);
-            ((RectTransform)playerHandCount.transform).SetParent(matchPanel, true);
-            ((RectTransform)oppHandCount.transform).SetParent(matchPanel, true);
-            ((RectTransform)playerResLabel.transform).SetParent(matchPanel, true);
-            ((RectTransform)oppResLabel.transform).SetParent(matchPanel, true);
+            boutPanel.SetParent(matchPanel, true);
+            playerInfoStrip.SetParent(matchPanel, true);
+            oppInfoStrip.SetParent(matchPanel, true);
             feedbackPanel.SetParent(matchPanel, true);
             matchPanel.gameObject.SetActive(false);
 
@@ -739,7 +751,7 @@ namespace WitsAndFools.EditorTools
             var shopFlorins = AddText(shopPanel, "ShopFlorins", "Your purse: 0 Florins",
                 anchorMin: new Vector2(0.1f, 0.74f), anchorMax: new Vector2(0.9f, 0.82f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 22, color: ThemePalette.Gold, font: MonoFont);
+                fontSize: 22, color: ThemePalette.Gold, font: DefaultFont);
 
             var shopItemContainer = NewChild(shopPanel, "ShopItemContainer");
             shopItemContainer.anchorMin = new Vector2(0.20f, 0.15f);
@@ -838,23 +850,23 @@ namespace WitsAndFools.EditorTools
             var prestigeLabel = AddText(runHudPanel, "PrestigeLabel", "Prestige: ♥♥♥♥",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.25f, 1),
                 pivot: new Vector2(0, 0.5f), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 26, color: ThemePalette.PrestigeRed, font: MonoFont);
+                fontSize: 26, color: ThemePalette.PrestigeRed, font: DefaultFont);
             ((RectTransform)prestigeLabel.transform).offsetMin = new Vector2(24, 0);
 
             var florinsLabel = AddText(runHudPanel, "FlorinsLabel", "Florins: 0",
                 anchorMin: new Vector2(0.25f, 0), anchorMax: new Vector2(0.5f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 26, color: ThemePalette.Gold, font: MonoFont);
+                fontSize: 26, color: ThemePalette.Gold, font: DefaultFont);
 
             var actLabel = AddText(runHudPanel, "ActLabel", "Act 1 of 5",
                 anchorMin: new Vector2(0.5f, 0), anchorMax: new Vector2(0.75f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 26, color: Color.white);
+                fontSize: 26, color: Color.white, font: DefaultFont);
 
             var abilitiesLabel = AddText(runHudPanel, "AbilitiesLabel", "Abilities: 4/5",
                 anchorMin: new Vector2(0.75f, 0), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(1, 0.5f), alignment: TextAlignmentOptions.MidlineRight,
-                fontSize: 26, color: ThemePalette.AbilityBlue, font: MonoFont);
+                fontSize: 26, color: ThemePalette.AbilityBlue, font: DefaultFont);
             ((RectTransform)abilitiesLabel.transform).offsetMax = new Vector2(-24, 0);
 
             runHudPanel.gameObject.SetActive(false);
