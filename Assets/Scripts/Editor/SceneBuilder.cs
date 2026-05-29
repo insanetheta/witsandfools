@@ -409,6 +409,8 @@ namespace WitsAndFools.EditorTools
                 alignment: TextAlignmentOptions.BottomLeft, fontSize: 32,
                 color: ThemePalette.Gold, font: MonoFont);
             playerResLabel.fontStyle = FontStyles.Bold;
+            playerResLabel.outlineWidth = 0.3f;
+            playerResLabel.outlineColor = Color.black;
             var playerResRT = (RectTransform)playerResLabel.transform;
             playerResRT.sizeDelta = new Vector2(0, 44);
             playerResRT.anchoredPosition = new Vector2(16, 200);
@@ -422,6 +424,8 @@ namespace WitsAndFools.EditorTools
                 alignment: TextAlignmentOptions.TopRight, fontSize: 26,
                 color: ThemePalette.Gold, font: MonoFont);
             oppResLabel.fontStyle = FontStyles.Bold;
+            oppResLabel.outlineWidth = 0.3f;
+            oppResLabel.outlineColor = Color.black;
             var oppResRT = (RectTransform)oppResLabel.transform;
             oppResRT.sizeDelta = new Vector2(0, 40);
             oppResRT.anchoredPosition = new Vector2(-210, -78);
@@ -435,6 +439,8 @@ namespace WitsAndFools.EditorTools
                 alignment: TextAlignmentOptions.Center, fontSize: 24,
                 color: Color.white, font: MonoFont);
             boutBanner.fontStyle = FontStyles.Bold;
+            boutBanner.outlineWidth = 0.3f;
+            boutBanner.outlineColor = Color.black;
             var boutBannerRT = (RectTransform)boutBanner.transform;
             boutBannerRT.sizeDelta = new Vector2(0, 40);
             boutBannerRT.anchoredPosition = new Vector2(0, -112);
@@ -448,6 +454,8 @@ namespace WitsAndFools.EditorTools
                 alignment: TextAlignmentOptions.BottomRight, fontSize: 22,
                 color: ThemePalette.Parchment, font: MonoFont);
             playerHandCount.fontStyle = FontStyles.Bold;
+            playerHandCount.outlineWidth = 0.3f;
+            playerHandCount.outlineColor = Color.black;
             var playerHCRT = (RectTransform)playerHandCount.transform;
             playerHCRT.sizeDelta = new Vector2(120, 30);
             playerHCRT.anchoredPosition = new Vector2(-16, 278);
@@ -461,6 +469,8 @@ namespace WitsAndFools.EditorTools
                 alignment: TextAlignmentOptions.TopRight, fontSize: 22,
                 color: ThemePalette.Parchment, font: MonoFont);
             oppHandCount.fontStyle = FontStyles.Bold;
+            oppHandCount.outlineWidth = 0.3f;
+            oppHandCount.outlineColor = Color.black;
             var oppHCRT = (RectTransform)oppHandCount.transform;
             oppHCRT.sizeDelta = new Vector2(180, 30);
             oppHCRT.anchoredPosition = new Vector2(-16, -78);
