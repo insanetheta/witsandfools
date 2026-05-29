@@ -601,6 +601,9 @@ namespace WitsAndFools
             Hud.SetDeckTop(top[0]);
             _peekDeckTopActive = true;
 
+            // Activate panel BEFORE spawning cards so CardView.Awake() runs
+            Hud.ShowPeekOverlay();
+
             for (int i = 0; i < top.Length; i++)
             {
                 var view = SpawnCardView(top[i], faceUp: true, Hud.PeekCardContainer);
@@ -615,8 +618,6 @@ namespace WitsAndFools
                 Hud.PeekNextDrawLabel.gameObject.SetActive(true);
                 Hud.PeekNextDrawLabel.text = $"Next draw: {top[0]}";
             }
-
-            Hud.ShowPeekOverlay();
 
             if (Hud.PeekDismissButton)
             {
