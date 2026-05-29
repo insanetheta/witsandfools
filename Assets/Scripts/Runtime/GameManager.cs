@@ -605,7 +605,7 @@ namespace WitsAndFools
             {
                 var view = SpawnCardView(top[i], faceUp: true, Hud.PeekCardContainer);
                 var rt = view.GetComponent<RectTransform>();
-                float spacing = 130f;
+                float spacing = 150f;
                 float totalWidth = (top.Length - 1) * spacing;
                 rt.anchoredPosition = new Vector2(-totalWidth / 2f + i * spacing, 0);
             }
