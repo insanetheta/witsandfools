@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -451,19 +452,6 @@ namespace WitsAndFools
 
         void OnDrew(int playerIndex, int drawnCount)
         {
-            if (playerIndex == HumanPlayerIndex)
-            {
-                // Add views for any cards in hand we don't have a view for yet.
-                var data = Engine.HandOf(playerIndex).Cards;
-                foreach (var c in data)
-                    if (!_humanCardViews.ContainsKey(c))
-                        AddHumanCardView(c);
-            }
-            else
-            {
-                int target = Engine.HandOf(playerIndex).Count;
-                while (_opponentCardViews.Count < target) AddOpponentCardView();
-            }
             UpdateHud();
         }
 
@@ -558,19 +546,23 @@ namespace WitsAndFools
 
         void OnAbilityUsed(int playerIndex, Card card, AbilityType ability)
         {
-            if (playerIndex == HumanPlayerIndex && _humanCardViews.TryGetValue(card, out var view))
+            bool autoTriggered = card.Trigger == TriggerTiming.OnAttack || card.Trigger == TriggerTiming.OnDefend;
+            if (!autoTriggered)
             {
-                _humanCardViews.Remove(card);
-                Table.PlayerHand.Remove(view);
-                StartCoroutine(MoveAndDestroy(view, Table.DiscardSlot.position, MoveSeconds));
-            }
-            else if (playerIndex != HumanPlayerIndex && _opponentCardViews.Count > 0)
-            {
-                var view2 = _opponentCardViews[0];
-                _opponentCardViews.RemoveAt(0);
-                Table.OpponentHand.Remove(view2);
-                view2.Bind(card, faceUp: true);
-                StartCoroutine(MoveAndDestroy(view2, Table.DiscardSlot.position, MoveSeconds));
+                if (playerIndex == HumanPlayerIndex && _humanCardViews.TryGetValue(card, out var view))
+                {
+                    _humanCardViews.Remove(card);
+                    Table.PlayerHand.Remove(view);
+                    StartCoroutine(MoveAndDestroy(view, Table.DiscardSlot.position, MoveSeconds));
+                }
+                else if (playerIndex != HumanPlayerIndex && _opponentCardViews.Count > 0)
+                {
+                    var view2 = _opponentCardViews[0];
+                    _opponentCardViews.RemoveAt(0);
+                    Table.OpponentHand.Remove(view2);
+                    view2.Bind(card, faceUp: true);
+                    StartCoroutine(MoveAndDestroy(view2, Table.DiscardSlot.position, MoveSeconds));
+                }
             }
             ShowAbilityFeedback(playerIndex, card, ability);
             UpdateHud();
@@ -578,22 +570,42 @@ namespace WitsAndFools
         }
 
         Coroutine _feedbackCoroutine;
+        bool _peekDeckTopActive;
         void ShowAbilityFeedback(int playerIndex, Card card, AbilityType ability)
         {
             if (Hud == null) return;
             string who = playerIndex == HumanPlayerIndex ? "You" : OpponentName;
             string name = card.DefinitionId != null && CardCatalog.TryGet(card.DefinitionId, out var def) ? def.Name : card.ToString();
             string text = $"{who}: {name} → {ability.ShortName()}";
+
+            if (ability == AbilityType.Peek && playerIndex == HumanPlayerIndex)
+            {
+                var top = Engine.PeekTopCards(playerIndex, 3);
+                if (top.Length > 0)
+                {
+                    text += "\n" + string.Join("  ", System.Array.ConvertAll(top, c => c.ToString()));
+                    Hud.SetDeckTop(top[0]);
+                    _peekDeckTopActive = true;
+                }
+            }
+
             var color = playerIndex == HumanPlayerIndex ? ThemePalette.Gold : ThemePalette.VenetianRed;
             Hud.ShowAbilityFeedback(text, color);
+            float duration = _peekDeckTopActive ? 2.5f : 1.2f;
             if (_feedbackCoroutine != null) StopCoroutine(_feedbackCoroutine);
-            _feedbackCoroutine = StartCoroutine(HideFeedbackAfter(1.2f));
+            _feedbackCoroutine = StartCoroutine(HideFeedbackAfter(duration));
         }
 
         IEnumerator HideFeedbackAfter(float seconds)
         {
             yield return new WaitForSeconds(seconds);
             Hud?.HideAbilityFeedback();
+            if (_peekDeckTopActive)
+            {
+                _peekDeckTopActive = false;
+                if (!Engine.Config.SpysMonocle[HumanPlayerIndex])
+                    Hud?.SetDeckTop(null);
+            }
             _feedbackCoroutine = null;
         }
 
@@ -654,7 +666,9 @@ namespace WitsAndFools
                 bool playable =
                     (humanAttack && Rules.CanAttackWith(Engine.Bout, view.Card)) ||
                     (humanDefense && defendSlot >= 0 && Rules.CanDefendSlotWith(Engine.Bout, defendSlot, view.Card, Engine.Trump));
-                bool abilityUsable = humanActive && view.Card.HasAbility && AbilityValidForPhase(view.Card.Ability.Value);
+                bool abilityUsable = humanActive && view.Card.HasAbility
+                    && view.Card.Trigger == TriggerTiming.None
+                    && AbilityValidForPhase(view.Card.Ability.Value);
 
                 if (playable || abilityUsable)
                 {
@@ -704,9 +718,20 @@ namespace WitsAndFools
         void UpdateHud()
         {
             if (!Hud) return;
-            Hud.SetDeckCount(Engine.DeckCount);
-            if (Table && Table.DeckCountLabel)
-                Table.DeckCountLabel.text = Engine.DeckCount.ToString();
+            if (Engine.IsDualDeck)
+            {
+                int playerDeck = Engine.DeckCountOf(HumanPlayerIndex);
+                int oppDeck = Engine.DeckCountOf(1 - HumanPlayerIndex);
+                Hud.SetDeckCount(oppDeck);
+                if (Table && Table.DeckCountLabel)
+                    Table.DeckCountLabel.text = playerDeck.ToString();
+            }
+            else
+            {
+                Hud.SetDeckCount(Engine.DeckCount);
+                if (Table && Table.DeckCountLabel)
+                    Table.DeckCountLabel.text = Engine.DeckCount.ToString();
+            }
             Hud.SetTrump(Engine.Trump);
             string phase;
             Color boutColor;
@@ -733,13 +758,50 @@ namespace WitsAndFools
             int oppCards = Engine.HandCount(1 - HumanPlayerIndex);
             Hud.SetHandCounts(playerCards, oppCards);
 
+            ReconcileHumanCardViews();
+            ReconcileOpponentCardViews(oppCards);
+
             if (Table && Table.DiscardCountLabel)
                 Table.DiscardCountLabel.text = Engine.Discard.Count.ToString();
 
             if (Engine.Config.SpysMonocle[HumanPlayerIndex])
                 Hud.SetDeckTop(Engine.DeckTopCard);
-            else
+            else if (!_peekDeckTopActive)
                 Hud.SetDeckTop(null);
+        }
+
+        // ---------- View reconciliation ----------
+
+        void ReconcileHumanCardViews()
+        {
+            var engineCards = Engine.HandOf(HumanPlayerIndex).Cards;
+            var stale = new List<Card>();
+            foreach (var kvp in _humanCardViews)
+                if (!engineCards.Contains(kvp.Key))
+                    stale.Add(kvp.Key);
+            foreach (var c in stale)
+            {
+                var v = _humanCardViews[c];
+                _humanCardViews.Remove(c);
+                Table.PlayerHand.Remove(v);
+                Destroy(v.gameObject);
+            }
+            foreach (var c in engineCards)
+                if (!_humanCardViews.ContainsKey(c))
+                    AddHumanCardView(c);
+        }
+
+        void ReconcileOpponentCardViews(int target)
+        {
+            while (_opponentCardViews.Count > target)
+            {
+                var v = _opponentCardViews[^1];
+                _opponentCardViews.RemoveAt(_opponentCardViews.Count - 1);
+                Table.OpponentHand.Remove(v);
+                Destroy(v.gameObject);
+            }
+            while (_opponentCardViews.Count < target)
+                AddOpponentCardView();
         }
 
         // ---------- Visual helpers ----------
