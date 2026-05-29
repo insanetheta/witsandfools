@@ -764,13 +764,13 @@ namespace WitsAndFools
             {
                 int playerDeck = Engine.DeckCountOf(HumanPlayerIndex);
                 int oppDeck = Engine.DeckCountOf(1 - HumanPlayerIndex);
-                Hud.SetDeckCount(oppDeck);
+                Hud.SetDeckCounts(playerDeck, oppDeck);
                 if (Table && Table.DeckCountLabel)
                     Table.DeckCountLabel.text = playerDeck.ToString();
             }
             else
             {
-                Hud.SetDeckCount(Engine.DeckCount);
+                Hud.SetDeckCounts(Engine.DeckCount, Engine.DeckCount);
                 if (Table && Table.DeckCountLabel)
                     Table.DeckCountLabel.text = Engine.DeckCount.ToString();
             }

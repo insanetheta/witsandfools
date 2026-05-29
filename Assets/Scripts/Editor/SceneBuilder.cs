@@ -129,14 +129,9 @@ namespace WitsAndFools.EditorTools
                 font: HeadingFont);
             turnLabel.margin = new Vector4(16, 0, 0, 0);
 
-            var trumpLabel = AddText(hudBar, "TrumpLabel", "Trump: ♥", anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(0.7f, 1),
+            var trumpLabel = AddText(hudBar, "TrumpLabel", "Trump: ♥", anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(1f, 1),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center, fontSize: 30, color: Color.white,
                 font: DefaultFont);
-
-            var deckLabel = AddText(hudBar, "DeckCountLabel", "Deck: 0", anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineRight, fontSize: 30, color: Color.white,
-                font: MonoFont);
-            deckLabel.margin = new Vector4(0, 0, 16, 0);
 
             // ----- Opponent Nameplate (top-left, below HUD bar) -----
             var nameplate = NewChild(canvasRT, "OpponentNameplate");
@@ -290,7 +285,6 @@ namespace WitsAndFools.EditorTools
             var hudGO = new GameObject("HudView");
             var hud = hudGO.AddComponent<HudView>();
             hud.TurnLabel = turnLabel;
-            hud.DeckCountLabel = deckLabel;
             hud.TrumpLabel = trumpLabel;
             hud.EndBoutButton = endBoutBtn.GetComponent<Button>();
             hud.OpponentPortrait = portraitImg;
@@ -415,7 +409,7 @@ namespace WitsAndFools.EditorTools
             oppInfoBg.raycastTarget = false;
 
             var oppResLabel = AddText(oppInfoStrip, "OpponentResourceLabel", "",
-                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.55f, 1),
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 1),
                 pivot: new Vector2(0, 0.5f),
                 alignment: TextAlignmentOptions.MidlineLeft, fontSize: 22,
                 color: ThemePalette.Gold, font: DefaultFont);
@@ -426,8 +420,16 @@ namespace WitsAndFools.EditorTools
             oppResLabel.gameObject.SetActive(true);
             hud.OpponentResourceLabel = oppResLabel;
 
+            var oppDeckCount = AddText(oppInfoStrip, "OpponentDeckCountLabel", "Deck: 0",
+                anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(0.7f, 1),
+                pivot: new Vector2(0.5f, 0.5f),
+                alignment: TextAlignmentOptions.Center, fontSize: 20,
+                color: Color.white, font: MonoFont);
+            oppDeckCount.fontStyle = FontStyles.Bold;
+            hud.OpponentDeckCountLabel = oppDeckCount;
+
             var oppHandCount = AddText(oppInfoStrip, "OpponentHandCount", "",
-                anchorMin: new Vector2(0.55f, 0), anchorMax: new Vector2(1, 1),
+                anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(1, 0.5f),
                 alignment: TextAlignmentOptions.MidlineRight, fontSize: 20,
                 color: ThemePalette.Parchment, font: DefaultFont);
@@ -449,7 +451,7 @@ namespace WitsAndFools.EditorTools
             playerInfoBg.raycastTarget = false;
 
             var playerResLabel = AddText(playerInfoStrip, "PlayerResourceLabel", "",
-                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.6f, 1),
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 1),
                 pivot: new Vector2(0, 0.5f),
                 alignment: TextAlignmentOptions.MidlineLeft, fontSize: 22,
                 color: ThemePalette.Gold, font: DefaultFont);
@@ -460,8 +462,16 @@ namespace WitsAndFools.EditorTools
             playerResLabel.gameObject.SetActive(true);
             hud.PlayerResourceLabel = playerResLabel;
 
+            var playerDeckCount = AddText(playerInfoStrip, "PlayerDeckCountLabel", "Deck: 0",
+                anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(0.7f, 1),
+                pivot: new Vector2(0.5f, 0.5f),
+                alignment: TextAlignmentOptions.Center, fontSize: 20,
+                color: Color.white, font: MonoFont);
+            playerDeckCount.fontStyle = FontStyles.Bold;
+            hud.PlayerDeckCountLabel = playerDeckCount;
+
             var playerHandCount = AddText(playerInfoStrip, "PlayerHandCount", "",
-                anchorMin: new Vector2(0.6f, 0), anchorMax: new Vector2(1, 1),
+                anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(1, 0.5f),
                 alignment: TextAlignmentOptions.MidlineRight, fontSize: 20,
                 color: ThemePalette.Parchment, font: DefaultFont);
