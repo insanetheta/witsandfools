@@ -42,6 +42,15 @@ namespace WitsAndFools
             }
         }
 
+        public void ApplyRankOverrides(Dictionary<string, Rank> overrides)
+        {
+            foreach (var t in _templates)
+            {
+                if (t.Id != null && overrides.TryGetValue(t.Id, out var newRank))
+                    t.Rank = newRank;
+            }
+        }
+
         public void Build(int seed)
         {
             _rng = new Random(seed);

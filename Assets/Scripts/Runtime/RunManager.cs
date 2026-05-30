@@ -299,6 +299,24 @@ namespace WitsAndFools
                     return;
                 }
             }
+            if (_run.Florins >= 6)
+            {
+                var upgradeCandidates = GetUpgradeableCards();
+                if (upgradeCandidates.Count > 0)
+                {
+                    var pick = upgradeCandidates[_rng.Next(upgradeCandidates.Count)];
+                    Rank newRank = pick.rank + 1;
+                    int price = (int)pick.rank >= 10 ? 10 : 6;
+                    if (_run.Florins >= price)
+                    {
+                        _run.CardRankOverrides[pick.id] = newRank;
+                        _run.Florins -= price;
+                        OnShopAction?.Invoke($"Honed '{pick.name}' {pick.rank.Label()}→{newRank.Label()} (-{price} florins, {_run.Florins} remaining)");
+                        OnResultContinue();
+                        return;
+                    }
+                }
+            }
             if (_run.Florins >= 6 && _run.PlayerDeckCardIds.Count < 16)
             {
                 var card = PickDraftableCard();
@@ -1439,6 +1457,10 @@ namespace WitsAndFools
             if (trinketOffering.HasValue)
                 CreateTrinketShopButton(trinketOffering.Value);
 
+            var upgradeOffering = PickCardUpgradeOffering();
+            if (upgradeOffering.HasValue)
+                CreateCardUpgradeButton(upgradeOffering.Value);
+
             if (_run.PlayerBurdens.Count > 0)
                 CreateBurdenRemovalButton();
         }
@@ -1686,6 +1708,65 @@ namespace WitsAndFools
             PopulateShopItems();
         }
 
+        (string cardId, string cardName, Rank currentRank, Rank newRank, int price)? PickCardUpgradeOffering()
+        {
+            var candidates = new List<(string id, string name, Rank rank)>();
+            foreach (var cardId in _run.PlayerDeckCardIds)
+            {
+                var def = CardCatalog.Get(cardId);
+                Rank effective = _run.CardRankOverrides.TryGetValue(cardId, out var ov) ? ov : def.Rank;
+                if (effective >= Rank.Ace) continue;
+                candidates.Add((cardId, def.Name, effective));
+            }
+            if (candidates.Count == 0) return null;
+            var pick = candidates[_rng.Next(candidates.Count)];
+            Rank newRank = pick.rank + 1;
+            int price = (int)pick.rank >= 10 ? 10 : 6;
+            return (pick.id, pick.name, pick.rank, newRank, price);
+        }
+
+        void CreateCardUpgradeButton((string cardId, string cardName, Rank currentRank, Rank newRank, int price) offering)
+        {
+            bool canBuy = _run.Florins >= offering.price;
+            string label = $"Hone: {offering.cardName}  {offering.currentRank.Label()} → {offering.newRank.Label()}  —  {offering.price}f";
+
+            var btnGO = new GameObject("CardUpgrade", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            btnGO.transform.SetParent(ShopItemContainer, false);
+            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.18f, 0.14f, 0.10f, 0.85f) : ThemePalette.LockedGray;
+            var le = btnGO.GetComponent<LayoutElement>();
+            le.preferredHeight = 70;
+            le.preferredWidth = 550;
+
+            var lblGO = new GameObject("Label", typeof(RectTransform));
+            lblGO.transform.SetParent(btnGO.transform, false);
+            var lblRT = (RectTransform)lblGO.transform;
+            lblRT.anchorMin = Vector2.zero;
+            lblRT.anchorMax = Vector2.one;
+            lblRT.offsetMin = new Vector2(16, 0);
+            lblRT.offsetMax = new Vector2(-16, 0);
+            var lbl = lblGO.AddComponent<TextMeshProUGUI>();
+            lbl.text = label;
+            lbl.alignment = TextAlignmentOptions.Center;
+            lbl.fontSize = 20;
+            lbl.color = canBuy ? ThemePalette.Parchment : ThemePalette.DisabledText;
+            lbl.raycastTarget = false;
+
+            var btn = btnGO.GetComponent<Button>();
+            btn.interactable = canBuy;
+            var captured = offering;
+            btn.onClick.AddListener(() => OnShopUpgradeCard(captured.cardId, captured.newRank, captured.price));
+        }
+
+        void OnShopUpgradeCard(string cardId, Rank newRank, int price)
+        {
+            if (_run.Florins < price) return;
+            _run.Florins -= price;
+            _run.CardRankOverrides[cardId] = newRank;
+            UpdateRunHud();
+            UpdateShopFlorins();
+            PopulateShopItems();
+        }
+
         void OnShopBuy(AbilityType type, int price)
         {
             if (_run.Florins < price || _run.PlayerAbilities.Count >= _run.MaxAbilitySlots) return;
@@ -1886,7 +1967,7 @@ namespace WitsAndFools
             SetPhase(RunPhase.Rest);
 
             bool hasBurdens = _run.PlayerBurdens.Count > 0;
-            int restType = _rng.Next(3);
+            int restType = _rng.Next(4);
 
             if (restType == 0 && hasBurdens)
             {
@@ -1910,6 +1991,32 @@ namespace WitsAndFools
                     studyLabel, "Rest quietly (+3 Florins)");
                 _eventChoice1Action = () => DoRestStudy(upgradeable, canLearn);
                 _eventChoice2Action = DoRestQuietly;
+            }
+            else if (restType == 2)
+            {
+                var candidates = GetUpgradeableCards();
+                if (candidates.Count > 0)
+                {
+                    var pick = candidates[_rng.Next(candidates.Count)];
+                    Rank newRank = pick.rank + 1;
+                    ShowEventChoices("The Smithy",
+                        $"A traveling smith offers to hone one of your cards.\n\"{pick.name}\" can be sharpened from {pick.rank.Label()} to {newRank.Label()}.",
+                        $"Hone ({pick.rank.Label()} → {newRank.Label()})", "Rest quietly (+3 Florins)");
+                    _eventChoice1Action = () =>
+                    {
+                        _run.CardRankOverrides[pick.id] = newRank;
+                        ShowEventOutcome($"{pick.name} honed to {newRank.Label()}!");
+                    };
+                    _eventChoice2Action = DoRestQuietly;
+                }
+                else
+                {
+                    ShowEventChoices("The Hearth",
+                        "A warm fire and a good meal. Simple comforts.",
+                        "Rest quietly (+3 Florins)", null);
+                    _eventChoice1Action = DoRestQuietly;
+                    _eventChoice2Action = null;
+                }
             }
             else
             {
@@ -2028,6 +2135,19 @@ namespace WitsAndFools
                 if (!_run.PlayerBurdens.Contains(b)) available.Add(b);
             if (available.Count > 0)
                 _run.PlayerBurdens.Add(available[_rng.Next(available.Count)]);
+        }
+
+        List<(string id, string name, Rank rank)> GetUpgradeableCards()
+        {
+            var result = new List<(string, string, Rank)>();
+            foreach (var cardId in _run.PlayerDeckCardIds)
+            {
+                var def = CardCatalog.Get(cardId);
+                Rank effective = _run.CardRankOverrides.TryGetValue(cardId, out var ov) ? ov : def.Rank;
+                if (effective < Rank.Ace)
+                    result.Add((cardId, def.Name, effective));
+            }
+            return result;
         }
 
         void DoRestStudy(List<AbilityType> upgradeable, bool canLearn)
