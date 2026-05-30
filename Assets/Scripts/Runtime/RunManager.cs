@@ -372,7 +372,6 @@ namespace WitsAndFools
             }
             if (_phase == RunPhase.Rest && _run.PlayerBurdens.Count > 0)
             {
-                // Always mend when we have burdens at rest
                 if (_eventChoice1Action == DoRestMend)
                     _eventChoice1Action.Invoke();
                 else if (_eventChoice2Action == DoRestMend)
@@ -385,7 +384,17 @@ namespace WitsAndFools
                 return;
             }
             if (EventChoice1Button && EventChoice1Button.gameObject.activeSelf)
-                _eventChoice1Action?.Invoke();
+            {
+                bool choice1Disabled = EventChoice1Label &&
+                    (EventChoice1Label.text.Contains("Can't afford") ||
+                     EventChoice1Label.text.Contains("Not enough") ||
+                     EventChoice1Label.text.Contains("No suitable"));
+                if (choice1Disabled && _eventChoice2Action != null
+                    && EventChoice2Button && EventChoice2Button.gameObject.activeSelf)
+                    _eventChoice2Action.Invoke();
+                else
+                    _eventChoice1Action?.Invoke();
+            }
         }
 
         public void StartNewRun()
@@ -1796,169 +1805,311 @@ namespace WitsAndFools
             int eventId = _rng.Next(8);
             switch (eventId)
             {
-                case 0:
-                    ShowEventChoices("A Whispered Lead...",
-                        "You overhear a conversation in the shadows.\nA gambler's secret, or a pickpocket's trap?",
-                        "Investigate", "Walk away");
-                    _eventChoice1Action = DoRumorInvestigate;
-                    _eventChoice2Action = DoRumorWalkAway;
-                    break;
-                case 1:
-                    ShowEventChoices("The Stranger's Wager",
-                        "A hooded figure offers you a bet:\n\"Double your coin, or lose it all.\"",
-                        "Accept the wager", "Decline politely");
+                case 0: RumorDrunkMerchant(); break;
+                case 1: RumorForgersOffer(); break;
+                case 2: RumorCardinalsConfession(); break;
+                case 3: RumorPickpocket(); break;
+                case 4: RumorAlchemistsBargain(); break;
+                case 5: RumorDuelistsGhost(); break;
+                case 6: RumorTheFence(); break;
+                default: RumorWhisperingWalls(); break;
+            }
+        }
+
+        void RumorDrunkMerchant()
+        {
+            int cost = 8 + _run.CurrentAct * 3;
+            bool canAfford = _run.Florins >= cost;
+            bool hasRoom = _run.PlayerAbilities.Count < _run.MaxAbilitySlots;
+            var ability = hasRoom ? PickAbilityReward(true) : null;
+            string abilityName = ability?.DisplayName() ?? "a rare technique";
+
+            ShowEventChoices("The Drunk Merchant",
+                $"A bleary-eyed merchant waves you over.\n\"I know secrets worth more than gold. {abilityName}... for {cost} Florins.\"",
+                canAfford && ability.HasValue ? $"Pay {cost} Florins" : $"Can't afford ({cost}F)",
+                "Walk away (+2 Florins)");
+
+            if (canAfford && ability.HasValue)
+            {
+                var captured = ability.Value;
+                _eventChoice1Action = () =>
+                {
+                    _run.Florins -= cost;
+                    _run.PlayerAbilities.Add(captured);
+                    _run.RecordAbilityPicked(captured);
+                    ShowEventOutcome($"Learned {captured.DisplayName()}! (-{cost} Florins)");
+                };
+            }
+            else
+                _eventChoice1Action = () => ShowEventOutcome("You can't make the deal.");
+
+            _eventChoice2Action = () =>
+            {
+                _run.Florins += 2;
+                ShowEventOutcome("You leave the drunk to his cups. +2 Florins.");
+            };
+        }
+
+        void RumorForgersOffer()
+        {
+            var upgradeable = AbilityUpgrades.GetUpgradeableAbilities(_run.PlayerAbilities);
+            if (upgradeable.Count == 0)
+            {
+                RumorDrunkMerchant();
+                return;
+            }
+            var pick = upgradeable[_rng.Next(upgradeable.Count)];
+            AbilityUpgrades.TryGetUpgrade(pick, out var upgraded);
+
+            ShowEventChoices("The Forger's Offer",
+                $"A scarred forger leans close.\n\"I can refine your {pick.DisplayName()} into {upgraded.DisplayName()}. But my methods leave a mark.\"",
+                $"Accept (upgrade + burden)", "Decline");
+
+            _eventChoice1Action = () =>
+            {
+                int idx = _run.PlayerAbilities.IndexOf(pick);
+                if (idx >= 0) _run.PlayerAbilities[idx] = upgraded;
+                UpgradeDeckAbility(pick, upgraded);
+                AssignRandomBurden();
+                var burden = _run.PlayerBurdens[^1];
+                ShowEventOutcome($"{pick.DisplayName()} forged into {upgraded.DisplayName()}! Gained {burden.DisplayName()}.");
+            };
+            _eventChoice2Action = () => ShowEventOutcome("You keep your cards as they are.");
+        }
+
+        void RumorCardinalsConfession()
+        {
+            int upgradeCost = 6 + _run.CurrentAct * 2;
+            var candidates = GetUpgradeableCards();
+            bool canUpgrade = candidates.Count > 0 && _run.Florins >= upgradeCost;
+            int freeGain = 4 + _run.CurrentAct;
+
+            string upgradeDesc;
+            string cardId = null;
+            string cardName = null;
+            Rank newRank = Rank.Six;
+            if (candidates.Count > 0)
+            {
+                var pick = candidates[_rng.Next(candidates.Count)];
+                cardId = pick.id;
+                cardName = pick.name;
+                newRank = pick.rank + 1;
+                upgradeDesc = $"\"I can bless your {cardName}\" ({pick.rank.Label()} → {newRank.Label()}) for {upgradeCost} Florins.";
+            }
+            else
+                upgradeDesc = "He has nothing to offer your cards.";
+
+            ShowEventChoices("The Cardinal's Confession",
+                $"A cardinal beckons from a shadowed alcove.\n{upgradeDesc}\nOr he can share a blessing of coin.",
+                canUpgrade ? $"Bless card (-{upgradeCost}F)" : $"No suitable cards",
+                $"Take the blessing (+{freeGain} Florins)");
+
+            if (canUpgrade)
+            {
+                string capturedId = cardId;
+                string capturedName = cardName;
+                Rank capturedRank = newRank;
+                _eventChoice1Action = () =>
+                {
+                    _run.Florins -= upgradeCost;
+                    _run.CardRankOverrides[capturedId] = capturedRank;
+                    ShowEventOutcome($"{capturedName} blessed to {capturedRank.Label()}! (-{upgradeCost} Florins)");
+                };
+            }
+            else
+                _eventChoice1Action = () => ShowEventOutcome("The cardinal shrugs apologetically.");
+
+            _eventChoice2Action = () =>
+            {
+                _run.Florins += freeGain;
+                ShowEventOutcome($"The cardinal presses coins into your palm. +{freeGain} Florins.");
+            };
+        }
+
+        void RumorPickpocket()
+        {
+            int stealAmount = 6 + _run.CurrentAct * 2;
+            ShowEventChoices("The Pickpocket's Dilemma",
+                $"You spot a fat purse dangling from a merchant's belt.\nYou could take {stealAmount} Florins... but thieves get marked.",
+                $"Steal ({stealAmount}F + burden)", "Return the wallet (+ability slot)");
+
+            _eventChoice1Action = () =>
+            {
+                _run.Florins += stealAmount;
+                AddBurden(BurdenType.BadReputation);
+                ShowEventOutcome($"Quick fingers! +{stealAmount} Florins. Gained Bad Reputation.");
+            };
+            _eventChoice2Action = () =>
+            {
+                _run.MaxAbilitySlots++;
+                ShowEventOutcome($"The merchant is grateful. Your reputation opens doors. +1 ability slot! (Now {_run.MaxAbilitySlots})");
+            };
+        }
+
+        void RumorAlchemistsBargain()
+        {
+            if (_run.PlayerDeckCardIds.Count <= 8)
+            {
+                RumorCardinalsConfession();
+                return;
+            }
+            string weakest = FindWeakestDeckCard();
+            var candidates = GetUpgradeableCards();
+            if (weakest == null || candidates.Count == 0)
+            {
+                RumorCardinalsConfession();
+                return;
+            }
+            var upgradeTarget = candidates[_rng.Next(candidates.Count)];
+            Rank boosted = (Rank)Math.Min((int)upgradeTarget.rank + 2, (int)Rank.Ace);
+            CardCatalog.TryGet(weakest, out var weakDef);
+
+            ShowEventChoices("The Alchemist's Bargain",
+                $"An alchemist gestures at your deck.\n\"Sacrifice '{weakDef.Name}' and I will transmute '{upgradeTarget.name}' to {boosted.Label()}.\"",
+                $"Transmute (remove + upgrade)", "Decline");
+
+            string capturedWeak = weakest;
+            _eventChoice1Action = () =>
+            {
+                _run.PlayerDeckCardIds.Remove(capturedWeak);
+                _run.CardRankOverrides.Remove(capturedWeak);
+                _run.CardAbilityOverrides.Remove(capturedWeak);
+                _run.CardRankOverrides[upgradeTarget.id] = boosted;
+                ShowEventOutcome($"{weakDef.Name} dissolved. {upgradeTarget.name} transmuted to {boosted.Label()}!");
+            };
+            _eventChoice2Action = () =>
+            {
+                _run.Florins += 2;
+                ShowEventOutcome("You keep your cards intact. +2 Florins.");
+            };
+        }
+
+        void RumorDuelistsGhost()
+        {
+            int prestigeCost = 2;
+            bool canPay = _run.Prestige > prestigeCost;
+            ShowEventChoices("The Duelist's Ghost",
+                $"A spectral duelist materializes before you.\n\"Prove your worth. Sacrifice {prestigeCost} Prestige and I will expand your mind.\"",
+                canPay ? $"Accept (-{prestigeCost} Prestige, +1 slot)" : "Not enough Prestige",
+                "Refuse (+4 Florins)");
+
+            if (canPay)
+            {
+                _eventChoice1Action = () =>
+                {
+                    _run.Prestige -= prestigeCost;
+                    _run.MaxAbilitySlots++;
+                    ShowEventOutcome($"Your mind expands! +1 ability slot (now {_run.MaxAbilitySlots}). -{prestigeCost} Prestige.");
+                };
+            }
+            else
+                _eventChoice1Action = () => ShowEventOutcome("The ghost fades, unimpressed.");
+
+            _eventChoice2Action = () =>
+            {
+                _run.Florins += 4;
+                ShowEventOutcome("The ghost vanishes. You find coins where it stood. +4 Florins.");
+            };
+        }
+
+        void RumorTheFence()
+        {
+            bool hasBurdens = _run.PlayerBurdens.Count > 0;
+            int removeCost = 10 + _run.CurrentAct * 2;
+            bool canAfford = _run.Florins >= removeCost;
+
+            if (hasBurdens && canAfford)
+            {
+                var burden = _run.PlayerBurdens[_rng.Next(_run.PlayerBurdens.Count)];
+                ShowEventChoices("The Fence",
+                    $"A shadowy fence offers a deal.\n\"I can make your '{burden.DisplayName()}' disappear... for {removeCost} Florins.\"",
+                    $"Pay {removeCost}F (remove burden)", "Decline (+3 Florins)");
+
+                _eventChoice1Action = () =>
+                {
+                    _run.Florins -= removeCost;
+                    _run.PlayerBurdens.Remove(burden);
+                    ShowEventOutcome($"{burden.DisplayName()} lifted! (-{removeCost} Florins)");
+                };
+                _eventChoice2Action = () =>
+                {
+                    _run.Florins += 3;
+                    ShowEventOutcome("You bear your burden a while longer. +3 Florins.");
+                };
+            }
+            else
+            {
+                int sellAmount = 6 + _run.CurrentAct;
+                ShowEventChoices("The Fence",
+                    "A shadowy fence eyes your belongings.\n\"Nothing to fix, but I can offer you coin for information.\"",
+                    $"Share intel (+{sellAmount} Florins)", "Move on (+2 Florins)");
+
+                _eventChoice1Action = () =>
+                {
+                    _run.Florins += sellAmount;
+                    ShowEventOutcome($"The fence pays well for your knowledge. +{sellAmount} Florins.");
+                };
+                _eventChoice2Action = () =>
+                {
+                    _run.Florins += 2;
+                    ShowEventOutcome("You keep your secrets. +2 Florins.");
+                };
+            }
+        }
+
+        void RumorWhisperingWalls()
+        {
+            if (_run.PlayerDeckCardIds.Count > 8)
+            {
+                int cost = 5 + _run.CurrentAct;
+                bool canAfford = _run.Florins >= cost;
+                string weakest = FindWeakestDeckCard();
+                string cardName = "a weak card";
+                if (weakest != null && CardCatalog.TryGet(weakest, out var def))
+                    cardName = def.Name;
+
+                ShowEventChoices("The Whispering Walls",
+                    $"Ancient walls whisper secrets of refinement.\n\"Shed the unnecessary. Let '{cardName}' go for {cost} Florins.\"",
+                    canAfford ? $"Thin deck (-{cost}F, remove card)" : $"Can't afford ({cost}F)",
+                    "Listen quietly (+3 Florins)");
+
+                if (canAfford && weakest != null)
+                {
+                    string capturedId = weakest;
                     _eventChoice1Action = () =>
                     {
-                        if (_rng.Next(100) < 50)
-                        {
-                            int gain = 8 + _run.CurrentAct * 2;
-                            _run.Florins += gain;
-                            ShowEventOutcome($"Lady luck smiles! +{gain} Florins.");
-                        }
-                        else
-                        {
-                            int loss = Math.Min(_run.Florins, 6);
-                            _run.Florins -= loss;
-                            ShowEventOutcome($"The stranger vanishes with your coin. -{loss} Florins.");
-                        }
+                        _run.Florins -= cost;
+                        _run.PlayerDeckCardIds.Remove(capturedId);
+                        _run.CardRankOverrides.Remove(capturedId);
+                        _run.CardAbilityOverrides.Remove(capturedId);
+                        ShowEventOutcome($"{cardName} forgotten. Your deck feels focused. (-{cost} Florins)");
                     };
-                    _eventChoice2Action = () => ShowEventOutcome("Wise choice. You move on.");
-                    break;
-                case 2:
-                    ShowEventChoices("The Herbalist's Cart",
-                        "A traveling herbalist offers a strange tonic.\n\"Sharpen the mind, but steady the hand,\" she warns.",
-                        "Drink the tonic", "Pass");
-                    _eventChoice1Action = () =>
-                    {
-                        if (_rng.Next(100) < 65)
-                        {
-                            if (_run.PlayerAbilities.Count < _run.MaxAbilitySlots)
-                            {
-                                var reward = PickAbilityReward(false);
-                                if (reward.HasValue)
-                                {
-                                    _run.PlayerAbilities.Add(reward.Value);
-                                    _run.RecordAbilityPicked(reward.Value);
-                                    ShowEventOutcome($"Your mind sharpens! Learned {reward.Value.DisplayName()}.");
-                                    return;
-                                }
-                            }
-                            _run.Florins += 4;
-                            ShowEventOutcome("The tonic refreshes you. +4 Florins.");
-                        }
-                        else
-                        {
-                            AddBurden(BurdenType.ClumsyFingers);
-                            ShowEventOutcome("The tonic makes your hands tremble. Gained Clumsy Fingers.");
-                        }
-                    };
-                    _eventChoice2Action = DoRumorWalkAway;
-                    break;
-                case 3:
-                    ShowEventChoices("The Card Sharp's Challenge",
-                        "A notorious card sharp blocks your path.\n\"Beat me in a trick, and I'll share my secret.\"",
-                        "Accept", "Avoid");
-                    _eventChoice1Action = () =>
-                    {
-                        if (_rng.Next(100) < 55)
-                        {
-                            int gain = 6 + _run.CurrentAct;
-                            _run.Florins += gain;
-                            ShowEventOutcome($"You outplay the sharp! +{gain} Florins and bragging rights.");
-                        }
-                        else
-                        {
-                            AddBurden(BurdenType.MarkedCards);
-                            ShowEventOutcome("The sharp marks your deck. Gained Marked Cards.");
-                        }
-                    };
-                    _eventChoice2Action = () =>
-                    {
-                        _run.Florins += 1;
-                        ShowEventOutcome("You slip past. +1 Florin from a loose pocket.");
-                    };
-                    break;
-                case 4:
-                    ShowEventChoices("The Beggar's Plea",
-                        "A ragged beggar clutches your sleeve.\n\"Spare some coin? I know things about your next rival...\"",
-                        "Give 5 Florins", "Ignore");
-                    _eventChoice1Action = () =>
-                    {
-                        if (_run.Florins >= 5)
-                        {
-                            _run.Florins -= 5;
-                            int gain = 8 + _run.CurrentAct * 2;
-                            _run.Florins += gain;
-                            ShowEventOutcome($"Useful intel! The tip pays off. +{gain - 5} Florins net.");
-                        }
-                        else
-                            ShowEventOutcome("You don't have enough coin. The beggar shuffles away.");
-                    };
-                    _eventChoice2Action = () => ShowEventOutcome("You walk on. The city has no mercy.");
-                    break;
-                case 5:
-                    ShowEventChoices("The Cursed Trinket",
-                        "A vendor displays a shimmering trinket.\n\"Powerful, but not without cost,\" she whispers.",
-                        "Take it", "Leave it");
-                    _eventChoice1Action = () =>
-                    {
-                        if (_run.PlayerTrinkets.Count < 5)
-                        {
-                            var allTrinkets = (TrinketType[])Enum.GetValues(typeof(TrinketType));
-                            var trinket = allTrinkets[_rng.Next(allTrinkets.Length)];
-                            _run.PlayerTrinkets.Add(trinket);
-                            AddBurden(BurdenType.RattledNerves);
-                            ShowEventOutcome($"You gain {trinket.DisplayName()}, but your nerves fray. Gained Rattled Nerves.");
-                        }
-                        else
-                        {
-                            _run.Florins += 3;
-                            ShowEventOutcome("Your pockets are full. You take coin instead. +3 Florins.");
-                        }
-                    };
-                    _eventChoice2Action = () => ShowEventOutcome("Probably wise. You move on.");
-                    break;
-                case 6:
-                    ShowEventChoices("The Drunken Sailor",
-                        "A sailor stumbles into you, scattering cards everywhere.\n\"Sorry, friend! Take one for your trouble.\"",
-                        "Pick up a card", "Help him up");
-                    _eventChoice1Action = () =>
-                    {
-                        if (_run.PlayerAbilities.Count < _run.MaxAbilitySlots)
-                        {
-                            var reward = PickAbilityReward(false);
-                            if (reward.HasValue)
-                            {
-                                _run.PlayerAbilities.Add(reward.Value);
-                                _run.RecordAbilityPicked(reward.Value);
-                                ShowEventOutcome($"You pocket {reward.Value.DisplayName()}!");
-                                return;
-                            }
-                        }
-                        ShowEventOutcome("Nothing useful in the mess. You move on.");
-                    };
-                    _eventChoice2Action = () =>
-                    {
-                        _run.Florins += 4;
-                        ShowEventOutcome("The grateful sailor presses coin into your hand. +4 Florins.");
-                    };
-                    break;
-                default:
-                    ShowEventChoices("The Fortune Teller",
-                        "An old woman peers into a crystal ball.\n\"Your fate is not yet written. Choose your path.\"",
-                        "Ask about rivals", "Ask about treasure");
-                    _eventChoice1Action = () =>
-                    {
-                        _run.Florins += 3;
-                        ShowEventOutcome("She reveals your next opponent's weakness. The knowledge is priceless. +3 Florins.");
-                    };
-                    _eventChoice2Action = () =>
-                    {
-                        int gain = 4 + _run.CurrentAct;
-                        _run.Florins += gain;
-                        ShowEventOutcome($"She reveals a hidden cache nearby. +{gain} Florins.");
-                    };
-                    break;
+                }
+                else
+                    _eventChoice1Action = () => ShowEventOutcome("The walls fall silent.");
+            }
+            else
+            {
+                int gain = 5 + _run.CurrentAct;
+                ShowEventChoices("The Whispering Walls",
+                    "Ancient walls murmur faintly.\nYour deck is already lean. They offer what they can.",
+                    $"Listen (+{gain} Florins)", null);
+
+                _eventChoice1Action = () =>
+                {
+                    _run.Florins += gain;
+                    ShowEventOutcome($"The whispers reveal hidden treasure. +{gain} Florins.");
+                };
+                _eventChoice2Action = null;
+            }
+
+            if (_eventChoice2Action == null)
+            {
+                _eventChoice2Action = () =>
+                {
+                    _run.Florins += 3;
+                    ShowEventOutcome("You rest against the old stones. +3 Florins.");
+                };
             }
         }
 
@@ -2109,44 +2260,6 @@ namespace WitsAndFools
 
         void OnEventChoice1() => _eventChoice1Action?.Invoke();
         void OnEventChoice2() => _eventChoice2Action?.Invoke();
-
-        void DoRumorInvestigate()
-        {
-            int roll = _rng.Next(100);
-            if (roll < 45)
-            {
-                int bonus = 5 + _run.CurrentAct;
-                _run.Florins += bonus;
-                ShowEventOutcome($"A hidden purse! +{bonus} Florins.");
-            }
-            else if (roll < 75 && _run.PlayerAbilities.Count < _run.MaxAbilitySlots)
-            {
-                var reward = PickAbilityReward(false);
-                if (reward.HasValue)
-                {
-                    _run.PlayerAbilities.Add(reward.Value);
-                    _run.RecordAbilityPicked(reward.Value);
-                    ShowEventOutcome($"An old gambler teaches you {reward.Value.DisplayName()}!");
-                }
-                else
-                    ShowEventOutcome("The lead goes cold. Nothing gained.");
-            }
-            else if (roll < 85)
-            {
-                _run.Florins += 3;
-                ShowEventOutcome("A minor tip. +3 Florins.");
-            }
-            else
-            {
-                ShowEventOutcome("It was a trap! But you escape unscathed.");
-            }
-        }
-
-        void DoRumorWalkAway()
-        {
-            _run.Florins += 2;
-            ShowEventOutcome("You keep your head down. +2 Florins for your trouble.");
-        }
 
         void AddBurden(BurdenType burden)
         {
