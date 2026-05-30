@@ -24,6 +24,7 @@ namespace WitsAndFools
     public sealed class RunState
     {
         public int Seed;
+        public int AscensionLevel;
         public int CurrentAct;
         public int CurrentColumn;
         public int Prestige = 7;

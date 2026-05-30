@@ -102,6 +102,7 @@ namespace WitsAndFools
         ArchetypeType? _selectedArchetype;
 
         bool _autoRun;
+        int _pendingAscension;
         float _autoStepDelay = 0.15f;
         float _nextAutoStep;
 
@@ -400,6 +401,8 @@ namespace WitsAndFools
             }
         }
 
+        public void SetAscensionLevel(int level) => _pendingAscension = Math.Clamp(level, 0, Ascension.MaxLevel);
+
         public void StartNewRun()
         {
             RunSaveSystem.Delete();
@@ -412,12 +415,18 @@ namespace WitsAndFools
 
             EnsureCatalogsLoaded();
 
+            _run.AscensionLevel = _pendingAscension;
             _run.CurrentAct = 0;
-            _run.CurrentMap = MapGenerator.Generate(0, _rng);
+            _run.CurrentMap = MapGenerator.Generate(0, _rng, Ascension.ShorterRoads(_run.AscensionLevel) ? 1 : 0);
             _currentColumn = 0;
             _visitedNodeRows.Clear();
             _selectedNodeRow = -1;
             ApplyActTheme(0);
+
+            if (Ascension.RattledStart(_run.AscensionLevel))
+                AddBurden(BurdenType.RattledNerves);
+            if (Ascension.NarrowMind(_run.AscensionLevel))
+                _run.MaxAbilitySlots = 3;
 
             SetPhase(RunPhase.ArchetypeSelect);
         }
@@ -1031,6 +1040,16 @@ namespace WitsAndFools
             GameManager.OnMatchComplete -= OnMatchComplete;
             GameManager.OnMatchComplete += OnMatchComplete;
 
+            if (Ascension.ArmedElites(_run.AscensionLevel)
+                && (node.Type == MapNodeType.EliteMatch || node.Type == MapNodeType.BossMatch))
+            {
+                var available = new List<RelicType>();
+                foreach (var r in new[] { RelicType.CandleStub, RelicType.GamblersDie, RelicType.PilgrimsCompass })
+                    if (!node.Opponent.Relics.Contains(r)) available.Add(r);
+                if (available.Count > 0)
+                    node.Opponent.Relics.Add(available[_rng.Next(available.Count)]);
+            }
+
             var (config, pDeck, eDeck) = MatchSetup.Build(_run, node.Opponent, _rng);
             config.MaxBouts = 12;
             GameManager.BeginGame(config, pDeck, eDeck, node.Opponent, _rng.Next());
@@ -1116,7 +1135,10 @@ namespace WitsAndFools
                 if (_run.PlayerRelics.Contains(RelicType.PhoenixFeather))
                     _run.PlayerRelics.Remove(RelicType.PhoenixFeather);
                 else
-                    _run.Prestige--;
+                {
+                    int loss = Ascension.BrutalDefeats(_run.AscensionLevel) ? 2 : 1;
+                    _run.Prestige -= loss;
+                }
                 AssignRandomBurden();
                 if (_run.Prestige <= 0 && _run.PlayerTrinkets.Contains(TrinketType.PhoenixMedal) && !_run.PhoenixMedalUsed)
                 {
@@ -1663,6 +1685,8 @@ namespace WitsAndFools
                     AbilityRarity.Rare => 18,
                     _ => 12
                 };
+                if (Ascension.InflatedPrices(_run.AscensionLevel))
+                    price = (int)(price * 1.25f);
                 result.Add((def.Type, price));
             }
             return result;
@@ -1820,6 +1844,8 @@ namespace WitsAndFools
             if (pool.Count == 0) return null;
             var trinket = pool[_rng.Next(pool.Count)];
             int price = trinket.AffectsEngine() ? 15 : 10;
+            if (Ascension.InflatedPrices(_run.AscensionLevel))
+                price = (int)(price * 1.25f);
             return (trinket, price);
         }
 
@@ -2512,8 +2538,9 @@ namespace WitsAndFools
 
         void DoRestQuietly()
         {
-            _run.Florins += 3;
-            ShowEventOutcome("A peaceful rest. +3 Florins.");
+            int gain = Ascension.SpartanRest(_run.AscensionLevel) ? 2 : 3;
+            _run.Florins += gain;
+            ShowEventOutcome($"A peaceful rest. +{gain} Florins.");
         }
 
         // ---------- Act progression ----------
@@ -2529,7 +2556,7 @@ namespace WitsAndFools
                 return;
             }
             _run.MaxAbilitySlots++;
-            _run.CurrentMap = MapGenerator.Generate(_run.CurrentAct, _rng);
+            _run.CurrentMap = MapGenerator.Generate(_run.CurrentAct, _rng, Ascension.ShorterRoads(_run.AscensionLevel) ? 1 : 0);
             _currentColumn = 0;
             _visitedNodeRows.Clear();
             _selectedNodeRow = -1;
@@ -2640,6 +2667,8 @@ namespace WitsAndFools
             int baseAmount = 10 + act * 2;
             if (nodeType == MapNodeType.EliteMatch) baseAmount += 5;
             if (nodeType == MapNodeType.BossMatch) baseAmount += 10;
+            if (Ascension.LeanPurse(_run.AscensionLevel))
+                baseAmount = Math.Max(1, baseAmount - 3);
             return baseAmount;
         }
     }

@@ -208,7 +208,7 @@ namespace WitsAndFools
             _jugglersBallsUsed = new bool[2];
             _luckyDrawUsed = new bool[2];
             _resource[0] = _config.StartingResource;
-            _resource[1] = _config.StartingResource;
+            _resource[1] = _config.StartingResource + _config.EmpoweredFoeBonus;
             _attackedThisBout[0] = false;
             _attackedThisBout[1] = false;
 

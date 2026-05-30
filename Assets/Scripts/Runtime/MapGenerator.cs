@@ -6,10 +6,11 @@ namespace WitsAndFools
     public static class MapGenerator
     {
 
-        public static List<List<MapNode>> Generate(int actIndex, Random rng)
+        public static List<List<MapNode>> Generate(int actIndex, Random rng, int columnReduction = 0)
         {
             var map = new List<List<MapNode>>();
             int columns = actIndex < 4 ? 3 : 2;
+            columns = Math.Max(1, columns - columnReduction);
 
             for (int col = 0; col < columns; col++)
             {

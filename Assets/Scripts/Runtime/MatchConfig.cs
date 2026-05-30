@@ -80,6 +80,7 @@ namespace WitsAndFools
 
         public bool AbilitiesCostResource;
         public int StartingResource;
+        public int EmpoweredFoeBonus;
         public bool DesperationDiscard;
 
         public static MatchConfig Default() => new()

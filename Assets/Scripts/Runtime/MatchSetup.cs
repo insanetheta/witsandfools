@@ -88,6 +88,11 @@ namespace WitsAndFools
             config.DesperationDiscard = true;
             ApplyHouseRule(config, opponent.HouseRule);
 
+            if (Ascension.EmpoweredFoes(run.AscensionLevel))
+                config.EmpoweredFoeBonus = 1;
+            if (Ascension.RelentlessAssault(run.AscensionLevel))
+                config.MaxAttacksPerBout++;
+
             return (config, playerDeck, enemyDeck);
         }
 
