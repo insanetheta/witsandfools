@@ -20,12 +20,17 @@ namespace WitsAndFools.EditorTools
             EditorUserBuildSettings.SwitchActiveBuildTarget(
                 BuildTargetGroup.WebGL, BuildTarget.WebGL);
 
-            string outputPath = "docs";
-            var scenes = new[] { "Assets/Scenes/GameScene.unity" };
+            string scenePath = "Assets/Scenes/GameScene.unity";
+            EditorBuildSettings.scenes = new[]
+            {
+                new EditorBuildSettingsScene(scenePath, true)
+            };
+            AssetDatabase.Refresh();
 
+            string outputPath = "docs";
             var options = new BuildPlayerOptions
             {
-                scenes = scenes,
+                scenes = new[] { scenePath },
                 locationPathName = outputPath,
                 target = BuildTarget.WebGL,
                 options = BuildOptions.None
