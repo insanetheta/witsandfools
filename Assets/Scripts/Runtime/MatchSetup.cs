@@ -79,6 +79,9 @@ namespace WitsAndFools
             foreach (var burden in run.PlayerBurdens)
                 ApplyBurden(config, 0, burden);
 
+            foreach (var trinket in run.PlayerTrinkets)
+                ApplyTrinket(config, 0, trinket);
+
             config.AnyRankAttack = true;
             config.AbilitiesCostResource = true;
             config.StartingResource = 2;
@@ -111,6 +114,30 @@ namespace WitsAndFools
                 case RelicType.WanderersBoots: break;
                 case RelicType.MisersHoard: break;
                 case RelicType.PhoenixFeather: break;
+            }
+        }
+
+        static void ApplyTrinket(MatchConfig config, int player, TrinketType trinket)
+        {
+            switch (trinket)
+            {
+                case TrinketType.DuelistsGlove: config.DuelistGlove[player] = true; break;
+                case TrinketType.ShieldBrooch: config.ShieldBrooch[player] = true; break;
+                case TrinketType.PoisonedWine: config.PoisonedWine[player] = true; break;
+                case TrinketType.CourtiersFan: config.CourtiersFan[player] = true; break;
+                case TrinketType.JugglersBalls: config.JugglersBalls[player] = true; break;
+                case TrinketType.LoadedDice: config.LoadedDice[player] = true; break;
+                case TrinketType.QuicksilverVial: config.QuicksilverVial[player] = true; break;
+                case TrinketType.SpysMonocle: config.SpysMonocle[player] = true; break;
+                case TrinketType.MarkedDeck: config.MarkedDeck[player] = true; break;
+                case TrinketType.CrownOfThorns: config.CrownOfThorns[player] = true; break;
+                case TrinketType.HereticsBrand: config.HereticsBrand[player] = true; break;
+                case TrinketType.FoolsGold: config.FoolsGold[player] = true; break;
+                case TrinketType.VentriloquistsDummy: config.VentriloquistsDummy[player] = true; break;
+                case TrinketType.CatalystGem: config.CatalystGem[player] = true; break;
+                case TrinketType.EchoStone: config.EchoStone[player] = true; break;
+                case TrinketType.RazorsEdge: config.RazorsEdge[player] = true; break;
+                case TrinketType.Bloodstone: config.Bloodstone[player] = true; break;
             }
         }
 

@@ -22,7 +22,13 @@ namespace WitsAndFools
         QuicksilverVial,
         VentriloquistsDummy,
         DevilsBargain,
-        PhoenixMedal
+        PhoenixMedal,
+
+        // Compound synergy trinkets
+        CatalystGem,
+        EchoStone,
+        RazorsEdge,
+        Bloodstone
     }
 
     public static class TrinketTypeExtensions
@@ -50,6 +56,10 @@ namespace WitsAndFools
             TrinketType.VentriloquistsDummy => "The Ventriloquist's Dummy",
             TrinketType.DevilsBargain => "The Devil's Bargain",
             TrinketType.PhoenixMedal => "The Phoenix Medal",
+            TrinketType.CatalystGem => "Catalyst Gem",
+            TrinketType.EchoStone => "Echo Stone",
+            TrinketType.RazorsEdge => "Razor's Edge",
+            TrinketType.Bloodstone => "Bloodstone",
             _ => t.ToString()
         };
 
@@ -76,6 +86,10 @@ namespace WitsAndFools
             TrinketType.VentriloquistsDummy => "Once per match, use one of the opponent's abilities.",
             TrinketType.DevilsBargain => "At match start, choose: +3 Florins or draw 1 fewer starting card.",
             TrinketType.PhoenixMedal => "Restore 1 Prestige once per run.",
+            TrinketType.CatalystGem => "When you activate an ability, gain +1 resource.",
+            TrinketType.EchoStone => "Upgraded abilities trigger their effect twice.",
+            TrinketType.RazorsEdge => "Your attacks deal +1 effective rank.",
+            TrinketType.Bloodstone => "Each bout you win (defender), gain +1 resource next bout.",
             _ => ""
         };
 
@@ -95,6 +109,10 @@ namespace WitsAndFools
             TrinketType.DevilsBargain => true,
             TrinketType.FoolsGold => true,
             TrinketType.VentriloquistsDummy => true,
+            TrinketType.CatalystGem => true,
+            TrinketType.EchoStone => true,
+            TrinketType.RazorsEdge => true,
+            TrinketType.Bloodstone => true,
             _ => false
         };
     }

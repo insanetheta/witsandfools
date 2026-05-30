@@ -161,6 +161,15 @@ namespace WitsAndFools
             }
         }
 
+        void PostAbilityTrigger(int playerIndex, AbilityType ability)
+        {
+            if (_config.CatalystGem[playerIndex])
+                GainResource(playerIndex, 1);
+
+            if (_config.EchoStone[playerIndex] && AbilityUpgrades.IsUpgraded(ability))
+                ApplyAbility(ability, playerIndex, default, -1);
+        }
+
         void RecycleCard(Card card, int ownerIndex) => _playerDecks[ownerIndex].PutOnBottom(card);
 
         Card[] PeekTopDeck(int playerIndex, int count) => _playerDecks[playerIndex].PeekTop(count);
@@ -350,6 +359,7 @@ namespace WitsAndFools
                     ApplyAbility(card.Ability.Value, playerIndex, card, -1);
                     _usedAbilityThisBout[playerIndex] = true;
                     OnAbilityUsed?.Invoke(playerIndex, card, card.Ability.Value);
+                    PostAbilityTrigger(playerIndex, card.Ability.Value);
                 }
             }
 
@@ -379,13 +389,17 @@ namespace WitsAndFools
             if (playerIndex != DefenderIndex) return false;
             if (!_hands[playerIndex].Contains(card)) return false;
 
+            var attackCard = _bout.Attacks[slot];
+            if (_config.RazorsEdge[AttackerIndex] && (int)attackCard.Rank < (int)Rank.Ace)
+                attackCard = new Card(attackCard.Suit, attackCard.Rank + 1, attackCard.Ability, attackCard.Trigger, attackCard.DefinitionId);
+
             bool canDefend;
             if (_config.EndgameSpecialist[playerIndex] && AnyDeckCount() <= 6)
-                canDefend = (int)card.Rank > (int)_bout.Attacks[slot].Rank || (card.Suit == Trump && _bout.Attacks[slot].Suit != Trump);
-            else if (_config.HereticsBrand[playerIndex] && _bout.Attacks[slot].Suit == Trump)
-                canDefend = Rules.CanDefendSlotWith(_bout, slot, card, Trump) && (int)card.Rank > (int)_bout.Attacks[slot].Rank;
+                canDefend = (int)card.Rank > (int)attackCard.Rank || (card.Suit == Trump && attackCard.Suit != Trump);
+            else if (_config.HereticsBrand[playerIndex] && attackCard.Suit == Trump)
+                canDefend = Rules.Beats(card, attackCard, Trump) && (int)card.Rank > (int)attackCard.Rank;
             else
-                canDefend = Rules.CanDefendSlotWith(_bout, slot, card, Trump);
+                canDefend = Rules.Beats(card, attackCard, Trump);
 
             if (!canDefend) return false;
             if (_config.NoTrumpsUntilBout > 0 && _boutCount < _config.NoTrumpsUntilBout && card.Suit == Trump)
@@ -405,6 +419,7 @@ namespace WitsAndFools
                     ApplyAbility(card.Ability.Value, playerIndex, card, slot);
                     _usedAbilityThisBout[playerIndex] = true;
                     OnAbilityUsed?.Invoke(playerIndex, card, card.Ability.Value);
+                    PostAbilityTrigger(playerIndex, card.Ability.Value);
                 }
             }
 
@@ -609,6 +624,7 @@ namespace WitsAndFools
 
             _usedAbilityThisBout[playerIndex] = true;
             OnAbilityUsed?.Invoke(playerIndex, card, ability);
+            PostAbilityTrigger(playerIndex, ability);
             return true;
         }
 
@@ -1607,6 +1623,9 @@ namespace WitsAndFools
                 // Jackpot: defender gains 2 Luck on successful defense
                 if (_config.Jackpot[defenderBefore])
                     GainResource(defenderBefore, 2);
+
+                if (_config.Bloodstone[defenderBefore])
+                    GainResource(defenderBefore, 1);
             }
 
             for (int p = 0; p < 2; p++)
