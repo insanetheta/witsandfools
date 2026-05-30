@@ -36,7 +36,7 @@ namespace WitsAndFools
 
         public ArchetypeType? PlayerArchetype;
         public List<AbilityType> PlayerAbilities = new();
-        public int MaxAbilitySlots = 5;
+        public int MaxAbilitySlots = 4;
         public List<TrinketType> PlayerTrinkets = new();
         public List<BurdenType> PlayerBurdens = new();
 

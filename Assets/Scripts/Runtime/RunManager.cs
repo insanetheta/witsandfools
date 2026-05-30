@@ -1967,7 +1967,7 @@ namespace WitsAndFools
             SetPhase(RunPhase.Rest);
 
             bool hasBurdens = _run.PlayerBurdens.Count > 0;
-            int restType = _rng.Next(4);
+            int restType = _rng.Next(5);
 
             if (restType == 0 && hasBurdens)
             {
@@ -2006,6 +2006,33 @@ namespace WitsAndFools
                     {
                         _run.CardRankOverrides[pick.id] = newRank;
                         ShowEventOutcome($"{pick.name} honed to {newRank.Label()}!");
+                    };
+                    _eventChoice2Action = DoRestQuietly;
+                }
+                else
+                {
+                    ShowEventChoices("The Hearth",
+                        "A warm fire and a good meal. Simple comforts.",
+                        "Rest quietly (+3 Florins)", null);
+                    _eventChoice1Action = DoRestQuietly;
+                    _eventChoice2Action = null;
+                }
+            }
+            else if (restType == 3 && _run.PlayerDeckCardIds.Count > 8)
+            {
+                string weakest = FindWeakestDeckCard();
+                if (weakest != null && CardCatalog.TryGet(weakest, out var wDef))
+                {
+                    ShowEventChoices("The Bonfire",
+                        $"Flames lick the night air. You could burn away the dead weight.\n\"{wDef.Name}\" ({wDef.Rank.Label()}{wDef.Suit.Glyph()}) looks expendable.",
+                        $"Burn it (remove from deck)", "Rest quietly (+3 Florins)");
+                    string capturedId = weakest;
+                    _eventChoice1Action = () =>
+                    {
+                        _run.PlayerDeckCardIds.Remove(capturedId);
+                        _run.CardRankOverrides.Remove(capturedId);
+                        _run.CardAbilityOverrides.Remove(capturedId);
+                        ShowEventOutcome($"{wDef.Name} crumbles to ash. Your deck feels lighter.");
                     };
                     _eventChoice2Action = DoRestQuietly;
                 }
@@ -2223,6 +2250,7 @@ namespace WitsAndFools
                 SetPhase(RunPhase.RunOver);
                 return;
             }
+            _run.MaxAbilitySlots++;
             _run.CurrentMap = MapGenerator.Generate(_run.CurrentAct, _rng);
             _currentColumn = 0;
             _visitedNodeRows.Clear();
