@@ -148,6 +148,18 @@ namespace WitsAndFools
             AbilityType.EndgameSpecialist => PassiveColor,
             AbilityType.CardCounter => PassiveColor,
             AbilityType.QuickHands => PassiveColor,
+            AbilityType.BracePlus => DefColor,
+            AbilityType.ExtraDrawPlus => UtilColor,
+            AbilityType.PileOnPlus => AtkColor,
+            AbilityType.PeekPlus => UtilColor,
+            AbilityType.BlockerPlus => DefColor,
+            AbilityType.FortifyPlus => DefColor,
+            AbilityType.SecondWindPlus => UtilColor,
+            AbilityType.HaymakerPlus => AtkColor,
+            AbilityType.RipostePlus => DefColor,
+            AbilityType.DiplomacyPlus => DefColor,
+            AbilityType.DoubleTroublePlus => AtkColor,
+            AbilityType.SleightOfHandPlus => UtilColor,
             _ => DustyTan
         };
 

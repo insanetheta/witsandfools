@@ -53,6 +53,8 @@ namespace WitsAndFools
             var config = new MatchConfig();
 
             var playerDeck = new PlayerDeck(run.PlayerDeckCardIds);
+            if (run.CardAbilityOverrides.Count > 0)
+                playerDeck.ApplyAbilityOverrides(run.CardAbilityOverrides);
             var enemyDeck = new PlayerDeck(opponent.DeckCardIds);
 
             if (run.PlayerDoctrine.HasValue)

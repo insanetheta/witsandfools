@@ -33,6 +33,15 @@ namespace WitsAndFools
                 _templates.Add(CardCatalog.Get(id));
         }
 
+        public void ApplyAbilityOverrides(Dictionary<string, AbilityType> overrides)
+        {
+            foreach (var t in _templates)
+            {
+                if (t.Id != null && overrides.TryGetValue(t.Id, out var upgraded))
+                    t.Ability = upgraded;
+            }
+        }
+
         public void Build(int seed)
         {
             _rng = new Random(seed);

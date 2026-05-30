@@ -103,14 +103,17 @@ namespace WitsAndFools
                     return CountSuit(hand, card.Suit) >= suitThreshold && CountSuit(hand, engine.Trump) <= 1;
 
                 case AbilityType.ExtraDraw:
+                case AbilityType.ExtraDrawPlus:
                     int deckThreshold = AbilityEagerness >= 1.2f ? 3 : 6;
                     return engine.Phase == Phase.Attack && engine.DeckCount >= deckThreshold;
 
                 case AbilityType.Blocker:
+                case AbilityType.BlockerPlus:
                     int attackThreshold = AbilityEagerness >= 1.2f ? 1 : 2;
                     return engine.Phase == Phase.Defense && engine.Bout.AttackCount >= attackThreshold;
 
                 case AbilityType.DoubleTrouble:
+                case AbilityType.DoubleTroublePlus:
                     if (engine.Phase != Phase.Attack || engine.Bout.IsEmpty) return false;
                     return HasOffRankCard(hand, engine.Bout);
 
@@ -122,6 +125,7 @@ namespace WitsAndFools
                     return engine.Phase == Phase.Defense && hand.Count >= handReq;
 
                 case AbilityType.PileOn:
+                case AbilityType.PileOnPlus:
                     return engine.Phase == Phase.Attack && engine.Bout.AttackCount >= 1 && hand.Count >= 4;
 
                 case AbilityType.Feint:
@@ -138,6 +142,7 @@ namespace WitsAndFools
                     return CountUndefended(engine.Bout) >= 2;
 
                 case AbilityType.Peek:
+                case AbilityType.PeekPlus:
                     return engine.DeckCount >= 3 && hand.Count >= 3;
 
                 case AbilityType.Gambit:
@@ -148,6 +153,7 @@ namespace WitsAndFools
                 // --- Rogue: Shadow ---
 
                 case AbilityType.Riposte:
+                case AbilityType.RipostePlus:
                     return engine.Phase == Phase.Defense && engine.GetResource(playerIndex) >= 1
                         && engine.HandOf(1 - playerIndex).Count >= 2;
 
@@ -170,6 +176,7 @@ namespace WitsAndFools
                 // --- Rogue: Saboteur ---
 
                 case AbilityType.SleightOfHand:
+                case AbilityType.SleightOfHandPlus:
                     return engine.DeckCount > 0 && hand.Count >= 3;
 
                 case AbilityType.SmokeBomb:
@@ -189,6 +196,7 @@ namespace WitsAndFools
                 // --- Brute: Brawler ---
 
                 case AbilityType.Haymaker:
+                case AbilityType.HaymakerPlus:
                     return engine.Phase == Phase.Attack && engine.DeckCount >= 2 && hand.Count <= 5;
 
                 case AbilityType.IronGrip:
@@ -242,6 +250,7 @@ namespace WitsAndFools
                 // --- Diplomat: Peacemaker ---
 
                 case AbilityType.Diplomacy:
+                case AbilityType.DiplomacyPlus:
                     return engine.Phase == Phase.Defense && !engine.Bout.IsEmpty
                         && CountUndefended(engine.Bout) >= 2 && engine.DeckCount > 0;
 
@@ -292,14 +301,17 @@ namespace WitsAndFools
                 // --- Neutral ---
 
                 case AbilityType.Fortify:
+                case AbilityType.FortifyPlus:
                     return engine.Phase == Phase.Defense && engine.Bout.FirstUndefendedSlot() >= 0
                         && !HasLegalDefense(engine, hand, engine.Bout.FirstUndefendedSlot());
 
                 case AbilityType.SecondWind:
+                case AbilityType.SecondWindPlus:
                     return hand.Count >= 4 && engine.DeckCount >= 3
                         && CountSuit(hand, engine.Trump) <= 1;
 
                 case AbilityType.Brace:
+                case AbilityType.BracePlus:
                     return engine.DeckCount >= 2 && hand.Count <= 4;
 
                 case AbilityType.Desperation:

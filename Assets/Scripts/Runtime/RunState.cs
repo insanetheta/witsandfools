@@ -54,6 +54,7 @@ namespace WitsAndFools
 
         public Dictionary<AbilityType, int> AbilityUsageCount = new();
         public Dictionary<AbilityType, int> AbilityPickCount = new();
+        public Dictionary<string, AbilityType> CardAbilityOverrides = new();
 
         public void RecordAbilityUsed(AbilityType a)
         {

@@ -608,10 +608,13 @@ namespace WitsAndFools
                 case AbilityType.TrumpChanger:
                     return !_trumpChangerUsed;
                 case AbilityType.ExtraDraw:
+                case AbilityType.ExtraDrawPlus:
                     return Phase == Phase.Attack && DeckCountFor(playerIndex) > 0;
                 case AbilityType.DoubleTrouble:
+                case AbilityType.DoubleTroublePlus:
                     return Phase == Phase.Attack;
                 case AbilityType.Blocker:
+                case AbilityType.BlockerPlus:
                     return Phase == Phase.Defense;
                 case AbilityType.DoubleDefense:
                     int ddSlot = defenseSlot >= 0 ? defenseSlot : _bout.FirstUndefendedSlot();
@@ -619,6 +622,7 @@ namespace WitsAndFools
                 case AbilityType.SeizeInitiative:
                     return true;
                 case AbilityType.PileOn:
+                case AbilityType.PileOnPlus:
                     return Phase == Phase.Attack;
                 case AbilityType.Feint:
                     return Phase == Phase.Attack && DeckCountFor(playerIndex) > 0 && _bout.AttackCount < (_config.MaxAttacksPerBout + _pileOnBonus);
@@ -627,12 +631,14 @@ namespace WitsAndFools
                 case AbilityType.SlipAway:
                     return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0 && !_slipAwayUsed[playerIndex];
                 case AbilityType.Peek:
+                case AbilityType.PeekPlus:
                     return DeckCountFor(playerIndex) > 0;
                 case AbilityType.Gambit:
                     return DeckCountFor(playerIndex) > 0;
 
                 // Rogue: Shadow
                 case AbilityType.Riposte:
+                case AbilityType.RipostePlus:
                     return Phase == Phase.Defense && _resource[playerIndex] >= 1;
                 case AbilityType.ShadowCloak:
                     return Phase == Phase.Defense;
@@ -647,6 +653,7 @@ namespace WitsAndFools
 
                 // Rogue: Saboteur
                 case AbilityType.SleightOfHand:
+                case AbilityType.SleightOfHandPlus:
                     return DeckCountFor(playerIndex) > 0 && _hands[playerIndex].Count > 0;
                 case AbilityType.SmokeBomb:
                     return Phase == Phase.Defense && _resource[playerIndex] >= 1 && !_bout.IsEmpty;
@@ -659,6 +666,7 @@ namespace WitsAndFools
 
                 // Brute: Brawler
                 case AbilityType.Haymaker:
+                case AbilityType.HaymakerPlus:
                     return Phase == Phase.Attack && DeckCountFor(playerIndex) > 0;
                 case AbilityType.IronGrip:
                     return Phase == Phase.Defense && _resource[playerIndex] >= 1 && DeckCountFor(playerIndex) > 0;
@@ -691,6 +699,7 @@ namespace WitsAndFools
 
                 // Diplomat: Peacemaker
                 case AbilityType.Diplomacy:
+                case AbilityType.DiplomacyPlus:
                     return Phase == Phase.Defense && !_bout.IsEmpty;
                 case AbilityType.SafePassage:
                     return Phase == Phase.Defense && _resource[playerIndex] >= 2 && _bout.FirstUndefendedSlot() >= 0;
@@ -723,10 +732,13 @@ namespace WitsAndFools
 
                 // Neutral
                 case AbilityType.Fortify:
+                case AbilityType.FortifyPlus:
                     return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
                 case AbilityType.SecondWind:
+                case AbilityType.SecondWindPlus:
                     return _hands[playerIndex].Count >= 2 && DeckCountFor(playerIndex) > 0;
                 case AbilityType.Brace:
+                case AbilityType.BracePlus:
                     return Phase == Phase.Defense && DeckCountFor(playerIndex) > 0;
                 case AbilityType.Desperation:
                     return Phase == Phase.Defense && _bout.FirstUndefendedSlot() >= 0;
@@ -765,8 +777,18 @@ namespace WitsAndFools
                     DrawTo(DefenderIndex, edTarget);
                     break;
 
+                case AbilityType.ExtraDrawPlus:
+                    int edpTarget = _hands[DefenderIndex].Count + 3;
+                    DrawTo(DefenderIndex, edpTarget);
+                    break;
+
                 case AbilityType.Blocker:
                     _bout.AttacksCapped = true;
+                    break;
+
+                case AbilityType.BlockerPlus:
+                    _bout.AttacksCapped = true;
+                    DrawCards(playerIndex, 1);
                     break;
 
                 case AbilityType.SeizeInitiative:
@@ -775,6 +797,11 @@ namespace WitsAndFools
 
                 case AbilityType.DoubleTrouble:
                     _doubleTroubleActive = true;
+                    break;
+
+                case AbilityType.DoubleTroublePlus:
+                    _doubleTroubleActive = true;
+                    _pileOnBonus += 1;
                     break;
 
                 case AbilityType.DoubleDefense:
@@ -793,6 +820,10 @@ namespace WitsAndFools
 
                 case AbilityType.PileOn:
                     _pileOnBonus += 2;
+                    break;
+
+                case AbilityType.PileOnPlus:
+                    _pileOnBonus += 4;
                     break;
 
                 case AbilityType.Feint:
@@ -829,6 +860,10 @@ namespace WitsAndFools
                     SortTopDeck(playerIndex, 3);
                     break;
 
+                case AbilityType.PeekPlus:
+                    SortTopDeck(playerIndex, 5);
+                    break;
+
                 case AbilityType.Gambit:
                 {
                     int count = _hands[playerIndex].Count;
@@ -850,6 +885,11 @@ namespace WitsAndFools
                 case AbilityType.Riposte:
                     SpendResource(playerIndex, 1);
                     DiscardRandomCards(opponent, 1);
+                    break;
+
+                case AbilityType.RipostePlus:
+                    SpendResource(playerIndex, 1);
+                    DiscardRandomCards(opponent, 2);
                     break;
 
                 case AbilityType.ShadowCloak:
@@ -884,6 +924,20 @@ namespace WitsAndFools
                         _hands[playerIndex].Remove(worst.Value);
                         PutOnTopOfDeck(playerIndex, worst.Value);
                     }
+                    break;
+                }
+
+                case AbilityType.SleightOfHandPlus:
+                {
+                    if (CanDrawFromDeck(playerIndex))
+                        _hands[playerIndex].Add(DrawFromDeck(playerIndex));
+                    var sohpWorst = FindWorstCard(_hands[playerIndex], Trump);
+                    if (sohpWorst.HasValue)
+                    {
+                        _hands[playerIndex].Remove(sohpWorst.Value);
+                        PutOnTopOfDeck(playerIndex, sohpWorst.Value);
+                    }
+                    DrawCards(playerIndex, 1);
                     break;
                 }
 
@@ -938,6 +992,10 @@ namespace WitsAndFools
 
                 case AbilityType.Haymaker:
                     DrawCards(playerIndex, 2);
+                    break;
+
+                case AbilityType.HaymakerPlus:
+                    DrawCards(playerIndex, 3);
                     break;
 
                 case AbilityType.IronGrip:
@@ -1045,6 +1103,21 @@ namespace WitsAndFools
                     CollectCrownOfThornsRanks();
                     _bout.Clear();
                     DrawCards(playerIndex, 1);
+                    ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
+                    break;
+                }
+
+                case AbilityType.DiplomacyPlus:
+                {
+                    for (int i = 0; i < _bout.Attacks.Count; i++)
+                    {
+                        _discard.Add(_bout.Attacks[i]);
+                        if (_bout.Defenses[i] != null)
+                            _discard.Add(_bout.Defenses[i].Value);
+                    }
+                    CollectCrownOfThornsRanks();
+                    _bout.Clear();
+                    DrawCards(playerIndex, 2);
                     ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
                     break;
                 }
@@ -1212,6 +1285,18 @@ namespace WitsAndFools
                     break;
                 }
 
+                case AbilityType.FortifyPlus:
+                {
+                    for (int fp = 0; fp < 2; fp++)
+                    {
+                        int fpSlot = _bout.FirstUndefendedSlot();
+                        if (fpSlot >= 0)
+                            _bout.AutoDefend(fpSlot);
+                    }
+                    if (_bout.FullyDefended) Phase = Phase.Attack;
+                    break;
+                }
+
                 case AbilityType.SecondWind:
                 {
                     int discarded = 0;
@@ -1227,8 +1312,27 @@ namespace WitsAndFools
                     break;
                 }
 
+                case AbilityType.SecondWindPlus:
+                {
+                    int swpDiscarded = 0;
+                    while (swpDiscarded < 2 && _hands[playerIndex].Count > 0)
+                    {
+                        var worst = FindWorstCard(_hands[playerIndex], Trump);
+                        if (!worst.HasValue) break;
+                        _hands[playerIndex].Remove(worst.Value);
+                        RecycleCard(worst.Value, playerIndex);
+                        swpDiscarded++;
+                    }
+                    DrawCards(playerIndex, 4);
+                    break;
+                }
+
                 case AbilityType.Brace:
                     DrawCards(playerIndex, 2);
+                    break;
+
+                case AbilityType.BracePlus:
+                    DrawCards(playerIndex, 3);
                     break;
 
                 case AbilityType.Desperation:

@@ -1162,6 +1162,8 @@ namespace WitsAndFools
             foreach (var def in AbilityPool.All)
             {
                 if (owned.Contains(def.Type)) continue;
+                if (AbilityUpgrades.TryGetUpgrade(def.Type, out var upgraded)
+                    && owned.Contains(upgraded)) continue;
                 if (!def.IsNeutral && def.Owner != archetype) continue;
                 if (!isElite && def.Rarity == AbilityRarity.Rare && rng.Next(100) >= 30) continue;
                 pool.Add(def);
@@ -1176,6 +1178,8 @@ namespace WitsAndFools
             foreach (var def in AbilityPool.All)
             {
                 if (_run.PlayerAbilities.Contains(def.Type)) continue;
+                if (AbilityUpgrades.TryGetUpgrade(def.Type, out var upg)
+                    && _run.PlayerAbilities.Contains(upg)) continue;
                 if (!def.IsNeutral && def.Owner != _run.PlayerArchetype) continue;
                 if (!isElite && def.Rarity == AbilityRarity.Rare && rng.Next(100) >= 30) continue;
                 if (def.IsNeutral) neutralPool.Add(def);
@@ -1894,25 +1898,17 @@ namespace WitsAndFools
             }
             else if (restType == 1)
             {
+                var upgradeable = AbilityUpgrades.GetUpgradeableAbilities(_run.PlayerAbilities);
+                bool canUpgrade = upgradeable.Count > 0;
+                bool canLearn = _run.PlayerAbilities.Count < _run.MaxAbilitySlots;
+
+                string studyLabel = canUpgrade ? "Study (upgrade an ability)" : "Study (+ability if room)";
                 ShowEventChoices("The Study",
-                    "You find a quiet corner with old game manuals.\nPerhaps you can learn something new.",
-                    "Study (+ability if room)", "Rest quietly (+3 Florins)");
-                _eventChoice1Action = () =>
-                {
-                    if (_run.PlayerAbilities.Count < _run.MaxAbilitySlots)
-                    {
-                        var reward = PickAbilityReward(false);
-                        if (reward.HasValue)
-                        {
-                            _run.PlayerAbilities.Add(reward.Value);
-                            _run.RecordAbilityPicked(reward.Value);
-                            ShowEventOutcome($"Studied and learned {reward.Value.DisplayName()}!");
-                            return;
-                        }
-                    }
-                    _run.Florins += 3;
-                    ShowEventOutcome("Nothing new in the books. +3 Florins from a tip jar.");
-                };
+                    canUpgrade
+                        ? "You find a quiet corner with old game manuals.\nYour experience lets you refine what you already know."
+                        : "You find a quiet corner with old game manuals.\nPerhaps you can learn something new.",
+                    studyLabel, "Rest quietly (+3 Florins)");
+                _eventChoice1Action = () => DoRestStudy(upgradeable, canLearn);
                 _eventChoice2Action = DoRestQuietly;
             }
             else
@@ -2032,6 +2028,49 @@ namespace WitsAndFools
                 if (!_run.PlayerBurdens.Contains(b)) available.Add(b);
             if (available.Count > 0)
                 _run.PlayerBurdens.Add(available[_rng.Next(available.Count)]);
+        }
+
+        void DoRestStudy(List<AbilityType> upgradeable, bool canLearn)
+        {
+            if (upgradeable.Count > 0)
+            {
+                var pick = upgradeable[_rng.Next(upgradeable.Count)];
+                if (AbilityUpgrades.TryGetUpgrade(pick, out var upgraded))
+                {
+                    int idx = _run.PlayerAbilities.IndexOf(pick);
+                    if (idx >= 0) _run.PlayerAbilities[idx] = upgraded;
+                    UpgradeDeckAbility(pick, upgraded);
+                    ShowEventOutcome($"{pick.DisplayName()} upgraded to {upgraded.DisplayName()}!");
+                    return;
+                }
+            }
+            if (canLearn)
+            {
+                var reward = PickAbilityReward(false);
+                if (reward.HasValue)
+                {
+                    _run.PlayerAbilities.Add(reward.Value);
+                    _run.RecordAbilityPicked(reward.Value);
+                    ShowEventOutcome($"Studied and learned {reward.Value.DisplayName()}!");
+                    return;
+                }
+            }
+            _run.Florins += 3;
+            ShowEventOutcome("Nothing new in the books. +3 Florins from a tip jar.");
+        }
+
+        void UpgradeDeckAbility(AbilityType from, AbilityType to)
+        {
+            foreach (var cardId in _run.PlayerDeckCardIds)
+            {
+                var def = CardCatalog.Get(cardId);
+                AbilityType? current = _run.CardAbilityOverrides.TryGetValue(cardId, out var ov) ? ov : def.Ability;
+                if (current == from)
+                {
+                    _run.CardAbilityOverrides[cardId] = to;
+                    break;
+                }
+            }
         }
 
         void DoRestMend()
@@ -2161,6 +2200,8 @@ namespace WitsAndFools
             foreach (var def in AbilityPool.All)
             {
                 if (_run.PlayerAbilities.Contains(def.Type)) continue;
+                if (AbilityUpgrades.TryGetUpgrade(def.Type, out var upgraded)
+                    && _run.PlayerAbilities.Contains(upgraded)) continue;
                 if (eliteWeighted || def.Rarity != AbilityRarity.Rare)
                     pool.Add(def);
             }

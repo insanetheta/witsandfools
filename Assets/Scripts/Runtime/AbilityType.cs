@@ -106,6 +106,20 @@ namespace WitsAndFools
         Onslaught,
         Masquerade,
         Monopoly,
+
+        // --- Upgraded abilities (rest site Study) ---
+        BracePlus,
+        ExtraDrawPlus,
+        PileOnPlus,
+        PeekPlus,
+        BlockerPlus,
+        FortifyPlus,
+        SecondWindPlus,
+        HaymakerPlus,
+        RipostePlus,
+        DiplomacyPlus,
+        DoubleTroublePlus,
+        SleightOfHandPlus,
     }
 
     public static class AbilityTypeExtensions
@@ -185,6 +199,18 @@ namespace WitsAndFools
             AbilityType.Onslaught => "Onslaught",
             AbilityType.Masquerade => "Masquerade",
             AbilityType.Monopoly => "Monopoly",
+            AbilityType.BracePlus => "Brace+",
+            AbilityType.ExtraDrawPlus => "Extra Draw+",
+            AbilityType.PileOnPlus => "Pile On+",
+            AbilityType.PeekPlus => "Peek+",
+            AbilityType.BlockerPlus => "Blocker+",
+            AbilityType.FortifyPlus => "Fortify+",
+            AbilityType.SecondWindPlus => "Second Wind+",
+            AbilityType.HaymakerPlus => "Haymaker+",
+            AbilityType.RipostePlus => "Riposte+",
+            AbilityType.DiplomacyPlus => "Diplomacy+",
+            AbilityType.DoubleTroublePlus => "Double Trouble+",
+            AbilityType.SleightOfHandPlus => "Sleight of Hand+",
             _ => a.ToString()
         };
 
@@ -263,6 +289,18 @@ namespace WitsAndFools
             AbilityType.Onslaught => "ONSLT",
             AbilityType.Masquerade => "MASQR",
             AbilityType.Monopoly => "MONOP",
+            AbilityType.BracePlus => "BRC+",
+            AbilityType.ExtraDrawPlus => "DRW+",
+            AbilityType.PileOnPlus => "PIL+",
+            AbilityType.PeekPlus => "PEK+",
+            AbilityType.BlockerPlus => "BLK+",
+            AbilityType.FortifyPlus => "FRT+",
+            AbilityType.SecondWindPlus => "2WN+",
+            AbilityType.HaymakerPlus => "HAY+",
+            AbilityType.RipostePlus => "RIP+",
+            AbilityType.DiplomacyPlus => "DIP+",
+            AbilityType.DoubleTroublePlus => "DBL+",
+            AbilityType.SleightOfHandPlus => "SLT+",
             _ => "?"
         };
 
@@ -341,6 +379,18 @@ namespace WitsAndFools
             AbilityType.Onslaught => "Spend 3 Fury. Play top 3 deck cards as attacks.",
             AbilityType.Masquerade => "Spend 2 Favor. Swap your entire hand with opponent's.",
             AbilityType.Monopoly => "Spend 2 Luck. Draw until you have 7 cards. Opponent discards down to 5.",
+            AbilityType.BracePlus => "Draw 3 cards.",
+            AbilityType.ExtraDrawPlus => "Force the defender to draw 3 cards before defending.",
+            AbilityType.PileOnPlus => "Raise the max attacks this bout by 4.",
+            AbilityType.PeekPlus => "Reveal and rearrange the top 5 cards of the deck.",
+            AbilityType.BlockerPlus => "No more attacks can be added this bout. Draw 1 card.",
+            AbilityType.FortifyPlus => "Auto-defend first 2 undefended attacks.",
+            AbilityType.SecondWindPlus => "Discard 2 cards, draw 4.",
+            AbilityType.HaymakerPlus => "Draw 3 cards.",
+            AbilityType.RipostePlus => "Spend 1 Intel. Opponent discards 2 random cards.",
+            AbilityType.DiplomacyPlus => "End bout — all cards discarded, no one eats. Draw 2.",
+            AbilityType.DoubleTroublePlus => "Play two extra attacks ignoring the rank-match rule.",
+            AbilityType.SleightOfHandPlus => "Draw top deck card. Put 1 card from hand on top of deck. Draw 1 more.",
             _ => ""
         };
 
@@ -393,6 +443,11 @@ namespace WitsAndFools
             AbilityType.Monopoly => 2,
             // Powerful free-trigger abilities cost 2
             AbilityType.Haymaker => 2,
+            AbilityType.HaymakerPlus => 2,
+            AbilityType.RipostePlus => 0,
+            AbilityType.DiplomacyPlus => 0,
+            AbilityType.SleightOfHandPlus => 0,
+            AbilityType.DoubleTroublePlus => 0,
             // Standard trigger cost
             _ => 1,
         };
