@@ -22,6 +22,9 @@ namespace WitsAndFools.EditorTools
             for (int g = 0; g < games; g++)
             {
                 var config = MatchConfig.Default();
+                config.AnyRankAttack = true;
+                config.MaxBouts = 12;
+                config.DesperationDiscard = true;
                 var deck0 = PlayerDeck.CreateStandard(config.Abilities);
                 var deck1 = PlayerDeck.CreateStandard(config.Abilities);
                 var engine = new GameEngine(seed + g, config, deck0, deck1);
@@ -101,11 +104,10 @@ namespace WitsAndFools.EditorTools
 
         static Card? LegalAttack(GameEngine engine, Hand hand)
         {
-            // Prefer lowest non-trump.
             Card? best = null;
             foreach (var c in hand.Cards)
             {
-                if (!Rules.CanAttackWith(engine.Bout, c)) continue;
+                if (!engine.Config.AnyRankAttack && !Rules.CanAttackWith(engine.Bout, c)) continue;
                 if (best == null) { best = c; continue; }
                 if (BetterAttack(c, best.Value, engine.Trump)) best = c;
             }
