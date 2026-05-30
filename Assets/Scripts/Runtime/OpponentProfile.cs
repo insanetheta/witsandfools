@@ -28,6 +28,5 @@ namespace WitsAndFools
         public List<string> DeckCardIds = new();
         public List<RelicType> Relics = new();
         public string GimmickDescription;
-        public bool UseDualDeck => DeckCardIds.Count > 0;
     }
 }

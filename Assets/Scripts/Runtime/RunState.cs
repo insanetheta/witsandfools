@@ -69,8 +69,6 @@ namespace WitsAndFools
             AbilityPickCount[a]++;
         }
 
-        public bool UseDualDeck => PlayerDoctrine.HasValue && PlayerDeckCardIds.Count > 0;
-
         public void InitDoctrineDeck(DoctrineType doctrine)
         {
             PlayerDoctrine = doctrine;
