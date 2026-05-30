@@ -7,8 +7,6 @@ namespace WitsAndFools
     // Top-bar HUD: turn label, deck count, trump suit, plus end-bout button and game-over panel.
     public sealed class HudView : MonoBehaviour
     {
-        public TMP_Text TurnLabel;
-        public TMP_Text DeckCountLabel; // legacy single deck label (unused in dual-deck)
         public TMP_Text TrumpLabel;
         public TMP_Text PlayerDeckCountLabel;
         public TMP_Text OpponentDeckCountLabel;
@@ -55,13 +53,10 @@ namespace WitsAndFools
         public Button UseAbilityButton;
         public Button CancelAbilityButton;
 
-        public void SetTurn(string text) { if (TurnLabel) TurnLabel.text = text; }
-        public void SetDeckCount(int n) { if (DeckCountLabel) DeckCountLabel.text = $"Deck: {n}"; }
         public void SetDeckCounts(int playerDeck, int opponentDeck)
         {
             if (PlayerDeckCountLabel) PlayerDeckCountLabel.text = $"Deck: {playerDeck}";
             if (OpponentDeckCountLabel) OpponentDeckCountLabel.text = $"Deck: {opponentDeck}";
-            if (DeckCountLabel) DeckCountLabel.gameObject.SetActive(false);
         }
         public void SetTrump(Suit suit) { if (TrumpLabel) { TrumpLabel.text = $"Trump: {suit.Glyph()}"; TrumpLabel.color = suit.IsRed() ? ThemePalette.PrestigeRed : Color.white; } }
         public void SetEndBoutEnabled(bool enabled) { if (EndBoutButton) EndBoutButton.interactable = enabled; }

@@ -21,7 +21,7 @@ namespace WitsAndFools
 
         public static string ModifierDescription(int level) => level switch
         {
-            1 => "Start runs with 0 Florins instead of 0",
+            1 => "Earn 3 fewer Florins from match victories",
             2 => "Elite opponents gain +1 relic",
             3 => "Rest quietly grants +2 Florins instead of +3",
             4 => "Start each run with Rattled Nerves",

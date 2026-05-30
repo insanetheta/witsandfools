@@ -132,6 +132,7 @@ namespace WitsAndFools
 
         public static Color AbilityBadgeColor(AbilityType ability) => ability switch
         {
+            // Core abilities
             AbilityType.TrumpChanger => UtilColor,
             AbilityType.ExtraDraw => UtilColor,
             AbilityType.Blocker => DefColor,
@@ -148,6 +149,93 @@ namespace WitsAndFools
             AbilityType.EndgameSpecialist => PassiveColor,
             AbilityType.CardCounter => PassiveColor,
             AbilityType.QuickHands => PassiveColor,
+
+            // Rogue: Shadow
+            AbilityType.Riposte => AtkColor,
+            AbilityType.ShadowCloak => DefColor,
+            AbilityType.PatienceRewarded => PassiveColor,
+
+            // Rogue: Spy
+            AbilityType.Wiretap => UtilColor,
+            AbilityType.MarkedCards => PassiveColor,
+            AbilityType.DoubleAgent => AtkColor,
+            AbilityType.Blackmail => AtkColor,
+
+            // Rogue: Saboteur
+            AbilityType.SleightOfHand => UtilColor,
+            AbilityType.SmokeBomb => DefColor,
+            AbilityType.TrapCard => AtkColor,
+            AbilityType.Undermine => PassiveColor,
+
+            // Brute: Berserker
+            AbilityType.Rampage => AtkColor,
+            AbilityType.Bloodlust => PassiveColor,
+
+            // Brute: Brawler
+            AbilityType.Haymaker => UtilColor,
+            AbilityType.IronGrip => UtilColor,
+            AbilityType.Brawl => AtkColor,
+            AbilityType.ThickSkin => PassiveColor,
+
+            // Brute: Warlord
+            AbilityType.Conquer => AtkColor,
+            AbilityType.Intimidate => AtkColor,
+            AbilityType.CrownSeize => AtkColor,
+            AbilityType.BattleHardened => PassiveColor,
+
+            // Diplomat: Courtier
+            AbilityType.CourtIntrigue => UtilColor,
+            AbilityType.RoyalDecree => UtilColor,
+            AbilityType.Patronage => UtilColor,
+            AbilityType.GracefulManners => PassiveColor,
+
+            // Diplomat: Puppeteer
+            AbilityType.PullStrings => AtkColor,
+            AbilityType.Misdirection => DefColor,
+            AbilityType.ForcedHand => AtkColor,
+            AbilityType.WebOfLies => PassiveColor,
+
+            // Diplomat: Peacemaker
+            AbilityType.Diplomacy => DefColor,
+            AbilityType.SafePassage => DefColor,
+            AbilityType.Treaty => DefColor,
+            AbilityType.GracefulRetreat => PassiveColor,
+            AbilityType.Equilibrium => PassiveColor,
+
+            // Gambler: Card Shark
+            AbilityType.StackTheDeck => UtilColor,
+            AbilityType.SecondDeal => UtilColor,
+            AbilityType.ColdRead => UtilColor,
+            AbilityType.SharkInstinct => PassiveColor,
+
+            // Gambler: High Roller
+            AbilityType.AllIn => UtilColor,
+            AbilityType.DoubleOrNothing => UtilColor,
+            AbilityType.LuckyStreak => AtkColor,
+            AbilityType.Jackpot => PassiveColor,
+
+            // Gambler: Trickster
+            AbilityType.BlindSwap => UtilColor,
+            AbilityType.Misdeal => DefColor,
+            AbilityType.WildCard => UtilColor,
+            AbilityType.SleightOfMind => PassiveColor,
+            AbilityType.ChaoticNature => PassiveColor,
+
+            // Neutral
+            AbilityType.Fortify => DefColor,
+            AbilityType.SecondWind => UtilColor,
+            AbilityType.Brace => DefColor,
+            AbilityType.Desperation => DefColor,
+            AbilityType.SteadyHand => PassiveColor,
+
+            // Doctrine
+            AbilityType.ResourceGain => UtilColor,
+            AbilityType.Masterstroke => AtkColor,
+            AbilityType.Onslaught => AtkColor,
+            AbilityType.Masquerade => DefColor,
+            AbilityType.Monopoly => UtilColor,
+
+            // Upgraded variants
             AbilityType.BracePlus => DefColor,
             AbilityType.ExtraDrawPlus => UtilColor,
             AbilityType.PileOnPlus => AtkColor,
@@ -160,6 +248,7 @@ namespace WitsAndFools
             AbilityType.DiplomacyPlus => DefColor,
             AbilityType.DoubleTroublePlus => AtkColor,
             AbilityType.SleightOfHandPlus => UtilColor,
+
             _ => DustyTan
         };
 

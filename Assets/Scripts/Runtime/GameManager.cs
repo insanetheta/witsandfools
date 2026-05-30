@@ -763,7 +763,6 @@ namespace WitsAndFools
                 boutColor = yourTurn ? ThemePalette.VenetianRed : ThemePalette.Sage;
             }
             else { phase = "..."; boutColor = ThemePalette.WarmSlate; }
-            Hud.SetTurn("");
             Hud.SetBoutState(phase, boutColor);
 
             int playerCards = Engine.HandCount(HumanPlayerIndex);

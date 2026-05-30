@@ -92,6 +92,21 @@ namespace WitsAndFools
         public string[] PortraitNames;
         public Sprite[] PortraitSprites;
 
+        [Header("Card Detail Modal")]
+        public GameObject CardDetailPanel;
+
+        [Header("Deck Browser")]
+        public GameObject DeckBrowserPanel;
+        public Transform DeckBrowserContainer;
+        public TMP_Text DeckStatsLabel;
+        public Button DeckBrowserCloseButton;
+        public Button ViewDeckButton;
+
+        [Header("Card Reward")]
+        public TMP_Text CardRewardLabel;
+        public Transform CardRewardContainer;
+        public Button CardRewardSkipButton;
+
         RunState _run;
         RunPhase _phase;
         public RunPhase CurrentPhase => _phase;
@@ -111,6 +126,11 @@ namespace WitsAndFools
             Time.timeScale = 1f;
             _autoRun = false;
             if (GameManager) GameManager.AutoStartOnAwake = false;
+            if (ViewDeckButton)
+            {
+                ViewDeckButton.onClick.RemoveAllListeners();
+                ViewDeckButton.onClick.AddListener(ShowDeckBrowser);
+            }
             if (!TryLoadSave())
                 StartNewRun();
         }
@@ -204,7 +224,9 @@ namespace WitsAndFools
                     AutoSelectNode();
                     break;
                 case RunPhase.PostMatch:
-                    if (_abilityPickOfferings != null && _abilityPickOfferings.Count > 0)
+                    if (_cardRewardOfferings != null && _cardRewardOfferings.Count > 0)
+                        OnCardRewardPicked(_cardRewardOfferings[_rng.Next(_cardRewardOfferings.Count)]);
+                    else if (_abilityPickOfferings != null && _abilityPickOfferings.Count > 0)
                         OnAbilityPicked(_abilityPickOfferings[_rng.Next(_abilityPickOfferings.Count)]);
                     else if (_relicPickOfferings != null && _relicPickOfferings.Count > 0)
                         OnRelicPicked(_relicPickOfferings[_rng.Next(_relicPickOfferings.Count)]);
@@ -1186,24 +1208,23 @@ namespace WitsAndFools
                     ResultRewardLabel.text = "";
             }
 
+            _cardRewardOfferings = null;
             _abilityPickOfferings = null;
             _relicPickOfferings = null;
+            HideCardReward();
+            HideAbilityPick();
+
             if (won)
             {
-                _abilityPickOfferings = PickAbilityOfferings(3);
-                if (_abilityPickOfferings.Count > 0)
-                    ShowAbilityPick();
-                else
-                    HideAbilityPick();
+                ShowCardReward();
             }
-            else
-                HideAbilityPick();
 
             if (ResultContinueButton)
             {
                 ResultContinueButton.onClick.RemoveAllListeners();
                 ResultContinueButton.onClick.AddListener(OnResultContinue);
-                ResultContinueButton.gameObject.SetActive(_abilityPickOfferings == null || _abilityPickOfferings.Count == 0);
+                bool showContinue = !won || (_cardRewardOfferings == null || _cardRewardOfferings.Count == 0);
+                ResultContinueButton.gameObject.SetActive(showContinue);
             }
         }
 
@@ -1648,6 +1669,8 @@ namespace WitsAndFools
             var abilityOfferings = PickShopOfferings(2);
             foreach (var offering in abilityOfferings)
                 CreateShopItemButton(offering);
+
+            CreateCardShopItems();
 
             var trinketOffering = PickTrinketOffering();
             if (trinketOffering.HasValue)
@@ -2670,6 +2693,894 @@ namespace WitsAndFools
             if (Ascension.LeanPurse(_run.AscensionLevel))
                 baseAmount = Math.Max(1, baseAmount - 3);
             return baseAmount;
+        }
+
+        // ---------- Card Detail Modal ----------
+
+        void ShowCardDetail(CardDefinition def)
+        {
+            if (!CardDetailPanel) BuildCardDetailPanel();
+            if (!CardDetailPanel) return;
+
+            CardDetailPanel.SetActive(true);
+
+            for (int i = CardDetailPanel.transform.childCount - 1; i >= 0; i--)
+                Destroy(CardDetailPanel.transform.GetChild(i).gameObject);
+
+            var container = new GameObject("DetailContent", typeof(RectTransform), typeof(Image));
+            container.transform.SetParent(CardDetailPanel.transform, false);
+            var containerRT = (RectTransform)container.transform;
+            containerRT.anchorMin = new Vector2(0.5f, 0.5f);
+            containerRT.anchorMax = new Vector2(0.5f, 0.5f);
+            containerRT.pivot = new Vector2(0.5f, 0.5f);
+            containerRT.sizeDelta = new Vector2(500, 280);
+            container.GetComponent<Image>().color = ThemePalette.DeepNavy;
+
+            var borderGO = container.AddComponent<Outline>();
+            if (borderGO) { borderGO.effectColor = new Color(0.35f, 0.28f, 0.19f); borderGO.effectDistance = new Vector2(1, -1); }
+
+            // Card visual (left side)
+            var cardGO = CreateMiniCard(def, container.transform, 130, 186);
+            var cardRT = (RectTransform)cardGO.transform;
+            cardRT.anchorMin = new Vector2(0, 0);
+            cardRT.anchorMax = new Vector2(0, 1);
+            cardRT.pivot = new Vector2(0, 0.5f);
+            cardRT.anchoredPosition = new Vector2(16, 0);
+            cardRT.sizeDelta = new Vector2(130, -32);
+
+            // Info panel (right side)
+            float infoLeft = 160;
+            float infoRight = -16;
+
+            // Card name
+            var nameGO = new GameObject("DetailName", typeof(RectTransform));
+            nameGO.transform.SetParent(container.transform, false);
+            var nameRT = (RectTransform)nameGO.transform;
+            nameRT.anchorMin = new Vector2(0, 1);
+            nameRT.anchorMax = new Vector2(1, 1);
+            nameRT.pivot = new Vector2(0, 1);
+            nameRT.anchoredPosition = new Vector2(infoLeft, -16);
+            nameRT.sizeDelta = new Vector2(infoRight - infoLeft, 30);
+            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Heading) nameTMP.font = FontAssets.Heading;
+            nameTMP.text = def.Name;
+            nameTMP.fontSize = 24;
+            nameTMP.color = ThemePalette.Parchment;
+            nameTMP.alignment = TextAlignmentOptions.TopLeft;
+            nameTMP.raycastTarget = false;
+
+            // Meta tags (doctrine, rarity, suit+rank)
+            var metaGO = new GameObject("DetailMeta", typeof(RectTransform));
+            metaGO.transform.SetParent(container.transform, false);
+            var metaRT = (RectTransform)metaGO.transform;
+            metaRT.anchorMin = new Vector2(0, 1);
+            metaRT.anchorMax = new Vector2(1, 1);
+            metaRT.pivot = new Vector2(0, 1);
+            metaRT.anchoredPosition = new Vector2(infoLeft, -50);
+            metaRT.sizeDelta = new Vector2(infoRight - infoLeft, 22);
+            var metaTMP = metaGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Mono) metaTMP.font = FontAssets.Mono;
+            string docColor = DoctrineHexColor(def.Doctrine);
+            metaTMP.text = $"<color={docColor}>{def.Doctrine}</color>  {def.Rarity}  {def.Rank.Label()}{def.Suit.Glyph()}";
+            metaTMP.fontSize = 14;
+            metaTMP.color = ThemePalette.DustyTan;
+            metaTMP.richText = true;
+            metaTMP.alignment = TextAlignmentOptions.TopLeft;
+            metaTMP.raycastTarget = false;
+
+            // Ability section
+            if (def.HasAbility)
+            {
+                var abilityBg = new GameObject("AbilityBg", typeof(RectTransform), typeof(Image));
+                abilityBg.transform.SetParent(container.transform, false);
+                var abRT = (RectTransform)abilityBg.transform;
+                abRT.anchorMin = new Vector2(0, 1);
+                abRT.anchorMax = new Vector2(1, 1);
+                abRT.pivot = new Vector2(0, 1);
+                abRT.anchoredPosition = new Vector2(infoLeft, -80);
+                abRT.sizeDelta = new Vector2(infoRight - infoLeft, 90);
+                abilityBg.GetComponent<Image>().color = new Color(0, 0, 0, 0.2f);
+
+                var abilityColor = ThemePalette.AbilityBadgeColor(def.Ability.Value);
+                var accentBar = new GameObject("AccentBar", typeof(RectTransform), typeof(Image));
+                accentBar.transform.SetParent(abilityBg.transform, false);
+                var abcRT = (RectTransform)accentBar.transform;
+                abcRT.anchorMin = Vector2.zero;
+                abcRT.anchorMax = new Vector2(0, 1);
+                abcRT.pivot = new Vector2(0, 0.5f);
+                abcRT.sizeDelta = new Vector2(3, 0);
+                accentBar.GetComponent<Image>().color = abilityColor;
+                accentBar.GetComponent<Image>().raycastTarget = false;
+
+                var abNameGO = new GameObject("AbName", typeof(RectTransform));
+                abNameGO.transform.SetParent(abilityBg.transform, false);
+                var abNameRT = (RectTransform)abNameGO.transform;
+                abNameRT.anchorMin = new Vector2(0, 1);
+                abNameRT.anchorMax = new Vector2(1, 1);
+                abNameRT.pivot = new Vector2(0, 1);
+                abNameRT.anchoredPosition = new Vector2(10, -6);
+                abNameRT.sizeDelta = new Vector2(-16, 20);
+                var abNameTMP = abNameGO.AddComponent<TextMeshProUGUI>();
+                if (FontAssets.Heading) abNameTMP.font = FontAssets.Heading;
+                string triggerTag = def.Trigger != TriggerTiming.Passive ? $"  <size=11><color=#888>{def.Trigger}</color></size>" : "  <size=11><color=#888>Passive</color></size>";
+                abNameTMP.text = $"{def.Ability.Value.DisplayName()}{triggerTag}";
+                abNameTMP.fontSize = 16;
+                abNameTMP.color = ThemePalette.Parchment;
+                abNameTMP.richText = true;
+                abNameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+                abNameTMP.raycastTarget = false;
+
+                var abDescGO = new GameObject("AbDesc", typeof(RectTransform));
+                abDescGO.transform.SetParent(abilityBg.transform, false);
+                var abDescRT = (RectTransform)abDescGO.transform;
+                abDescRT.anchorMin = Vector2.zero;
+                abDescRT.anchorMax = new Vector2(1, 0.65f);
+                abDescRT.offsetMin = new Vector2(10, 4);
+                abDescRT.offsetMax = new Vector2(-6, 0);
+                var abDescTMP = abDescGO.AddComponent<TextMeshProUGUI>();
+                abDescTMP.text = def.AbilityText ?? def.Ability.Value.Description();
+                abDescTMP.fontSize = 14;
+                abDescTMP.color = ThemePalette.DescGray;
+                abDescTMP.enableWordWrapping = true;
+                abDescTMP.alignment = TextAlignmentOptions.TopLeft;
+                abDescTMP.raycastTarget = false;
+            }
+
+            // Flavor text
+            if (!string.IsNullOrEmpty(def.FlavorText))
+            {
+                var flavorGO = new GameObject("Flavor", typeof(RectTransform));
+                flavorGO.transform.SetParent(container.transform, false);
+                var flavorRT = (RectTransform)flavorGO.transform;
+                flavorRT.anchorMin = new Vector2(0, 0);
+                flavorRT.anchorMax = new Vector2(1, 0);
+                flavorRT.pivot = new Vector2(0, 0);
+                flavorRT.anchoredPosition = new Vector2(infoLeft, 12);
+                flavorRT.sizeDelta = new Vector2(infoRight - infoLeft, 40);
+                var flavorTMP = flavorGO.AddComponent<TextMeshProUGUI>();
+                flavorTMP.text = $"<i>“{def.FlavorText}”</i>";
+                flavorTMP.fontSize = 13;
+                flavorTMP.color = ThemePalette.DustyTan;
+                flavorTMP.richText = true;
+                flavorTMP.enableWordWrapping = true;
+                flavorTMP.alignment = TextAlignmentOptions.BottomLeft;
+                flavorTMP.raycastTarget = false;
+            }
+
+            // Close button
+            var closeGO = new GameObject("CloseBtn", typeof(RectTransform), typeof(Button));
+            closeGO.transform.SetParent(container.transform, false);
+            var closeRT = (RectTransform)closeGO.transform;
+            closeRT.anchorMin = new Vector2(1, 1);
+            closeRT.anchorMax = new Vector2(1, 1);
+            closeRT.pivot = new Vector2(1, 1);
+            closeRT.anchoredPosition = new Vector2(-6, -4);
+            closeRT.sizeDelta = new Vector2(30, 30);
+            var closeTMP = closeGO.AddComponent<TextMeshProUGUI>();
+            closeTMP.text = "×";
+            closeTMP.fontSize = 22;
+            closeTMP.color = ThemePalette.DustyTan;
+            closeTMP.alignment = TextAlignmentOptions.Center;
+            closeGO.GetComponent<Button>().onClick.AddListener(HideCardDetail);
+        }
+
+        void HideCardDetail()
+        {
+            if (CardDetailPanel) CardDetailPanel.SetActive(false);
+        }
+
+        void BuildCardDetailPanel()
+        {
+            var canvas = GetComponentInParent<Canvas>();
+            if (!canvas) canvas = FindFirstObjectByType<Canvas>();
+            if (!canvas) return;
+
+            var panelGO = new GameObject("CardDetailPanel", typeof(RectTransform), typeof(Image), typeof(Button));
+            panelGO.transform.SetParent(canvas.transform, false);
+            var rt = (RectTransform)panelGO.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            panelGO.GetComponent<Image>().color = ThemePalette.ModalOverlay;
+            panelGO.GetComponent<Button>().onClick.AddListener(HideCardDetail);
+            CardDetailPanel = panelGO;
+            panelGO.SetActive(false);
+        }
+
+        static string DoctrineHexColor(DoctrineType d) => d switch
+        {
+            DoctrineType.Schemer => "#1A8A7A",
+            DoctrineType.Brute => "#A83232",
+            DoctrineType.Trickster => "#7C3AED",
+            DoctrineType.Hoarder => "#B45309",
+            _ => "#6B7280"
+        };
+
+        GameObject CreateMiniCard(CardDefinition def, Transform parent, float width, float height)
+        {
+            var cardGO = new GameObject("Card_" + def.Id, typeof(RectTransform), typeof(Image));
+            cardGO.transform.SetParent(parent, false);
+            var rt = (RectTransform)cardGO.transform;
+            rt.sizeDelta = new Vector2(width, height);
+
+            var rarityBorder = def.Rarity switch
+            {
+                CardRarity.Common => ThemePalette.RarityCommon,
+                CardRarity.Uncommon => ThemePalette.RarityUncommon,
+                CardRarity.Rare => ThemePalette.RarityRare,
+                _ => ThemePalette.DustyTan
+            };
+            var outline = cardGO.AddComponent<Outline>();
+            outline.effectColor = rarityBorder;
+            outline.effectDistance = new Vector2(2, -2);
+
+            cardGO.GetComponent<Image>().color = ThemePalette.CardCream;
+
+            Rank displayRank = def.Rank;
+            if (_run != null && _run.CardRankOverrides.TryGetValue(def.Id, out var overrideRank))
+                displayRank = overrideRank;
+
+            // Rank + Suit
+            var rankGO = new GameObject("RankSuit", typeof(RectTransform));
+            rankGO.transform.SetParent(cardGO.transform, false);
+            var rankRT = (RectTransform)rankGO.transform;
+            rankRT.anchorMin = new Vector2(0, 1);
+            rankRT.anchorMax = new Vector2(0.5f, 1);
+            rankRT.pivot = new Vector2(0, 1);
+            rankRT.anchoredPosition = new Vector2(4, -3);
+            rankRT.sizeDelta = new Vector2(0, 16);
+            var rankTMP = rankGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Mono) rankTMP.font = FontAssets.Mono;
+            rankTMP.text = $"{displayRank.Label()}{def.Suit.Glyph()}";
+            rankTMP.fontSize = width > 110 ? 14 : 11;
+            rankTMP.color = def.Suit.IsRed() ? ThemePalette.RedSuit : new Color(0.05f, 0.05f, 0.05f);
+            rankTMP.alignment = TextAlignmentOptions.TopLeft;
+            rankTMP.raycastTarget = false;
+
+            // Doctrine badge
+            var docGO = new GameObject("Doc", typeof(RectTransform), typeof(Image));
+            docGO.transform.SetParent(cardGO.transform, false);
+            var docRT = (RectTransform)docGO.transform;
+            docRT.anchorMin = new Vector2(1, 1);
+            docRT.anchorMax = new Vector2(1, 1);
+            docRT.pivot = new Vector2(1, 1);
+            docRT.anchoredPosition = new Vector2(-3, -3);
+            docRT.sizeDelta = new Vector2(28, 12);
+            var docColor = def.Doctrine switch
+            {
+                DoctrineType.Schemer => new Color(0.1f, 0.54f, 0.48f),
+                DoctrineType.Brute => new Color(0.66f, 0.2f, 0.2f),
+                DoctrineType.Trickster => new Color(0.49f, 0.23f, 0.93f),
+                DoctrineType.Hoarder => new Color(0.71f, 0.33f, 0.04f),
+                _ => new Color(0.42f, 0.45f, 0.5f)
+            };
+            docGO.GetComponent<Image>().color = docColor;
+            var docLabel = new GameObject("DocLabel", typeof(RectTransform));
+            docLabel.transform.SetParent(docGO.transform, false);
+            var dlRT = (RectTransform)docLabel.transform;
+            dlRT.anchorMin = Vector2.zero;
+            dlRT.anchorMax = Vector2.one;
+            dlRT.offsetMin = Vector2.zero;
+            dlRT.offsetMax = Vector2.zero;
+            var dlTMP = docLabel.AddComponent<TextMeshProUGUI>();
+            dlTMP.text = def.Doctrine.ToString().Substring(0, 3).ToUpper();
+            dlTMP.fontSize = 7;
+            dlTMP.color = Color.white;
+            dlTMP.alignment = TextAlignmentOptions.Center;
+            dlTMP.raycastTarget = false;
+
+            // Card name
+            var nameGO = new GameObject("Name", typeof(RectTransform));
+            nameGO.transform.SetParent(cardGO.transform, false);
+            var nameRT = (RectTransform)nameGO.transform;
+            nameRT.anchorMin = new Vector2(0, 1);
+            nameRT.anchorMax = new Vector2(1, 1);
+            nameRT.pivot = new Vector2(0.5f, 1);
+            nameRT.anchoredPosition = new Vector2(0, -20);
+            nameRT.sizeDelta = new Vector2(-8, 16);
+            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Heading) nameTMP.font = FontAssets.Heading;
+            nameTMP.text = def.Name;
+            nameTMP.fontSize = width > 110 ? 10 : 8;
+            nameTMP.color = new Color(0.05f, 0.05f, 0.05f);
+            nameTMP.alignment = TextAlignmentOptions.Center;
+            nameTMP.enableWordWrapping = false;
+            nameTMP.overflowMode = TextOverflowModes.Ellipsis;
+            nameTMP.raycastTarget = false;
+
+            // Ability bar at bottom
+            if (def.HasAbility)
+            {
+                var abilBarGO = new GameObject("AbilBar", typeof(RectTransform), typeof(Image));
+                abilBarGO.transform.SetParent(cardGO.transform, false);
+                var abRT = (RectTransform)abilBarGO.transform;
+                abRT.anchorMin = Vector2.zero;
+                abRT.anchorMax = new Vector2(1, 0);
+                abRT.pivot = new Vector2(0.5f, 0);
+                abRT.anchoredPosition = Vector2.zero;
+                abRT.sizeDelta = new Vector2(0, 16);
+                abilBarGO.GetComponent<Image>().color = new Color(0, 0, 0, 0.06f);
+                abilBarGO.GetComponent<Image>().raycastTarget = false;
+
+                var dotGO = new GameObject("Dot", typeof(RectTransform), typeof(Image));
+                dotGO.transform.SetParent(abilBarGO.transform, false);
+                var dotRT = (RectTransform)dotGO.transform;
+                dotRT.anchorMin = new Vector2(0, 0.5f);
+                dotRT.anchorMax = new Vector2(0, 0.5f);
+                dotRT.pivot = new Vector2(0.5f, 0.5f);
+                dotRT.anchoredPosition = new Vector2(8, 0);
+                dotRT.sizeDelta = new Vector2(6, 6);
+                dotGO.GetComponent<Image>().color = ThemePalette.AbilityBadgeColor(def.Ability.Value);
+                dotGO.GetComponent<Image>().raycastTarget = false;
+
+                var abLabelGO = new GameObject("AbLabel", typeof(RectTransform));
+                abLabelGO.transform.SetParent(abilBarGO.transform, false);
+                var abLabelRT = (RectTransform)abLabelGO.transform;
+                abLabelRT.anchorMin = Vector2.zero;
+                abLabelRT.anchorMax = Vector2.one;
+                abLabelRT.offsetMin = new Vector2(14, 0);
+                abLabelRT.offsetMax = new Vector2(-2, 0);
+                var abLabelTMP = abLabelGO.AddComponent<TextMeshProUGUI>();
+                abLabelTMP.text = def.Ability.Value.DisplayName();
+                abLabelTMP.fontSize = 8;
+                abLabelTMP.color = new Color(0.33f, 0.33f, 0.33f);
+                abLabelTMP.alignment = TextAlignmentOptions.MidlineLeft;
+                abLabelTMP.enableWordWrapping = false;
+                abLabelTMP.overflowMode = TextOverflowModes.Ellipsis;
+                abLabelTMP.raycastTarget = false;
+            }
+
+            return cardGO;
+        }
+
+        // ---------- Card Reward ----------
+
+        List<CardDefinition> _cardRewardOfferings;
+
+        List<CardDefinition> PickCardRewardOfferings(int count)
+        {
+            if (!_run.PlayerDoctrine.HasValue || !CardCatalog.IsInitialized) return new List<CardDefinition>();
+
+            var pool = CardCatalog.Draftable(_run.PlayerDoctrine.Value);
+            var candidates = new List<CardDefinition>();
+            foreach (var card in pool)
+            {
+                if (_run.PlayerDeckCardIds.Contains(card.Id)) continue;
+                if (card.InStartingDeck && card.Rarity == CardRarity.Common) continue;
+                candidates.Add(card);
+            }
+
+            bool isElite = _currentNode?.Type == MapNodeType.EliteMatch || _currentNode?.Type == MapNodeType.BossMatch;
+            var result = new List<CardDefinition>();
+            for (int i = 0; i < count && candidates.Count > 0; i++)
+            {
+                CardRarity targetRarity;
+                int roll = _rng.Next(100);
+                if (isElite)
+                    targetRarity = roll < 25 ? CardRarity.Rare : roll < 60 ? CardRarity.Uncommon : CardRarity.Common;
+                else
+                    targetRarity = roll < 10 ? CardRarity.Rare : roll < 35 ? CardRarity.Uncommon : CardRarity.Common;
+
+                var rarityPool = candidates.FindAll(c => c.Rarity == targetRarity);
+                if (rarityPool.Count == 0) rarityPool = candidates;
+
+                int idx = _rng.Next(rarityPool.Count);
+                var pick = rarityPool[idx];
+                result.Add(pick);
+                candidates.Remove(pick);
+            }
+            return result;
+        }
+
+        void ShowCardReward()
+        {
+            _cardRewardOfferings = PickCardRewardOfferings(3);
+            if (_cardRewardOfferings.Count == 0) { FinishCardReward(); return; }
+
+            if (CardRewardLabel) { CardRewardLabel.text = "Choose a card for your deck:"; CardRewardLabel.gameObject.SetActive(true); }
+            ClearCardRewardButtons();
+
+            if (CardRewardContainer)
+            {
+                foreach (var cardDef in _cardRewardOfferings)
+                    CreateCardRewardButton(cardDef);
+            }
+
+            if (CardRewardSkipButton)
+            {
+                CardRewardSkipButton.gameObject.SetActive(true);
+                CardRewardSkipButton.onClick.RemoveAllListeners();
+                CardRewardSkipButton.onClick.AddListener(OnCardRewardSkip);
+            }
+        }
+
+        void CreateCardRewardButton(CardDefinition def)
+        {
+            var btnGO = new GameObject($"CardReward_{def.Id}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            btnGO.transform.SetParent(CardRewardContainer, false);
+
+            var bgColor = def.Rarity switch
+            {
+                CardRarity.Common => ThemePalette.RarityCommonBg,
+                CardRarity.Uncommon => ThemePalette.RarityUncommonBg,
+                CardRarity.Rare => ThemePalette.RarityRareBg,
+                _ => ThemePalette.LockedGray
+            };
+            btnGO.GetComponent<Image>().color = new Color(bgColor.r * 0.7f, bgColor.g * 0.7f, bgColor.b * 0.7f, 0.9f);
+
+            var le = btnGO.GetComponent<LayoutElement>();
+            le.preferredHeight = 110;
+            le.preferredWidth = 650;
+
+            // Rarity accent bar
+            var rarityColor = def.Rarity switch
+            {
+                CardRarity.Common => ThemePalette.RarityCommon,
+                CardRarity.Uncommon => ThemePalette.RarityUncommon,
+                CardRarity.Rare => ThemePalette.RarityRare,
+                _ => ThemePalette.DustyTan
+            };
+            var accentGO = new GameObject("RarityAccent", typeof(RectTransform), typeof(Image));
+            accentGO.transform.SetParent(btnGO.transform, false);
+            var accentRT = (RectTransform)accentGO.transform;
+            accentRT.anchorMin = Vector2.zero;
+            accentRT.anchorMax = new Vector2(0, 1);
+            accentRT.pivot = new Vector2(0, 0.5f);
+            accentRT.sizeDelta = new Vector2(4, 0);
+            accentGO.GetComponent<Image>().color = rarityColor;
+            accentGO.GetComponent<Image>().raycastTarget = false;
+
+            Rank displayRank = def.Rank;
+            if (_run.CardRankOverrides.TryGetValue(def.Id, out var overrideRank))
+                displayRank = overrideRank;
+
+            // Suit+Rank display
+            var suitGO = new GameObject("SuitRank", typeof(RectTransform));
+            suitGO.transform.SetParent(btnGO.transform, false);
+            var suitRT = (RectTransform)suitGO.transform;
+            suitRT.anchorMin = new Vector2(0, 0);
+            suitRT.anchorMax = new Vector2(0, 1);
+            suitRT.pivot = new Vector2(0, 0.5f);
+            suitRT.anchoredPosition = new Vector2(14, 0);
+            suitRT.sizeDelta = new Vector2(40, 0);
+            var suitTMP = suitGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Mono) suitTMP.font = FontAssets.Mono;
+            suitTMP.text = $"{displayRank.Label()}{def.Suit.Glyph()}";
+            suitTMP.fontSize = 22;
+            suitTMP.color = def.Suit.IsRed() ? ThemePalette.VenetianRed : ThemePalette.Parchment;
+            suitTMP.alignment = TextAlignmentOptions.Center;
+            suitTMP.raycastTarget = false;
+
+            // Card name + rarity + doctrine
+            var nameGO = new GameObject("Name", typeof(RectTransform));
+            nameGO.transform.SetParent(btnGO.transform, false);
+            var nameRT = (RectTransform)nameGO.transform;
+            nameRT.anchorMin = new Vector2(0, 0.5f);
+            nameRT.anchorMax = new Vector2(1, 1);
+            nameRT.offsetMin = new Vector2(58, 0);
+            nameRT.offsetMax = new Vector2(-12, -2);
+            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Heading) nameTMP.font = FontAssets.Heading;
+            string docTag = $"<color={DoctrineHexColor(def.Doctrine)}>{def.Doctrine}</color>";
+            string rarityTag = def.Rarity != CardRarity.Common ? $"  [{def.Rarity}]" : "";
+            nameTMP.text = $"{def.Name}{rarityTag}  {docTag}";
+            nameTMP.richText = true;
+            nameTMP.fontSize = 20;
+            nameTMP.color = ThemePalette.Parchment;
+            nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            nameTMP.raycastTarget = false;
+
+            // Ability description
+            var descGO = new GameObject("Desc", typeof(RectTransform));
+            descGO.transform.SetParent(btnGO.transform, false);
+            var descRT = (RectTransform)descGO.transform;
+            descRT.anchorMin = Vector2.zero;
+            descRT.anchorMax = new Vector2(1, 0.5f);
+            descRT.offsetMin = new Vector2(58, 2);
+            descRT.offsetMax = new Vector2(-12, 0);
+            var descTMP = descGO.AddComponent<TextMeshProUGUI>();
+            string abilityText = "";
+            if (def.HasAbility)
+            {
+                var badgeColor = ThemePalette.AbilityBadgeColor(def.Ability.Value);
+                string hexColor = $"#{(int)(badgeColor.r * 255):X2}{(int)(badgeColor.g * 255):X2}{(int)(badgeColor.b * 255):X2}";
+                abilityText = $"<color={hexColor}>{def.Ability.Value.DisplayName()}</color> · {def.Trigger}\n{def.AbilityText ?? def.Ability.Value.Description()}";
+            }
+            descTMP.text = abilityText;
+            descTMP.richText = true;
+            descTMP.fontSize = 15;
+            descTMP.color = ThemePalette.DescGray;
+            descTMP.enableWordWrapping = true;
+            descTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            descTMP.raycastTarget = false;
+
+            var btn = btnGO.GetComponent<Button>();
+            var colors = btn.colors;
+            colors.highlightedColor = new Color(bgColor.r, bgColor.g, bgColor.b, 0.95f);
+            btn.colors = colors;
+            var captured = def;
+            btn.onClick.AddListener(() => OnCardRewardPicked(captured));
+        }
+
+        void OnCardRewardPicked(CardDefinition def)
+        {
+            _run.PlayerDeckCardIds.Add(def.Id);
+            Debug.Log($"[RunManager] Added card '{def.Name}' to deck. Deck size: {_run.PlayerDeckCardIds.Count}");
+            UpdateRunHud();
+            FinishCardReward();
+        }
+
+        void OnCardRewardSkip()
+        {
+            Debug.Log("[RunManager] Skipped card reward.");
+            FinishCardReward();
+        }
+
+        void FinishCardReward()
+        {
+            _cardRewardOfferings = null;
+            HideCardReward();
+
+            _abilityPickOfferings = PickAbilityOfferings(3);
+            if (_abilityPickOfferings.Count > 0)
+                ShowAbilityPick();
+            else
+            {
+                HideAbilityPick();
+                if (ResultContinueButton) ResultContinueButton.gameObject.SetActive(true);
+            }
+        }
+
+        void HideCardReward()
+        {
+            if (CardRewardLabel) CardRewardLabel.gameObject.SetActive(false);
+            ClearCardRewardButtons();
+            if (CardRewardSkipButton) CardRewardSkipButton.gameObject.SetActive(false);
+        }
+
+        void ClearCardRewardButtons()
+        {
+            if (!CardRewardContainer) return;
+            for (int i = CardRewardContainer.childCount - 1; i >= 0; i--)
+                Destroy(CardRewardContainer.GetChild(i).gameObject);
+        }
+
+        // ---------- Deck Browser ----------
+
+        void ShowDeckBrowser()
+        {
+            if (!DeckBrowserPanel) BuildDeckBrowserPanel();
+            if (!DeckBrowserPanel) return;
+
+            DeckBrowserPanel.SetActive(true);
+            PopulateDeckBrowser();
+        }
+
+        void HideDeckBrowser()
+        {
+            if (DeckBrowserPanel) DeckBrowserPanel.SetActive(false);
+        }
+
+        void BuildDeckBrowserPanel()
+        {
+            var canvas = GetComponentInParent<Canvas>();
+            if (!canvas) canvas = FindFirstObjectByType<Canvas>();
+            if (!canvas) return;
+
+            var panelGO = new GameObject("DeckBrowserPanel", typeof(RectTransform), typeof(Image));
+            panelGO.transform.SetParent(canvas.transform, false);
+            var rt = (RectTransform)panelGO.transform;
+            rt.anchorMin = Vector2.zero;
+            rt.anchorMax = Vector2.one;
+            rt.offsetMin = Vector2.zero;
+            rt.offsetMax = Vector2.zero;
+            panelGO.GetComponent<Image>().color = new Color(0.05f, 0.07f, 0.1f, 0.97f);
+
+            // Title
+            var titleGO = new GameObject("Title", typeof(RectTransform));
+            titleGO.transform.SetParent(panelGO.transform, false);
+            var titleRT = (RectTransform)titleGO.transform;
+            titleRT.anchorMin = new Vector2(0, 1);
+            titleRT.anchorMax = new Vector2(0.7f, 1);
+            titleRT.pivot = new Vector2(0, 1);
+            titleRT.anchoredPosition = new Vector2(24, -16);
+            titleRT.sizeDelta = new Vector2(0, 36);
+            var titleTMP = titleGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Heading) titleTMP.font = FontAssets.Heading;
+            titleTMP.text = "Your Deck";
+            titleTMP.fontSize = 28;
+            titleTMP.color = ThemePalette.Gold;
+            titleTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            titleTMP.raycastTarget = false;
+
+            // Stats
+            var statsGO = new GameObject("Stats", typeof(RectTransform));
+            statsGO.transform.SetParent(panelGO.transform, false);
+            var statsRT = (RectTransform)statsGO.transform;
+            statsRT.anchorMin = new Vector2(0, 1);
+            statsRT.anchorMax = new Vector2(1, 1);
+            statsRT.pivot = new Vector2(0, 1);
+            statsRT.anchoredPosition = new Vector2(24, -52);
+            statsRT.sizeDelta = new Vector2(-48, 20);
+            DeckStatsLabel = statsGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Mono) DeckStatsLabel.font = FontAssets.Mono;
+            DeckStatsLabel.fontSize = 14;
+            DeckStatsLabel.color = ThemePalette.DustyTan;
+            DeckStatsLabel.alignment = TextAlignmentOptions.MidlineLeft;
+            DeckStatsLabel.raycastTarget = false;
+
+            // Close button
+            var closeGO = new GameObject("CloseBtn", typeof(RectTransform), typeof(Image), typeof(Button));
+            closeGO.transform.SetParent(panelGO.transform, false);
+            var closeRT = (RectTransform)closeGO.transform;
+            closeRT.anchorMin = new Vector2(1, 1);
+            closeRT.anchorMax = new Vector2(1, 1);
+            closeRT.pivot = new Vector2(1, 1);
+            closeRT.anchoredPosition = new Vector2(-16, -12);
+            closeRT.sizeDelta = new Vector2(90, 32);
+            closeGO.GetComponent<Image>().color = ThemePalette.DarkSlate;
+            var closeBtnLabel = new GameObject("Label", typeof(RectTransform));
+            closeBtnLabel.transform.SetParent(closeGO.transform, false);
+            var clRT = (RectTransform)closeBtnLabel.transform;
+            clRT.anchorMin = Vector2.zero; clRT.anchorMax = Vector2.one;
+            clRT.offsetMin = Vector2.zero; clRT.offsetMax = Vector2.zero;
+            var clTMP = closeBtnLabel.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Heading) clTMP.font = FontAssets.Heading;
+            clTMP.text = "Close";
+            clTMP.fontSize = 14;
+            clTMP.color = ThemePalette.Parchment;
+            clTMP.alignment = TextAlignmentOptions.Center;
+            clTMP.raycastTarget = false;
+            DeckBrowserCloseButton = closeGO.GetComponent<Button>();
+            DeckBrowserCloseButton.onClick.AddListener(HideDeckBrowser);
+
+            // Scroll content area
+            var scrollGO = new GameObject("ScrollView", typeof(RectTransform), typeof(ScrollRect));
+            scrollGO.transform.SetParent(panelGO.transform, false);
+            var scrollRT = (RectTransform)scrollGO.transform;
+            scrollRT.anchorMin = Vector2.zero;
+            scrollRT.anchorMax = Vector2.one;
+            scrollRT.offsetMin = new Vector2(16, 8);
+            scrollRT.offsetMax = new Vector2(-16, -76);
+
+            var contentGO = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            contentGO.transform.SetParent(scrollGO.transform, false);
+            var contentRT = (RectTransform)contentGO.transform;
+            contentRT.anchorMin = new Vector2(0, 1);
+            contentRT.anchorMax = new Vector2(1, 1);
+            contentRT.pivot = new Vector2(0.5f, 1);
+            contentRT.anchoredPosition = Vector2.zero;
+            contentRT.sizeDelta = new Vector2(0, 0);
+
+            var vlg = contentGO.GetComponent<VerticalLayoutGroup>();
+            vlg.spacing = 12;
+            vlg.childForceExpandWidth = true;
+            vlg.childForceExpandHeight = false;
+            vlg.padding = new RectOffset(8, 8, 4, 4);
+
+            var csf = contentGO.GetComponent<ContentSizeFitter>();
+            csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var scroll = scrollGO.GetComponent<ScrollRect>();
+            scroll.content = contentRT;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+
+            DeckBrowserContainer = contentRT;
+            DeckBrowserPanel = panelGO;
+            panelGO.SetActive(false);
+        }
+
+        void PopulateDeckBrowser()
+        {
+            if (!DeckBrowserContainer) return;
+
+            for (int i = DeckBrowserContainer.childCount - 1; i >= 0; i--)
+                Destroy(DeckBrowserContainer.GetChild(i).gameObject);
+
+            var cards = new List<CardDefinition>();
+            int totalRank = 0;
+            int abilityCount = 0;
+            foreach (var id in _run.PlayerDeckCardIds)
+            {
+                if (!CardCatalog.TryGet(id, out var def)) continue;
+                cards.Add(def);
+                Rank r = def.Rank;
+                if (_run.CardRankOverrides.TryGetValue(id, out var oRank)) r = oRank;
+                totalRank += (int)r;
+                if (def.HasAbility) abilityCount++;
+            }
+
+            float avgRank = cards.Count > 0 ? (float)totalRank / cards.Count : 0;
+            string doctrine = _run.PlayerDoctrine.HasValue ? _run.PlayerDoctrine.Value.ToString() : "None";
+            if (DeckStatsLabel)
+                DeckStatsLabel.text = $"Cards: {cards.Count}    Avg Rank: {avgRank:F1}    Abilities: {abilityCount}    Doctrine: {doctrine}";
+
+            var suitOrder = new[] { Suit.Hearts, Suit.Diamonds, Suit.Clubs, Suit.Spades };
+            foreach (var suit in suitOrder)
+            {
+                var suitCards = cards.FindAll(c => c.Suit == suit);
+                if (suitCards.Count == 0) continue;
+
+                suitCards.Sort((a, b) =>
+                {
+                    Rank ra = a.Rank, rb = b.Rank;
+                    if (_run.CardRankOverrides.TryGetValue(a.Id, out var oa)) ra = oa;
+                    if (_run.CardRankOverrides.TryGetValue(b.Id, out var ob)) rb = ob;
+                    return ra.CompareTo(rb);
+                });
+
+                // Suit group container
+                var groupGO = new GameObject($"SuitGroup_{suit}", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(LayoutElement));
+                groupGO.transform.SetParent(DeckBrowserContainer, false);
+                var gVlg = groupGO.GetComponent<VerticalLayoutGroup>();
+                gVlg.spacing = 6;
+                gVlg.childForceExpandWidth = true;
+                gVlg.childForceExpandHeight = false;
+
+                // Suit header
+                var headerGO = new GameObject("Header", typeof(RectTransform), typeof(LayoutElement));
+                headerGO.transform.SetParent(groupGO.transform, false);
+                headerGO.GetComponent<LayoutElement>().preferredHeight = 24;
+                var headerTMP = headerGO.AddComponent<TextMeshProUGUI>();
+                if (FontAssets.Heading) headerTMP.font = FontAssets.Heading;
+                string suitColorTag = suit.IsRed() ? "<color=#C02020>" : "<color=#CCCCCC>";
+                headerTMP.text = $"{suitColorTag}{suit.Glyph()}</color>  {suit}  ({suitCards.Count})";
+                headerTMP.richText = true;
+                headerTMP.fontSize = 16;
+                headerTMP.color = ThemePalette.DustyTan;
+                headerTMP.alignment = TextAlignmentOptions.MidlineLeft;
+                headerTMP.raycastTarget = false;
+
+                // Card row
+                var rowGO = new GameObject("CardRow", typeof(RectTransform), typeof(HorizontalLayoutGroup), typeof(LayoutElement));
+                rowGO.transform.SetParent(groupGO.transform, false);
+                var rowHlg = rowGO.GetComponent<HorizontalLayoutGroup>();
+                rowHlg.spacing = 8;
+                rowHlg.childForceExpandWidth = false;
+                rowHlg.childForceExpandHeight = false;
+                rowHlg.childAlignment = TextAnchor.MiddleLeft;
+                rowGO.GetComponent<LayoutElement>().preferredHeight = 130;
+
+                foreach (var cardDef in suitCards)
+                {
+                    var miniCard = CreateMiniCard(cardDef, rowGO.transform, 88, 126);
+                    var mcLE = miniCard.AddComponent<LayoutElement>();
+                    mcLE.preferredWidth = 88;
+                    mcLE.preferredHeight = 126;
+
+                    var btn = miniCard.AddComponent<Button>();
+                    var captured = cardDef;
+                    btn.onClick.AddListener(() => ShowCardDetail(captured));
+                }
+            }
+        }
+
+        // ---------- Shop Card Purchase ----------
+
+        void CreateCardShopItems()
+        {
+            if (!ShopItemContainer || !CardCatalog.IsInitialized || !_run.PlayerDoctrine.HasValue) return;
+            if (_run.PlayerDeckCardIds.Count >= 20) return;
+
+            var offerings = PickCardRewardOfferings(2);
+            foreach (var cardDef in offerings)
+            {
+                int price = cardDef.Rarity switch
+                {
+                    CardRarity.Common => 6,
+                    CardRarity.Uncommon => 10,
+                    CardRarity.Rare => 16,
+                    _ => 8
+                };
+                if (Ascension.InflatedPrices(_run.AscensionLevel))
+                    price = (int)(price * 1.25f);
+
+                bool canBuy = _run.Florins >= price && _run.PlayerDeckCardIds.Count < 20;
+
+                var btnGO = new GameObject($"ShopCard_{cardDef.Id}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+                btnGO.transform.SetParent(ShopItemContainer, false);
+                btnGO.GetComponent<Image>().color = canBuy ? new Color(0.07f, 0.22f, 0.18f, 0.85f) : ThemePalette.LockedGray;
+                btnGO.GetComponent<LayoutElement>().preferredHeight = 90;
+                btnGO.GetComponent<LayoutElement>().preferredWidth = 550;
+
+                // Rarity accent
+                var rarityColor = cardDef.Rarity switch
+                {
+                    CardRarity.Common => ThemePalette.RarityCommon,
+                    CardRarity.Uncommon => ThemePalette.RarityUncommon,
+                    CardRarity.Rare => ThemePalette.RarityRare,
+                    _ => ThemePalette.DustyTan
+                };
+                var accentGO = new GameObject("Accent", typeof(RectTransform), typeof(Image));
+                accentGO.transform.SetParent(btnGO.transform, false);
+                var aRT = (RectTransform)accentGO.transform;
+                aRT.anchorMin = Vector2.zero; aRT.anchorMax = new Vector2(0, 1);
+                aRT.pivot = new Vector2(0, 0.5f); aRT.sizeDelta = new Vector2(4, 0);
+                accentGO.GetComponent<Image>().color = canBuy ? rarityColor : ThemePalette.DisabledOutline;
+                accentGO.GetComponent<Image>().raycastTarget = false;
+
+                // Suit+Rank
+                Rank displayRank = cardDef.Rank;
+                if (_run.CardRankOverrides.TryGetValue(cardDef.Id, out var oRank)) displayRank = oRank;
+
+                var suitGO = new GameObject("SuitRank", typeof(RectTransform));
+                suitGO.transform.SetParent(btnGO.transform, false);
+                var sRT = (RectTransform)suitGO.transform;
+                sRT.anchorMin = new Vector2(0, 0); sRT.anchorMax = new Vector2(0, 1);
+                sRT.pivot = new Vector2(0, 0.5f); sRT.anchoredPosition = new Vector2(14, 0); sRT.sizeDelta = new Vector2(36, 0);
+                var suitTMP = suitGO.AddComponent<TextMeshProUGUI>();
+                if (FontAssets.Mono) suitTMP.font = FontAssets.Mono;
+                suitTMP.text = $"{displayRank.Label()}{cardDef.Suit.Glyph()}";
+                suitTMP.fontSize = 20;
+                suitTMP.color = canBuy ? (cardDef.Suit.IsRed() ? ThemePalette.VenetianRed : ThemePalette.Parchment) : ThemePalette.DisabledText;
+                suitTMP.alignment = TextAlignmentOptions.Center;
+                suitTMP.raycastTarget = false;
+
+                // Name
+                var nameGO = new GameObject("Name", typeof(RectTransform));
+                nameGO.transform.SetParent(btnGO.transform, false);
+                var nRT = (RectTransform)nameGO.transform;
+                nRT.anchorMin = new Vector2(0, 0.5f); nRT.anchorMax = new Vector2(1, 1);
+                nRT.offsetMin = new Vector2(54, 0); nRT.offsetMax = new Vector2(-80, -4);
+                var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+                if (FontAssets.Heading) nameTMP.font = FontAssets.Heading;
+                string docTag = $"<color={DoctrineHexColor(cardDef.Doctrine)}>{cardDef.Doctrine}</color>";
+                nameTMP.text = $"{cardDef.Name}  {docTag}";
+                nameTMP.richText = true;
+                nameTMP.fontSize = 17;
+                nameTMP.color = canBuy ? ThemePalette.Parchment : ThemePalette.DisabledText;
+                nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+                nameTMP.raycastTarget = false;
+
+                // Ability desc
+                var descGO = new GameObject("Desc", typeof(RectTransform));
+                descGO.transform.SetParent(btnGO.transform, false);
+                var dRT = (RectTransform)descGO.transform;
+                dRT.anchorMin = Vector2.zero; dRT.anchorMax = new Vector2(1, 0.5f);
+                dRT.offsetMin = new Vector2(54, 4); dRT.offsetMax = new Vector2(-80, 0);
+                var descTMP = descGO.AddComponent<TextMeshProUGUI>();
+                if (cardDef.HasAbility)
+                    descTMP.text = $"{cardDef.Ability.Value.DisplayName()} · {cardDef.AbilityText ?? cardDef.Ability.Value.Description()}";
+                descTMP.fontSize = 13;
+                descTMP.color = ThemePalette.DescGray;
+                descTMP.enableWordWrapping = true;
+                descTMP.alignment = TextAlignmentOptions.MidlineLeft;
+                descTMP.raycastTarget = false;
+
+                // Price
+                var priceGO = new GameObject("Price", typeof(RectTransform));
+                priceGO.transform.SetParent(btnGO.transform, false);
+                var pRT = (RectTransform)priceGO.transform;
+                pRT.anchorMin = new Vector2(1, 0); pRT.anchorMax = new Vector2(1, 1);
+                pRT.pivot = new Vector2(1, 0.5f); pRT.sizeDelta = new Vector2(65, 0); pRT.anchoredPosition = new Vector2(-10, 0);
+                var priceTMP = priceGO.AddComponent<TextMeshProUGUI>();
+                if (FontAssets.Mono) priceTMP.font = FontAssets.Mono;
+                priceTMP.text = $"{price}f";
+                priceTMP.fontSize = 20;
+                priceTMP.color = canBuy ? ThemePalette.Gold : ThemePalette.DisabledText;
+                priceTMP.alignment = TextAlignmentOptions.Center;
+                priceTMP.raycastTarget = false;
+
+                var btn = btnGO.GetComponent<Button>();
+                btn.interactable = canBuy;
+                var capturedDef = cardDef;
+                int capturedPrice = price;
+                btn.onClick.AddListener(() => OnShopCardBuy(capturedDef, capturedPrice));
+            }
+        }
+
+        void OnShopCardBuy(CardDefinition def, int price)
+        {
+            if (_run.Florins < price) return;
+            _run.PlayerDeckCardIds.Add(def.Id);
+            _run.Florins -= price;
+            Debug.Log($"[RunManager] Bought card '{def.Name}' for {price}f. Deck: {_run.PlayerDeckCardIds.Count}");
+            OnShopAction?.Invoke($"Bought '{def.Name}' (-{price} Florins)");
+            UpdateShopFlorins();
+            UpdateRunHud();
+            PopulateShopItems();
         }
     }
 }
