@@ -11,9 +11,6 @@ namespace WitsAndFools
 
         bool _pumpRequested;
 
-        public GameLoop(IPlayerController p0, IPlayerController p1, int? seed = null)
-            : this(p0, p1, new GameEngine(seed)) { }
-
         public GameLoop(IPlayerController p0, IPlayerController p1, GameEngine engine)
         {
             Engine = engine;

@@ -144,23 +144,27 @@ namespace WitsAndFools
             return _templates.FirstOrDefault(t => t.Suit == runtimeCard.Suit && t.Rank == runtimeCard.Rank);
         }
 
-        public static PlayerDeck FromSharedDeck(Deck sharedDeck)
+        public static PlayerDeck CreateStandard(IReadOnlyDictionary<(Suit, Rank), AbilityType> abilities = null)
         {
             var templates = new List<CardDefinition>();
-            foreach (var card in sharedDeck.AsReadOnly())
-            {
-                templates.Add(new CardDefinition
+            foreach (Suit suit in Enum.GetValues(typeof(Suit)))
+                for (Rank rank = Rank.Six; rank <= Rank.Ace; rank++)
                 {
-                    Id = $"legacy_{card.Suit.ToString().ToLowerInvariant()}_{(int)card.Rank}",
-                    Name = $"{card.Rank.Label()} of {card.Suit}",
-                    Suit = card.Suit,
-                    Rank = card.Rank,
-                    Doctrine = DoctrineType.Neutral,
-                    Trigger = card.HasAbility ? TriggerTiming.None : TriggerTiming.None,
-                    Ability = card.Ability,
-                    Rarity = CardRarity.Common
-                });
-            }
+                    AbilityType? ability = null;
+                    if (abilities != null && abilities.TryGetValue((suit, rank), out var a))
+                        ability = a;
+                    templates.Add(new CardDefinition
+                    {
+                        Id = $"std_{suit.ToString().ToLowerInvariant()}_{(int)rank}",
+                        Name = $"{rank.Label()} of {suit}",
+                        Suit = suit,
+                        Rank = rank,
+                        Doctrine = DoctrineType.Neutral,
+                        Trigger = ability.HasValue ? TriggerTiming.OnAttack : TriggerTiming.None,
+                        Ability = ability,
+                        Rarity = CardRarity.Common
+                    });
+                }
             return new PlayerDeck(templates);
         }
     }

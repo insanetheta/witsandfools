@@ -287,8 +287,7 @@ namespace WitsAndFools
                         && engine.Bout.AttackCount >= 2;
 
                 case AbilityType.WildCard:
-                    return engine.GetResource(playerIndex) >= 2
-                        && engine.Discard.Count > 0 && hand.Count <= 5;
+                    return engine.GetResource(playerIndex) >= 2 && hand.Count <= 5;
 
                 // --- Neutral ---
 

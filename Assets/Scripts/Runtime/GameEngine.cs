@@ -20,12 +20,10 @@ namespace WitsAndFools
 
     public sealed class GameEngine
     {
-        readonly Deck _deck;
         readonly PlayerDeck[] _playerDecks;
-        readonly bool _dualDeckMode;
+        readonly List<Card> _discard = new();
         readonly int _seed;
         readonly Hand[] _hands;
-        readonly List<Card> _discard = new();
         readonly List<Card>[] _playerDiscards;
         readonly Bout _bout = new();
         readonly MatchConfig _config;
@@ -59,9 +57,8 @@ namespace WitsAndFools
         public int? FoolIndex { get; private set; }
 
         public Bout Bout => _bout;
-        public IReadOnlyList<Card> Discard => _discard;
         public int DeckCount => AnyDeckCount();
-        public bool IsDualDeck => _dualDeckMode;
+        public bool IsDualDeck => true;
         public int DeckCountOf(int playerIndex) => DeckCountFor(playerIndex);
         public Card? DeckTopCard => AnyDeckCount() > 0 ? PeekTopDeck(AttackerIndex, 1)[0] : null;
         public Card[] PeekTopCards(int playerIndex, int count) => PeekTopDeck(playerIndex, count);
@@ -126,122 +123,51 @@ namespace WitsAndFools
             return true;
         }
 
-        public GameEngine(int? seed = null, IReadOnlyDictionary<(Suit, Rank), AbilityType> abilities = null)
-            : this(seed, new MatchConfig { Abilities = abilities != null ? new Dictionary<(Suit, Rank), AbilityType>(abilities) : DeckConfig.DefaultAbilities })
-        { }
-
-        public GameEngine(int? seed, MatchConfig config)
-        {
-            _config = config ?? MatchConfig.Default();
-            _seed = seed ?? Environment.TickCount;
-            _deck = new Deck(seed, _config.Abilities);
-            _hands = new[] { new Hand(), new Hand() };
-            _dualDeckMode = false;
-            _playerDecks = null;
-            _playerDiscards = null;
-        }
-
         public GameEngine(int? seed, MatchConfig config, PlayerDeck deck0, PlayerDeck deck1)
         {
             _config = config ?? MatchConfig.Default();
             _seed = seed ?? Environment.TickCount;
-            _deck = null;
             _playerDecks = new[] { deck0, deck1 };
             _playerDiscards = new[] { new List<Card>(), new List<Card>() };
-            _dualDeckMode = true;
             _hands = new[] { new Hand(), new Hand() };
 
             deck0.Build(_seed);
             deck1.Build(_seed + 1);
         }
 
-        // --- Dual-deck helpers: route all deck ops through these ---
+        // --- Deck helpers ---
 
-        Card DrawFromDeck(int playerIndex)
-        {
-            if (_dualDeckMode) return _playerDecks[playerIndex].Draw();
-            return _deck.Draw();
-        }
+        Card DrawFromDeck(int playerIndex) => _playerDecks[playerIndex].Draw();
 
-        bool CanDrawFromDeck(int playerIndex)
-        {
-            if (_dualDeckMode) return _playerDecks[playerIndex].DrawPileCount > 0;
-            return _deck.Count > 0;
-        }
+        bool CanDrawFromDeck(int playerIndex) => _playerDecks[playerIndex].DrawPileCount > 0;
 
-        int AnyDeckCount()
-        {
-            if (_dualDeckMode) return _playerDecks[0].DrawPileCount + _playerDecks[1].DrawPileCount;
-            return _deck.Count;
-        }
+        int AnyDeckCount() => _playerDecks[0].DrawPileCount + _playerDecks[1].DrawPileCount;
 
-        int DeckCountFor(int playerIndex)
-        {
-            if (_dualDeckMode) return _playerDecks[playerIndex].DrawPileCount;
-            return _deck.Count;
-        }
+        int DeckCountFor(int playerIndex) => _playerDecks[playerIndex].DrawPileCount;
 
         void AddToDiscard(Card card, int ownerIndex = -1)
         {
-            if (_dualDeckMode && ownerIndex >= 0)
-                _playerDiscards[ownerIndex].Add(card);
-            else
-                _discard.Add(card);
+            if (ownerIndex >= 0) _playerDiscards[ownerIndex].Add(card);
         }
 
-        void RecycleCard(Card card, int ownerIndex)
-        {
-            if (_dualDeckMode)
-                _playerDecks[ownerIndex].PutOnBottom(card);
-            else
-                _discard.Add(card);
-        }
+        void RecycleCard(Card card, int ownerIndex) => _playerDecks[ownerIndex].PutOnBottom(card);
 
-        Card[] PeekTopDeck(int playerIndex, int count)
-        {
-            if (_dualDeckMode) return _playerDecks[playerIndex].PeekTop(count);
-            return _deck.PeekTop(count);
-        }
+        Card[] PeekTopDeck(int playerIndex, int count) => _playerDecks[playerIndex].PeekTop(count);
 
-        void ReplaceTopDeck(int playerIndex, Card[] cards)
-        {
-            if (_dualDeckMode) _playerDecks[playerIndex].ReplaceTop(cards);
-            else _deck.ReplaceTop(cards);
-        }
+        void ReplaceTopDeck(int playerIndex, Card[] cards) => _playerDecks[playerIndex].ReplaceTop(cards);
 
-        void PutOnTopOfDeck(int playerIndex, Card card)
-        {
-            if (_dualDeckMode) _playerDecks[playerIndex].PutOnTop(card);
-            else _deck.PutOnTop(card);
-        }
+        void PutOnTopOfDeck(int playerIndex, Card card) => _playerDecks[playerIndex].PutOnTop(card);
 
-        void ShuffleIntoDeck(int playerIndex, Card card)
-        {
-            if (_dualDeckMode) _playerDecks[playerIndex].ShuffleIn(card);
-            else _deck.ShuffleIn(card);
-        }
+        void ShuffleIntoDeck(int playerIndex, Card card) => _playerDecks[playerIndex].ShuffleIn(card);
 
-        int PseudoRandomSeed()
-        {
-            if (_dualDeckMode) return _playerDecks[0].DrawPileCount + _playerDecks[1].DrawPileCount + _boutCount;
-            return _deck.Count + _boutCount;
-        }
+        int PseudoRandomSeed() => _playerDecks[0].DrawPileCount + _playerDecks[1].DrawPileCount + _boutCount;
 
-        void PutOnBottomOfDeck(int playerIndex, Card card)
-        {
-            if (_dualDeckMode) _playerDecks[playerIndex].PutOnBottom(card);
-            else _deck.PutOnBottom(card);
-        }
+        void PutOnBottomOfDeck(int playerIndex, Card card) => _playerDecks[playerIndex].PutOnBottom(card);
 
-        void ShuffleInManyToDeck(int playerIndex, IEnumerable<Card> cards)
-        {
-            if (_dualDeckMode) _playerDecks[playerIndex].ShuffleInMany(cards);
-            else _deck.ShuffleInMany(cards);
-        }
+        void ShuffleInManyToDeck(int playerIndex, IEnumerable<Card> cards) => _playerDecks[playerIndex].ShuffleInMany(cards);
 
         public void StartNewGame()
         {
-            _discard.Clear();
             _bout.Clear();
             _hands[0].Clear();
             _hands[1].Clear();
@@ -257,8 +183,6 @@ namespace WitsAndFools
             _shieldBroochUsed = new bool[2];
             _courtiersFanUsed = new bool[2];
             _clumsyFingersTriggered = new bool[2];
-
-            if (!_dualDeckMode) _deck.Shuffle();
             _quicksilverUsed = new bool[2];
             _slipAwayUsed = new bool[2];
             _jugglersBallsUsed = new bool[2];
@@ -268,29 +192,17 @@ namespace WitsAndFools
             _attackedThisBout[0] = false;
             _attackedThisBout[1] = false;
 
-            if (_dualDeckMode)
-            {
-                if (_config.ForcedTrumpSuit.HasValue)
-                    Trump = (Suit)_config.ForcedTrumpSuit.Value;
-                else
-                    Trump = (Suit)(new Random(_seed).Next(4));
-                TrumpCard = new Card(Trump, Rank.Six, null);
-            }
+            if (_config.ForcedTrumpSuit.HasValue)
+                Trump = (Suit)_config.ForcedTrumpSuit.Value;
+            else
+                Trump = (Suit)(new Random(_seed).Next(4));
+            TrumpCard = new Card(Trump, Rank.Six, null);
 
             int handSize = _config.HandSize;
             for (int i = 0; i < handSize; i++)
             {
                 if (CanDrawFromDeck(0)) _hands[0].Add(DrawFromDeck(0));
                 if (CanDrawFromDeck(1)) _hands[1].Add(DrawFromDeck(1));
-            }
-
-            if (!_dualDeckMode)
-            {
-                TrumpCard = _deck.PeekBottom();
-                if (_config.ForcedTrumpSuit.HasValue)
-                    Trump = (Suit)_config.ForcedTrumpSuit.Value;
-                else
-                    Trump = TrumpCard.Suit;
             }
 
             for (int p = 0; p < 2; p++)
@@ -316,9 +228,7 @@ namespace WitsAndFools
                     _hands[p].Add(new Card(Trump, Rank.Seven, null));
             }
 
-            if (_dualDeckMode)
-                ApplyDeckPassives();
-
+            ApplyDeckPassives();
             ApplyVentriloquistsDummy();
 
             AttackerIndex = ChooseFirstAttacker();
@@ -656,10 +566,7 @@ namespace WitsAndFools
                 int roll = (PseudoRandomSeed() + playerIndex) % 2;
                 if (roll == 0)
                 {
-                    if (_dualDeckMode)
-                        _playerDecks[playerIndex].RemoveCard(card);
-                    else
-                        _discard.Remove(card);
+                    _playerDecks[playerIndex].RemoveCard(card);
                     _hands[playerIndex].Add(card);
                 }
             }
@@ -1702,30 +1609,19 @@ namespace WitsAndFools
         void ApplyCourtFavor(int player)
         {
             if (!_config.CourtFavor[player] || DeckCountFor(player) < 4) return;
-            if (_dualDeckMode)
-            {
-                var top2 = _playerDecks[player].PeekTop(2);
-                if (top2.Length < 2) return;
-                int s0 = CardValue(top2[0], Trump), s1 = CardValue(top2[1], Trump);
-                var topCard = _playerDecks[player].Draw();
-                var secondCard = _playerDecks[player].Draw();
-                if (s0 <= s1)
-                    _playerDecks[player].PutOnBottom(topCard);
-                else
-                    _playerDecks[player].PutOnBottom(secondCard);
-                if (s0 <= s1)
-                    _playerDecks[player].PutOnTop(secondCard);
-                else
-                    _playerDecks[player].PutOnTop(topCard);
-            }
+            var top2 = _playerDecks[player].PeekTop(2);
+            if (top2.Length < 2) return;
+            int s0 = CardValue(top2[0], Trump), s1 = CardValue(top2[1], Trump);
+            var topCard = _playerDecks[player].Draw();
+            var secondCard = _playerDecks[player].Draw();
+            if (s0 <= s1)
+                _playerDecks[player].PutOnBottom(topCard);
             else
-            {
-                var top2 = _deck.PeekTop(2);
-                int s0 = CardValue(top2[0], Trump), s1 = CardValue(top2[1], Trump);
-                if (s1 > s0) _deck.SwapTopTwo();
-                _deck.SwapTopTwo();
-                _deck.PutTopOnBottom();
-            }
+                _playerDecks[player].PutOnBottom(secondCard);
+            if (s0 <= s1)
+                _playerDecks[player].PutOnTop(secondCard);
+            else
+                _playerDecks[player].PutOnTop(topCard);
         }
 
         static int CardValue(Card c, Suit trump)

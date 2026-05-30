@@ -186,8 +186,8 @@ namespace WitsAndFools.EditorTools
 
         static void SimulateMatch(RunState run, MapNode node, string buildPath, System.Random rng)
         {
-            var config = MatchSetup.Build(run, node.Opponent, rng);
-            var engine = new GameEngine(rng.Next(), config);
+            var (config, pDeck, eDeck) = MatchSetup.Build(run, node.Opponent, rng);
+            var engine = new GameEngine(rng.Next(), config, pDeck, eDeck);
             engine.StartNewGame();
 
             var ai0 = new AIPlayer("Player", rng.Next());

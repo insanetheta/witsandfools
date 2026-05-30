@@ -135,8 +135,8 @@ namespace WitsAndFools.EditorTools
         static bool PlayMatch(RunState run, OpponentProfile opponent, Random rng, RunStats stats)
         {
             int matchSeed = rng.Next();
-            var config = MatchSetup.Build(run, opponent, rng);
-            var engine = new GameEngine(matchSeed, config);
+            var (config, pDeck, eDeck) = MatchSetup.Build(run, opponent, rng);
+            var engine = new GameEngine(matchSeed, config, pDeck, eDeck);
 
             var ai0 = new AIPlayer("Player", matchSeed);
             var ai1 = new AIPlayer(opponent.Name, matchSeed + 1);

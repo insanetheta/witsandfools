@@ -332,11 +332,9 @@ namespace WitsAndFools
         {
             var run = GetRunState();
             if (run == null) return "Browsing wares...";
-            if (run.UseDualDeck)
-                return $"Florins: {run.Florins} | Deck: {run.PlayerDeckCardIds.Count} cards\n" +
-                       $"Removals used: {run.CardRemovalsPurchased}/3\n" +
-                       "The gambler surveys the wares...";
-            return $"Florins: {run.Florins} | The auto-runner buys an ability if affordable.";
+            return $"Florins: {run.Florins} | Deck: {run.PlayerDeckCardIds.Count} cards\n" +
+                   $"Removals used: {run.CardRemovalsPurchased}/3\n" +
+                   "The gambler surveys the wares...";
         }
 
         string DescribeRest()
@@ -410,20 +408,15 @@ namespace WitsAndFools
             var run = GetRunState();
             string result = run != null && run.RunWon ? "VICTORY" : "DEFEAT";
             string buildInfo;
-            if (run != null && run.UseDualDeck)
             {
                 var cardNames = new System.Collections.Generic.List<string>();
-                foreach (var id in run.PlayerDeckCardIds)
-                    cardNames.Add(CardCatalog.TryGet(id, out var def) ? def.Name : id);
-                buildInfo = $"Doctrine: {run.PlayerDoctrine}\n" +
-                            $"Deck ({run.PlayerDeckCardIds.Count} cards): [{string.Join(", ", cardNames)}]\n" +
-                            $"Relics: [{string.Join(", ", run.PlayerRelics)}]\n" +
-                            $"Card removals purchased: {run.CardRemovalsPurchased}";
-            }
-            else
-            {
-                buildInfo = $"Abilities: [{string.Join(", ", run.PlayerAbilities)}]\n" +
-                            $"Trinkets: [{string.Join(", ", run.PlayerTrinkets)}]";
+                if (run != null)
+                    foreach (var id in run.PlayerDeckCardIds)
+                        cardNames.Add(CardCatalog.TryGet(id, out var def) ? def.Name : id);
+                buildInfo = $"Doctrine: {run?.PlayerDoctrine}\n" +
+                            $"Deck ({run?.PlayerDeckCardIds.Count ?? 0} cards): [{string.Join(", ", cardNames)}]\n" +
+                            $"Relics: [{string.Join(", ", run?.PlayerRelics ?? new System.Collections.Generic.List<RelicType>())}]\n" +
+                            $"Card removals purchased: {run?.CardRemovalsPurchased ?? 0}";
             }
             string body = run != null
                 ? $"Result: {result}\n" +

@@ -167,28 +167,7 @@ namespace WitsAndFools
             };
         }
 
-        public void BeginConfiguredGame(MatchConfig config, OpponentProfile opponent, int? seed = null)
-        {
-            OpponentName = opponent.Name;
-            ClearAllVisuals();
-            Hud?.HideGameOver();
-
-            var engine = new GameEngine(seed, config);
-            var ai = new AIPlayer(opponent.Name, seed ?? 0);
-            AIArchetypes.Apply(ai, opponent.Archetype, opponent.ActIndex);
-            _loop = new GameLoop(
-                p0: new HumanPlayer(PlayerName),
-                p1: ai,
-                engine: engine);
-            _humanIsPlayerZero = true;
-            _matchFrames = 0;
-
-            WireEngineEvents();
-            WireHudButtons();
-            _loop.Start();
-        }
-
-        public void BeginDualDeckGame(MatchConfig config, PlayerDeck playerDeck, PlayerDeck enemyDeck,
+        public void BeginGame(MatchConfig config, PlayerDeck playerDeck, PlayerDeck enemyDeck,
             OpponentProfile opponent, int? seed = null)
         {
             OpponentName = opponent.Name;
@@ -760,20 +739,11 @@ namespace WitsAndFools
         void UpdateHud()
         {
             if (!Hud) return;
-            if (Engine.IsDualDeck)
-            {
-                int playerDeck = Engine.DeckCountOf(HumanPlayerIndex);
-                int oppDeck = Engine.DeckCountOf(1 - HumanPlayerIndex);
-                Hud.SetDeckCounts(playerDeck, oppDeck);
-                if (Table && Table.DeckCountLabel)
-                    Table.DeckCountLabel.text = playerDeck.ToString();
-            }
-            else
-            {
-                Hud.SetDeckCounts(Engine.DeckCount, Engine.DeckCount);
-                if (Table && Table.DeckCountLabel)
-                    Table.DeckCountLabel.text = Engine.DeckCount.ToString();
-            }
+            int playerDeck = Engine.DeckCountOf(HumanPlayerIndex);
+            int oppDeck = Engine.DeckCountOf(1 - HumanPlayerIndex);
+            Hud.SetDeckCounts(playerDeck, oppDeck);
+            if (Table && Table.DeckCountLabel)
+                Table.DeckCountLabel.text = playerDeck.ToString();
             Hud.SetTrump(Engine.Trump);
             string phase;
             Color boutColor;
@@ -804,7 +774,7 @@ namespace WitsAndFools
             ReconcileOpponentCardViews(oppCards);
 
             if (Table && Table.DiscardCountLabel)
-                Table.DiscardCountLabel.text = Engine.Discard.Count.ToString();
+                Table.DiscardCountLabel.gameObject.SetActive(false);
 
             if (Engine.Config.SpysMonocle[HumanPlayerIndex])
                 Hud.SetDeckTop(Engine.DeckTopCard);

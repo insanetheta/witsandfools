@@ -272,17 +272,8 @@ namespace WitsAndFools
                     else if (_run.PlayerBurdens.Count >= 1) restBase = 60;
                     return restBase;
                 case MapNodeType.Shop:
-                    if (_run.UseDualDeck)
-                    {
-                        int dShop = 55;
-                        if (_run.Florins >= 8) dShop = 80;
-                        return dShop;
-                    }
-                    int shopBase = 15;
-                    if (_run.Florins >= 15 && _run.PlayerAbilities.Count < _run.MaxAbilitySlots)
-                        shopBase = 75;
-                    else if (_run.Florins >= 10)
-                        shopBase = 40;
+                    int shopBase = 55;
+                    if (_run.Florins >= 8) shopBase = 80;
                     return shopBase;
                 case MapNodeType.Rumor:
                     int rumorBase = 50;
@@ -293,34 +284,6 @@ namespace WitsAndFools
         }
 
         void AutoHandleShop()
-        {
-            if (_run.UseDualDeck)
-            {
-                AutoHandleShopDualDeck();
-                return;
-            }
-            if (_run.Florins >= 8 && _run.PlayerAbilities.Count < _run.MaxAbilitySlots)
-            {
-                var offerings = PickShopOfferings(1);
-                if (offerings.Count > 0 && _run.Florins >= offerings[0].price)
-                {
-                    OnShopBuy(offerings[0].type, offerings[0].price);
-                    return;
-                }
-            }
-            if (_run.Florins >= 10 && _run.PlayerTrinkets.Count < 5)
-            {
-                var trinket = PickTrinketOffering();
-                if (trinket.HasValue && _run.Florins >= trinket.Value.price)
-                {
-                    OnShopBuyTrinket(trinket.Value.type, trinket.Value.price);
-                    return;
-                }
-            }
-            OnResultContinue();
-        }
-
-        void AutoHandleShopDualDeck()
         {
             if (_run.Florins >= 8 && _run.PlayerDeckCardIds.Count > 8 && _run.CardRemovalsPurchased < 3)
             {
@@ -509,15 +472,10 @@ namespace WitsAndFools
             if (PrestigeLabel) PrestigeLabel.text = $"Prestige: {new string('♥', _run.Prestige)}";
             if (FlorinsLabel) FlorinsLabel.text = $"Florins: {_run.Florins}";
             if (ActLabel) ActLabel.text = $"Act {_run.CurrentAct + 1} of 5";
-            if (AbilitiesLabel)
+            if (AbilitiesLabel && _run.PlayerDoctrine.HasValue)
             {
-                if (_run.UseDualDeck && _run.PlayerDoctrine.HasValue)
-                {
-                    var doc = _run.PlayerDoctrine.Value;
-                    AbilitiesLabel.text = $"{doc.DisplayName()} | Deck: {_run.PlayerDeckCardIds.Count}";
-                }
-                else
-                    AbilitiesLabel.text = $"Abilities: {_run.PlayerAbilities.Count}/{_run.MaxAbilitySlots}";
+                var doc = _run.PlayerDoctrine.Value;
+                AbilitiesLabel.text = $"{doc.DisplayName()} | Deck: {_run.PlayerDeckCardIds.Count}";
             }
         }
 
@@ -1043,19 +1001,10 @@ namespace WitsAndFools
             GameManager.OnMatchComplete -= OnMatchComplete;
             GameManager.OnMatchComplete += OnMatchComplete;
 
-            if (_run.UseDualDeck && node.Opponent != null && node.Opponent.UseDualDeck)
-            {
-                var (config, pDeck, eDeck) = MatchSetup.BuildDualDeck(_run, node.Opponent, _rng);
-                config.MaxBouts = 12;
-                GameManager.BeginDualDeckGame(config, pDeck, eDeck, node.Opponent, _rng.Next());
-                Debug.Log($"[RunManager] Dual-deck match vs {node.Opponent.Name} (bout cap: 12)");
-            }
-            else
-            {
-                var config = MatchSetup.Build(_run, node.Opponent, _rng);
-                config.MaxBouts = 12;
-                GameManager.BeginConfiguredGame(config, node.Opponent, _rng.Next());
-            }
+            var (config, pDeck, eDeck) = MatchSetup.Build(_run, node.Opponent, _rng);
+            config.MaxBouts = 12;
+            GameManager.BeginGame(config, pDeck, eDeck, node.Opponent, _rng.Next());
+            Debug.Log($"[RunManager] Match vs {node.Opponent.Name} (bout cap: 12)");
 
             if (_autoRun)
             {
@@ -2184,12 +2133,10 @@ namespace WitsAndFools
             if (RunOverStatsLabel)
             {
                 string archName = _selectedArchetype.HasValue ? _selectedArchetype.Value.DisplayName() : "Unknown";
-                string docLine = _run.UseDualDeck && _run.PlayerDoctrine.HasValue
+                string docLine = _run.PlayerDoctrine.HasValue
                     ? $"<color=#D4A846>{_run.PlayerDoctrine.Value.DisplayName()}</color> ({archName})"
                     : $"<color=#D4A846>{archName}</color>";
-                string deckLine = _run.UseDualDeck
-                    ? $"Deck  <color=#99CCEE>{_run.PlayerDeckCardIds.Count} cards</color>    Relics  <color=#99CCEE>{_run.PlayerTrinkets.Count}</color>"
-                    : $"Abilities  <color=#99CCEE>{_run.PlayerAbilities.Count}</color>    Trinkets  <color=#99CCEE>{_run.PlayerTrinkets.Count}</color>";
+                string deckLine = $"Deck  <color=#99CCEE>{_run.PlayerDeckCardIds.Count} cards</color>    Relics  <color=#99CCEE>{_run.PlayerTrinkets.Count}</color>";
                 string stats = $"{docLine}\n\n" +
                     $"Acts completed  <color=#99CCEE>{_run.CurrentAct}/5</color>\n" +
                     $"Matches won  <color=#99CCEE>{_run.MatchesWon}/{_run.MatchesPlayed}</color>\n" +

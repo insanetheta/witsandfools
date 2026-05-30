@@ -21,7 +21,10 @@ namespace WitsAndFools.EditorTools
 
             for (int g = 0; g < games; g++)
             {
-                var engine = new GameEngine(seed + g);
+                var config = MatchConfig.Default();
+                var deck0 = PlayerDeck.CreateStandard(config.Abilities);
+                var deck1 = PlayerDeck.CreateStandard(config.Abilities);
+                var engine = new GameEngine(seed + g, config, deck0, deck1);
                 int turns = 0;
                 engine.OnTurnBegan += _ => turns++;
                 engine.StartNewGame();
