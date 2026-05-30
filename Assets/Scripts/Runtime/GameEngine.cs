@@ -21,7 +21,6 @@ namespace WitsAndFools
     public sealed class GameEngine
     {
         readonly PlayerDeck[] _playerDecks;
-        readonly List<Card> _discard = new();
         readonly int _seed;
         readonly Hand[] _hands;
         readonly List<Card>[] _playerDiscards;
@@ -62,6 +61,8 @@ namespace WitsAndFools
         public int DeckCountOf(int playerIndex) => DeckCountFor(playerIndex);
         public Card? DeckTopCard => AnyDeckCount() > 0 ? PeekTopDeck(AttackerIndex, 1)[0] : null;
         public Card[] PeekTopCards(int playerIndex, int count) => PeekTopDeck(playerIndex, count);
+        public int DiscardCountOf(int playerIndex) => _playerDiscards[playerIndex].Count;
+        public IReadOnlyList<Card> DiscardOf(int playerIndex) => _playerDiscards[playerIndex];
 
         public List<Card> GetMarkedCards(int playerIndex, int count)
         {
@@ -145,9 +146,19 @@ namespace WitsAndFools
 
         int DeckCountFor(int playerIndex) => _playerDecks[playerIndex].DrawPileCount;
 
-        void AddToDiscard(Card card, int ownerIndex = -1)
+        void AddToDiscard(Card card, int ownerIndex)
         {
-            if (ownerIndex >= 0) _playerDiscards[ownerIndex].Add(card);
+            _playerDiscards[ownerIndex].Add(card);
+        }
+
+        void DiscardBoutCards()
+        {
+            for (int i = 0; i < _bout.Attacks.Count; i++)
+            {
+                _playerDiscards[AttackerIndex].Add(_bout.Attacks[i]);
+                if (_bout.Defenses[i] != null)
+                    _playerDiscards[DefenderIndex].Add(_bout.Defenses[i].Value);
+            }
         }
 
         void RecycleCard(Card card, int ownerIndex) => _playerDecks[ownerIndex].PutOnBottom(card);
@@ -516,7 +527,7 @@ namespace WitsAndFools
             if (!_bout.FullyDefended) return false;
 
             CollectCrownOfThornsRanks();
-            foreach (var c in _bout.AllCards()) _discard.Add(c);
+            DiscardBoutCards();
             _bout.Clear();
 
             ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
@@ -728,7 +739,7 @@ namespace WitsAndFools
                 case AbilityType.Misdeal:
                     return Phase == Phase.Defense && _resource[playerIndex] >= 1 && !_bout.IsEmpty;
                 case AbilityType.WildCard:
-                    return _resource[playerIndex] >= 2 && _discard.Count > 0;
+                    return _resource[playerIndex] >= 2 && _playerDiscards[playerIndex].Count > 0;
 
                 // Neutral
                 case AbilityType.Fortify:
@@ -805,7 +816,7 @@ namespace WitsAndFools
                     break;
 
                 case AbilityType.DoubleDefense:
-                    _discard.Remove(card);
+                    _playerDiscards[playerIndex].Remove(card);
                     int slot1 = defenseSlot >= 0 ? defenseSlot : _bout.FirstUndefendedSlot();
                     if (slot1 >= 0)
                     {
@@ -841,17 +852,8 @@ namespace WitsAndFools
 
                 case AbilityType.SlipAway:
                     _slipAwayUsed[playerIndex] = true;
-                    for (int i = 0; i < _bout.Attacks.Count; i++)
-                    {
-                        if (_bout.Defenses[i] == null)
-                            _discard.Add(_bout.Attacks[i]);
-                        else
-                        {
-                            _discard.Add(_bout.Attacks[i]);
-                            _discard.Add(_bout.Defenses[i].Value);
-                        }
-                    }
                     CollectCrownOfThornsRanks();
+                    DiscardBoutCards();
                     _bout.Clear();
                     ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
                     break;
@@ -944,13 +946,8 @@ namespace WitsAndFools
                 case AbilityType.SmokeBomb:
                 {
                     SpendResource(playerIndex, 1);
-                    for (int i = 0; i < _bout.Attacks.Count; i++)
-                    {
-                        _discard.Add(_bout.Attacks[i]);
-                        if (_bout.Defenses[i] != null)
-                            _discard.Add(_bout.Defenses[i].Value);
-                    }
                     CollectCrownOfThornsRanks();
+                    DiscardBoutCards();
                     _bout.Clear();
                     ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
                     break;
@@ -1094,13 +1091,8 @@ namespace WitsAndFools
 
                 case AbilityType.Diplomacy:
                 {
-                    for (int i = 0; i < _bout.Attacks.Count; i++)
-                    {
-                        _discard.Add(_bout.Attacks[i]);
-                        if (_bout.Defenses[i] != null)
-                            _discard.Add(_bout.Defenses[i].Value);
-                    }
                     CollectCrownOfThornsRanks();
+                    DiscardBoutCards();
                     _bout.Clear();
                     DrawCards(playerIndex, 1);
                     ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
@@ -1109,13 +1101,8 @@ namespace WitsAndFools
 
                 case AbilityType.DiplomacyPlus:
                 {
-                    for (int i = 0; i < _bout.Attacks.Count; i++)
-                    {
-                        _discard.Add(_bout.Attacks[i]);
-                        if (_bout.Defenses[i] != null)
-                            _discard.Add(_bout.Defenses[i].Value);
-                    }
                     CollectCrownOfThornsRanks();
+                    DiscardBoutCards();
                     _bout.Clear();
                     DrawCards(playerIndex, 2);
                     ResolveBout(BoutOutcome.DefenderWonAllDiscarded);
@@ -1253,7 +1240,7 @@ namespace WitsAndFools
                     {
                         attacks.Add(_bout.Attacks[i]);
                         if (_bout.Defenses[i] != null)
-                            _discard.Add(_bout.Defenses[i].Value);
+                            AddToDiscard(_bout.Defenses[i].Value, DefenderIndex);
                     }
                     ShuffleInManyToDeck(1 - playerIndex, attacks);
                     CollectCrownOfThornsRanks();
@@ -1265,10 +1252,11 @@ namespace WitsAndFools
                 case AbilityType.WildCard:
                 {
                     SpendResource(playerIndex, 2);
-                    if (_discard.Count > 0)
+                    var pile = _playerDiscards[playerIndex];
+                    if (pile.Count > 0)
                     {
-                        var retrieved = _discard[_discard.Count - 1];
-                        _discard.RemoveAt(_discard.Count - 1);
+                        var retrieved = pile[pile.Count - 1];
+                        pile.RemoveAt(pile.Count - 1);
                         _hands[playerIndex].Add(retrieved);
                     }
                     break;
