@@ -15,17 +15,17 @@
         "doctrine": 7,
         "neutral": 4,
         "cardIds": [
-          "brute_gladiator",
-          "brute_war_elephant",
           "brute_mercenary_captain",
-          "neutral_castellan",
-          "neutral_crown_jewel",
-          "neutral_squire",
-          "neutral_magistrate",
           "brute_cannon_master",
           "brute_sapper",
           "brute_vanguard",
-          "brute_titan"
+          "brute_condottiero",
+          "brute_berserker",
+          "brute_enforcer",
+          "brute_pit_fighter",
+          "brute_arsonist",
+          "brute_siege_tower",
+          "brute_quartermaster"
         ]
       },
       "relics": [],
@@ -50,17 +50,17 @@
         "neutral": 5,
         "cardIds": [
           "hoarder_antiquarian",
-          "hoarder_vault_keeper",
           "hoarder_packrat",
           "hoarder_miser",
-          "neutral_herald",
-          "neutral_merchant_prince",
-          "neutral_knight",
-          "neutral_bishop",
-          "neutral_duke",
           "hoarder_collector",
           "hoarder_treasure_hunter",
-          "hoarder_monopolist"
+          "hoarder_merchant",
+          "hoarder_warehouse_keeper",
+          "hoarder_tax_collector",
+          "hoarder_squirrel",
+          "hoarder_usurer",
+          "hoarder_apothecary",
+          "hoarder_auctioneer"
         ]
       },
       "relics": [],
@@ -84,19 +84,18 @@
         "doctrine": 8,
         "neutral": 5,
         "cardIds": [
-          "brute_pillager",
-          "brute_siege_ram",
           "brute_condottiero",
-          "brute_warmonger",
-          "brute_gladiator",
-          "neutral_queen_regent",
-          "neutral_duke",
-          "neutral_cardinal",
-          "neutral_treasurer",
-          "neutral_castellan",
           "brute_cannon_master",
           "brute_sapper",
-          "brute_titan"
+          "brute_berserker",
+          "brute_enforcer",
+          "brute_pit_fighter",
+          "brute_mercenary_captain",
+          "brute_vanguard",
+          "brute_arsonist",
+          "brute_siege_tower",
+          "brute_quartermaster",
+          "brute_executioner"
         ]
       },
       "relics": [],
@@ -125,14 +124,14 @@
           "brute_quartermaster",
           "brute_condottiero",
           "brute_vanguard",
-          "neutral_treasurer",
           "neutral_courser",
-          "neutral_crown_jewel",
-          "neutral_knight",
-          "neutral_herald",
           "brute_cannon_master",
           "brute_sapper",
-          "brute_titan"
+          "brute_berserker",
+          "brute_enforcer",
+          "brute_pit_fighter",
+          "brute_mercenary_captain",
+          "brute_arsonist"
         ]
       },
       "relics": [],
@@ -160,14 +159,14 @@
           "schemer_archivist",
           "schemer_interceptor",
           "schemer_cartographer",
-          "neutral_magistrate",
           "neutral_footman",
-          "neutral_bishop",
-          "neutral_treasurer",
-          "neutral_squire",
           "schemer_spyglass",
           "schemer_librarian",
-          "schemer_grand_inquisitor"
+          "schemer_informant",
+          "schemer_cipher",
+          "schemer_double_agent",
+          "schemer_poisoner",
+          "schemer_scribe"
         ]
       },
       "relics": [],
@@ -192,18 +191,17 @@
         "neutral": 5,
         "cardIds": [
           "brute_siege_tower",
-          "brute_battering_shield",
-          "brute_iron_duke",
           "brute_executioner",
           "brute_cannon_master",
-          "neutral_queen_regent",
-          "neutral_squire",
-          "neutral_bishop",
-          "neutral_magistrate",
-          "neutral_duke",
           "brute_sapper",
           "brute_vanguard",
-          "brute_titan"
+          "brute_condottiero",
+          "brute_berserker",
+          "brute_enforcer",
+          "brute_pit_fighter",
+          "brute_mercenary_captain",
+          "brute_arsonist",
+          "brute_quartermaster"
         ]
       },
       "relics": [],
@@ -227,19 +225,19 @@
         "doctrine": 8,
         "neutral": 5,
         "cardIds": [
-          "hoarder_dynasty_heir",
           "hoarder_tax_collector",
           "hoarder_merchant",
           "hoarder_squirrel",
           "hoarder_packrat",
           "neutral_courser",
-          "neutral_knight",
           "neutral_squire",
-          "neutral_treasurer",
           "neutral_herald",
           "hoarder_collector",
           "hoarder_treasure_hunter",
-          "hoarder_monopolist"
+          "hoarder_miser",
+          "hoarder_warehouse_keeper",
+          "hoarder_antiquarian",
+          "hoarder_usurer"
         ]
       },
       "relics": [],
@@ -270,13 +268,13 @@
           "schemer_cartographer",
           "schemer_double_agent",
           "neutral_merchant_prince",
-          "neutral_castellan",
           "neutral_squire",
-          "neutral_queen_regent",
-          "neutral_duke",
           "schemer_librarian",
           "schemer_poisoner",
-          "schemer_grand_inquisitor"
+          "schemer_informant",
+          "schemer_forger",
+          "schemer_envoy",
+          "schemer_inquisitor"
         ]
       },
       "relics": [],
@@ -301,18 +299,18 @@
         "neutral": 5,
         "cardIds": [
           "trickster_illusionist",
-          "trickster_mirror_mage",
           "trickster_alchemist",
           "trickster_charlatan",
           "trickster_smuggler",
-          "neutral_treasurer",
-          "neutral_castellan",
-          "neutral_guild_knight",
-          "neutral_queen_regent",
-          "neutral_crown_jewel",
           "trickster_jester",
           "trickster_pickpocket",
-          "trickster_grand_masquerader"
+          "trickster_courtesan",
+          "trickster_mask_maker",
+          "trickster_fortune_teller",
+          "trickster_card_sharp",
+          "trickster_acrobat",
+          "trickster_doppelganger",
+          "trickster_con_artist"
         ]
       },
       "relics": [],
@@ -336,7 +334,6 @@
         "doctrine": 10,
         "neutral": 5,
         "cardIds": [
-          "schemer_mastermind",
           "schemer_forger",
           "schemer_puppeteer",
           "schemer_cartographer",
@@ -344,13 +341,14 @@
           "schemer_interceptor",
           "schemer_scribe",
           "schemer_venetian_mirror",
-          "neutral_bishop",
           "neutral_herald",
-          "neutral_queen_regent",
           "neutral_merchant_prince",
           "neutral_courser",
           "schemer_spyglass",
-          "schemer_grand_inquisitor"
+          "schemer_informant",
+          "schemer_cipher",
+          "schemer_librarian",
+          "schemer_double_agent"
         ]
       },
       "relics": [
@@ -377,20 +375,20 @@
         "neutral": 5,
         "cardIds": [
           "hoarder_usurer",
-          "hoarder_reliquary",
-          "hoarder_vault_keeper",
           "hoarder_tax_collector",
           "hoarder_warehouse_keeper",
           "hoarder_antiquarian",
           "hoarder_apothecary",
-          "hoarder_guild_master",
-          "neutral_treasurer",
           "neutral_courser",
           "neutral_squire",
           "neutral_merchant_prince",
-          "neutral_queen_regent",
           "hoarder_collector",
-          "hoarder_monopolist"
+          "hoarder_miser",
+          "hoarder_merchant",
+          "hoarder_packrat",
+          "hoarder_squirrel",
+          "hoarder_auctioneer",
+          "hoarder_treasure_hunter"
         ]
       },
       "relics": [
@@ -416,21 +414,21 @@
         "doctrine": 10,
         "neutral": 5,
         "cardIds": [
-          "trickster_puppet_master",
           "trickster_doppelganger",
-          "trickster_contessa",
           "trickster_pickpocket",
-          "trickster_mirror_mage",
           "trickster_escape_artist",
           "trickster_courtesan",
           "trickster_charlatan",
           "neutral_merchant_prince",
           "neutral_courser",
-          "neutral_castellan",
-          "neutral_queen_regent",
           "neutral_squire",
           "trickster_alchemist",
-          "trickster_grand_masquerader"
+          "trickster_jester",
+          "trickster_mask_maker",
+          "trickster_illusionist",
+          "trickster_fortune_teller",
+          "trickster_card_sharp",
+          "trickster_smuggler"
         ]
       },
       "relics": [
@@ -458,19 +456,19 @@
         "cardIds": [
           "schemer_cryptanalyst",
           "schemer_interceptor",
-          "schemer_doge_spymaster",
-          "schemer_ambassador",
           "schemer_librarian",
           "schemer_spyglass",
           "schemer_envoy",
           "schemer_inquisitor",
-          "neutral_guild_knight",
           "neutral_treasurer",
           "neutral_footman",
-          "neutral_duke",
-          "neutral_bishop",
           "schemer_cartographer",
-          "schemer_grand_inquisitor"
+          "schemer_informant",
+          "schemer_cipher",
+          "schemer_forger",
+          "schemer_double_agent",
+          "schemer_poisoner",
+          "schemer_scribe"
         ]
       },
       "relics": [
@@ -497,21 +495,21 @@
         "neutral": 5,
         "cardIds": [
           "brute_siege_tower",
-          "brute_war_elephant",
           "brute_executioner",
           "brute_warmonger",
           "brute_siege_ram",
           "brute_quartermaster",
           "brute_berserker",
-          "brute_gladiator",
           "brute_iron_duke",
           "brute_pillager",
           "neutral_herald",
-          "neutral_bishop",
           "neutral_footman",
-          "neutral_duke",
           "neutral_treasurer",
-          "brute_titan"
+          "brute_condottiero",
+          "brute_enforcer",
+          "brute_pit_fighter",
+          "brute_cannon_master",
+          "brute_mercenary_captain"
         ]
       },
       "relics": [
@@ -538,7 +536,6 @@
         "neutral": 4,
         "cardIds": [
           "hoarder_warehouse_keeper",
-          "hoarder_dynasty_heir",
           "hoarder_collector",
           "hoarder_cartels_don",
           "hoarder_treasure_hunter",
@@ -549,11 +546,12 @@
           "hoarder_reliquary",
           "hoarder_apothecary",
           "hoarder_tax_collector",
-          "neutral_bishop",
-          "neutral_duke",
-          "neutral_cardinal",
-          "neutral_knight",
-          "hoarder_monopolist"
+          "hoarder_antiquarian",
+          "hoarder_squirrel",
+          "hoarder_auctioneer",
+          "hoarder_fence",
+          "hoarder_vault_keeper",
+          "hoarder_speculator"
         ]
       },
       "relics": [
@@ -580,8 +578,6 @@
         "neutral": 4,
         "cardIds": [
           "schemer_archivist",
-          "schemer_mastermind",
-          "schemer_doge_spymaster",
           "schemer_forger",
           "schemer_venetian_mirror",
           "schemer_cipher",
@@ -590,11 +586,13 @@
           "schemer_scribe",
           "schemer_cryptanalyst",
           "schemer_librarian",
-          "neutral_magistrate",
           "neutral_squire",
-          "neutral_crown_jewel",
           "neutral_footman",
-          "schemer_grand_inquisitor"
+          "schemer_informant",
+          "schemer_cartographer",
+          "schemer_interceptor",
+          "schemer_double_agent",
+          "schemer_poisoner"
         ]
       },
       "relics": [
@@ -622,21 +620,21 @@
         "neutral": 4,
         "cardIds": [
           "trickster_escape_artist",
-          "trickster_contessa",
           "trickster_doppelganger",
           "trickster_pickpocket",
           "trickster_acrobat",
           "trickster_con_artist",
           "trickster_mountebank",
           "trickster_fortune_teller",
-          "trickster_maestro",
           "trickster_card_sharp",
           "trickster_charlatan",
           "neutral_queen_regent",
           "neutral_courser",
           "neutral_squire",
           "neutral_herald",
-          "trickster_grand_masquerader"
+          "trickster_courtesan",
+          "trickster_alchemist",
+          "trickster_jester"
         ]
       },
       "relics": [
@@ -663,7 +661,6 @@
         "doctrine": 13,
         "neutral": 4,
         "cardIds": [
-          "hoarder_dynasty_heir",
           "hoarder_usurer",
           "hoarder_vault_keeper",
           "hoarder_reliquary",
@@ -671,15 +668,16 @@
           "hoarder_apothecary",
           "hoarder_collector",
           "hoarder_packrat",
-          "hoarder_banker",
           "hoarder_antiquarian",
           "hoarder_speculator",
           "hoarder_auctioneer",
-          "neutral_magistrate",
-          "neutral_bishop",
           "neutral_treasurer",
-          "neutral_crown_jewel",
-          "hoarder_monopolist"
+          "hoarder_miser",
+          "hoarder_merchant",
+          "hoarder_warehouse_keeper",
+          "hoarder_tax_collector",
+          "hoarder_squirrel",
+          "hoarder_treasure_hunter"
         ]
       },
       "relics": [
@@ -720,9 +718,9 @@
           "schemer_scribe",
           "neutral_magistrate",
           "neutral_squire",
-          "neutral_bishop",
           "neutral_courser",
-          "schemer_grand_inquisitor"
+          "schemer_informant",
+          "schemer_spyglass"
         ]
       },
       "relics": [
@@ -759,14 +757,14 @@
           "trickster_con_artist",
           "trickster_venetian_noble",
           "trickster_acrobat",
-          "trickster_maestro",
           "trickster_smuggler",
           "trickster_doppelganger",
           "neutral_castellan",
           "neutral_treasurer",
           "neutral_courser",
           "neutral_duke",
-          "trickster_grand_masquerader"
+          "trickster_grand_masquerader",
+          "trickster_courtesan"
         ]
       },
       "relics": [
@@ -798,7 +796,6 @@
           "brute_condottiero",
           "brute_iron_duke",
           "brute_gladiator",
-          "brute_warlord",
           "brute_warmonger",
           "brute_battering_shield",
           "brute_arsonist",
@@ -809,7 +806,8 @@
           "neutral_squire",
           "neutral_merchant_prince",
           "neutral_herald",
-          "brute_titan"
+          "brute_siege_ram",
+          "brute_berserker"
         ]
       },
       "relics": [
@@ -847,13 +845,13 @@
           "schemer_cartographer",
           "schemer_envoy",
           "schemer_inquisitor",
-          "schemer_ambassador",
           "schemer_poisoner",
           "schemer_librarian",
           "neutral_footman",
           "neutral_queen_regent",
-          "neutral_guild_knight",
-          "schemer_grand_inquisitor"
+          "schemer_informant",
+          "schemer_interceptor",
+          "schemer_double_agent"
         ]
       },
       "relics": [
@@ -893,13 +891,13 @@
           "brute_sapper",
           "brute_vanguard",
           "brute_pit_fighter",
-          "brute_warlord",
           "brute_warmonger",
           "neutral_treasurer",
           "neutral_duke",
-          "neutral_guild_knight",
           "neutral_merchant_prince",
-          "brute_titan"
+          "brute_condottiero",
+          "brute_siege_ram",
+          "brute_mercenary_captain"
         ]
       },
       "relics": [
@@ -943,9 +941,9 @@
           "schemer_poisoner",
           "neutral_treasurer",
           "neutral_magistrate",
-          "neutral_bishop",
           "neutral_queen_regent",
-          "schemer_grand_inquisitor"
+          "schemer_spyglass",
+          "schemer_cipher"
         ]
       },
       "relics": [

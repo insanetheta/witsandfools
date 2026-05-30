@@ -97,7 +97,7 @@
       "ability": "Look at opponent's hand; choose 1 card they must play next if able.",
       "flavorText": "A perfect copy is worth more than the original.",
       "rarity": "Rare",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "Peek"
     },
     {
@@ -201,7 +201,7 @@
       "ability": "Seize the initiative; you become the attacker after this bout.",
       "flavorText": "Every piece falls exactly where he planned.",
       "rarity": "Rare",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "SeizeInitiative"
     },
     {
@@ -214,7 +214,7 @@
       "ability": "Gain 1 Intel.",
       "flavorText": "Patterns emerge from chaos for those who know where to look.",
       "rarity": "Uncommon",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "ResourceGain"
     },
     {
@@ -240,7 +240,7 @@
       "ability": "Put 1 card from hand on top of deck. Draw 2.",
       "flavorText": "Nothing is ever truly lost in these vaults.",
       "rarity": "Rare",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "StackTheDeck"
     },
     {
@@ -253,7 +253,7 @@
       "ability": "Cap attacks this bout at 2.",
       "flavorText": "His presence alone shifts the balance of power.",
       "rarity": "Uncommon",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Blocker"
     },
     {
@@ -305,7 +305,7 @@
       "ability": "Masterstroke: spend 4 Intel \u2014 opponent discards their 2 highest-rank cards, you draw 1.",
       "flavorText": "His questions have only one answer, and it is always confession.",
       "rarity": "Rare",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Masterstroke"
     },
     {
@@ -331,7 +331,7 @@
       "ability": "If defender picks up, gain 2 Fury.",
       "flavorText": "The gate holds until it doesn't.",
       "rarity": "Common",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "ResourceGain"
     },
     {
@@ -422,7 +422,7 @@
       "ability": "Spend 1 Fury. Opponent discards 1 random card.",
       "flavorText": "The tunnel was finished before dawn.",
       "rarity": "Common",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "Riposte"
     },
     {
@@ -435,7 +435,7 @@
       "ability": "Gain 1 Fury.",
       "flavorText": "The crowd roars. He does not hear them.",
       "rarity": "Uncommon",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "ResourceGain"
     },
     {
@@ -448,7 +448,7 @@
       "ability": "Spend 1 Fury. Play top 2 deck cards as attacks.",
       "flavorText": "What the sword takes, the sack carries away.",
       "rarity": "Common",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Rampage"
     },
     {
@@ -461,7 +461,7 @@
       "ability": "This card attacks with +2 rank.",
       "flavorText": "Armies are merely the extension of one man's will.",
       "rarity": "Uncommon",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Conquer"
     },
     {
@@ -487,7 +487,7 @@
       "ability": "Your next attack card this bout gets +2 rank.",
       "flavorText": "First through the breach, last to fall.",
       "rarity": "Common",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "Conquer"
     },
     {
@@ -500,7 +500,7 @@
       "ability": "Spend 1 Fury. Opponent discards 1 non-trump card.",
       "flavorText": "From the ashes, nothing grows back.",
       "rarity": "Common",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "Intimidate"
     },
     {
@@ -552,7 +552,7 @@
       "ability": "Spend 3 Fury: this card attacks with +4 rank.",
       "flavorText": "The sentence is always the same.",
       "rarity": "Rare",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "Conquer"
     },
     {
@@ -565,7 +565,7 @@
       "ability": "Onslaught: spend 3 Fury \u2014 play top 3 cards from your deck as attacks.",
       "flavorText": "When the Titan charges, the earth itself retreats.",
       "rarity": "Rare",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Onslaught"
     },
     {
@@ -578,7 +578,7 @@
       "ability": "Play one extra attack ignoring the rank-match rule.",
       "flavorText": "It crushes friend and foe with equal indifference.",
       "rarity": "Uncommon",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "DoubleTrouble"
     },
     {
@@ -721,7 +721,7 @@
       "ability": "After defending, seize initiative; you become the attacker next bout.",
       "flavorText": "She bends but never breaks.",
       "rarity": "Uncommon",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "SeizeInitiative"
     },
     {
@@ -734,7 +734,7 @@
       "ability": "This card copies the suit and rank of the card it defends against.",
       "flavorText": "Which one is the reflection?",
       "rarity": "Rare",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "Fortify"
     },
     {
@@ -747,7 +747,7 @@
       "ability": "This card counts as trump suit for this attack.",
       "flavorText": "Blood and gold open every door in the republic.",
       "rarity": "Common",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "TrumpChanger"
     },
     {
@@ -773,7 +773,7 @@
       "ability": "Discard undefended attacks instead of eating them.",
       "flavorText": "The chains were real. The locks were not.",
       "rarity": "Rare",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "SlipAway"
     },
     {
@@ -799,7 +799,7 @@
       "ability": "Gain 1 Favor.",
       "flavorText": "Your blade finds only your own reflection.",
       "rarity": "Rare",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "ResourceGain"
     },
     {
@@ -812,7 +812,7 @@
       "ability": "Cap attacks this bout at 2.",
       "flavorText": "The final act is always his to command.",
       "rarity": "Uncommon",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Blocker"
     },
     {
@@ -825,7 +825,7 @@
       "ability": "Swap 1 random card with opponent.",
       "flavorText": "His elixir cures nothing, but his tongue cures doubt.",
       "rarity": "Uncommon",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "BlindSwap"
     },
     {
@@ -838,7 +838,7 @@
       "ability": "Masquerade: spend 2 Favor \u2014 swap your entire hand with opponent's.",
       "flavorText": "Behind the final mask is another mask, and behind that \u2014 your face.",
       "rarity": "Rare",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Masquerade"
     },
     {
@@ -942,7 +942,7 @@
       "ability": "Spend 1 Luck. Draw 2 cards, discard your lowest.",
       "flavorText": "Gold flows to those who already have it.",
       "rarity": "Uncommon",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "DoubleOrNothing"
     },
     {
@@ -955,7 +955,7 @@
       "ability": "When you have 8+ cards in hand, your defense cards get +1 rank.",
       "flavorText": "Age only increases value, never diminishes it.",
       "rarity": "Common",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "SteadyHand"
     },
     {
@@ -1046,7 +1046,7 @@
       "ability": "Monopoly: spend 2 Luck \u2014 draw cards until you have 7 in hand, opponent discards down to 5.",
       "flavorText": "When one man owns everything, the game is already over.",
       "rarity": "Rare",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Monopoly"
     },
     {
@@ -1059,7 +1059,7 @@
       "ability": "Draw 1 card for every 3 cards in your hand.",
       "flavorText": "The family name carries more weight than any blade.",
       "rarity": "Rare",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Haymaker"
     },
     {
@@ -1111,7 +1111,7 @@
       "ability": "Draw 2 cards from your deck.",
       "flavorText": "The vault opens for those who've earned its trust.",
       "rarity": "Rare",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Brace"
     },
     {
@@ -1124,7 +1124,7 @@
       "ability": "If you have 7+ cards in hand, draw 1 card.",
       "flavorText": "Risk is for amateurs. I invest in certainties.",
       "rarity": "Uncommon",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "ExtraDraw"
     },
     {
