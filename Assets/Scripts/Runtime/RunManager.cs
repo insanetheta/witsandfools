@@ -205,7 +205,10 @@ namespace WitsAndFools
                 case RunPhase.PostMatch:
                     if (_abilityPickOfferings != null && _abilityPickOfferings.Count > 0)
                         OnAbilityPicked(_abilityPickOfferings[_rng.Next(_abilityPickOfferings.Count)]);
-                    OnResultContinue();
+                    else if (_relicPickOfferings != null && _relicPickOfferings.Count > 0)
+                        OnRelicPicked(_relicPickOfferings[_rng.Next(_relicPickOfferings.Count)]);
+                    else
+                        OnResultContinue();
                     break;
                 case RunPhase.Shop:
                     AutoHandleShop();
@@ -1104,11 +1107,16 @@ namespace WitsAndFools
                     florinsEarned += 3;
                 if (_run.PlayerTrinkets.Contains(TrinketType.MisersRing))
                     florinsEarned += _boutsDefended;
+                if (_run.PlayerRelics.Contains(RelicType.MisersHoard))
+                    florinsEarned = (int)(florinsEarned * 1.5f);
                 _run.Florins += florinsEarned;
             }
             else
             {
-                _run.Prestige--;
+                if (_run.PlayerRelics.Contains(RelicType.PhoenixFeather))
+                    _run.PlayerRelics.Remove(RelicType.PhoenixFeather);
+                else
+                    _run.Prestige--;
                 AssignRandomBurden();
                 if (_run.Prestige <= 0 && _run.PlayerTrinkets.Contains(TrinketType.PhoenixMedal) && !_run.PhoenixMedalUsed)
                 {
@@ -1157,6 +1165,7 @@ namespace WitsAndFools
             }
 
             _abilityPickOfferings = null;
+            _relicPickOfferings = null;
             if (won)
             {
                 _abilityPickOfferings = PickAbilityOfferings(3);
@@ -1417,6 +1426,162 @@ namespace WitsAndFools
         void FinishAbilityPick()
         {
             _abilityPickOfferings = null;
+            HideAbilityPick();
+
+            bool isBossOrElite = _currentNode?.Type == MapNodeType.EliteMatch
+                              || _currentNode?.Type == MapNodeType.BossMatch;
+            if (isBossOrElite && _relicPickOfferings == null)
+            {
+                _relicPickOfferings = PickRelicOfferings(3);
+                if (_relicPickOfferings.Count > 0)
+                {
+                    ShowRelicPick();
+                    return;
+                }
+            }
+
+            _relicPickOfferings = null;
+            if (ResultContinueButton) ResultContinueButton.gameObject.SetActive(true);
+        }
+
+        List<RelicType> _relicPickOfferings;
+
+        static readonly RelicType[] BossRelicTypes =
+        {
+            RelicType.TitansCrown, RelicType.SovereignsDecree, RelicType.HeraldsHorn,
+            RelicType.WanderersBoots, RelicType.MisersHoard, RelicType.PhoenixFeather
+        };
+
+        static readonly Dictionary<RelicType, string> BossRelicNames = new()
+        {
+            { RelicType.TitansCrown, "Titan's Crown" },
+            { RelicType.SovereignsDecree, "Sovereign's Decree" },
+            { RelicType.HeraldsHorn, "Herald's Horn" },
+            { RelicType.WanderersBoots, "Wanderer's Boots" },
+            { RelicType.MisersHoard, "Miser's Hoard" },
+            { RelicType.PhoenixFeather, "Phoenix Feather" },
+        };
+
+        static readonly Dictionary<RelicType, string> BossRelicDescs = new()
+        {
+            { RelicType.TitansCrown, "+2 hand size in all matches" },
+            { RelicType.SovereignsDecree, "+1 max attacks per bout" },
+            { RelicType.HeraldsHorn, "+3 starting resource each match" },
+            { RelicType.WanderersBoots, "+1 ability slot" },
+            { RelicType.MisersHoard, "+50% Florins from matches" },
+            { RelicType.PhoenixFeather, "Prevents one prestige loss per match" },
+        };
+
+        List<RelicType> PickRelicOfferings(int count)
+        {
+            var available = new List<RelicType>();
+            foreach (var r in BossRelicTypes)
+                if (!_run.PlayerRelics.Contains(r)) available.Add(r);
+            var result = new List<RelicType>();
+            int picks = Math.Min(count, available.Count);
+            for (int i = 0; i < picks; i++)
+            {
+                int idx = _rng.Next(available.Count);
+                result.Add(available[idx]);
+                available.RemoveAt(idx);
+            }
+            return result;
+        }
+
+        void ShowRelicPick()
+        {
+            if (AbilityPickLabel)
+            {
+                AbilityPickLabel.text = "Choose a boss relic:";
+                AbilityPickLabel.gameObject.SetActive(true);
+            }
+            ClearAbilityPickButtons();
+            if (AbilityPickContainer)
+                foreach (var relic in _relicPickOfferings)
+                    CreateRelicPickButton(relic);
+            if (AbilityPickSkipButton)
+            {
+                AbilityPickSkipButton.gameObject.SetActive(true);
+                AbilityPickSkipButton.onClick.RemoveAllListeners();
+                AbilityPickSkipButton.onClick.AddListener(OnRelicPickSkip);
+            }
+        }
+
+        void CreateRelicPickButton(RelicType relicType)
+        {
+            string name = BossRelicNames.TryGetValue(relicType, out var n) ? n : relicType.ToString();
+            string desc = BossRelicDescs.TryGetValue(relicType, out var d) ? d : "";
+
+            var btnGO = new GameObject($"Relic_{relicType}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            btnGO.transform.SetParent(AbilityPickContainer, false);
+
+            var img = btnGO.GetComponent<Image>();
+            img.color = new Color(0.25f, 0.18f, 0.12f, 0.9f);
+
+            var le = btnGO.GetComponent<LayoutElement>();
+            le.preferredHeight = 104;
+            le.preferredWidth = 650;
+
+            var accentGO = new GameObject("RelicAccent", typeof(RectTransform), typeof(Image));
+            accentGO.transform.SetParent(btnGO.transform, false);
+            var accentRT = (RectTransform)accentGO.transform;
+            accentRT.anchorMin = new Vector2(0, 0);
+            accentRT.anchorMax = new Vector2(0, 1);
+            accentRT.pivot = new Vector2(0, 0.5f);
+            accentRT.sizeDelta = new Vector2(4, 0);
+            accentRT.anchoredPosition = Vector2.zero;
+            accentGO.GetComponent<Image>().color = ThemePalette.Gold;
+            accentGO.GetComponent<Image>().raycastTarget = false;
+
+            var nameGO = new GameObject("Name", typeof(RectTransform));
+            nameGO.transform.SetParent(btnGO.transform, false);
+            var nameRT = (RectTransform)nameGO.transform;
+            nameRT.anchorMin = new Vector2(0, 0.5f);
+            nameRT.anchorMax = new Vector2(1, 1);
+            nameRT.offsetMin = new Vector2(16, 0);
+            nameRT.offsetMax = new Vector2(-12, -2);
+            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            var headingFont = FontAssets.Heading;
+            if (headingFont) nameTMP.font = headingFont;
+            nameTMP.text = name;
+            nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            nameTMP.fontSize = 23;
+            nameTMP.color = ThemePalette.Gold;
+            nameTMP.raycastTarget = false;
+
+            var descGO = new GameObject("Desc", typeof(RectTransform));
+            descGO.transform.SetParent(btnGO.transform, false);
+            var descRT = (RectTransform)descGO.transform;
+            descRT.anchorMin = Vector2.zero;
+            descRT.anchorMax = new Vector2(1, 0.5f);
+            descRT.offsetMin = new Vector2(16, 2);
+            descRT.offsetMax = new Vector2(-12, 0);
+            var descTMP = descGO.AddComponent<TextMeshProUGUI>();
+            descTMP.text = desc;
+            descTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            descTMP.fontSize = 18;
+            descTMP.color = ThemePalette.DustyTan;
+            descTMP.raycastTarget = false;
+            descTMP.enableWordWrapping = true;
+
+            var btn = btnGO.GetComponent<Button>();
+            var captured = relicType;
+            btn.onClick.AddListener(() => OnRelicPicked(captured));
+        }
+
+        void OnRelicPicked(RelicType type)
+        {
+            _run.PlayerRelics.Add(type);
+            if (type == RelicType.WanderersBoots)
+                _run.MaxAbilitySlots++;
+            FinishRelicPick();
+        }
+
+        void OnRelicPickSkip() => FinishRelicPick();
+
+        void FinishRelicPick()
+        {
+            _relicPickOfferings = null;
             HideAbilityPick();
             if (ResultContinueButton) ResultContinueButton.gameObject.SetActive(true);
         }

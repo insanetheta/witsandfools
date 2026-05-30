@@ -39,7 +39,15 @@ namespace WitsAndFools
         GamblersDie,
         VenetianGlass,
         ThiefsLantern,
-        PilgrimsCompass
+        PilgrimsCompass,
+
+        // --- Boss Relics (elite/boss rewards) ---
+        TitansCrown,
+        SovereignsDecree,
+        HeraldsHorn,
+        WanderersBoots,
+        MisersHoard,
+        PhoenixFeather
     }
 
     public enum RelicRarity { Common, Uncommon, Rare }

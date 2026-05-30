@@ -105,6 +105,12 @@ namespace WitsAndFools
                 case RelicType.VenetianGlass: config.CourtiersFan[player] = true; break;
                 case RelicType.ThiefsLantern: config.QuicksilverVial[player] = true; break;
                 case RelicType.PilgrimsCompass: config.QuickHands[player] = true; break;
+                case RelicType.TitansCrown: config.HandSize += 2; break;
+                case RelicType.SovereignsDecree: config.MaxAttacksPerBout += 1; break;
+                case RelicType.HeraldsHorn: config.StartingResource += 3; break;
+                case RelicType.WanderersBoots: break;
+                case RelicType.MisersHoard: break;
+                case RelicType.PhoenixFeather: break;
             }
         }
 
