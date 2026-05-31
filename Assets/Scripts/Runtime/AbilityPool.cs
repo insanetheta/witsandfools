@@ -124,6 +124,20 @@ namespace WitsAndFools
             new AbilityDefinition(AbilityType.WildCard,         AbilityRarity.Uncommon, 2, owner: ArchetypeType.Gambler, buildPath: "Trickster"),
             new AbilityDefinition(AbilityType.SleightOfMind,    AbilityRarity.Uncommon, 0, isPassive: true, owner: ArchetypeType.Gambler, buildPath: "Trickster"),
             new AbilityDefinition(AbilityType.ChaoticNature,    AbilityRarity.Rare,     0, isPassive: true, owner: ArchetypeType.Gambler, buildPath: "Trickster"),
+
+            // --- Upgraded (Plus) variants ---
+            new AbilityDefinition(AbilityType.BlockerPlus,        AbilityRarity.Common,   3),
+            new AbilityDefinition(AbilityType.ExtraDrawPlus,      AbilityRarity.Common,   3),
+            new AbilityDefinition(AbilityType.PeekPlus,           AbilityRarity.Uncommon, 2),
+            new AbilityDefinition(AbilityType.FortifyPlus,        AbilityRarity.Common,   3),
+            new AbilityDefinition(AbilityType.SecondWindPlus,     AbilityRarity.Uncommon, 2),
+            new AbilityDefinition(AbilityType.BracePlus,          AbilityRarity.Uncommon, 2),
+            new AbilityDefinition(AbilityType.RipostePlus,        AbilityRarity.Common,   3, owner: ArchetypeType.Rogue),
+            new AbilityDefinition(AbilityType.SleightOfHandPlus,  AbilityRarity.Common,   3, owner: ArchetypeType.Rogue),
+            new AbilityDefinition(AbilityType.DoubleTroublePlus,  AbilityRarity.Common,   3, owner: ArchetypeType.Brute),
+            new AbilityDefinition(AbilityType.PileOnPlus,         AbilityRarity.Uncommon, 2, owner: ArchetypeType.Brute),
+            new AbilityDefinition(AbilityType.HaymakerPlus,       AbilityRarity.Common,   3, owner: ArchetypeType.Brute),
+            new AbilityDefinition(AbilityType.DiplomacyPlus,      AbilityRarity.Common,   3, owner: ArchetypeType.Diplomat),
         };
 
         static readonly Dictionary<AbilityType, AbilityDefinition> _byType;

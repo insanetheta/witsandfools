@@ -267,6 +267,8 @@ namespace WitsAndFools
                         _autoRun = false;
                         Time.timeScale = 1f;
                         Debug.Log($"[RunManager] Auto-run complete — {runResult}");
+                        if (UIScreenCapture.Instance != null && UIScreenCapture.Instance.IsCapturing)
+                            UIScreenCapture.Instance.EndCapture();
                     }
                     break;
             }
@@ -514,6 +516,9 @@ namespace WitsAndFools
             if (RunHudPanel) RunHudPanel.SetActive(phase != RunPhase.Title && phase != RunPhase.RunOver && phase != RunPhase.ArchetypeSelect);
 
             UpdateRunHud();
+
+            if (UIScreenCapture.Instance != null)
+                UIScreenCapture.Instance.NotifyPhaseChange(phase, _run?.RunWon ?? false);
 
             switch (phase)
             {
@@ -1191,6 +1196,7 @@ namespace WitsAndFools
         void ShowResult(bool won, int florinsEarned)
         {
             SetPhase(RunPhase.PostMatch);
+            UIScreenCapture.Instance?.NotifyModal(won ? UIScreen.MatchVictory : UIScreen.MatchDefeat);
 
             if (ResultTitleLabel)
                 ResultTitleLabel.text = won ? "Victory!" : "Defeat...";
@@ -1294,6 +1300,7 @@ namespace WitsAndFools
 
         void ShowAbilityPick()
         {
+            UIScreenCapture.Instance?.NotifyModal(UIScreen.AbilityPick);
             if (AbilityPickLabel) AbilityPickLabel.text = "Choose an ability:";
             if (AbilityPickLabel) AbilityPickLabel.gameObject.SetActive(true);
             ClearAbilityPickButtons();
@@ -1540,6 +1547,7 @@ namespace WitsAndFools
 
         void ShowRelicPick()
         {
+            UIScreenCapture.Instance?.NotifyModal(UIScreen.RelicPick);
             if (AbilityPickLabel)
             {
                 AbilityPickLabel.text = "Choose a boss relic:";
@@ -2530,6 +2538,7 @@ namespace WitsAndFools
 
         void ShowEventOutcome(string outcome)
         {
+            UIScreenCapture.Instance?.NotifyModal(UIScreen.EventOutcome);
             if (EventOutcomeLabel)
             {
                 EventOutcomeLabel.text = outcome;
@@ -2777,6 +2786,7 @@ namespace WitsAndFools
             if (!CardDetailPanel) return;
 
             CardDetailPanel.SetActive(true);
+            UIScreenCapture.Instance?.NotifyModal(UIScreen.CardDetail);
 
             for (int i = CardDetailPanel.transform.childCount - 1; i >= 0; i--)
                 Destroy(CardDetailPanel.transform.GetChild(i).gameObject);
@@ -3151,6 +3161,7 @@ namespace WitsAndFools
         {
             _cardRewardOfferings = PickCardRewardOfferings(3);
             if (_cardRewardOfferings.Count == 0) { FinishCardReward(); return; }
+            UIScreenCapture.Instance?.NotifyModal(UIScreen.CardReward);
 
             if (CardRewardLabel) { CardRewardLabel.text = "Choose a card for your deck:"; CardRewardLabel.gameObject.SetActive(true); }
             ClearCardRewardButtons();
@@ -3329,6 +3340,7 @@ namespace WitsAndFools
 
             DeckBrowserPanel.SetActive(true);
             PopulateDeckBrowser();
+            UIScreenCapture.Instance?.NotifyModal(UIScreen.DeckBrowser);
         }
 
         void HideDeckBrowser()

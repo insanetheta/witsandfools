@@ -204,9 +204,14 @@ namespace WitsAndFools
             ClearAllVisuals();
             Hud?.HideGameOver();
 
+            var config = MatchConfig.Default();
+            var deck0 = PlayerDeck.CreateStandard(config.Abilities);
+            var deck1 = PlayerDeck.CreateStandard(config.Abilities);
+            var engine = new GameEngine(null, config, deck0, deck1);
             _loop = new GameLoop(
                 p0: new HumanPlayer(PlayerName),
-                p1: new AIPlayer(OpponentName));
+                p1: new AIPlayer(OpponentName),
+                engine: engine);
             _humanIsPlayerZero = true;
             WireEngineEvents();
             WireHudButtons();
@@ -459,6 +464,7 @@ namespace WitsAndFools
                     var ability = view.Card.Ability.Value;
                     Hud?.ShowAbilityChoice(ability.DisplayName(), ability.Description(),
                         $"Use {ability.ShortName()}", canPlay, canUse);
+                    UIScreenCapture.Instance?.NotifyModal(UIScreen.AbilityChoiceModal);
                     return;
                 }
             }
@@ -574,6 +580,7 @@ namespace WitsAndFools
 
             // Activate panel BEFORE spawning cards so CardView.Awake() runs
             Hud.ShowPeekOverlay();
+            UIScreenCapture.Instance?.NotifyModal(UIScreen.PeekOverlay);
 
             for (int i = 0; i < top.Length; i++)
             {

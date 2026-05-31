@@ -59,7 +59,7 @@ namespace WitsAndFools
         public int DeckCount => AnyDeckCount();
         public bool IsDualDeck => true;
         public int DeckCountOf(int playerIndex) => DeckCountFor(playerIndex);
-        public Card? DeckTopCard => AnyDeckCount() > 0 ? PeekTopDeck(AttackerIndex, 1)[0] : null;
+        public Card? DeckTopCard => DeckCountFor(AttackerIndex) > 0 ? PeekTopDeck(AttackerIndex, 1)[0] : null;
         public Card[] PeekTopCards(int playerIndex, int count) => PeekTopDeck(playerIndex, count);
         public int DiscardCountOf(int playerIndex) => _playerDiscards[playerIndex].Count;
         public IReadOnlyList<Card> DiscardOf(int playerIndex) => _playerDiscards[playerIndex];

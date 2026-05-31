@@ -284,7 +284,6 @@ namespace WitsAndFools.EditorTools
             // ----- HUD wiring -----
             var hudGO = new GameObject("HudView");
             var hud = hudGO.AddComponent<HudView>();
-            hud.TurnLabel = turnLabel;
             hud.TrumpLabel = trumpLabel;
             hud.EndBoutButton = endBoutBtn.GetComponent<Button>();
             hud.OpponentPortrait = portraitImg;

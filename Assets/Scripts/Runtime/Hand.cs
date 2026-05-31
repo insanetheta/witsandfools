@@ -16,5 +16,7 @@ namespace WitsAndFools
         public bool Contains(Card card) => _cards.Contains(card);
 
         public void Clear() => _cards.Clear();
+
+        public List<Card>.Enumerator GetEnumerator() => _cards.GetEnumerator();
     }
 }

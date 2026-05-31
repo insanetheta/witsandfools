@@ -66,4 +66,9 @@ _Add a brief overview of your project architecture_
 
 ## Conventions & Patterns
 
-_Add your project-specific conventions here_
+### UI Screen Registry Rule
+When adding a new screen or modal to the game:
+1. Add an entry to `UIScreen` enum in `Assets/Scripts/Runtime/UIScreenCapture.cs`
+2. Add a `UIScreenCapture.Instance?.NotifyModal(UIScreen.YourScreen)` or `NotifyPhaseChange` call at the point the screen becomes visible
+3. The UI audit report (menu: Wits and Fools > UI Audit > Capture All Screens) will flag missing screens
+4. Design targets live in `docs/design/walkthrough/index.html` and `docs/design/ui_screens_mockup.html`
