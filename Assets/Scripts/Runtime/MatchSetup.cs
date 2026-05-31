@@ -93,19 +93,54 @@ namespace WitsAndFools
             if (Ascension.RelentlessAssault(run.AscensionLevel))
                 config.MaxAttacksPerBout++;
 
+            if (config.MirrorAbilities)
+            {
+                if (config.AbilityOwners != null)
+                {
+                    var keys = new List<(Suit, Rank)>(config.AbilityOwners.Keys);
+                    foreach (var key in keys)
+                        config.AbilityOwners[key] = -1;
+                }
+            }
+
             return (config, playerDeck, enemyDeck);
         }
 
         static void ApplyRelic(MatchConfig config, int player, RelicType relic)
         {
-            if (!RelicPool.TryGet(relic, out var def)) return;
-
             switch (relic)
             {
+                // Starting relics
                 case RelicType.SpysMonocle: config.SpysMonocle[player] = true; break;
                 case RelicType.IronGauntlet: config.BruteFury[player] = true; break;
                 case RelicType.TwoFacedCoin: config.LuckyDraw[player] = true; break;
                 case RelicType.BottomlessPurse: config.SteadyHand[player] = true; break;
+
+                // Schemer synergy
+                case RelicType.ScholarsLens: config.CardCounter[player] = true; break;
+                case RelicType.ForkedTongue: config.WebOfLies[player] = true; break;
+                case RelicType.InvisibleInk: config.MarkedDeck[player] = true; break;
+                case RelicType.CiphersRing: config.MarkedCards[player] = true; break;
+
+                // Brute synergy
+                case RelicType.WarHammer: config.RazorsEdge[player] = true; break;
+                case RelicType.BloodyKnuckles: config.Bloodlust[player] = true; break;
+                case RelicType.IronHelm: config.ThickSkin[player] = true; break;
+                case RelicType.CondottierisBanner: config.BattleHardened[player] = true; break;
+
+                // Trickster synergy
+                case RelicType.MasqueradeMask: config.Equilibrium[player] = true; break;
+                case RelicType.PoisonedChalice: config.PoisonedWine[player] = true; break;
+                case RelicType.MirrorShard: config.CourtFavor[player] = true; break;
+                case RelicType.AlchemistsPhial: config.QuicksilverVial[player] = true; break;
+
+                // Hoarder synergy
+                case RelicType.MisersLockbox: config.QuickHands[player] = true; break;
+                case RelicType.RatsNest: config.Jackpot[player] = true; break;
+                case RelicType.DeepPockets: config.SharkInstinct[player] = true; break;
+                case RelicType.TaxCollectorsLedger: config.CatalystGem[player] = true; break;
+
+                // Universal
                 case RelicType.CandleStub: config.CardCounter[player] = true; break;
                 case RelicType.MerchantsPurse: break;
                 case RelicType.PhoenixMedal: break;
@@ -113,6 +148,8 @@ namespace WitsAndFools
                 case RelicType.VenetianGlass: config.CourtiersFan[player] = true; break;
                 case RelicType.ThiefsLantern: config.QuicksilverVial[player] = true; break;
                 case RelicType.PilgrimsCompass: config.QuickHands[player] = true; break;
+
+                // Boss relics
                 case RelicType.TitansCrown: config.HandSize += 2; break;
                 case RelicType.SovereignsDecree: config.MaxAttacksPerBout += 1; break;
                 case RelicType.HeraldsHorn: config.StartingResource += 3; break;
@@ -143,6 +180,13 @@ namespace WitsAndFools
                 case TrinketType.EchoStone: config.EchoStone[player] = true; break;
                 case TrinketType.RazorsEdge: config.RazorsEdge[player] = true; break;
                 case TrinketType.Bloodstone: config.Bloodstone[player] = true; break;
+                case TrinketType.TailorsThimble:
+                    if (player == 0) config.HandSize = Math.Min(config.HandSize, 5);
+                    break;
+                case TrinketType.AlchemistsStone:
+                    if (player == 0) config.ForcedTrumpSuit = 0;
+                    break;
+                case TrinketType.ForgersKit: config.ForgersKit[player] = true; break;
             }
         }
 

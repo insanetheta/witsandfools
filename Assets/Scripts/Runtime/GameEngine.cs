@@ -405,6 +405,20 @@ namespace WitsAndFools
             if (_config.NoTrumpsUntilBout > 0 && _boutCount < _config.NoTrumpsUntilBout && card.Suit == Trump)
                 return false;
 
+            if (_config.RattledNerves[playerIndex] && _bout.Defenses[slot] == null)
+            {
+                bool isFirstDefense = true;
+                for (int i = 0; i < _bout.Defenses.Count; i++)
+                    if (_bout.Defenses[i] != null) { isFirstDefense = false; break; }
+                if (isFirstDefense)
+                {
+                    Card highest = card;
+                    foreach (var h in _hands[playerIndex])
+                        if ((int)h.Rank > (int)highest.Rank) highest = h;
+                    if (card != highest) return false;
+                }
+            }
+
             _hands[playerIndex].Remove(card);
             _bout.TryDefend(slot, card);
             Phase = Phase.Attack;
@@ -560,7 +574,7 @@ namespace WitsAndFools
 
             if (_config.AbilityOwners != null &&
                 _config.AbilityOwners.TryGetValue((card.Suit, card.Rank), out int owner) &&
-                owner != playerIndex)
+                owner != playerIndex && owner != -1)
                 return false;
 
             var ability = card.Ability.Value;

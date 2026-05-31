@@ -63,6 +63,9 @@ namespace WitsAndFools
         public bool[] ChaoticNature = new bool[2];
         public bool[] SteadyHand = new bool[2];
 
+        // Additional trinkets
+        public bool[] ForgersKit = new bool[2];
+
         // Compound synergy trinkets
         public bool[] CatalystGem = new bool[2];
         public bool[] EchoStone = new bool[2];

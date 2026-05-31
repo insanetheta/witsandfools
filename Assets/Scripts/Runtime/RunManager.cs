@@ -476,6 +476,11 @@ namespace WitsAndFools
                     Debug.Log($"[RunManager] Loaded {DoctrineRoster.Count} enemies from roster.");
                 }
             }
+            if (!RelicPool.IsInitialized)
+            {
+                RelicPool.RegisterAll(RelicDefinitions.All());
+                Debug.Log($"[RunManager] Registered {RelicPool.Count} relic definitions.");
+            }
         }
 
         void OnArchetypeSelected(ArchetypeType archetype)
@@ -1684,6 +1689,9 @@ namespace WitsAndFools
 
             if (_run.PlayerBurdens.Count > 0)
                 CreateBurdenRemovalButton();
+
+            if (_run.PlayerDeckCardIds.Count > 8 && _run.CardRemovalsPurchased < 3)
+                CreateCardRemovalButton();
         }
 
         void ClearShopItems()
@@ -1712,6 +1720,8 @@ namespace WitsAndFools
                 };
                 if (Ascension.InflatedPrices(_run.AscensionLevel))
                     price = (int)(price * 1.25f);
+                if (_run.PlayerBurdens.Contains(BurdenType.BadReputation))
+                    price = (int)(price * 1.20f);
                 result.Add((def.Type, price));
             }
             return result;
@@ -1824,6 +1834,10 @@ namespace WitsAndFools
         void CreateBurdenRemovalButton()
         {
             int price = 6;
+            if (Ascension.InflatedPrices(_run.AscensionLevel))
+                price = (int)(price * 1.25f);
+            if (_run.PlayerBurdens.Contains(BurdenType.BadReputation))
+                price = (int)(price * 1.20f);
             bool canBuy = _run.Florins >= price;
             var burden = _run.PlayerBurdens[0];
 
@@ -1856,6 +1870,58 @@ namespace WitsAndFools
             btn.onClick.AddListener(() => OnShopRemoveBurden(burden, price));
         }
 
+        void CreateCardRemovalButton()
+        {
+            string weakest = FindWeakestDeckCard();
+            if (weakest == null) return;
+            string cardName = CardCatalog.TryGet(weakest, out var wDef) ? wDef.Name : weakest;
+            int price = 8;
+            if (Ascension.InflatedPrices(_run.AscensionLevel))
+                price = (int)(price * 1.25f);
+            if (_run.PlayerBurdens.Contains(BurdenType.BadReputation))
+                price = (int)(price * 1.20f);
+            bool canBuy = _run.Florins >= price;
+
+            var btnGO = new GameObject("CardRemoval", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            btnGO.transform.SetParent(ShopItemContainer, false);
+            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.35f, 0.12f, 0.12f, 0.85f) : ThemePalette.LockedGray;
+            var le = btnGO.GetComponent<LayoutElement>();
+            le.preferredHeight = 70;
+            le.preferredWidth = 550;
+
+            var lblGO = new GameObject("Label", typeof(RectTransform));
+            lblGO.transform.SetParent(btnGO.transform, false);
+            var lblRT = (RectTransform)lblGO.transform;
+            lblRT.anchorMin = Vector2.zero;
+            lblRT.anchorMax = Vector2.one;
+            lblRT.offsetMin = new Vector2(16, 0);
+            lblRT.offsetMax = new Vector2(-16, 0);
+            var lbl = lblGO.AddComponent<TextMeshProUGUI>();
+            lbl.text = $"Remove \"{cardName}\"  —  {price}f";
+            lbl.alignment = TextAlignmentOptions.Center;
+            lbl.fontSize = 20;
+            lbl.color = canBuy ? ThemePalette.Parchment : ThemePalette.DisabledText;
+            lbl.raycastTarget = false;
+
+            var btn = btnGO.GetComponent<Button>();
+            btn.interactable = canBuy;
+            string capturedId = weakest;
+            btn.onClick.AddListener(() => OnShopRemoveCard(capturedId, price));
+        }
+
+        void OnShopRemoveCard(string cardId, int price)
+        {
+            if (_run.Florins < price) return;
+            _run.Florins -= price;
+            _run.PlayerDeckCardIds.Remove(cardId);
+            _run.CardAbilityOverrides.Remove(cardId);
+            _run.CardRankOverrides.Remove(cardId);
+            _run.CardRemovalsPurchased++;
+            UpdateRunHud();
+            UpdateShopFlorins();
+            PopulateShopItems();
+        }
+
         (TrinketType type, int price)? PickTrinketOffering()
         {
             if (_run.PlayerTrinkets.Count >= 5) return null;
@@ -1871,6 +1937,8 @@ namespace WitsAndFools
             int price = trinket.AffectsEngine() ? 15 : 10;
             if (Ascension.InflatedPrices(_run.AscensionLevel))
                 price = (int)(price * 1.25f);
+            if (_run.PlayerBurdens.Contains(BurdenType.BadReputation))
+                price = (int)(price * 1.20f);
             return (trinket, price);
         }
 
@@ -1947,6 +2015,10 @@ namespace WitsAndFools
             var pick = candidates[_rng.Next(candidates.Count)];
             Rank newRank = pick.rank + 1;
             int price = (int)pick.rank >= 10 ? 10 : 6;
+            if (Ascension.InflatedPrices(_run.AscensionLevel))
+                price = (int)(price * 1.25f);
+            if (_run.PlayerBurdens.Contains(BurdenType.BadReputation))
+                price = (int)(price * 1.20f);
             return (pick.id, pick.name, pick.rank, newRank, price);
         }
 
@@ -3478,6 +3550,8 @@ namespace WitsAndFools
                 };
                 if (Ascension.InflatedPrices(_run.AscensionLevel))
                     price = (int)(price * 1.25f);
+                if (_run.PlayerBurdens.Contains(BurdenType.BadReputation))
+                    price = (int)(price * 1.20f);
 
                 bool canBuy = _run.Florins >= price && _run.PlayerDeckCardIds.Count < 20;
 
