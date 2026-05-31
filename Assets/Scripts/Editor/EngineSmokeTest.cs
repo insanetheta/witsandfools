@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEditor;
@@ -12,6 +14,133 @@ namespace WitsAndFools.EditorTools
 
         [MenuItem("Wits and Fools/Smoke Test/Play 50 Games (Greedy AIs)")]
         public static void PlayFifty() => Run(seed: 1, games: 50);
+
+        [MenuItem("Wits and Fools/Smoke Test/Regression Suite")]
+        public static void RegressionSuite()
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("=== Regression Suite ===");
+            int pass = 0, fail = 0;
+
+            void Check(string name, Action test)
+            {
+                try { test(); pass++; sb.AppendLine($"  PASS: {name}"); }
+                catch (Exception e) { fail++; sb.AppendLine($"  FAIL: {name} — {e.Message}"); }
+            }
+
+            Check("AbilityPool: all Plus variants registered", () =>
+            {
+                var plusTypes = new[] {
+                    AbilityType.BlockerPlus, AbilityType.ExtraDrawPlus, AbilityType.PeekPlus,
+                    AbilityType.FortifyPlus, AbilityType.SecondWindPlus, AbilityType.BracePlus,
+                    AbilityType.RipostePlus, AbilityType.SleightOfHandPlus, AbilityType.DoubleTroublePlus,
+                    AbilityType.PileOnPlus, AbilityType.HaymakerPlus, AbilityType.DiplomacyPlus
+                };
+                foreach (var t in plusTypes) AbilityPool.Get(t);
+            });
+
+            Check("DeckTopCard: safe when attacker deck empty", () =>
+            {
+                var config = MatchConfig.Default();
+                config.AnyRankAttack = true;
+                config.MaxBouts = 50;
+                var deck0 = PlayerDeck.CreateStandard(config.Abilities);
+                var deck1 = PlayerDeck.CreateStandard(config.Abilities);
+                var engine = new GameEngine(999, config, deck0, deck1);
+                engine.StartNewGame();
+                int safety = 0;
+                while (engine.Phase != Phase.GameOver && safety++ < 5000)
+                    StepGreedy(engine);
+                var _ = engine.DeckTopCard;
+            });
+
+            Check("Hand: foreach enumerable", () =>
+            {
+                var hand = new Hand();
+                hand.Add(new Card(Suit.Hearts, Rank.Ace));
+                hand.Add(new Card(Suit.Spades, Rank.King));
+                int count = 0;
+                foreach (var c in hand) count++;
+                if (count != 2) throw new Exception($"Expected 2, got {count}");
+            });
+
+            Check("RelicPool: all relics registered", () =>
+            {
+                RelicPool.RegisterAll(RelicDefinitions.All());
+                foreach (RelicType r in Enum.GetValues(typeof(RelicType)))
+                    RelicPool.TryGet(r, out _);
+            });
+
+            Check("MatchSetup: all relic types applied without crash", () =>
+            {
+                var rng = new System.Random(42);
+                foreach (RelicType r in Enum.GetValues(typeof(RelicType)))
+                {
+                    var run = new RunState();
+                    run.PlayerRelics.Add(r);
+                    run.PlayerDoctrine = DoctrineType.Schemer;
+                    var opponent = new OpponentProfile { Name = "Test", Archetype = AIArchetypeName.Brawler, ActIndex = 0 };
+                    MatchSetup.Build(run, opponent, rng);
+                }
+            });
+
+            Check("MatchSetup: all trinket types applied without crash", () =>
+            {
+                var rng = new System.Random(42);
+                foreach (TrinketType t in Enum.GetValues(typeof(TrinketType)))
+                {
+                    var run = new RunState();
+                    run.PlayerTrinkets.Add(t);
+                    run.PlayerDoctrine = DoctrineType.Brute;
+                    var opponent = new OpponentProfile { Name = "Test", Archetype = AIArchetypeName.Brawler, ActIndex = 0 };
+                    MatchSetup.Build(run, opponent, rng);
+                }
+            });
+
+            Check("MatchSetup: all burden types applied without crash", () =>
+            {
+                var rng = new System.Random(42);
+                foreach (BurdenType b in Enum.GetValues(typeof(BurdenType)))
+                {
+                    var run = new RunState();
+                    run.PlayerBurdens.Add(b);
+                    run.PlayerDoctrine = DoctrineType.Trickster;
+                    var opponent = new OpponentProfile { Name = "Test", Archetype = AIArchetypeName.Brawler, ActIndex = 0 };
+                    MatchSetup.Build(run, opponent, rng);
+                }
+            });
+
+            Check("Engine: 10 games with relics + abilities survive", () =>
+            {
+                var rng = new System.Random(77);
+                for (int g = 0; g < 10; g++)
+                {
+                    var config = MatchConfig.Default();
+                    config.AnyRankAttack = true;
+                    config.MaxBouts = 12;
+                    config.SpysMonocle[0] = true;
+                    config.BruteFury[1] = true;
+                    config.RazorsEdge[0] = true;
+                    config.PoisonedWine[1] = true;
+                    config.QuickHands[0] = true;
+                    config.Equilibrium[1] = true;
+                    config.EmpoweredFoeBonus = 1;
+                    config.MaxAttacksPerBout = 4;
+                    config.DesperationDiscard = true;
+                    var deck0 = PlayerDeck.CreateStandard(config.Abilities);
+                    var deck1 = PlayerDeck.CreateStandard(config.Abilities);
+                    var engine = new GameEngine(rng.Next(), config, deck0, deck1);
+                    engine.StartNewGame();
+                    int safety = 0;
+                    while (engine.Phase != Phase.GameOver && safety++ < 10000)
+                        StepGreedy(engine);
+                    if (safety >= 10000) throw new Exception($"Game {g} stalled");
+                }
+            });
+
+            sb.AppendLine($"Results: {pass} passed, {fail} failed");
+            Debug.Log(sb.ToString());
+        }
 
         static void Run(int seed, int games)
         {

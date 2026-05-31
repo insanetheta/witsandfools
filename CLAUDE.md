@@ -64,6 +64,11 @@ _Add your build and test commands here_
 
 _Add a brief overview of your project architecture_
 
+## Unity MCP Rules
+
+### NEVER use System.Reflection in Unity_RunCommand
+When executing C# via `Unity_RunCommand`, **never** call methods that use `System.Reflection` internally (e.g., `Enum.GetValues()`, `Type.GetMethod()`, assembly scanning). Reflection calls inside `RunCommand` cause the MCP bridge to silently drop — console output disappears and the bridge disconnects, requiring a manual `/mcp` reconnect. Instead, call existing `[MenuItem]` methods via `Unity_ManageMenuItem`, or write non-reflective code in `RunCommand`.
+
 ## Conventions & Patterns
 
 ### UI Screen Registry Rule

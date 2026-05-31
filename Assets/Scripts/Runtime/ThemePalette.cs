@@ -244,7 +244,7 @@ namespace WitsAndFools
             AbilityType.FortifyPlus => DefColor,
             AbilityType.SecondWindPlus => UtilColor,
             AbilityType.HaymakerPlus => AtkColor,
-            AbilityType.RipostePlus => DefColor,
+            AbilityType.RipostePlus => AtkColor,
             AbilityType.DiplomacyPlus => DefColor,
             AbilityType.DoubleTroublePlus => AtkColor,
             AbilityType.SleightOfHandPlus => UtilColor,
