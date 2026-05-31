@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wits &amp; Fools &mdash; Master Game Design Document</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;700&display=swap');
+
+  :root {
+    --gold: #D4A843;
+    --gold-bright: #F5D076;
+    --gold-dim: #8B6914;
+    --parchment: #F2E8D5;
+    --ink: #12100E;
+    --ink-light: #1E1A16;
+    --wood: #3D2B1F;
+    --atk: #CC4444;
+    --def: #4488BB;
+    --util: #CC9933;
+    --passive: #55AA55;
+    --schemer-teal: #1A8A7A;
+    --schemer-glow: #2DD4BF;
+    --brute-red: #A83232;
+    --brute-glow: #EF4444;
+    --trickster-violet: #7C3AED;
+    --trickster-glow: #A78BFA;
+    --hoarder-amber: #B45309;
+    --hoarder-glow: #F59E0B;
+    --neutral-gray: #6B7280;
+    --neutral-glow: #9CA3AF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: var(--parchment);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ---- TOC SIDEBAR ---- */
+  .toc-toggle {
+    position: fixed; top: 1rem; left: 1rem; z-index: 1001;
+    background: rgba(18,16,14,0.95); border: 1px solid var(--gold-dim);
+    color: var(--gold); font-family: 'Cinzel', serif; font-size: 0.75rem;
+    padding: 0.5rem 0.8rem; cursor: pointer; border-radius: 4px;
+    letter-spacing: 0.1em; transition: all 0.3s;
+  }
+  .toc-toggle:hover { background: rgba(212,168,67,0.15); }
+  .toc-sidebar {
+    position: fixed; top: 0; left: -320px; width: 300px; height: 100vh;
+    background: rgba(18,16,14,0.98); border-right: 1px solid var(--gold-dim);
+    z-index: 1000; padding: 3.5rem 1.5rem 2rem; overflow-y: auto; transition: left 0.3s ease;
+  }
+  .toc-sidebar.open { left: 0; }
+  .toc-sidebar h3 {
+    font-family: 'Cinzel', serif; color: var(--gold); font-size: 0.9rem;
+    letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid var(--gold-dim);
+  }
+  .toc-sidebar a {
+    display: block; color: var(--parchment); text-decoration: none; font-size: 0.85rem;
+    padding: 0.35rem 0; opacity: 0.7; transition: all 0.2s;
+    border-left: 2px solid transparent; padding-left: 0.75rem;
+  }
+  .toc-sidebar a:hover { opacity: 1; color: var(--gold); border-left-color: var(--gold); }
+  .toc-sidebar a.toc-sub { padding-left: 1.5rem; font-size: 0.78rem; opacity: 0.5; }
+  .toc-sidebar a.toc-sub:hover { opacity: 0.9; }
+  .toc-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+  .toc-overlay.open { display: block; }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 60vh; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center;
+    background:
+      radial-gradient(ellipse 40% 60% at 20% 30%, rgba(26,138,122,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(168,50,50,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 35% 80%, rgba(124,58,237,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 65% 80%, rgba(180,83,9,0.06) 0%, transparent 70%),
+      var(--ink);
+    padding: 4rem 2rem; position: relative;
+  }
+  .hero h1 {
+    font-family: 'Cinzel', serif; font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900; color: var(--gold);
+    text-shadow: 0 0 60px rgba(212,168,67,0.25); line-height: 1.1;
+    margin-bottom: 0.5rem; position: relative; z-index: 1;
+  }
+  .hero h1 span {
+    display: block; font-size: 0.35em; font-weight: 400; color: var(--parchment);
+    letter-spacing: 0.15em; text-transform: uppercase; margin-top: 0.5rem;
+    text-shadow: none; opacity: 0.7;
+  }
+  .hero-badge {
+    display: inline-block; border: 1px solid var(--gold-dim); color: var(--gold);
+    font-family: 'Cinzel', serif; font-size: 0.7rem; letter-spacing: 0.3em;
+    text-transform: uppercase; padding: 0.4rem 1.5rem; margin-bottom: 2rem;
+    position: relative; z-index: 1;
+  }
+  .hero-tagline {
+    font-size: 1.3rem; font-style: italic; color: var(--gold-bright); opacity: 0.8;
+    max-width: 650px; margin: 1.5rem auto 2rem; position: relative; z-index: 1;
+  }
+  .hero-stats { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; margin: 2rem 0; position: relative; z-index: 1; }
+  .hero-stat { text-align: center; }
+  .hero-stat .num { font-family: 'Cinzel', serif; font-size: 2rem; font-weight: 700; color: var(--gold); }
+  .hero-stat .lbl { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; }
+
+  /* ---- LAYOUT ---- */
+  .content { max-width: 960px; margin: 0 auto; padding: 0 2rem 6rem; }
+  section { margin-bottom: 4rem; }
+  .section-rule { width: 120px; height: 1px; background: var(--gold-dim); margin: 3rem auto; }
+
+  h2 {
+    font-family: 'Cinzel', serif; font-size: 1.8rem; font-weight: 700;
+    color: var(--gold); letter-spacing: 0.05em; margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem; border-bottom: 1px solid rgba(212,168,67,0.2);
+  }
+  h3 {
+    font-family: 'Cinzel', serif; font-size: 1.2rem; font-weight: 600;
+    color: var(--gold-bright); margin: 2rem 0 0.75rem; letter-spacing: 0.03em;
+  }
+  h4 {
+    font-family: 'Cinzel', serif; font-size: 1rem; font-weight: 600;
+    color: var(--parchment); margin: 1.5rem 0 0.5rem; opacity: 0.9;
+  }
+  p { margin-bottom: 1rem; }
+  strong { color: var(--gold-bright); }
+  em { color: rgba(242,232,213,0.85); }
+
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.85em;
+    background: rgba(212,168,67,0.1); color: var(--gold-bright);
+    padding: 0.15em 0.4em; border-radius: 3px;
+  }
+
+  /* ---- TABLES ---- */
+  table {
+    width: 100%; border-collapse: collapse; margin: 1rem 0 2rem;
+    font-size: 0.95rem;
+  }
+  th {
+    font-family: 'Cinzel', serif; font-size: 0.75rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--gold); text-align: left;
+    padding: 0.6rem 0.8rem; border-bottom: 2px solid var(--gold-dim);
+    background: rgba(212,168,67,0.05);
+  }
+  td {
+    padding: 0.5rem 0.8rem; border-bottom: 1px solid rgba(212,168,67,0.08);
+    vertical-align: top;
+  }
+  tr:hover td { background: rgba(212,168,67,0.03); }
+
+  /* ---- CARDS / PANELS ---- */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin: 1.5rem 0; }
+  .card-panel {
+    background: rgba(30,26,22,0.8); border: 1px solid rgba(212,168,67,0.15);
+    border-radius: 8px; padding: 1.25rem; transition: border-color 0.3s;
+  }
+  .card-panel:hover { border-color: rgba(212,168,67,0.35); }
+  .card-panel h4 { margin-top: 0; }
+  .card-panel .tag {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem; letter-spacing: 0.08em; padding: 0.2rem 0.5rem;
+    border-radius: 3px; margin-right: 0.3rem; margin-bottom: 0.3rem;
+  }
+  .tag-atk { background: rgba(204,68,68,0.2); color: #CC4444; border: 1px solid rgba(204,68,68,0.3); }
+  .tag-def { background: rgba(68,136,187,0.2); color: #4488BB; border: 1px solid rgba(68,136,187,0.3); }
+  .tag-util { background: rgba(204,153,51,0.2); color: #CC9933; border: 1px solid rgba(204,153,51,0.3); }
+  .tag-passive { background: rgba(85,170,85,0.2); color: #55AA55; border: 1px solid rgba(85,170,85,0.3); }
+  .tag-rare { background: rgba(221,170,51,0.2); color: #DDAA33; border: 1px solid rgba(221,170,51,0.3); }
+  .tag-uncommon { background: rgba(170,187,204,0.2); color: #AABBCC; border: 1px solid rgba(170,187,204,0.3); }
+  .tag-common { background: rgba(170,136,85,0.2); color: #AA8855; border: 1px solid rgba(170,136,85,0.3); }
+
+  /* Doctrine accent bars */
+  .doctrine-schemer { border-left: 3px solid var(--schemer-glow); }
+  .doctrine-brute { border-left: 3px solid var(--brute-glow); }
+  .doctrine-trickster { border-left: 3px solid var(--trickster-glow); }
+  .doctrine-hoarder { border-left: 3px solid var(--hoarder-glow); }
+  .doctrine-neutral { border-left: 3px solid var(--neutral-glow); }
+
+  /* Lists */
+  ul, ol { margin: 0.5rem 0 1rem 1.5rem; }
+  li { margin-bottom: 0.3rem; }
+
+  /* Callout boxes */
+  .callout {
+    background: rgba(212,168,67,0.06); border-left: 3px solid var(--gold-dim);
+    padding: 1rem 1.25rem; margin: 1.5rem 0; border-radius: 0 6px 6px 0;
+    font-size: 0.95rem;
+  }
+  .callout-title {
+    font-family: 'Cinzel', serif; font-size: 0.8rem; color: var(--gold);
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem;
+  }
+
+  /* Flow diagrams (ASCII-style) */
+  .flow {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.8rem;
+    background: rgba(30,26,22,0.8); padding: 1.25rem; border-radius: 6px;
+    border: 1px solid rgba(212,168,67,0.1); overflow-x: auto;
+    white-space: pre; line-height: 1.8; margin: 1rem 0 2rem;
+    color: var(--parchment);
+  }
+  .flow .hl { color: var(--gold); }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .card-grid { grid-template-columns: 1fr; }
+    .hero-stats { gap: 1rem; }
+    .content { padding: 0 1rem 4rem; }
+    table { font-size: 0.8rem; }
+    th, td { padding: 0.4rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Table of Contents Toggle -->
+<button class="toc-toggle" onclick="document.querySelector('.toc-sidebar').classList.toggle('open'); document.querySelector('.toc-overlay').classList.toggle('open');">&#9776; Contents</button>
+<div class="toc-overlay" onclick="document.querySelector('.toc-sidebar').classList.remove('open'); this.classList.remove('open');"></div>
+<nav class="toc-sidebar">
+  <h3>Master GDD</h3>
+  <a href="#overview">Game Overview</a>
+  <a href="#core-loop" class="toc-sub">Core Loop</a>
+  <a href="#match">Match Rules</a>
+  <a href="#match-cards" class="toc-sub">Cards &amp; Suits</a>
+  <a href="#match-attack" class="toc-sub">Attack &amp; Defense</a>
+  <a href="#match-trump" class="toc-sub">Trump</a>
+  <a href="#match-eating" class="toc-sub">Eating</a>
+  <a href="#match-resources" class="toc-sub">Resources</a>
+  <a href="#match-phases" class="toc-sub">Bout Phases</a>
+  <a href="#archetypes">Archetypes</a>
+  <a href="#arch-rogue" class="toc-sub">The Rogue</a>
+  <a href="#arch-brute" class="toc-sub">The Brute</a>
+  <a href="#arch-diplomat" class="toc-sub">The Diplomat</a>
+  <a href="#arch-gambler" class="toc-sub">The Gambler</a>
+  <a href="#abilities">Abilities</a>
+  <a href="#ab-core" class="toc-sub">Core Abilities</a>
+  <a href="#ab-rogue" class="toc-sub">Rogue Abilities</a>
+  <a href="#ab-brute" class="toc-sub">Brute Abilities</a>
+  <a href="#ab-diplomat" class="toc-sub">Diplomat Abilities</a>
+  <a href="#ab-gambler" class="toc-sub">Gambler Abilities</a>
+  <a href="#ab-neutral" class="toc-sub">Neutral &amp; Doctrine</a>
+  <a href="#ab-upgrades" class="toc-sub">Upgrades</a>
+  <a href="#cards">Card Catalog</a>
+  <a href="#doctrines" class="toc-sub">Doctrines</a>
+  <a href="#trinkets">Trinkets</a>
+  <a href="#relics">Relics</a>
+  <a href="#burdens">Burdens</a>
+  <a href="#run-loop">Run Structure</a>
+  <a href="#map" class="toc-sub">Map Generation</a>
+  <a href="#economy" class="toc-sub">Economy</a>
+  <a href="#prestige" class="toc-sub">Prestige</a>
+  <a href="#post-match" class="toc-sub">Post-Match Flow</a>
+  <a href="#shop" class="toc-sub">Shop</a>
+  <a href="#rest" class="toc-sub">Rest Sites</a>
+  <a href="#rumors" class="toc-sub">Rumors / Events</a>
+  <a href="#opponents">Opponents &amp; AI</a>
+  <a href="#ai-arch" class="toc-sub">AI Archetypes</a>
+  <a href="#house-rules" class="toc-sub">House Rules</a>
+  <a href="#ascension">Ascension</a>
+  <a href="#reputation">Reputation &amp; Unlocks</a>
+  <a href="#visual">Visual Design</a>
+  <a href="#venues" class="toc-sub">Venues</a>
+  <a href="#code-ref">Code Reference</a>
+</nav>
+
+<!-- ==================== HERO ==================== -->
+<header class="hero">
+  <div class="hero-badge">Master Game Design Document</div>
+  <h1>Wits &amp; Fools<span>A Roguelike Card Game of Cunning &amp; Chance</span></h1>
+  <p class="hero-tagline">"In the candlelit salons of Renaissance Italy, fortunes are won and lost with every card."</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">85</div><div class="lbl">Abilities</div></div>
+    <div class="hero-stat"><div class="num">95</div><div class="lbl">Cards</div></div>
+    <div class="hero-stat"><div class="num">25</div><div class="lbl">Trinkets</div></div>
+    <div class="hero-stat"><div class="num">34</div><div class="lbl">Relics</div></div>
+    <div class="hero-stat"><div class="num">4</div><div class="lbl">Archetypes</div></div>
+    <div class="hero-stat"><div class="num">5</div><div class="lbl">Acts</div></div>
+    <div class="hero-stat"><div class="num">10</div><div class="lbl">Ascension Levels</div></div>
+  </div>
+</header>
+
+<div class="content">
+
+<!-- ==================== OVERVIEW ==================== -->
+<section id="overview">
+  <h2>Game Overview</h2>
+  <p><strong>Wits &amp; Fools</strong> is a single-player roguelike card game set in Renaissance Italy. The player selects an archetype, then travels a branching map through five increasingly prestigious venues, playing Durak-variant card matches against colorful opponents. Between matches, the player builds a deck, acquires abilities and trinkets, and manages an economy of Florins and Prestige.</p>
+
+  <p>The card game core is derived from <strong>Durak</strong> (Russian "fool"), where the attacker plays cards and the defender must beat each attack with a higher card of the same suit or any trump card. The defender can choose to "eat" (accept) attacks rather than defend them, adding those cards to their hand. The first player to empty their hand (when the draw deck is exhausted) wins.</p>
+
+  <h3 id="core-loop">Core Loop</h3>
+  <div class="flow">
+<span class="hl">SELECT ARCHETYPE</span> &rarr; <span class="hl">MAP</span> &rarr; Choose Node &rarr; [Match / Shop / Rest / Rumor]
+        &darr;                                     &darr;
+    3 starting abilities              <span class="hl">MATCH WON</span> &rarr; Card Reward &rarr; Ability Pick &rarr; Relic Pick (elite/boss)
+    1 starting trinket                     &darr;
+    archetype perk                   <span class="hl">MATCH LOST</span> &rarr; Lose Prestige &rarr; Gain Burden &rarr; (Prestige 0 = Run Over)
+                                           &darr;
+                                     <span class="hl">ACT COMPLETE</span> &rarr; Next Venue &rarr; Harder Opponents
+                                           &darr;
+                                     <span class="hl">ACT 5 BOSS</span> &rarr; The Champion &rarr; Run Won!</div>
+
+  <div class="callout">
+    <div class="callout-title">Source of Truth</div>
+    This document is auto-generated from the codebase. All values, constants, and mechanics reflect the current implementation. When code and this document disagree, the code wins &mdash; then update this document.
+  </div>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== MATCH RULES ==================== -->
+<section id="match">
+  <h2>Match Rules</h2>
+
+  <h3 id="match-cards">Cards &amp; Suits</h3>
+  <p>Matches use a standard 36-card deck (6 through Ace in four suits). Each player has their own deck; per-player dual-deck mode is the current standard.</p>
+
+  <table>
+    <tr><th>Rank</th><th>Value</th><th>Suit</th><th>Color</th></tr>
+    <tr><td>Six</td><td>6</td><td>Hearts &hearts;</td><td style="color:#C02020">Red</td></tr>
+    <tr><td>Seven</td><td>7</td><td>Diamonds &diams;</td><td style="color:#C02020">Red</td></tr>
+    <tr><td>Eight</td><td>8</td><td>Clubs &clubs;</td><td>Black</td></tr>
+    <tr><td>Nine</td><td>9</td><td>Spades &spades;</td><td>Black</td></tr>
+    <tr><td>Ten</td><td>10</td><td colspan="2" rowspan="5" style="vertical-align:middle; text-align:center; opacity:0.5"><em>Each rank exists once per suit = 36 cards</em></td></tr>
+    <tr><td>Jack</td><td>11</td></tr>
+    <tr><td>Queen</td><td>12</td></tr>
+    <tr><td>King</td><td>13</td></tr>
+    <tr><td>Ace</td><td>14 (highest)</td></tr>
+  </table>
+
+  <table>
+    <tr><th>Constant</th><th>Value</th><th>Description</th></tr>
+    <tr><td><code>HandSizeTwoPlayer</code></td><td>6</td><td>Cards dealt to each player at start</td></tr>
+    <tr><td><code>MaxAttacksPerBout</code></td><td>6</td><td>Maximum attack cards per bout</td></tr>
+    <tr><td><code>MaxResource</code></td><td>5</td><td>Cap on resource points</td></tr>
+  </table>
+
+  <h3 id="match-attack">Attack &amp; Defense</h3>
+  <p>A match consists of multiple <strong>bouts</strong>. Each bout, one player attacks and the other defends. Players alternate as attacker each bout.</p>
+
+  <h4>Attack Rules</h4>
+  <ul>
+    <li>First attack card in a bout: <strong>any card</strong> is legal</li>
+    <li>Follow-up attacks: card rank must match a rank already in play (on the table)</li>
+    <li>Attacker can stop attacking at any point (voluntarily ending the bout)</li>
+    <li>Maximum 6 attacks per bout (increased by <code>PileOn</code> ability and <code>RelentlessAssault</code> ascension)</li>
+    <li><strong>Duelist's Glove</strong> trinket: first attack ignores rank-match restriction</li>
+    <li><strong>DoubleTrouble</strong> ability: bypass rank-match for one attack</li>
+    <li><strong>AnyRankAttack</strong> house rule: disables rank-match entirely</li>
+  </ul>
+
+  <h4>Defense Rules</h4>
+  <ul>
+    <li>Defender must play a card that <strong>beats</strong> the attack card</li>
+    <li>Same suit: higher rank wins (e.g., 8&hearts; beats 7&hearts;)</li>
+    <li>Trump suit: any trump beats any non-trump (e.g., 6&spades; trump beats Ace&hearts; non-trump)</li>
+    <li>Trump vs trump: higher rank wins normally</li>
+    <li><strong>EndgameSpecialist</strong> passive: when deck &le; 6 cards, defend with any suit</li>
+    <li><strong>HereticsBrand</strong> trinket: opponent's trump treated as 1 rank lower</li>
+  </ul>
+
+  <h3 id="match-trump">Trump Suit</h3>
+  <p>One suit is designated <strong>trump</strong> at the start of each match (random unless overridden). Trump cards beat all non-trump cards regardless of rank.</p>
+  <ul>
+    <li><strong>TrumpChanger</strong> ability: change trump suit once per game</li>
+    <li><strong>CrownSeize</strong> ability (3 Fury): change trump and draw 2 cards</li>
+    <li><strong>AlchemistsStone</strong> trinket: choose trump suit at match start</li>
+    <li><strong>NoTrumpsUntilBout</strong> house rule: restricts trump attacks until specified bout number</li>
+    <li><strong>GracefulManners</strong> passive: gain 2 resource when trump changes</li>
+    <li><strong>TrumpAffinity</strong> passive: draw extra card when drawing trump cards</li>
+  </ul>
+
+  <h3 id="match-eating">Eating (Accepting Attacks)</h3>
+  <p>Instead of defending, the defender can <strong>eat</strong> all undefended attack cards, adding them to their hand. This ends the bout.</p>
+  <ul>
+    <li>All undefended cards go into the defender's hand</li>
+    <li><strong>PoisonedWine</strong> trinket: when opponent eats, they draw 2 extra cards</li>
+    <li><strong>EatDrawsExtra</strong> house rule: eating draws 2 extra cards</li>
+    <li><strong>ThickSkin</strong> passive: eater draws 1 extra card</li>
+    <li><strong>Bloodlust</strong> passive: attacker gains 1 Fury per card eaten by opponent</li>
+    <li><strong>BruteFury</strong> perk: attacker draws 1 and gains 1 Fury when opponent eats</li>
+    <li><strong>GracefulRetreat</strong> passive: eat first card to discard pile instead of hand</li>
+    <li><strong>LuckyDraw</strong> perk: after eating, discard worst card (once per match)</li>
+    <li><strong>DesperationDiscard</strong>: if hand &ge; 10 after eating, discard 2 worst cards and gain 1 resource</li>
+  </ul>
+
+  <h3 id="match-resources">Resource System</h3>
+  <p>Each archetype has a unique resource type used to power abilities:</p>
+  <table>
+    <tr><th>Resource</th><th>Archetype</th><th>Color</th><th>Decay Rule</th></tr>
+    <tr><td>Intel</td><td>Rogue</td><td style="color:#8AAEBC">#8AAEBC</td><td>Decays per Rogue behavior</td></tr>
+    <tr><td>Fury</td><td>Brute</td><td style="color:#D4735A">#D4735A</td><td>No decay</td></tr>
+    <tr><td>Favor</td><td>Diplomat</td><td style="color:#D4A846">#D4A846</td><td>Decay 1 if ability NOT used</td></tr>
+    <tr><td>Luck</td><td>Gambler</td><td style="color:#A3B86C">#A3B86C</td><td>Decay 1 if ability NOT used</td></tr>
+  </table>
+  <ul>
+    <li>Maximum resource cap: <strong>5</strong></li>
+    <li><strong>CatalystGem</strong> trinket: gain +1 resource when ability activated</li>
+    <li><strong>ResourceGain</strong> ability: gain 1 resource (or draw 1 if at cap)</li>
+    <li><strong>EmpoweredFoeBonus</strong> ascension: opponent starts with +1 resource</li>
+  </ul>
+
+  <h3 id="match-phases">Bout Flow</h3>
+  <div class="flow">
+<span class="hl">SETUP</span> &rarr; Draw hands (6 cards each) &rarr; Set trump suit
+   &darr;
+<span class="hl">BOUT START</span> &rarr; Passive triggers (Equilibrium, SteadyHand, SharkInstinct, MarkedCards)
+   &darr;
+<span class="hl">ATTACK PHASE</span> &rarr; Attacker plays card(s) &rarr; Triggers fire (OnAttack abilities)
+   &darr;
+<span class="hl">DEFENSE PHASE</span> &rarr; Defender plays card or eats &rarr; Triggers fire (OnDefend abilities)
+   &darr;
+<span class="hl">RESOLVING</span> &rarr; Bout outcome determined &rarr; Cards discarded or eaten
+   &darr;                                     &darr;
+   &darr;                              Resource decay applied
+   &darr;                              Both draw back to hand size
+   &darr;
+<span class="hl">NEXT BOUT</span> &rarr; Attacker/Defender swap &rarr; Repeat until...
+   &darr;
+<span class="hl">GAME OVER</span> &rarr; First player to empty hand (with empty deck) wins</div>
+
+  <div class="callout">
+    <div class="callout-title">Win Condition</div>
+    The game ends when the draw decks are exhausted and one player empties their hand. That player wins. The loser (the "fool") is the one left holding cards.
+  </div>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== ARCHETYPES ==================== -->
+<section id="archetypes">
+  <h2>Archetypes</h2>
+  <p>Four playable archetypes, each with unique starting abilities, a trinket, an archetype perk, and three build paths of specialized abilities.</p>
+
+  <div class="card-grid">
+    <!-- Rogue -->
+    <div class="card-panel doctrine-schemer" id="arch-rogue">
+      <h4>The Rogue</h4>
+      <p><span class="tag tag-def">Intel</span><span class="tag tag-common">Unlock: Free</span></p>
+      <p><strong>Starting Abilities:</strong> Blocker, Seize Initiative, Peek</p>
+      <p><strong>Starting Trinket:</strong> Spy's Monocle</p>
+      <p><strong>Perk &mdash; Shadow Reflexes:</strong> First successful defense each bout draws 1 card &amp; gains 1 Intel</p>
+      <p><strong>Build Paths:</strong> Shadow, Spy, Saboteur</p>
+      <p><em>"Reactive and information-focused. Defends well, then seizes the moment."</em></p>
+    </div>
+
+    <!-- Brute -->
+    <div class="card-panel doctrine-brute" id="arch-brute">
+      <h4>The Brute</h4>
+      <p><span class="tag tag-atk">Fury</span><span class="tag tag-uncommon">Unlock: 25 Rep</span></p>
+      <p><strong>Starting Abilities:</strong> Double Trouble, Pile On, Extra Draw</p>
+      <p><strong>Starting Trinket:</strong> Duelist's Glove</p>
+      <p><strong>Perk &mdash; Fury:</strong> When opponent eats attacks, draw 1 extra card</p>
+      <p><strong>Build Paths:</strong> Berserker, Brawler, Warlord</p>
+      <p><em>"Aggressive overwhelm. Pile attacks high and draw deep."</em></p>
+    </div>
+
+    <!-- Diplomat -->
+    <div class="card-panel doctrine-trickster" id="arch-diplomat">
+      <h4>The Diplomat</h4>
+      <p><span class="tag tag-util">Favor</span><span class="tag tag-rare">Unlock: 100 Rep</span></p>
+      <p><strong>Starting Abilities:</strong> Trump Changer, Deflect, Diplomacy</p>
+      <p><strong>Starting Trinket:</strong> Courtier's Fan</p>
+      <p><strong>Perk &mdash; Court Favor:</strong> At each bout start (deck &ge; 4), better of top 2 deck cards rises to top</p>
+      <p><strong>Build Paths:</strong> Courtier, Puppeteer, Peacemaker</p>
+      <p><em>"Redirection and trump control. Bend the rules in your favor."</em></p>
+    </div>
+
+    <!-- Gambler -->
+    <div class="card-panel doctrine-hoarder" id="arch-gambler">
+      <h4>The Gambler</h4>
+      <p><span class="tag tag-passive">Luck</span><span class="tag tag-rare">Unlock: 300 Rep</span></p>
+      <p><strong>Starting Abilities:</strong> Gambit, Feint, Card Counter</p>
+      <p><strong>Starting Trinket:</strong> Loaded Dice</p>
+      <p><strong>Perk &mdash; Lucky Draw:</strong> Once per match after eating, discard worst card</p>
+      <p><strong>Build Paths:</strong> Card Shark, High Roller, Trickster</p>
+      <p><em>"High risk, high reward. Bluff, feint, and read the table."</em></p>
+    </div>
+  </div>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== ABILITIES ==================== -->
+<section id="abilities">
+  <h2>Abilities (85 Total)</h2>
+  <p>Abilities bind to specific cards in your deck. When you play that card, the ability triggers. Active abilities cost resources; passive abilities are always on. Ability types are color-coded:</p>
+  <p>
+    <span class="tag tag-atk">Attack</span>
+    <span class="tag tag-def">Defense</span>
+    <span class="tag tag-util">Utility</span>
+    <span class="tag tag-passive">Passive</span>
+  </p>
+
+  <h3 id="ab-core">Core Abilities (16)</h3>
+  <p>Available to all archetypes. These form the foundation of the ability system.</p>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Trump Changer</td><td><span class="tag tag-util">Util</span></td><td>0</td><td>Change trump suit to this card's suit (once per game)</td></tr>
+    <tr><td>Extra Draw</td><td><span class="tag tag-util">Util</span></td><td>0</td><td>Draw 2 extra cards from deck</td></tr>
+    <tr><td>Blocker</td><td><span class="tag tag-def">Def</span></td><td>0</td><td>Auto-defend one attack with this card</td></tr>
+    <tr><td>Double Trouble</td><td><span class="tag tag-atk">Atk</span></td><td>0</td><td>Attack ignores rank-match restriction</td></tr>
+    <tr><td>Double Defense</td><td><span class="tag tag-def">Def</span></td><td>0</td><td>This card defends two attacks simultaneously</td></tr>
+    <tr><td>Seize Initiative</td><td><span class="tag tag-util">Util</span></td><td>0</td><td>Swap attacker/defender mid-bout</td></tr>
+    <tr><td>Pile On</td><td><span class="tag tag-atk">Atk</span></td><td>0</td><td>Increase max attacks this bout by 2</td></tr>
+    <tr><td>Feint</td><td><span class="tag tag-atk">Atk</span></td><td>0</td><td>Retract last attack, opponent discards their defense</td></tr>
+    <tr><td>Deflect</td><td><span class="tag tag-def">Def</span></td><td>0</td><td>Redirect attack back to attacker</td></tr>
+    <tr><td>Slip Away</td><td><span class="tag tag-def">Def</span></td><td>0</td><td>Discard this card to end the bout</td></tr>
+    <tr><td>Peek</td><td><span class="tag tag-util">Util</span></td><td>0</td><td>Reveal and rearrange the top 3 deck cards</td></tr>
+    <tr><td>Gambit</td><td><span class="tag tag-util">Util</span></td><td>0</td><td>Discard this card, draw 2 from deck</td></tr>
+    <tr><td>Trump Affinity</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Draw extra card when drawing trump cards</td></tr>
+    <tr><td>Endgame Specialist</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>When deck &le; 6, defend with any suit</td></tr>
+    <tr><td>Card Counter</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>See cards remaining per suit in deck</td></tr>
+    <tr><td>Quick Hands</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Draw 1 extra card during refill</td></tr>
+  </table>
+
+  <h3 id="ab-rogue">Rogue Abilities</h3>
+
+  <h4>Shadow Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Riposte</td><td><span class="tag tag-atk">Atk</span></td><td>1 Intel</td><td>After successful defense, opponent discards 1 random card</td></tr>
+    <tr><td>Shadow Cloak</td><td><span class="tag tag-def">Def</span></td><td>1 Intel</td><td>Reduce max attacks this bout by 2</td></tr>
+    <tr><td>Patience Rewarded</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>After defending all attacks, gain 2 Intel</td></tr>
+  </table>
+
+  <h4>Spy Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Wiretap</td><td><span class="tag tag-util">Util</span></td><td>1 Intel</td><td>Rearrange the top 5 cards of your deck</td></tr>
+    <tr><td>Marked Cards</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Gain 1 Intel at the start of each bout</td></tr>
+    <tr><td>Double Agent</td><td><span class="tag tag-atk">Atk</span></td><td>3 Intel</td><td>Steal 1 random card from opponent's hand</td></tr>
+    <tr><td>Blackmail</td><td><span class="tag tag-atk">Atk</span></td><td>2 Intel</td><td>Opponent discards their 2 highest-rank cards</td></tr>
+  </table>
+
+  <h4>Saboteur Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Sleight of Hand</td><td><span class="tag tag-util">Util</span></td><td>1 Intel</td><td>Draw 1 card, put worst card on top of opponent's deck</td></tr>
+    <tr><td>Smoke Bomb</td><td><span class="tag tag-def">Def</span></td><td>1 Intel</td><td>End the bout immediately, no resolution</td></tr>
+    <tr><td>Trap Card</td><td><span class="tag tag-atk">Atk</span></td><td>1 Intel</td><td>Draw 1, bury opponent's worst card to bottom of their deck</td></tr>
+    <tr><td>Undermine</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Opponent discards 1 extra card when using abilities</td></tr>
+  </table>
+
+  <h3 id="ab-brute">Brute Abilities</h3>
+
+  <h4>Berserker Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Rampage</td><td><span class="tag tag-atk">Atk</span></td><td>1 Fury</td><td>Play the top 2 cards of your deck as attacks</td></tr>
+    <tr><td>Bloodlust</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Gain 1 Fury for each card the opponent eats</td></tr>
+  </table>
+
+  <h4>Brawler Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Haymaker</td><td><span class="tag tag-util">Util</span></td><td>1 Fury</td><td>Draw 2 cards from deck</td></tr>
+    <tr><td>Iron Grip</td><td><span class="tag tag-util">Util</span></td><td>1 Fury</td><td>Draw 3 cards from deck</td></tr>
+    <tr><td>Brawl</td><td><span class="tag tag-atk">Atk</span></td><td>2 Fury</td><td>Both players discard hands and draw 6 new cards</td></tr>
+    <tr><td>Thick Skin</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Draw 1 extra card when eating attacks</td></tr>
+  </table>
+
+  <h4>Warlord Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Conquer</td><td><span class="tag tag-atk">Atk</span></td><td>1 Fury</td><td>Draw 1 card (+1 if trump)</td></tr>
+    <tr><td>Intimidate</td><td><span class="tag tag-atk">Atk</span></td><td>1 Fury</td><td>Opponent discards 1 non-trump card</td></tr>
+    <tr><td>Crown Seize</td><td><span class="tag tag-atk">Atk</span></td><td>3 Fury</td><td>Change trump suit and draw 2 cards</td></tr>
+    <tr><td>Battle Hardened</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Gain 1 Fury per trump attack played</td></tr>
+  </table>
+
+  <h3 id="ab-diplomat">Diplomat Abilities</h3>
+
+  <h4>Courtier Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Court Intrigue</td><td><span class="tag tag-util">Util</span></td><td>1 Favor</td><td>Rearrange top 3 deck cards, draw 1</td></tr>
+    <tr><td>Royal Decree</td><td><span class="tag tag-util">Util</span></td><td>1 Favor</td><td>Draw 2, opponent discards 1</td></tr>
+    <tr><td>Patronage</td><td><span class="tag tag-util">Util</span></td><td>3 Favor</td><td>Draw 3 cards</td></tr>
+    <tr><td>Graceful Manners</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Gain 2 Favor when trump suit changes</td></tr>
+  </table>
+
+  <h4>Puppeteer Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Pull Strings</td><td><span class="tag tag-atk">Atk</span></td><td>1 Favor</td><td>Opponent discards 2 cards</td></tr>
+    <tr><td>Misdirection</td><td><span class="tag tag-def">Def</span></td><td>1 Favor</td><td>Cap max attacks, opponent discards 1</td></tr>
+    <tr><td>Forced Hand</td><td><span class="tag tag-atk">Atk</span></td><td>2 Favor</td><td>Opponent discards their highest-rank card</td></tr>
+    <tr><td>Web of Lies</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Gain 1 Favor when opponent uses an ability</td></tr>
+  </table>
+
+  <h4>Peacemaker Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Diplomacy</td><td><span class="tag tag-def">Def</span></td><td>1 Favor</td><td>End bout immediately, draw 1 card</td></tr>
+    <tr><td>Safe Passage</td><td><span class="tag tag-def">Def</span></td><td>2 Favor</td><td>Auto-defend all attacks this bout</td></tr>
+    <tr><td>Treaty</td><td><span class="tag tag-def">Def</span></td><td>3 Favor</td><td>Both players draw up to 6 cards</td></tr>
+    <tr><td>Graceful Retreat</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>When eating, first card goes to discard instead of hand</td></tr>
+    <tr><td>Equilibrium</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>At bout start, if opponent has more cards, draw 1</td></tr>
+  </table>
+
+  <h3 id="ab-gambler">Gambler Abilities</h3>
+
+  <h4>Card Shark Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Stack the Deck</td><td><span class="tag tag-util">Util</span></td><td>1 Luck</td><td>Put worst card on top of deck, draw 2</td></tr>
+    <tr><td>Second Deal</td><td><span class="tag tag-util">Util</span></td><td>1 Luck</td><td>Draw 2, put worst on bottom of deck</td></tr>
+    <tr><td>Cold Read</td><td><span class="tag tag-util">Util</span></td><td>2 Luck</td><td>Draw 3, put worst on top of opponent's deck</td></tr>
+    <tr><td>Shark Instinct</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Gain 1 Luck at the start of each bout</td></tr>
+  </table>
+
+  <h4>High Roller Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>All In</td><td><span class="tag tag-util">Util</span></td><td>All Luck</td><td>Spend all Luck, draw that many cards</td></tr>
+    <tr><td>Double or Nothing</td><td><span class="tag tag-util">Util</span></td><td>1 Luck</td><td>Draw 2, discard lowest-rank card</td></tr>
+    <tr><td>Lucky Streak</td><td><span class="tag tag-atk">Atk</span></td><td>2 Luck</td><td>Play top deck card as attack (+1 extra if trump)</td></tr>
+    <tr><td>Jackpot</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>After defending all attacks in a bout, gain 2 Luck</td></tr>
+  </table>
+
+  <h4>Trickster Path</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Blind Swap</td><td><span class="tag tag-util">Util</span></td><td>1 Luck</td><td>Swap 1 random card with opponent</td></tr>
+    <tr><td>Misdeal</td><td><span class="tag tag-def">Def</span></td><td>1 Luck</td><td>Shuffle all attacks back into deck, end bout</td></tr>
+    <tr><td>Wild Card</td><td><span class="tag tag-util">Util</span></td><td>2 Luck</td><td>Take the last discarded card into your hand</td></tr>
+    <tr><td>Sleight of Mind</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>Draw 1 card after using any active ability</td></tr>
+    <tr><td>Chaotic Nature</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>50% chance ability card returns to hand instead of discard</td></tr>
+  </table>
+
+  <h3 id="ab-neutral">Neutral &amp; Doctrine Abilities</h3>
+
+  <h4>Neutral (Available to all)</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Fortify</td><td><span class="tag tag-def">Def</span></td><td>0</td><td>Auto-defend 1 attack</td></tr>
+    <tr><td>Second Wind</td><td><span class="tag tag-util">Util</span></td><td>0</td><td>Discard 2 cards, draw 3</td></tr>
+    <tr><td>Brace</td><td><span class="tag tag-def">Def</span></td><td>0</td><td>Draw 2 cards immediately</td></tr>
+    <tr><td>Desperation</td><td><span class="tag tag-def">Def</span></td><td>0</td><td>Discard entire hand, auto-defend all attacks, draw 4</td></tr>
+    <tr><td>Steady Hand</td><td><span class="tag tag-passive">Passive</span></td><td>&mdash;</td><td>At bout start, if &le; 3 cards in hand, draw 1</td></tr>
+  </table>
+
+  <h4>Doctrine Ultimates</h4>
+  <table>
+    <tr><th>Ability</th><th>Type</th><th>Cost</th><th>Effect</th></tr>
+    <tr><td>Masterstroke</td><td><span class="tag tag-atk">Atk</span></td><td>4 Intel</td><td>Opponent discards 2 highest cards, you draw 1</td></tr>
+    <tr><td>Onslaught</td><td><span class="tag tag-atk">Atk</span></td><td>3 Fury</td><td>Play top 3 deck cards as attacks</td></tr>
+    <tr><td>Masquerade</td><td><span class="tag tag-def">Def</span></td><td>2 Favor</td><td>Swap hands with opponent</td></tr>
+    <tr><td>Monopoly</td><td><span class="tag tag-util">Util</span></td><td>2 Luck</td><td>Draw to 7 cards, opponent down to 5</td></tr>
+    <tr><td>Resource Gain</td><td><span class="tag tag-util">Util</span></td><td>0</td><td>Gain 1 resource (or draw 1 if at cap)</td></tr>
+  </table>
+
+  <h3 id="ab-upgrades">Upgraded Abilities (12 "Plus" Variants)</h3>
+  <p>Certain abilities can be upgraded at rest sites or through events. Upgraded versions have enhanced effects.</p>
+  <table>
+    <tr><th>Base</th><th>Upgraded</th><th>Enhancement</th></tr>
+    <tr><td>Brace</td><td>Brace+</td><td>Draw 3 instead of 2</td></tr>
+    <tr><td>Extra Draw</td><td>Extra Draw+</td><td>Draw 3 instead of 2</td></tr>
+    <tr><td>Pile On</td><td>Pile On+</td><td>+3 max attacks instead of +2</td></tr>
+    <tr><td>Peek</td><td>Peek+</td><td>See top 5 instead of 3</td></tr>
+    <tr><td>Blocker</td><td>Blocker+</td><td>Auto-defend 2 attacks</td></tr>
+    <tr><td>Fortify</td><td>Fortify+</td><td>Auto-defend 2 attacks</td></tr>
+    <tr><td>Second Wind</td><td>Second Wind+</td><td>Draw 4 instead of 3</td></tr>
+    <tr><td>Haymaker</td><td>Haymaker+</td><td>Draw 3 instead of 2</td></tr>
+    <tr><td>Riposte</td><td>Riposte+</td><td>Opponent discards 2 instead of 1</td></tr>
+    <tr><td>Diplomacy</td><td>Diplomacy+</td><td>Draw 2 instead of 1</td></tr>
+    <tr><td>Double Trouble</td><td>Double Trouble+</td><td>Play 2 rank-ignoring attacks</td></tr>
+    <tr><td>Sleight of Hand</td><td>Sleight of Hand+</td><td>Draw 2 instead of 1</td></tr>
+  </table>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== CARD CATALOG ==================== -->
+<section id="cards">
+  <h2>Card Catalog (95 Cards)</h2>
+  <p>The card catalog defines named cards with abilities, flavor text, and doctrine alignment. Cards are organized by 5 doctrines. Each card has: <code>Id</code>, <code>Name</code>, <code>Suit</code>, <code>Rank</code>, <code>Doctrine</code>, <code>Trigger</code> (OnAttack/OnDefend/Passive), <code>AbilityText</code>, <code>FlavorText</code>, <code>Rarity</code>, <code>InStartingDeck</code>.</p>
+
+  <h3 id="doctrines">Doctrines</h3>
+  <div class="card-grid">
+    <div class="card-panel doctrine-schemer">
+      <h4 style="color:var(--schemer-glow)">Schemer</h4>
+      <p><em>"Knowledge is the sharpest blade."</em></p>
+      <p>Maps to: Rogue archetype</p>
+      <p>Resource: Intel</p>
+      <p>Color: <code>#2DD4BF</code></p>
+    </div>
+    <div class="card-panel doctrine-brute">
+      <h4 style="color:var(--brute-glow)">Brute</h4>
+      <p><em>"Overwhelming force needs no subtlety."</em></p>
+      <p>Maps to: Brute archetype</p>
+      <p>Resource: Fury</p>
+      <p>Color: <code>#EF4444</code></p>
+    </div>
+    <div class="card-panel doctrine-trickster">
+      <h4 style="color:var(--trickster-glow)">Trickster</h4>
+      <p><em>"The rules are just suggestions."</em></p>
+      <p>Maps to: Diplomat archetype</p>
+      <p>Resource: Favor</p>
+      <p>Color: <code>#A78BFA</code></p>
+    </div>
+    <div class="card-panel doctrine-hoarder">
+      <h4 style="color:var(--hoarder-glow)">Hoarder</h4>
+      <p><em>"The one with the most cards wins... eventually."</em></p>
+      <p>Maps to: Gambler archetype</p>
+      <p>Resource: Luck</p>
+      <p>Color: <code>#F59E0B</code></p>
+    </div>
+    <div class="card-panel doctrine-neutral">
+      <h4 style="color:var(--neutral-glow)">Neutral</h4>
+      <p>Available to all archetypes</p>
+      <p>No specific resource</p>
+      <p>Color: <code>#9CA3AF</code></p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-title">Card Data Source</div>
+    Full card definitions live in <code>Assets/Data/card_catalog.json</code> (95 entries). Runtime access via <code>CardCatalog.Get(id)</code>, <code>CardCatalog.ForDoctrine()</code>, <code>CardCatalog.StartingDeck()</code>, <code>CardCatalog.Draftable()</code>.
+  </div>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== TRINKETS ==================== -->
+<section id="trinkets">
+  <h2>Trinkets (25)</h2>
+  <p>Persistent items that modify match mechanics. Max 5 per run. Acquired from archetype selection, shops, and events.</p>
+
+  <h3>Starting Trinkets</h3>
+  <table>
+    <tr><th>Trinket</th><th>Archetype</th><th>Effect</th></tr>
+    <tr><td>Spy's Monocle</td><td>Rogue</td><td>See top card of your deck at all times</td></tr>
+    <tr><td>Duelist's Glove</td><td>Brute</td><td>First attack each bout ignores rank-match restriction</td></tr>
+    <tr><td>Courtier's Fan</td><td>Diplomat</td><td>Once per match, draw 1 fewer card during refill</td></tr>
+    <tr><td>Loaded Dice</td><td>Gambler</td><td>Peek/rearrange bottom 3 deck cards at match start</td></tr>
+  </table>
+
+  <h3>Economy Trinkets</h3>
+  <table>
+    <tr><th>Trinket</th><th>Effect</th></tr>
+    <tr><td>Merchant's Purse</td><td>+3 Florins per match win</td></tr>
+    <tr><td>Miser's Ring</td><td>+1 Florin per bout successfully defended</td></tr>
+    <tr><td>Devil's Bargain</td><td>At match start: +3 Florins OR start with 1 fewer card</td></tr>
+  </table>
+
+  <h3>Hand/Deck Trinkets</h3>
+  <table>
+    <tr><th>Trinket</th><th>Effect</th></tr>
+    <tr><td>Tailor's Thimble</td><td>Starting hand 5 instead of 6</td></tr>
+    <tr><td>Juggler's Balls</td><td>After bout 1, discard 1 card for free</td></tr>
+    <tr><td>Fool's Gold</td><td>Start each match with temporary 7 of any suit</td></tr>
+    <tr><td>Marked Deck</td><td>At match start, reveal 3 random opponent hand cards</td></tr>
+    <tr><td>Quicksilver Vial</td><td>Once per match, use ability without discarding card</td></tr>
+  </table>
+
+  <h3>Combat Trinkets</h3>
+  <table>
+    <tr><th>Trinket</th><th>Effect</th></tr>
+    <tr><td>Shield Brooch</td><td>Once per match, auto-beat first undefended attack</td></tr>
+    <tr><td>Poisoned Wine</td><td>Opponent draws 2 extra when eating your attacks</td></tr>
+    <tr><td>Heretic's Brand</td><td>Opponent's trump cards treated as 1 rank lower</td></tr>
+    <tr><td>Crown of Thorns</td><td>Trump cards in defense count for next bout rank-match</td></tr>
+    <tr><td>Razor's Edge</td><td>Your attacks have +1 effective rank</td></tr>
+  </table>
+
+  <h3>Engine Trinkets</h3>
+  <table>
+    <tr><th>Trinket</th><th>Effect</th></tr>
+    <tr><td>Scholar's Tome</td><td>+1 ability slot</td></tr>
+    <tr><td>Forger's Kit</td><td>Abilities that bind to 1 card bind to 2 instead</td></tr>
+    <tr><td>Ventriloquist's Dummy</td><td>Once per match, use opponent's ability</td></tr>
+    <tr><td>Alchemist's Stone</td><td>Choose trump suit at match start</td></tr>
+    <tr><td>Phoenix Medal</td><td>Restore 1 Prestige (once per run)</td></tr>
+    <tr><td>Catalyst Gem</td><td>Gain +1 resource when ability activated</td></tr>
+    <tr><td>Echo Stone</td><td>Upgraded abilities trigger twice</td></tr>
+    <tr><td>Bloodstone</td><td>Each bout won as defender, gain +1 resource next bout</td></tr>
+  </table>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== RELICS ==================== -->
+<section id="relics">
+  <h2>Relics (34)</h2>
+  <p>Powerful persistent items tied to the doctrine system. Acquired from elite/boss victories and shops.</p>
+
+  <h3>Starting Relics (1 per Doctrine)</h3>
+  <table>
+    <tr><th>Relic</th><th>Doctrine</th></tr>
+    <tr><td>Spy's Monocle</td><td>Schemer</td></tr>
+    <tr><td>Iron Gauntlet</td><td>Brute</td></tr>
+    <tr><td>Two-Faced Coin</td><td>Trickster</td></tr>
+    <tr><td>Bottomless Purse</td><td>Hoarder</td></tr>
+  </table>
+
+  <h3>Doctrine-Synergy Relics</h3>
+  <table>
+    <tr><th>Schemer</th><th>Brute</th><th>Trickster</th><th>Hoarder</th></tr>
+    <tr><td>Scholar's Lens</td><td>War Hammer</td><td>Masquerade Mask</td><td>Miser's Lockbox</td></tr>
+    <tr><td>Forked Tongue</td><td>Bloody Knuckles</td><td>Poisoned Chalice</td><td>Rat's Nest</td></tr>
+    <tr><td>Invisible Ink</td><td>Iron Helm</td><td>Mirror Shard</td><td>Deep Pockets</td></tr>
+    <tr><td>Cipher's Ring</td><td>Condottieri's Banner</td><td>Alchemist's Phial</td><td>Tax Collector's Ledger</td></tr>
+  </table>
+
+  <h3>Universal Relics</h3>
+  <p>Candle Stub, Merchant's Purse, Phoenix Medal, Gambler's Die, Venetian Glass, Thief's Lantern, Pilgrim's Compass</p>
+
+  <h3>Boss/Elite Relics</h3>
+  <table>
+    <tr><th>Relic</th><th>Effect</th></tr>
+    <tr><td>Titan's Crown</td><td>+2 hand size in all matches</td></tr>
+    <tr><td>Sovereign's Decree</td><td>+1 max attacks per bout</td></tr>
+    <tr><td>Herald's Horn</td><td>+3 starting resource each match</td></tr>
+    <tr><td>Wanderer's Boots</td><td>+1 ability slot</td></tr>
+    <tr><td>Miser's Hoard</td><td>+50% Florins from matches</td></tr>
+    <tr><td>Phoenix Feather</td><td>Prevents one prestige loss (one-time use)</td></tr>
+  </table>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== BURDENS ==================== -->
+<section id="burdens">
+  <h2>Burdens (5)</h2>
+  <p>Persistent debuffs acquired from match losses and events. Can be removed at rest sites, shops, or events.</p>
+
+  <table>
+    <tr><th>Burden</th><th>Effect</th><th>Engine Impact</th></tr>
+    <tr><td>Rattled Nerves</td><td>First defense each bout must use your highest-rank card</td><td>Yes &mdash; forces suboptimal defense</td></tr>
+    <tr><td>Heavy Purse</td><td>Starting hand size is 7 instead of 6</td><td>Yes &mdash; harder to empty hand</td></tr>
+    <tr><td>Marked Cards</td><td>Opponent can see 1 random card in your hand</td><td>Display only</td></tr>
+    <tr><td>Clumsy Fingers</td><td>Once per match, a random ability activation fizzles</td><td>Yes &mdash; ability can fail</td></tr>
+    <tr><td>Bad Reputation</td><td>Shop prices increased by 20%</td><td>Economy only</td></tr>
+  </table>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== RUN STRUCTURE ==================== -->
+<section id="run-loop">
+  <h2>Run Structure</h2>
+
+  <h3>Run Phases</h3>
+  <p>A run progresses through these phases:</p>
+  <div class="flow">
+<span class="hl">TITLE</span> &rarr; <span class="hl">ARCHETYPE SELECT</span> &rarr; <span class="hl">MAP SELECT</span> &rarr; [Node Type] &rarr; ...repeat...
+                                                         &darr;
+                                              RivalMatch / EliteMatch
+                                              Shop / Rest / Rumor
+                                              BossMatch (end of act)
+                                                         &darr;
+                                              <span class="hl">ACT COMPLETE</span> &rarr; Next Act
+                                                         &darr;
+                                              <span class="hl">ACT 5 BOSS</span> &rarr; <span class="hl">RUN WON</span> or <span class="hl">RUN OVER</span></div>
+
+  <h3 id="map">Map Generation</h3>
+  <table>
+    <tr><th>Parameter</th><th>Acts 0&ndash;3</th><th>Act 4 (Final)</th></tr>
+    <tr><td>Columns</td><td>3 (reduced by <code>columnReduction</code> ascension)</td><td>2 + 1 boss column</td></tr>
+    <tr><td>Rows per column</td><td>2&ndash;5 (random)</td><td>1 (boss only)</td></tr>
+    <tr><td>Minimum columns</td><td>1</td><td>1 + boss</td></tr>
+  </table>
+
+  <h4>Node Type Weights (non-first column)</h4>
+  <table>
+    <tr><th>Node Type</th><th>Weight</th><th>Color</th></tr>
+    <tr><td>RivalMatch</td><td>40</td><td style="color:#AA4040">#AA4040</td></tr>
+    <tr><td>Shop</td><td>25</td><td style="color:#44884A">#44884A</td></tr>
+    <tr><td>Rumor</td><td>20</td><td style="color:#5555AA">#5555AA</td></tr>
+    <tr><td>Rest</td><td>15</td><td style="color:#886633">#886633</td></tr>
+  </table>
+  <p>Guaranteed: at least 1 Shop, 1 Rest, and 1 Rumor per act (except Act 4). First column always contains EliteMatch. Act 4 final column is always BossMatch.</p>
+  <p><strong>Elite color:</strong> <span style="color:#CC8820">#CC8820</span> &nbsp; <strong>Boss color:</strong> <span style="color:#882266">#882266</span></p>
+
+  <h3 id="economy">Economy (Florins)</h3>
+  <h4>Income Sources</h4>
+  <table>
+    <tr><th>Source</th><th>Amount</th></tr>
+    <tr><td>Match Win (base)</td><td>10&ndash;12 (scales with act: +2&ndash;4 per act level)</td></tr>
+    <tr><td>Elite Match Bonus</td><td>+5</td></tr>
+    <tr><td>Boss Match Bonus</td><td>+10</td></tr>
+    <tr><td>Merchant's Purse trinket</td><td>+3 per win</td></tr>
+    <tr><td>Miser's Ring trinket</td><td>+1 per bout defended</td></tr>
+    <tr><td>Miser's Hoard relic</td><td>&times;1.5 multiplier on all match Florins</td></tr>
+    <tr><td>Rest site (Quiet Hearth)</td><td>+3 (or +2 with Spartan Rest ascension)</td></tr>
+    <tr><td>Rumor events</td><td>2&ndash;12 (varies by event)</td></tr>
+  </table>
+
+  <h4>Costs</h4>
+  <table>
+    <tr><th>Purchase</th><th>Cost</th></tr>
+    <tr><td>Card Removal (Shop)</td><td>8 Florins</td></tr>
+    <tr><td>Card Upgrade (Rank &le; 9)</td><td>6 Florins</td></tr>
+    <tr><td>Card Upgrade (Rank &ge; 10)</td><td>10 Florins</td></tr>
+    <tr><td>Card Purchase</td><td>6 Florins</td></tr>
+    <tr><td>Ability (Common)</td><td>8 Florins</td></tr>
+    <tr><td>Ability (Uncommon)</td><td>12 Florins</td></tr>
+    <tr><td>Ability (Rare)</td><td>18 Florins</td></tr>
+    <tr><td>Trinket</td><td>10&ndash;15 Florins</td></tr>
+    <tr><td>Burden Removal</td><td>6 Florins</td></tr>
+  </table>
+  <p><strong>Ascension modifier:</strong> <code>InflatedPrices</code> increases all shop costs by 25%.</p>
+
+  <h3 id="prestige">Prestige (Lives)</h3>
+  <ul>
+    <li>Starting prestige: <strong>3</strong> (displayed as &hearts;&hearts;&hearts;)</li>
+    <li>Loss on match defeat: <strong>&minus;1</strong> (or &minus;2 with <code>BrutalDefeats</code> ascension)</li>
+    <li>Recovery: <strong>Phoenix Medal</strong> trinket (one-time, restores 1)</li>
+    <li>Prestige &le; 0: <strong>Run Over</strong> (defeat)</li>
+  </ul>
+
+  <h3 id="post-match">Post-Match Reward Flow</h3>
+  <div class="flow">
+<span class="hl">MATCH WON</span>
+  &darr;
+  Show victory + Florins earned
+  &darr;
+  <span class="hl">CARD REWARD</span> &rarr; Pick 1 of 3 cards (or skip)
+  &darr;                   Normal: 65% Common, 25% Uncommon, 10% Rare
+  &darr;                   Elite/Boss: 40% Common, 35% Uncommon, 25% Rare
+  &darr;
+  <span class="hl">ABILITY PICK</span> &rarr; Pick 1 of 3 abilities (weighted to archetype)
+  &darr;
+  <span class="hl">RELIC PICK</span> &rarr; (Elite/Boss only) Pick 1 relic
+  &darr;
+  Continue to map
+
+<span class="hl">MATCH LOST</span>
+  &darr;
+  Lose Prestige &rarr; Gain random Burden
+  &darr;
+  Prestige &le; 0? &rarr; Run Over
+  Prestige &gt; 0? &rarr; Return to map</div>
+
+  <h3 id="shop">Shop ("The Fence")</h3>
+  <p>Each shop visit generates fresh stock:</p>
+  <ul>
+    <li><strong>2 random abilities</strong> &mdash; priced by rarity (8/12/18 Florins)</li>
+    <li><strong>1 random card</strong> &mdash; only if deck &lt; 16 cards, from draftable pool (6 Florins)</li>
+    <li><strong>1 card upgrade</strong> &mdash; random card from deck (6 or 10 Florins)</li>
+    <li><strong>1 random trinket</strong> &mdash; only if &lt; 5 trinkets held (10&ndash;15 Florins)</li>
+    <li><strong>Burden removal</strong> &mdash; only if burdens exist (6 Florins)</li>
+    <li><strong>Card removal</strong> &mdash; remove weakest card (8 Florins)</li>
+  </ul>
+
+  <h3 id="rest">Rest Sites (5 Variants)</h3>
+  <table>
+    <tr><th>Variant</th><th>Condition</th><th>Effect</th></tr>
+    <tr><td>The Hearth (Mend)</td><td>If burdens exist</td><td>Remove a random burden</td></tr>
+    <tr><td>The Study</td><td>Always available</td><td>Upgrade ability OR learn new ability OR +3 Florins</td></tr>
+    <tr><td>The Smithy</td><td>If upgradeable cards</td><td>Upgrade a random card by 1 rank</td></tr>
+    <tr><td>The Bonfire</td><td>If deck &gt; 8 cards</td><td>Remove weakest card from deck</td></tr>
+    <tr><td>The Hearth (Quiet)</td><td>Default fallback</td><td>+3 Florins (+2 with Spartan Rest ascension)</td></tr>
+  </table>
+
+  <h3 id="rumors">Rumors / Events (8 Types)</h3>
+  <table>
+    <tr><th>#</th><th>Event</th><th>Choice A</th><th>Choice B</th></tr>
+    <tr><td>0</td><td>Drunk Merchant</td><td>Pay 8+3&times;Act Florins &rarr; get rare ability</td><td>+2 Florins</td></tr>
+    <tr><td>1</td><td>Forger's Offer</td><td>Upgrade archetype ability &rarr; gain burden</td><td>Decline</td></tr>
+    <tr><td>2</td><td>Cardinal's Confession</td><td>Upgrade card for 6+2&times;Act Florins</td><td>+4+Act Florins</td></tr>
+    <tr><td>3</td><td>Pickpocket</td><td>Steal 6+2&times;Act Florins (gain burden)</td><td>+1 ability slot</td></tr>
+    <tr><td>4</td><td>Alchemist's Bargain</td><td>Sacrifice weak card &rarr; upgrade random card +2 ranks</td><td>+2 Florins</td></tr>
+    <tr><td>5</td><td>Duelist's Ghost</td><td>Pay 2 prestige &rarr; +1 ability slot</td><td>+4 Florins</td></tr>
+    <tr><td>6</td><td>The Fence</td><td>Pay 10+2&times;Act &rarr; remove burden</td><td>+6+Act Florins</td></tr>
+    <tr><td>7</td><td>Whispering Walls</td><td>Pay 5+Act &rarr; remove weak card</td><td>+5+Act Florins</td></tr>
+  </table>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== OPPONENTS & AI ==================== -->
+<section id="opponents">
+  <h2>Opponents &amp; AI</h2>
+  <p>Each act features a roster of opponents with escalating difficulty, unique house rules, and AI personalities.</p>
+
+  <h3>Venue Progression</h3>
+  <table>
+    <tr><th>Act</th><th>Venue</th><th>Difficulty</th><th>Available AI Types</th></tr>
+    <tr><td>1</td><td>The Bilge Rat Tavern</td><td>1&ndash;4</td><td>Brawler, Miser</td></tr>
+    <tr><td>2</td><td>The Merchant's Rest</td><td>3&ndash;6</td><td>Brawler, Miser, Fox</td></tr>
+    <tr><td>3</td><td>The Guildmaster's Hall</td><td>5&ndash;7</td><td>Fox, Noble, Scholar</td></tr>
+    <tr><td>4</td><td>The Cardinal's Library</td><td>6&ndash;8</td><td>Scholar, Assassin, Fox</td></tr>
+    <tr><td>5</td><td>The Duke's Salon</td><td>8+</td><td>Fox, Assassin, Scholar</td></tr>
+  </table>
+
+  <h3 id="ai-arch">AI Archetypes (6)</h3>
+  <div class="card-grid">
+    <div class="card-panel">
+      <h4>Brawler</h4>
+      <p><strong>Eagerness:</strong> 1.5 (aggressive)</p>
+      <p>Plays highest legal attacks. Never stops attacking voluntarily. Uses abilities frequently.</p>
+    </div>
+    <div class="card-panel">
+      <h4>Miser</h4>
+      <p><strong>Eagerness:</strong> 0.3 (conservative)</p>
+      <p>Plays lowest cards first. Stops after 2&ndash;3 attacks. Hoards high cards for defense.</p>
+    </div>
+    <div class="card-panel">
+      <h4>Fox</h4>
+      <p><strong>Eagerness:</strong> 1.0 (adaptive)</p>
+      <p>Adjusts strategy based on opponent hand size. Presses advantage when ahead, conserves when behind.</p>
+    </div>
+    <div class="card-panel">
+      <h4>Noble</h4>
+      <p><strong>Eagerness:</strong> 0.8 (reserved)</p>
+      <p>Saves trump cards for endgame (deck &ge; 12). Plays non-trump first. Dignified and methodical.</p>
+    </div>
+    <div class="card-panel">
+      <h4>Scholar</h4>
+      <p><strong>Eagerness:</strong> 1.2 (tactical)</p>
+      <p>Prefers rank-locked attacks for maximum follow-up options. Efficient defense, avoids overspending.</p>
+    </div>
+    <div class="card-panel">
+      <h4>Assassin</h4>
+      <p><strong>Eagerness:</strong> 0.5 (patient)</p>
+      <p>Holds back for first 3 bouts, then unleashes highest attacks. Waits for the perfect strike.</p>
+    </div>
+  </div>
+
+  <h4>Difficulty Scaling by Act</h4>
+  <table>
+    <tr><th>Act</th><th>Random Move Chance</th></tr>
+    <tr><td>0</td><td>35%</td></tr>
+    <tr><td>1</td><td>20%</td></tr>
+    <tr><td>2</td><td>10%</td></tr>
+    <tr><td>3</td><td>4%</td></tr>
+    <tr><td>4+</td><td>0%</td></tr>
+  </table>
+
+  <h3 id="house-rules">House Rules (6)</h3>
+  <p>Unique modifiers that specific opponents can apply to matches:</p>
+  <table>
+    <tr><th>Rule</th><th>Effect</th></tr>
+    <tr><td>No Trumps Until Bout N</td><td>Trump attacks restricted until bout N</td></tr>
+    <tr><td>Fixed Attacker</td><td>Attacker never rotates &mdash; same player attacks every bout</td></tr>
+    <tr><td>Any Rank Attack</td><td>Rank-match requirement disabled entirely</td></tr>
+    <tr><td>Eat Draws Extra</td><td>Eating draws 2 extra cards</td></tr>
+    <tr><td>Mirror Abilities</td><td>Both players share the same ability set</td></tr>
+    <tr><td>Max Bouts</td><td>Force bout limit &mdash; match ends after N bouts</td></tr>
+  </table>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== ASCENSION ==================== -->
+<section id="ascension">
+  <h2>Ascension (10 Levels)</h2>
+  <p>Stackable difficulty modifiers unlocked by completing runs. Each level adds its modifier on top of all previous levels.</p>
+
+  <table>
+    <tr><th>Level</th><th>Name</th><th>Effect</th></tr>
+    <tr><td>1</td><td>Lean Purse</td><td>Earn 3 fewer Florins from match victories</td></tr>
+    <tr><td>2</td><td>Armed Elites</td><td>Elite opponents gain +1 relic</td></tr>
+    <tr><td>3</td><td>Spartan Rest</td><td>Rest sites grant +2 Florins instead of +3</td></tr>
+    <tr><td>4</td><td>Rattled Start</td><td>Start each run with Rattled Nerves burden</td></tr>
+    <tr><td>5</td><td>Inflated Prices</td><td>Shop prices increased by 25%</td></tr>
+    <tr><td>6</td><td>Empowered Foes</td><td>Opponents start with +1 resource</td></tr>
+    <tr><td>7</td><td>Shorter Roads</td><td>One fewer map column per act</td></tr>
+    <tr><td>8</td><td>Brutal Defeats</td><td>Lose 2 Prestige on defeat instead of 1</td></tr>
+    <tr><td>9</td><td>Narrow Mind</td><td>Start with 3 ability slots instead of 4</td></tr>
+    <tr><td>10</td><td>Relentless Assault</td><td>Opponents get +1 max attacks per bout</td></tr>
+  </table>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== REPUTATION ==================== -->
+<section id="reputation">
+  <h2>Reputation &amp; Unlocks</h2>
+
+  <h3>Reputation Calculation</h3>
+  <table>
+    <tr><th>Source</th><th>Formula</th></tr>
+    <tr><td>Match Wins</td><td>MatchesWon &times; 3</td></tr>
+    <tr><td>Act Bonus</td><td>CurrentAct &times; 5</td></tr>
+    <tr><td>Run Win Bonus</td><td>+25 (if run completed)</td></tr>
+  </table>
+  <p><em>Example: 3 match wins + reach Act 4 + win run = 9 + 20 + 25 = 54 reputation</em></p>
+
+  <h3>Unlock Thresholds</h3>
+  <table>
+    <tr><th>Reputation</th><th>Unlock</th></tr>
+    <tr><td>0</td><td>Rogue archetype (free)</td></tr>
+    <tr><td>25</td><td>Brute archetype</td></tr>
+    <tr><td>100</td><td>Diplomat archetype</td></tr>
+    <tr><td>300</td><td>Gambler archetype</td></tr>
+  </table>
+
+  <h3>Tracked Statistics</h3>
+  <ul>
+    <li><code>TotalReputation</code> &mdash; cumulative career reputation</li>
+    <li><code>RunsCompleted</code> / <code>RunsWon</code> &mdash; total and successful runs</li>
+    <li><code>TotalMatchesWon</code> &mdash; career match victories</li>
+    <li><code>UnlockedArchetypes</code> &mdash; list of available archetypes</li>
+    <li><code>ArchetypeWins</code> &mdash; per-archetype victory counts</li>
+  </ul>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== VISUAL DESIGN ==================== -->
+<section id="visual">
+  <h2>Visual Design</h2>
+
+  <h3>Aesthetic Direction</h3>
+  <p><strong>Tone:</strong> Warm, roguish, tactile. Golden hour Caravaggio meets heist film. Candlelit Renaissance Italy with thick hand-pressed cards and dangerous beauty.</p>
+
+  <h3>Typography</h3>
+  <table>
+    <tr><th>Usage</th><th>Font</th><th>Code Reference</th></tr>
+    <tr><td>Headings, titles, buttons</td><td>Cinzel</td><td><code>FontAssets.Heading</code></td></tr>
+    <tr><td>Body text, descriptions</td><td>Crimson Pro</td><td><code>FontAssets.Body</code></td></tr>
+    <tr><td>Stats, numbers, code</td><td>JetBrains Mono</td><td><code>FontAssets.Mono</code></td></tr>
+  </table>
+
+  <h3 id="venues">Venue Art Direction</h3>
+  <table>
+    <tr><th>Act</th><th>Venue</th><th>Palette</th><th>Table</th><th>Opponents</th></tr>
+    <tr><td>1</td><td>The Bilge Rat Tavern</td><td>Muddy browns, yellows</td><td>Stained barrel-lid</td><td>Rough dockworkers</td></tr>
+    <tr><td>2</td><td>The Merchant's Rest</td><td>Rich browns, brass</td><td>Polished oak</td><td>Calculating traders</td></tr>
+    <tr><td>3</td><td>The Guildmaster's Hall</td><td>Burgundy, gold, ivory</td><td>Ornate carved</td><td>Skilled professionals</td></tr>
+    <tr><td>4</td><td>The Cardinal's Library</td><td>Purples, gold, crimson</td><td>Ebony pearl-inlaid</td><td>Brilliant schemers</td></tr>
+    <tr><td>5</td><td>The Duke's Salon</td><td>Royal purple, Venetian gold</td><td>Gold-filigree mahogany</td><td>The Champion (masked)</td></tr>
+  </table>
+
+  <h3>Color System</h3>
+  <table>
+    <tr><th>Name</th><th>Hex</th><th>Usage</th></tr>
+    <tr><td style="color:#D4A846">Gold</td><td>#D4A846</td><td>Primary accent, buttons, headings</td></tr>
+    <tr><td style="color:#F0E6D2">Parchment</td><td>#F0E6D2</td><td>Body text, card faces</td></tr>
+    <tr><td style="color:#2A3442">Warm Slate</td><td>#2A3442</td><td>Panel backgrounds</td></tr>
+    <tr><td style="color:#CC4444">Attack Red</td><td>#CC4444</td><td>Offensive abilities</td></tr>
+    <tr><td style="color:#4488BB">Defense Blue</td><td>#4488BB</td><td>Defensive abilities</td></tr>
+    <tr><td style="color:#CC9933">Utility Amber</td><td>#CC9933</td><td>Utility abilities</td></tr>
+    <tr><td style="color:#55AA55">Passive Green</td><td>#55AA55</td><td>Passive abilities</td></tr>
+    <tr><td style="color:#FF6666">Prestige Red</td><td>#FF6666</td><td>HUD prestige display</td></tr>
+    <tr><td style="color:#99CCEE">Ability Blue</td><td>#99CCEE</td><td>HUD ability indicators</td></tr>
+  </table>
+
+  <h3>Card Design</h3>
+  <ul>
+    <li><strong>Number cards:</strong> Suit symbols in traditional patterns, vine borders</li>
+    <li><strong>Court cards:</strong> Renaissance-dressed characters, different per suit</li>
+    <li><strong>Ability badge:</strong> Heraldic shield in bottom-left, colored glow by type</li>
+    <li><strong>Card back:</strong> Accent color <code>#C8A040</code> with card cream <code>#F5F0E0</code></li>
+  </ul>
+
+  <h3>Rarity Colors</h3>
+  <table>
+    <tr><th>Rarity</th><th>Border Color</th><th>Background Tint</th></tr>
+    <tr><td style="color:#AA8855">Common</td><td>#AA8855</td><td>rgba(0.18, 0.30, 0.40)</td></tr>
+    <tr><td style="color:#AABBCC">Uncommon</td><td>#AABBCC</td><td>rgba(0.25, 0.35, 0.18)</td></tr>
+    <tr><td style="color:#DDAA33">Rare</td><td>#DDAA33</td><td>rgba(0.40, 0.22, 0.45)</td></tr>
+  </table>
+
+  <h3>Narrative Voice</h3>
+  <p>Renaissance-flavored but not Shakespearean. Warm, wry, slightly ironic.</p>
+  <ul>
+    <li><em>"The hearth crackles. You find a quiet moment of peace."</em></li>
+    <li><em>"You defeated {opponent}!"</em></li>
+    <li><em>"{Opponent} bested you. Prestige remaining: {count}"</em></li>
+    <li><em>"The whispers reveal hidden treasure. +{florins} Florins."</em></li>
+  </ul>
+</section>
+
+<div class="section-rule"></div>
+
+<!-- ==================== CODE REFERENCE ==================== -->
+<section id="code-ref">
+  <h2>Code Reference</h2>
+  <p>Key source files and their responsibilities:</p>
+
+  <table>
+    <tr><th>File</th><th>Purpose</th></tr>
+    <tr><td><code>GameEngine.cs</code></td><td>Core match logic: attack/defense/trump/eating/resources/bout flow</td></tr>
+    <tr><td><code>GameManager.cs</code></td><td>Unity match UI: card visuals, animations, HUD updates, input handling</td></tr>
+    <tr><td><code>RunManager.cs</code></td><td>Roguelike meta-loop: map, shop, rest, events, post-match rewards, all non-match UI</td></tr>
+    <tr><td><code>RunState.cs</code></td><td>Persistent run data: prestige, florins, deck, abilities, trinkets, burdens</td></tr>
+    <tr><td><code>MapGenerator.cs</code></td><td>Procedural map generation with node types and connections</td></tr>
+    <tr><td><code>Ascension.cs</code></td><td>10 ascension level definitions and modifiers</td></tr>
+    <tr><td><code>Reputation.cs</code></td><td>Career progression, archetype unlocks, stat tracking</td></tr>
+    <tr><td><code>AbilityType.cs</code></td><td>85-value enum of all ability types</td></tr>
+    <tr><td><code>AbilityPool.cs</code></td><td>Ability definitions: names, descriptions, costs, rarities</td></tr>
+    <tr><td><code>TrinketType.cs / TrinketRegistry.cs</code></td><td>25 trinkets with effects and engine flags</td></tr>
+    <tr><td><code>RelicType.cs / RelicRegistry.cs</code></td><td>34 relics with effects, doctrine synergies, rarities</td></tr>
+    <tr><td><code>CardCatalog.cs</code></td><td>Static card registry with lookup methods</td></tr>
+    <tr><td><code>card_catalog.json</code></td><td>95 card definitions (data file)</td></tr>
+    <tr><td><code>ThemePalette.cs</code></td><td>All color constants and ability badge color mapping</td></tr>
+    <tr><td><code>HudView.cs</code></td><td>Match HUD component references</td></tr>
+    <tr><td><code>AiPlayer.cs</code></td><td>6 AI archetypes with heuristic decision-making</td></tr>
+    <tr><td><code>MatchConfig.cs</code></td><td>67-field match configuration (abilities, trinkets, house rules)</td></tr>
+  </table>
+
+  <div class="callout">
+    <div class="callout-title">Maintenance</div>
+    When game mechanics change, update this document to match. Run <code>EngineSmokeTest.PlayFifty()</code> (menu: Wits and Fools &gt; Smoke Test &gt; Play 50 Games) to verify no regressions. Use <code>ScreenshotAutoPlay</code> to capture visual state across all phases.
+  </div>
+</section>
+
+<div class="section-rule"></div>
+
+<footer style="text-align:center; padding: 3rem 0; opacity: 0.4; font-size: 0.85rem;">
+  <p style="font-family:'Cinzel',serif; color:var(--gold); letter-spacing:0.1em;">WITS &amp; FOOLS</p>
+  <p>Master Game Design Document &mdash; Generated from codebase, May 2026</p>
+  <p>Source of truth for code, testing, and design decisions</p>
+</footer>
+
+</div><!-- .content -->
+
+<script>
+// TOC toggle
+document.querySelector('.toc-toggle').addEventListener('click', () => {
+  document.querySelector('.toc-sidebar').classList.toggle('open');
+  document.querySelector('.toc-overlay').classList.toggle('open');
+});
+
+// Close TOC on link click
+document.querySelectorAll('.toc-sidebar a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.querySelector('.toc-sidebar').classList.remove('open');
+    document.querySelector('.toc-overlay').classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>
