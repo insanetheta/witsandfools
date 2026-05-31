@@ -188,9 +188,9 @@ namespace WitsAndFools
         public void StartAutoRun()
         {
             _batchRemaining = 0;
+            StartNewRun();
             _autoRun = true;
             Time.timeScale = 20f;
-            StartNewRun();
             _nextAutoStep = Time.time + _autoStepDelay;
             Debug.Log("[RunManager] Auto-run started (fresh run, timeScale=20)");
         }
@@ -202,9 +202,9 @@ namespace WitsAndFools
             _batchMatches = 0;
             _batchMatchWins = 0;
             _batchResults = new List<string>();
+            StartNewRun();
             _autoRun = true;
             Time.timeScale = 20f;
-            StartNewRun();
             _nextAutoStep = Time.time + _autoStepDelay;
             Debug.Log($"[RunManager] Batch run started — {count} runs");
         }
@@ -253,6 +253,8 @@ namespace WitsAndFools
                         if (_batchRemaining > 0)
                         {
                             StartNewRun();
+                            _autoRun = true;
+                            Time.timeScale = 20f;
                             break;
                         }
                         _autoRun = false;
