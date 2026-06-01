@@ -518,7 +518,11 @@ namespace WitsAndFools
             UpdateRunHud();
 
             if (UIScreenCapture.Instance != null)
+            {
                 UIScreenCapture.Instance.NotifyPhaseChange(phase, _run?.RunWon ?? false);
+                if (UIScreenCapture.Instance.IsCapturing && _autoRun)
+                    _nextAutoStep = Time.time + 0.2f;
+            }
 
             switch (phase)
             {
