@@ -132,8 +132,18 @@ namespace WitsAndFools.EditorTools
                     var engine = new GameEngine(rng.Next(), config, deck0, deck1);
                     engine.StartNewGame();
                     int safety = 0;
+                    int stall = 0;
+                    Phase lastPhase = engine.Phase;
+                    int lastBout = engine.BoutCount;
                     while (engine.Phase != Phase.GameOver && safety++ < 10000)
+                    {
                         StepGreedy(engine);
+                        if (engine.Phase == lastPhase && engine.BoutCount == lastBout)
+                        {
+                            if (++stall > 50) engine.TryEat(engine.DefenderIndex);
+                        }
+                        else { stall = 0; lastPhase = engine.Phase; lastBout = engine.BoutCount; }
+                    }
                     if (safety >= 10000) throw new Exception($"Game {g} stalled");
                 }
             });
