@@ -53,6 +53,8 @@ namespace WitsAndFools
         public TMP_Text RunOverTitleLabel;
         public TMP_Text RunOverStatsLabel;
         public Button RunOverRestartButton;
+        public RectTransform RunOverJourneyContainer;
+        public RectTransform RunOverAbilityChipsContainer;
 
         [Header("Run HUD Refs")]
         public TMP_Text PrestigeLabel;
@@ -2843,10 +2845,85 @@ namespace WitsAndFools
                 RunOverStatsLabel.text = stats;
                 RunOverStatsLabel.richText = true;
             }
+            PopulateRunOverJourney();
+            PopulateRunOverAbilityChips();
+
             if (RunOverRestartButton)
             {
                 RunOverRestartButton.onClick.RemoveAllListeners();
                 RunOverRestartButton.onClick.AddListener(StartNewRun);
+            }
+        }
+
+        void PopulateRunOverJourney()
+        {
+            if (!RunOverJourneyContainer) return;
+            for (int i = RunOverJourneyContainer.childCount - 1; i >= 0; i--)
+                Destroy(RunOverJourneyContainer.GetChild(i).gameObject);
+
+            int acts = Mathf.Max(_run.CurrentAct, 1);
+            for (int a = 0; a < acts; a++)
+            {
+                var go = new GameObject($"Act{a}", typeof(RectTransform), typeof(Image));
+                go.transform.SetParent(RunOverJourneyContainer, false);
+                var rt = go.GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(120, 80);
+                var img = go.GetComponent<Image>();
+                if (VenueBackgroundSprites != null && a < VenueBackgroundSprites.Length)
+                    img.sprite = VenueBackgroundSprites[a];
+                img.color = a < _run.CurrentAct ? Color.white : new Color(1, 1, 1, 0.4f);
+                img.preserveAspect = true;
+
+                var labelGO = new GameObject("Label", typeof(RectTransform), typeof(TMP_Text));
+                labelGO.transform.SetParent(go.transform, false);
+                var lrt = labelGO.GetComponent<RectTransform>();
+                lrt.anchorMin = Vector2.zero;
+                lrt.anchorMax = Vector2.one;
+                lrt.offsetMin = Vector2.zero;
+                lrt.offsetMax = Vector2.zero;
+                var lbl = labelGO.GetComponent<TMP_Text>();
+                lbl.text = $"Act {a + 1}";
+                lbl.fontSize = 14;
+                lbl.alignment = TextAlignmentOptions.Bottom;
+                lbl.color = Color.white;
+                lbl.enableAutoSizing = false;
+            }
+        }
+
+        void PopulateRunOverAbilityChips()
+        {
+            if (!RunOverAbilityChipsContainer) return;
+            for (int i = RunOverAbilityChipsContainer.childCount - 1; i >= 0; i--)
+                Destroy(RunOverAbilityChipsContainer.GetChild(i).gameObject);
+
+            if (_run.PlayerAbilities.Count == 0) return;
+
+            foreach (var ability in _run.PlayerAbilities)
+            {
+                var def = AbilityPool.Get(ability);
+                var color = ThemePalette.AbilityBadgeColor(ability);
+
+                var pill = new GameObject($"Chip_{ability}", typeof(RectTransform), typeof(Image));
+                pill.transform.SetParent(RunOverAbilityChipsContainer, false);
+                var rt = pill.GetComponent<RectTransform>();
+                rt.sizeDelta = new Vector2(130, 32);
+                var bg = pill.GetComponent<Image>();
+                bg.color = new Color(color.r, color.g, color.b, 0.25f);
+
+                var textGO = new GameObject("Text", typeof(RectTransform), typeof(TMP_Text));
+                textGO.transform.SetParent(pill.transform, false);
+                var trt = textGO.GetComponent<RectTransform>();
+                trt.anchorMin = Vector2.zero;
+                trt.anchorMax = Vector2.one;
+                trt.offsetMin = new Vector2(6, 0);
+                trt.offsetMax = new Vector2(-6, 0);
+                var txt = textGO.GetComponent<TMP_Text>();
+                txt.text = ability.DisplayName();
+                txt.fontSize = 16;
+                txt.alignment = TextAlignmentOptions.Center;
+                txt.color = color;
+                txt.enableAutoSizing = false;
+                txt.overflowMode = TextOverflowModes.Ellipsis;
             }
         }
 

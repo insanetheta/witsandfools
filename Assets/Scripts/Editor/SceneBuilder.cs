@@ -778,28 +778,56 @@ namespace WitsAndFools.EditorTools
             runOverVignette.SetSiblingIndex(1);
 
             var runOverTitle = AddText(runOverPanel, "RunOverTitle", "Run Over",
-                anchorMin: new Vector2(0.1f, 0.65f), anchorMax: new Vector2(0.9f, 0.88f),
+                anchorMin: new Vector2(0.1f, 0.78f), anchorMax: new Vector2(0.9f, 0.95f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
                 fontSize: 52, color: ThemePalette.Gold, font: HeadingFont);
 
             // Decorative divider under title
             var divider = NewChild(runOverPanel, "Divider");
-            divider.anchorMin = new Vector2(0.35f, 0.63f);
-            divider.anchorMax = new Vector2(0.65f, 0.63f);
+            divider.anchorMin = new Vector2(0.35f, 0.76f);
+            divider.anchorMax = new Vector2(0.65f, 0.76f);
             divider.sizeDelta = new Vector2(0, 2);
             var divImg = divider.gameObject.AddComponent<Image>();
             divImg.color = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.4f);
             divImg.raycastTarget = false;
 
+            // Journey visualization strip (5 venue thumbnails)
+            var journeyContainer = NewChild(runOverPanel, "JourneyContainer");
+            journeyContainer.anchorMin = new Vector2(0.1f, 0.60f);
+            journeyContainer.anchorMax = new Vector2(0.9f, 0.75f);
+            journeyContainer.offsetMin = Vector2.zero;
+            journeyContainer.offsetMax = Vector2.zero;
+            var journeyLayout = journeyContainer.gameObject.AddComponent<HorizontalLayoutGroup>();
+            journeyLayout.spacing = 12;
+            journeyLayout.childAlignment = TextAnchor.MiddleCenter;
+            journeyLayout.childControlWidth = false;
+            journeyLayout.childControlHeight = false;
+            journeyLayout.childForceExpandWidth = false;
+            journeyLayout.childForceExpandHeight = false;
+
             var runOverStats = AddText(runOverPanel, "RunOverStats", "",
-                anchorMin: new Vector2(0.2f, 0.28f), anchorMax: new Vector2(0.8f, 0.60f),
+                anchorMin: new Vector2(0.2f, 0.32f), anchorMax: new Vector2(0.8f, 0.58f),
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
                 fontSize: 22, color: ThemePalette.Parchment);
             runOverStats.enableWordWrapping = true;
 
+            // Ability chips container
+            var abilityChipsContainer = NewChild(runOverPanel, "AbilityChipsContainer");
+            abilityChipsContainer.anchorMin = new Vector2(0.1f, 0.20f);
+            abilityChipsContainer.anchorMax = new Vector2(0.9f, 0.30f);
+            abilityChipsContainer.offsetMin = Vector2.zero;
+            abilityChipsContainer.offsetMax = Vector2.zero;
+            var chipsLayout = abilityChipsContainer.gameObject.AddComponent<HorizontalLayoutGroup>();
+            chipsLayout.spacing = 8;
+            chipsLayout.childAlignment = TextAnchor.MiddleCenter;
+            chipsLayout.childControlWidth = false;
+            chipsLayout.childControlHeight = false;
+            chipsLayout.childForceExpandWidth = false;
+            chipsLayout.childForceExpandHeight = false;
+
             var runOverRestartBtn = AddButton(runOverPanel, "RunOverRestartButton", "New Run");
-            runOverRestartBtn.anchorMin = new Vector2(0.5f, 0.10f);
-            runOverRestartBtn.anchorMax = new Vector2(0.5f, 0.10f);
+            runOverRestartBtn.anchorMin = new Vector2(0.5f, 0.06f);
+            runOverRestartBtn.anchorMax = new Vector2(0.5f, 0.06f);
             runOverRestartBtn.pivot = new Vector2(0.5f, 0);
             runOverRestartBtn.sizeDelta = new Vector2(260, 70);
 
@@ -1000,6 +1028,8 @@ namespace WitsAndFools.EditorTools
             rm.RunOverTitleLabel = runOverTitle;
             rm.RunOverStatsLabel = runOverStats;
             rm.RunOverRestartButton = runOverRestartBtn.GetComponent<Button>();
+            rm.RunOverJourneyContainer = journeyContainer;
+            rm.RunOverAbilityChipsContainer = abilityChipsContainer;
             rm.PrestigeLabel = prestigeLabel;
             rm.FlorinsLabel = florinsLabel;
             rm.ActLabel = actLabel;
