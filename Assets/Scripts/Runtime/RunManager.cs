@@ -225,6 +225,9 @@ namespace WitsAndFools
                 case RunPhase.MapSelect:
                     AutoSelectNode();
                     break;
+                case RunPhase.PreMatch:
+                    _eventChoice1Action?.Invoke();
+                    break;
                 case RunPhase.PostMatch:
                     if (_cardRewardOfferings != null && _cardRewardOfferings.Count > 0)
                         OnCardRewardPicked(_cardRewardOfferings[_rng.Next(_cardRewardOfferings.Count)]);
@@ -514,7 +517,7 @@ namespace WitsAndFools
             if (ResultPanel) ResultPanel.SetActive(phase == RunPhase.PostMatch);
             if (RunOverPanel) RunOverPanel.SetActive(phase == RunPhase.RunOver);
             if (ShopPanel) ShopPanel.SetActive(phase == RunPhase.Shop);
-            if (EventPanel) EventPanel.SetActive(phase == RunPhase.Event || phase == RunPhase.Rest);
+            if (EventPanel) EventPanel.SetActive(phase == RunPhase.Event || phase == RunPhase.Rest || phase == RunPhase.PreMatch);
             if (RunHudPanel) RunHudPanel.SetActive(phase != RunPhase.Title && phase != RunPhase.RunOver && phase != RunPhase.ArchetypeSelect);
 
             UpdateRunHud();
@@ -1072,9 +1075,13 @@ namespace WitsAndFools
 
         int _boutsDefended;
 
+        MatchConfig _pendingConfig;
+        PlayerDeck _pendingPlayerDeck;
+        PlayerDeck _pendingEnemyDeck;
+        MapNode _pendingMatchNode;
+
         void StartMatch(MapNode node)
         {
-            SetPhase(RunPhase.InMatch);
             _boutsDefended = 0;
 
             GameManager.OnMatchComplete -= OnMatchComplete;
@@ -1092,6 +1099,47 @@ namespace WitsAndFools
 
             var (config, pDeck, eDeck) = MatchSetup.Build(_run, node.Opponent, _rng);
             config.MaxBouts = 12;
+
+            if (_run.PlayerTrinkets.Contains(TrinketType.DevilsBargain))
+            {
+                _pendingConfig = config;
+                _pendingPlayerDeck = pDeck;
+                _pendingEnemyDeck = eDeck;
+                _pendingMatchNode = node;
+                SetPhase(RunPhase.PreMatch);
+                ShowEventChoices("The Devil's Bargain",
+                    $"Before facing <b>{node.Opponent.Name}</b>, the devil offers a deal.\nChoose your terms:",
+                    "Take +3 Florins", "Draw 1 fewer card",
+                    ChoiceCost, ChoiceRisky);
+                _eventChoice1Action = () =>
+                {
+                    _run.Florins += 3;
+                    UpdateRunHud();
+                    LaunchPendingMatch();
+                };
+                _eventChoice2Action = () =>
+                {
+                    _pendingConfig.HandSize = Math.Max(1, _pendingConfig.HandSize - 1);
+                    LaunchPendingMatch();
+                };
+                return;
+            }
+
+            LaunchMatch(config, pDeck, eDeck, node);
+        }
+
+        void LaunchPendingMatch()
+        {
+            LaunchMatch(_pendingConfig, _pendingPlayerDeck, _pendingEnemyDeck, _pendingMatchNode);
+            _pendingConfig = null;
+            _pendingPlayerDeck = null;
+            _pendingEnemyDeck = null;
+            _pendingMatchNode = null;
+        }
+
+        void LaunchMatch(MatchConfig config, PlayerDeck pDeck, PlayerDeck eDeck, MapNode node)
+        {
+            SetPhase(RunPhase.InMatch);
             GameManager.BeginGame(config, pDeck, eDeck, node.Opponent, _rng.Next());
             Debug.Log($"[RunManager] Match vs {node.Opponent.Name} (bout cap: 12)");
 
@@ -2874,14 +2922,14 @@ namespace WitsAndFools
                 img.color = a < _run.CurrentAct ? Color.white : new Color(1, 1, 1, 0.4f);
                 img.preserveAspect = true;
 
-                var labelGO = new GameObject("Label", typeof(RectTransform), typeof(TMP_Text));
+                var labelGO = new GameObject("Label", typeof(RectTransform));
                 labelGO.transform.SetParent(go.transform, false);
                 var lrt = labelGO.GetComponent<RectTransform>();
                 lrt.anchorMin = Vector2.zero;
                 lrt.anchorMax = Vector2.one;
                 lrt.offsetMin = Vector2.zero;
                 lrt.offsetMax = Vector2.zero;
-                var lbl = labelGO.GetComponent<TMP_Text>();
+                var lbl = labelGO.AddComponent<TextMeshProUGUI>();
                 lbl.text = $"Act {a + 1}";
                 lbl.fontSize = 14;
                 lbl.alignment = TextAlignmentOptions.Bottom;
@@ -2910,14 +2958,14 @@ namespace WitsAndFools
                 var bg = pill.GetComponent<Image>();
                 bg.color = new Color(color.r, color.g, color.b, 0.25f);
 
-                var textGO = new GameObject("Text", typeof(RectTransform), typeof(TMP_Text));
+                var textGO = new GameObject("Text", typeof(RectTransform));
                 textGO.transform.SetParent(pill.transform, false);
                 var trt = textGO.GetComponent<RectTransform>();
                 trt.anchorMin = Vector2.zero;
                 trt.anchorMax = Vector2.one;
                 trt.offsetMin = new Vector2(6, 0);
                 trt.offsetMax = new Vector2(-6, 0);
-                var txt = textGO.GetComponent<TMP_Text>();
+                var txt = textGO.AddComponent<TextMeshProUGUI>();
                 txt.text = ability.DisplayName();
                 txt.fontSize = 16;
                 txt.alignment = TextAlignmentOptions.Center;
