@@ -7,6 +7,7 @@ namespace WitsAndFools
     // Top-bar HUD: turn label, deck count, trump suit, plus end-bout button and game-over panel.
     public sealed class HudView : MonoBehaviour
     {
+        public TMP_Text PhaseLabel;
         public TMP_Text TrumpLabel;
         public TMP_Text PlayerDeckCountLabel;
         public TMP_Text OpponentDeckCountLabel;

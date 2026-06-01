@@ -284,6 +284,7 @@ namespace WitsAndFools.EditorTools
             // ----- HUD wiring -----
             var hudGO = new GameObject("HudView");
             var hud = hudGO.AddComponent<HudView>();
+            hud.PhaseLabel = turnLabel;
             hud.TrumpLabel = trumpLabel;
             hud.EndBoutButton = endBoutBtn.GetComponent<Button>();
             hud.OpponentPortrait = portraitImg;
@@ -691,6 +692,34 @@ namespace WitsAndFools.EditorTools
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
                 fontSize: 34, color: ThemePalette.Sage);
 
+            // Card reward area (shares vertical band with ability pick — never shown simultaneously)
+            var cardRewardLabel = AddText(resultPanel, "CardRewardLabel", "Choose a card for your deck:",
+                anchorMin: new Vector2(0.15f, 0.56f), anchorMax: new Vector2(0.85f, 0.64f),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
+                fontSize: 31, color: ThemePalette.Gold, font: HeadingFont);
+            cardRewardLabel.gameObject.SetActive(false);
+
+            var cardRewardContainer = NewChild(resultPanel, "CardRewardContainer");
+            cardRewardContainer.anchorMin = new Vector2(0.1f, 0.20f);
+            cardRewardContainer.anchorMax = new Vector2(0.9f, 0.56f);
+            cardRewardContainer.offsetMin = Vector2.zero;
+            cardRewardContainer.offsetMax = Vector2.zero;
+            var cardRewardLayout = cardRewardContainer.gameObject.AddComponent<HorizontalLayoutGroup>();
+            cardRewardLayout.spacing = 20;
+            cardRewardLayout.childAlignment = TextAnchor.MiddleCenter;
+            cardRewardLayout.childControlWidth = false;
+            cardRewardLayout.childControlHeight = false;
+            cardRewardLayout.childForceExpandWidth = false;
+            cardRewardLayout.childForceExpandHeight = false;
+            cardRewardContainer.gameObject.SetActive(false);
+
+            var cardRewardSkipBtn = AddButton(resultPanel, "CardRewardSkipButton", "Skip", secondary: true);
+            cardRewardSkipBtn.anchorMin = new Vector2(0.5f, 0.10f);
+            cardRewardSkipBtn.anchorMax = new Vector2(0.5f, 0.10f);
+            cardRewardSkipBtn.pivot = new Vector2(0.5f, 0.5f);
+            cardRewardSkipBtn.sizeDelta = new Vector2(200, 60);
+            cardRewardSkipBtn.gameObject.SetActive(false);
+
             // Ability pick area
             var abilityPickLabel = AddText(resultPanel, "AbilityPickLabel", "Choose an ability:",
                 anchorMin: new Vector2(0.15f, 0.56f), anchorMax: new Vector2(0.85f, 0.64f),
@@ -959,6 +988,9 @@ namespace WitsAndFools.EditorTools
             rm.ResultDetailsLabel = resultDetails;
             rm.ResultRewardLabel = resultReward;
             rm.ResultContinueButton = resultContinueBtn.GetComponent<Button>();
+            rm.CardRewardLabel = cardRewardLabel;
+            rm.CardRewardContainer = cardRewardContainer;
+            rm.CardRewardSkipButton = cardRewardSkipBtn.GetComponent<Button>();
             rm.AbilityPickLabel = abilityPickLabel;
             rm.AbilityPickContainer = abilityPickContainer;
             rm.AbilityPickSkipButton = abilityPickSkipBtn.GetComponent<Button>();

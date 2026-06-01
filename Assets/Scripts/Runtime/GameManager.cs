@@ -752,6 +752,7 @@ namespace WitsAndFools
             if (Table && Table.DeckCountLabel)
                 Table.DeckCountLabel.text = playerDeck.ToString();
             Hud.SetTrump(Engine.Trump);
+            if (Hud.PhaseLabel) Hud.PhaseLabel.text = $"Bout {Engine.BoutCount + 1}";
             string phase;
             Color boutColor;
             if (Engine.Phase == Phase.GameOver) { phase = "Game over"; boutColor = ThemePalette.WarmSlate; }

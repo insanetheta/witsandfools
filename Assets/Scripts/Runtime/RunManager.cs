@@ -3168,6 +3168,7 @@ namespace WitsAndFools
 
             if (CardRewardContainer)
             {
+                CardRewardContainer.gameObject.SetActive(true);
                 foreach (var cardDef in _cardRewardOfferings)
                     CreateCardRewardButton(cardDef);
             }
@@ -3182,108 +3183,12 @@ namespace WitsAndFools
 
         void CreateCardRewardButton(CardDefinition def)
         {
-            var btnGO = new GameObject($"CardReward_{def.Id}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
-            btnGO.transform.SetParent(CardRewardContainer, false);
+            var miniCard = CreateMiniCard(def, CardRewardContainer, 140, 200);
+            var le = miniCard.AddComponent<LayoutElement>();
+            le.preferredWidth = 140;
+            le.preferredHeight = 200;
 
-            var bgColor = def.Rarity switch
-            {
-                CardRarity.Common => ThemePalette.RarityCommonBg,
-                CardRarity.Uncommon => ThemePalette.RarityUncommonBg,
-                CardRarity.Rare => ThemePalette.RarityRareBg,
-                _ => ThemePalette.LockedGray
-            };
-            btnGO.GetComponent<Image>().color = new Color(bgColor.r * 0.7f, bgColor.g * 0.7f, bgColor.b * 0.7f, 0.9f);
-
-            var le = btnGO.GetComponent<LayoutElement>();
-            le.preferredHeight = 110;
-            le.preferredWidth = 650;
-
-            // Rarity accent bar
-            var rarityColor = def.Rarity switch
-            {
-                CardRarity.Common => ThemePalette.RarityCommon,
-                CardRarity.Uncommon => ThemePalette.RarityUncommon,
-                CardRarity.Rare => ThemePalette.RarityRare,
-                _ => ThemePalette.DustyTan
-            };
-            var accentGO = new GameObject("RarityAccent", typeof(RectTransform), typeof(Image));
-            accentGO.transform.SetParent(btnGO.transform, false);
-            var accentRT = (RectTransform)accentGO.transform;
-            accentRT.anchorMin = Vector2.zero;
-            accentRT.anchorMax = new Vector2(0, 1);
-            accentRT.pivot = new Vector2(0, 0.5f);
-            accentRT.sizeDelta = new Vector2(4, 0);
-            accentGO.GetComponent<Image>().color = rarityColor;
-            accentGO.GetComponent<Image>().raycastTarget = false;
-
-            Rank displayRank = def.Rank;
-            if (_run.CardRankOverrides.TryGetValue(def.Id, out var overrideRank))
-                displayRank = overrideRank;
-
-            // Suit+Rank display
-            var suitGO = new GameObject("SuitRank", typeof(RectTransform));
-            suitGO.transform.SetParent(btnGO.transform, false);
-            var suitRT = (RectTransform)suitGO.transform;
-            suitRT.anchorMin = new Vector2(0, 0);
-            suitRT.anchorMax = new Vector2(0, 1);
-            suitRT.pivot = new Vector2(0, 0.5f);
-            suitRT.anchoredPosition = new Vector2(14, 0);
-            suitRT.sizeDelta = new Vector2(40, 0);
-            var suitTMP = suitGO.AddComponent<TextMeshProUGUI>();
-            if (FontAssets.Mono) suitTMP.font = FontAssets.Mono;
-            suitTMP.text = $"{displayRank.Label()}{def.Suit.Glyph()}";
-            suitTMP.fontSize = 22;
-            suitTMP.color = def.Suit.IsRed() ? ThemePalette.VenetianRed : ThemePalette.Parchment;
-            suitTMP.alignment = TextAlignmentOptions.Center;
-            suitTMP.raycastTarget = false;
-
-            // Card name + rarity + doctrine
-            var nameGO = new GameObject("Name", typeof(RectTransform));
-            nameGO.transform.SetParent(btnGO.transform, false);
-            var nameRT = (RectTransform)nameGO.transform;
-            nameRT.anchorMin = new Vector2(0, 0.5f);
-            nameRT.anchorMax = new Vector2(1, 1);
-            nameRT.offsetMin = new Vector2(58, 0);
-            nameRT.offsetMax = new Vector2(-12, -2);
-            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
-            if (FontAssets.Heading) nameTMP.font = FontAssets.Heading;
-            string docTag = $"<color={DoctrineHexColor(def.Doctrine)}>{def.Doctrine}</color>";
-            string rarityTag = def.Rarity != CardRarity.Common ? $"  [{def.Rarity}]" : "";
-            nameTMP.text = $"{def.Name}{rarityTag}  {docTag}";
-            nameTMP.richText = true;
-            nameTMP.fontSize = 20;
-            nameTMP.color = ThemePalette.Parchment;
-            nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            nameTMP.raycastTarget = false;
-
-            // Ability description
-            var descGO = new GameObject("Desc", typeof(RectTransform));
-            descGO.transform.SetParent(btnGO.transform, false);
-            var descRT = (RectTransform)descGO.transform;
-            descRT.anchorMin = Vector2.zero;
-            descRT.anchorMax = new Vector2(1, 0.5f);
-            descRT.offsetMin = new Vector2(58, 2);
-            descRT.offsetMax = new Vector2(-12, 0);
-            var descTMP = descGO.AddComponent<TextMeshProUGUI>();
-            string abilityText = "";
-            if (def.HasAbility)
-            {
-                var badgeColor = ThemePalette.AbilityBadgeColor(def.Ability.Value);
-                string hexColor = $"#{(int)(badgeColor.r * 255):X2}{(int)(badgeColor.g * 255):X2}{(int)(badgeColor.b * 255):X2}";
-                abilityText = $"<color={hexColor}>{def.Ability.Value.DisplayName()}</color> · {def.Trigger}\n{def.AbilityText ?? def.Ability.Value.Description()}";
-            }
-            descTMP.text = abilityText;
-            descTMP.richText = true;
-            descTMP.fontSize = 15;
-            descTMP.color = ThemePalette.DescGray;
-            descTMP.enableWordWrapping = true;
-            descTMP.alignment = TextAlignmentOptions.MidlineLeft;
-            descTMP.raycastTarget = false;
-
-            var btn = btnGO.GetComponent<Button>();
-            var colors = btn.colors;
-            colors.highlightedColor = new Color(bgColor.r, bgColor.g, bgColor.b, 0.95f);
-            btn.colors = colors;
+            var btn = miniCard.AddComponent<Button>();
             var captured = def;
             btn.onClick.AddListener(() => OnCardRewardPicked(captured));
         }
@@ -3321,6 +3226,7 @@ namespace WitsAndFools
         {
             if (CardRewardLabel) CardRewardLabel.gameObject.SetActive(false);
             ClearCardRewardButtons();
+            if (CardRewardContainer) CardRewardContainer.gameObject.SetActive(false);
             if (CardRewardSkipButton) CardRewardSkipButton.gameObject.SetActive(false);
         }
 
