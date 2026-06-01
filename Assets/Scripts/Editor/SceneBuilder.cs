@@ -138,29 +138,32 @@ namespace WitsAndFools.EditorTools
             nameplate.anchorMin = new Vector2(0, 1);
             nameplate.anchorMax = new Vector2(0, 1);
             nameplate.pivot = new Vector2(0, 1);
-            nameplate.sizeDelta = new Vector2(360, 70);
+            nameplate.sizeDelta = new Vector2(380, 80);
             nameplate.anchoredPosition = new Vector2(16, -76);
             var nameplateBg = nameplate.gameObject.AddComponent<Image>();
-            nameplateBg.color = new Color(0, 0, 0, 0.55f);
+            nameplateBg.color = new Color(0, 0, 0, 0.6f);
             nameplateBg.raycastTarget = false;
 
             var portraitRT = NewChild(nameplate, "Portrait");
             portraitRT.anchorMin = new Vector2(0, 0.5f);
             portraitRT.anchorMax = new Vector2(0, 0.5f);
             portraitRT.pivot = new Vector2(0, 0.5f);
-            portraitRT.sizeDelta = new Vector2(60, 60);
-            portraitRT.anchoredPosition = new Vector2(5, 0);
+            portraitRT.sizeDelta = new Vector2(66, 66);
+            portraitRT.anchoredPosition = new Vector2(7, 0);
             var portraitImg = portraitRT.gameObject.AddComponent<Image>();
             portraitImg.color = ThemePalette.WarmSlate;
             portraitImg.preserveAspect = true;
             portraitImg.raycastTarget = false;
+            var portraitOutline = portraitRT.gameObject.AddComponent<Outline>();
+            portraitOutline.effectColor = new Color(0.75f, 0.65f, 0.45f, 0.7f);
+            portraitOutline.effectDistance = new Vector2(2, -2);
 
             var oppNameLabel = AddText(nameplate, "OpponentName", "Opponent",
                 anchorMin: new Vector2(0, 0.5f), anchorMax: new Vector2(1, 1),
                 pivot: new Vector2(0, 1), alignment: TextAlignmentOptions.MidlineLeft,
                 fontSize: 22, color: ThemePalette.Parchment, font: HeadingFont);
             var oppNameRT = (RectTransform)oppNameLabel.transform;
-            oppNameRT.offsetMin = new Vector2(70, 0);
+            oppNameRT.offsetMin = new Vector2(80, 0);
             oppNameRT.offsetMax = new Vector2(-8, -2);
 
             var oppArchLabel = AddText(nameplate, "OpponentArchetype", "The Fox",
@@ -168,7 +171,7 @@ namespace WitsAndFools.EditorTools
                 pivot: new Vector2(0, 0), alignment: TextAlignmentOptions.MidlineLeft,
                 fontSize: 16, color: ThemePalette.DustyTan);
             var oppArchRT = (RectTransform)oppArchLabel.transform;
-            oppArchRT.offsetMin = new Vector2(70, 2);
+            oppArchRT.offsetMin = new Vector2(80, 2);
             oppArchRT.offsetMax = new Vector2(-8, 0);
 
             // ----- End-bout button (bottom-right, above player hand) -----
@@ -402,7 +405,7 @@ namespace WitsAndFools.EditorTools
             oppInfoStrip.anchorMin = new Vector2(0, 1);
             oppInfoStrip.anchorMax = new Vector2(1, 1);
             oppInfoStrip.pivot = new Vector2(0.5f, 1);
-            oppInfoStrip.offsetMin = new Vector2(390, -118);
+            oppInfoStrip.offsetMin = new Vector2(410, -122);
             oppInfoStrip.offsetMax = new Vector2(-16, -82);
             var oppInfoBg = oppInfoStrip.gameObject.AddComponent<Image>();
             oppInfoBg.color = new Color(0, 0, 0, 0.55f);
@@ -700,12 +703,12 @@ namespace WitsAndFools.EditorTools
             cardRewardLabel.gameObject.SetActive(false);
 
             var cardRewardContainer = NewChild(resultPanel, "CardRewardContainer");
-            cardRewardContainer.anchorMin = new Vector2(0.1f, 0.20f);
+            cardRewardContainer.anchorMin = new Vector2(0.1f, 0.14f);
             cardRewardContainer.anchorMax = new Vector2(0.9f, 0.56f);
             cardRewardContainer.offsetMin = Vector2.zero;
             cardRewardContainer.offsetMax = Vector2.zero;
             var cardRewardLayout = cardRewardContainer.gameObject.AddComponent<HorizontalLayoutGroup>();
-            cardRewardLayout.spacing = 20;
+            cardRewardLayout.spacing = 30;
             cardRewardLayout.childAlignment = TextAnchor.MiddleCenter;
             cardRewardLayout.childControlWidth = false;
             cardRewardLayout.childControlHeight = false;
@@ -714,8 +717,8 @@ namespace WitsAndFools.EditorTools
             cardRewardContainer.gameObject.SetActive(false);
 
             var cardRewardSkipBtn = AddButton(resultPanel, "CardRewardSkipButton", "Skip", secondary: true);
-            cardRewardSkipBtn.anchorMin = new Vector2(0.5f, 0.10f);
-            cardRewardSkipBtn.anchorMax = new Vector2(0.5f, 0.10f);
+            cardRewardSkipBtn.anchorMin = new Vector2(0.5f, 0.06f);
+            cardRewardSkipBtn.anchorMax = new Vector2(0.5f, 0.06f);
             cardRewardSkipBtn.pivot = new Vector2(0.5f, 0.5f);
             cardRewardSkipBtn.sizeDelta = new Vector2(200, 60);
             cardRewardSkipBtn.gameObject.SetActive(false);
@@ -1058,6 +1061,11 @@ namespace WitsAndFools.EditorTools
             {
                 var slug = opp.Name.ToLower().Replace(" ", "_");
                 var sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Art/Portraits/portrait_{slug}.png");
+                if (sprite == null)
+                {
+                    var altSlug = slug.Replace("the_", "");
+                    sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"Assets/Art/Portraits/portrait_{altSlug}.png");
+                }
                 portraitNames.Add(opp.Name);
                 portraitSprites.Add(sprite);
             }

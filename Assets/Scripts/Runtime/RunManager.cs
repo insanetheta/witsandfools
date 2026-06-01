@@ -163,7 +163,7 @@ namespace WitsAndFools
         {
             if (Input.GetKeyDown(KeyCode.R) && _phase != RunPhase.InMatch)
                 ToggleAutoRun();
-            if (!_autoRun || Time.time < _nextAutoStep) return;
+            if (!_autoRun || Time.unscaledTime < _nextAutoStep) return;
             AutoStep();
         }
 
@@ -172,7 +172,7 @@ namespace WitsAndFools
             _autoRun = !_autoRun;
             if (_autoRun)
             {
-                _nextAutoStep = Time.time + _autoStepDelay;
+                _nextAutoStep = Time.unscaledTime + _autoStepDelay;
                 Debug.Log("[RunManager] Auto-run ON");
             }
             else
@@ -191,7 +191,7 @@ namespace WitsAndFools
             StartNewRun();
             _autoRun = true;
             Time.timeScale = 20f;
-            _nextAutoStep = Time.time + _autoStepDelay;
+            _nextAutoStep = Time.unscaledTime + _autoStepDelay;
             Debug.Log("[RunManager] Auto-run started (fresh run, timeScale=20)");
         }
 
@@ -205,13 +205,13 @@ namespace WitsAndFools
             StartNewRun();
             _autoRun = true;
             Time.timeScale = 20f;
-            _nextAutoStep = Time.time + _autoStepDelay;
+            _nextAutoStep = Time.unscaledTime + _autoStepDelay;
             Debug.Log($"[RunManager] Batch run started — {count} runs");
         }
 
         void AutoStep()
         {
-            _nextAutoStep = Time.time + _autoStepDelay;
+            _nextAutoStep = Time.unscaledTime + _autoStepDelay;
             if (_run == null || _run.CurrentMap == null) return;
 
             switch (_phase)
@@ -521,7 +521,7 @@ namespace WitsAndFools
             {
                 UIScreenCapture.Instance.NotifyPhaseChange(phase, _run?.RunWon ?? false);
                 if (UIScreenCapture.Instance.IsCapturing && _autoRun)
-                    _nextAutoStep = Time.time + 0.2f;
+                    _nextAutoStep = Time.unscaledTime + 0.2f;
             }
 
             switch (phase)
@@ -1686,24 +1686,73 @@ namespace WitsAndFools
             if (!ShopItemContainer) return;
 
             var abilityOfferings = PickShopOfferings(2);
-            foreach (var offering in abilityOfferings)
-                CreateShopItemButton(offering);
+            if (abilityOfferings.Count > 0)
+            {
+                CreateShopSectionHeader("Abilities", ThemePalette.AbilityBadgeColor(AbilityType.ExtraDraw));
+                foreach (var offering in abilityOfferings)
+                    CreateShopItemButton(offering);
+            }
 
             CreateCardShopItems();
 
             var trinketOffering = PickTrinketOffering();
             if (trinketOffering.HasValue)
+            {
+                CreateShopSectionHeader("Trinkets", ThemePalette.Gold);
                 CreateTrinketShopButton(trinketOffering.Value);
+            }
 
+            bool hasServices = false;
             var upgradeOffering = PickCardUpgradeOffering();
+            bool hasBurden = _run.PlayerBurdens.Count > 0;
+            bool hasRemoval = _run.PlayerDeckCardIds.Count > 8 && _run.CardRemovalsPurchased < 3;
+            if (upgradeOffering.HasValue || hasBurden || hasRemoval)
+            {
+                CreateShopSectionHeader("Services", new Color(0.5f, 0.65f, 0.5f));
+                hasServices = true;
+            }
+
             if (upgradeOffering.HasValue)
                 CreateCardUpgradeButton(upgradeOffering.Value);
 
-            if (_run.PlayerBurdens.Count > 0)
+            if (hasBurden)
                 CreateBurdenRemovalButton();
 
-            if (_run.PlayerDeckCardIds.Count > 8 && _run.CardRemovalsPurchased < 3)
+            if (hasRemoval)
                 CreateCardRemovalButton();
+        }
+
+        void CreateShopSectionHeader(string title, Color accentColor)
+        {
+            var headerGO = new GameObject($"Section_{title}", typeof(RectTransform), typeof(LayoutElement));
+            headerGO.transform.SetParent(ShopItemContainer, false);
+            headerGO.GetComponent<LayoutElement>().preferredHeight = 32;
+            headerGO.GetComponent<LayoutElement>().preferredWidth = 550;
+
+            var lineGO = new GameObject("Line", typeof(RectTransform), typeof(Image));
+            lineGO.transform.SetParent(headerGO.transform, false);
+            var lineRT = (RectTransform)lineGO.transform;
+            lineRT.anchorMin = new Vector2(0, 0);
+            lineRT.anchorMax = new Vector2(1, 0);
+            lineRT.pivot = new Vector2(0.5f, 0);
+            lineRT.sizeDelta = new Vector2(0, 1);
+            lineGO.GetComponent<Image>().color = new Color(accentColor.r, accentColor.g, accentColor.b, 0.3f);
+            lineGO.GetComponent<Image>().raycastTarget = false;
+
+            var labelGO = new GameObject("Label", typeof(RectTransform));
+            labelGO.transform.SetParent(headerGO.transform, false);
+            var labelRT = (RectTransform)labelGO.transform;
+            labelRT.anchorMin = Vector2.zero;
+            labelRT.anchorMax = Vector2.one;
+            labelRT.offsetMin = new Vector2(8, 0);
+            labelRT.offsetMax = Vector2.zero;
+            var tmp = labelGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Heading) tmp.font = FontAssets.Heading;
+            tmp.text = title.ToUpper();
+            tmp.fontSize = 14;
+            tmp.color = accentColor;
+            tmp.alignment = TextAlignmentOptions.BottomLeft;
+            tmp.raycastTarget = false;
         }
 
         void ClearShopItems()
@@ -1815,8 +1864,10 @@ namespace WitsAndFools
             var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
             var headingFont = FontAssets.Heading;
             if (headingFont) nameTMP.font = headingFont;
-            string rarityTag = def.Rarity != AbilityRarity.Common ? $"  [{def.Rarity}]" : "";
+            string rarityHex = ColorUtility.ToHtmlStringRGB(rarityColor);
+            string rarityTag = def.Rarity != AbilityRarity.Common ? $"  <color=#{rarityHex}><size=80%>{def.Rarity}</size></color>" : "";
             nameTMP.text = $"{offering.type.DisplayName()}{rarityTag}";
+            nameTMP.richText = true;
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
             nameTMP.fontSize = 18;
             nameTMP.color = canBuy ? ThemePalette.Parchment : ThemePalette.DisabledText;
@@ -2127,7 +2178,8 @@ namespace WitsAndFools
             ShowEventChoices("The Drunk Merchant",
                 $"A bleary-eyed merchant waves you over.\n\"I know secrets worth more than gold. {abilityName}... for {cost} Florins.\"",
                 canAfford && ability.HasValue ? $"Pay {cost} Florins" : $"Can't afford ({cost}F)",
-                "Walk away (+2 Florins)");
+                "Walk away (+2 Florins)",
+                ChoiceCost, ChoiceSafe);
 
             if (canAfford && ability.HasValue)
             {
@@ -2163,7 +2215,8 @@ namespace WitsAndFools
 
             ShowEventChoices("The Forger's Offer",
                 $"A scarred forger leans close.\n\"I can refine your {pick.DisplayName()} into {upgraded.DisplayName()}. But my methods leave a mark.\"",
-                $"Accept (upgrade + burden)", "Decline");
+                $"Accept (upgrade + burden)", "Decline",
+                ChoiceRisky, ChoiceSafe);
 
             _eventChoice1Action = () =>
             {
@@ -2202,7 +2255,8 @@ namespace WitsAndFools
             ShowEventChoices("The Cardinal's Confession",
                 $"A cardinal beckons from a shadowed alcove.\n{upgradeDesc}\nOr he can share a blessing of coin.",
                 canUpgrade ? $"Bless card (-{upgradeCost}F)" : $"No suitable cards",
-                $"Take the blessing (+{freeGain} Florins)");
+                $"Take the blessing (+{freeGain} Florins)",
+                ChoiceCost, ChoiceSafe);
 
             if (canUpgrade)
             {
@@ -2231,7 +2285,8 @@ namespace WitsAndFools
             int stealAmount = 6 + _run.CurrentAct * 2;
             ShowEventChoices("The Pickpocket's Dilemma",
                 $"You spot a fat purse dangling from a merchant's belt.\nYou could take {stealAmount} Florins... but thieves get marked.",
-                $"Steal ({stealAmount}F + burden)", "Return the wallet (+ability slot)");
+                $"Steal ({stealAmount}F + burden)", "Return the wallet (+ability slot)",
+                ChoiceRisky, ChoiceSafe);
 
             _eventChoice1Action = () =>
             {
@@ -2266,7 +2321,8 @@ namespace WitsAndFools
 
             ShowEventChoices("The Alchemist's Bargain",
                 $"An alchemist gestures at your deck.\n\"Sacrifice '{weakDef.Name}' and I will transmute '{upgradeTarget.name}' to {boosted.Label()}.\"",
-                $"Transmute (remove + upgrade)", "Decline");
+                $"Transmute (remove + upgrade)", "Decline",
+                ChoiceRisky, ChoiceSafe);
 
             string capturedWeak = weakest;
             _eventChoice1Action = () =>
@@ -2291,7 +2347,8 @@ namespace WitsAndFools
             ShowEventChoices("The Duelist's Ghost",
                 $"A spectral duelist materializes before you.\n\"Prove your worth. Sacrifice {prestigeCost} Prestige and I will expand your mind.\"",
                 canPay ? $"Accept (-{prestigeCost} Prestige, +1 slot)" : "Not enough Prestige",
-                "Refuse (+4 Florins)");
+                "Refuse (+4 Florins)",
+                ChoiceCost, ChoiceSafe);
 
             if (canPay)
             {
@@ -2323,7 +2380,8 @@ namespace WitsAndFools
                 var burden = _run.PlayerBurdens[_rng.Next(_run.PlayerBurdens.Count)];
                 ShowEventChoices("The Fence",
                     $"A shadowy fence offers a deal.\n\"I can make your '{burden.DisplayName()}' disappear... for {removeCost} Florins.\"",
-                    $"Pay {removeCost}F (remove burden)", "Decline (+3 Florins)");
+                    $"Pay {removeCost}F (remove burden)", "Decline (+3 Florins)",
+                    ChoiceCost, ChoiceSafe);
 
                 _eventChoice1Action = () =>
                 {
@@ -2342,7 +2400,8 @@ namespace WitsAndFools
                 int sellAmount = 6 + _run.CurrentAct;
                 ShowEventChoices("The Fence",
                     "A shadowy fence eyes your belongings.\n\"Nothing to fix, but I can offer you coin for information.\"",
-                    $"Share intel (+{sellAmount} Florins)", "Move on (+2 Florins)");
+                    $"Share intel (+{sellAmount} Florins)", "Move on (+2 Florins)",
+                    ChoiceIntel, ChoiceSafe);
 
                 _eventChoice1Action = () =>
                 {
@@ -2371,7 +2430,8 @@ namespace WitsAndFools
                 ShowEventChoices("The Whispering Walls",
                     $"Ancient walls whisper secrets of refinement.\n\"Shed the unnecessary. Let '{cardName}' go for {cost} Florins.\"",
                     canAfford ? $"Thin deck (-{cost}F, remove card)" : $"Can't afford ({cost}F)",
-                    "Listen quietly (+3 Florins)");
+                    "Listen quietly (+3 Florins)",
+                    ChoiceCost, ChoiceSafe);
 
                 if (canAfford && weakest != null)
                 {
@@ -2393,7 +2453,8 @@ namespace WitsAndFools
                 int gain = 5 + _run.CurrentAct;
                 ShowEventChoices("The Whispering Walls",
                     "Ancient walls murmur faintly.\nYour deck is already lean. They offer what they can.",
-                    $"Listen (+{gain} Florins)", null);
+                    $"Listen (+{gain} Florins)", null,
+                    ChoiceSafe);
 
                 _eventChoice1Action = () =>
                 {
@@ -2424,7 +2485,8 @@ namespace WitsAndFools
             {
                 ShowEventChoices("The Hearth",
                     "The hearth crackles. You find a quiet moment of peace.",
-                    "Mend (remove a burden)", "Rest quietly (+3 Florins)");
+                    "Mend (remove a burden)", "Rest quietly (+3 Florins)",
+                    ChoiceSafe, ChoiceSafe);
                 _eventChoice1Action = DoRestMend;
                 _eventChoice2Action = DoRestQuietly;
             }
@@ -2439,7 +2501,8 @@ namespace WitsAndFools
                     canUpgrade
                         ? "You find a quiet corner with old game manuals.\nYour experience lets you refine what you already know."
                         : "You find a quiet corner with old game manuals.\nPerhaps you can learn something new.",
-                    studyLabel, "Rest quietly (+3 Florins)");
+                    studyLabel, "Rest quietly (+3 Florins)",
+                    ChoiceSafe, ChoiceSafe);
                 _eventChoice1Action = () => DoRestStudy(upgradeable, canLearn);
                 _eventChoice2Action = DoRestQuietly;
             }
@@ -2452,7 +2515,8 @@ namespace WitsAndFools
                     Rank newRank = pick.rank + 1;
                     ShowEventChoices("The Smithy",
                         $"A traveling smith offers to hone one of your cards.\n\"{pick.name}\" can be sharpened from {pick.rank.Label()} to {newRank.Label()}.",
-                        $"Hone ({pick.rank.Label()} → {newRank.Label()})", "Rest quietly (+3 Florins)");
+                        $"Hone ({pick.rank.Label()} → {newRank.Label()})", "Rest quietly (+3 Florins)",
+                        ChoiceSafe, ChoiceSafe);
                     _eventChoice1Action = () =>
                     {
                         _run.CardRankOverrides[pick.id] = newRank;
@@ -2464,7 +2528,8 @@ namespace WitsAndFools
                 {
                     ShowEventChoices("The Hearth",
                         "A warm fire and a good meal. Simple comforts.",
-                        "Rest quietly (+3 Florins)", null);
+                        "Rest quietly (+3 Florins)", null,
+                        ChoiceSafe);
                     _eventChoice1Action = DoRestQuietly;
                     _eventChoice2Action = null;
                 }
@@ -2476,7 +2541,8 @@ namespace WitsAndFools
                 {
                     ShowEventChoices("The Bonfire",
                         $"Flames lick the night air. You could burn away the dead weight.\n\"{wDef.Name}\" ({wDef.Rank.Label()}{wDef.Suit.Glyph()}) looks expendable.",
-                        $"Burn it (remove from deck)", "Rest quietly (+3 Florins)");
+                        $"Burn it (remove from deck)", "Rest quietly (+3 Florins)",
+                        ChoiceRisky, ChoiceSafe);
                     string capturedId = weakest;
                     _eventChoice1Action = () =>
                     {
@@ -2491,7 +2557,8 @@ namespace WitsAndFools
                 {
                     ShowEventChoices("The Hearth",
                         "A warm fire and a good meal. Simple comforts.",
-                        "Rest quietly (+3 Florins)", null);
+                        "Rest quietly (+3 Florins)", null,
+                        ChoiceSafe);
                     _eventChoice1Action = DoRestQuietly;
                     _eventChoice2Action = null;
                 }
@@ -2502,7 +2569,8 @@ namespace WitsAndFools
                     ? "The hearth crackles. You find a quiet moment of peace."
                     : "A warm fire and a good meal. Simple comforts.";
                 ShowEventChoices("The Hearth", desc,
-                    hasBurdens ? "Mend (remove a burden)" : "Rest quietly (+3 Florins)", null);
+                    hasBurdens ? "Mend (remove a burden)" : "Rest quietly (+3 Florins)", null,
+                    ChoiceSafe);
                 _eventChoice1Action = hasBurdens ? DoRestMend : DoRestQuietly;
                 _eventChoice2Action = null;
             }
@@ -2511,7 +2579,13 @@ namespace WitsAndFools
         Action _eventChoice1Action;
         Action _eventChoice2Action;
 
-        void ShowEventChoices(string title, string desc, string choice1, string choice2)
+        static readonly Color ChoiceSafe  = new(0.35f, 0.65f, 0.35f);
+        static readonly Color ChoiceRisky = new(0.72f, 0.28f, 0.28f);
+        static readonly Color ChoiceCost  = new(0.78f, 0.62f, 0.25f);
+        static readonly Color ChoiceIntel = new(0.35f, 0.55f, 0.75f);
+
+        void ShowEventChoices(string title, string desc, string choice1, string choice2,
+            Color? accent1 = null, Color? accent2 = null)
         {
             if (EventTitleLabel) EventTitleLabel.text = title;
             if (EventDescLabel) EventDescLabel.text = desc;
@@ -2523,6 +2597,7 @@ namespace WitsAndFools
                 EventChoice1Button.onClick.RemoveAllListeners();
                 EventChoice1Button.onClick.AddListener(OnEventChoice1);
                 if (EventChoice1Label) EventChoice1Label.text = choice1 ?? "";
+                SetChoiceAccent(EventChoice1Button, accent1 ?? ChoiceCost);
             }
 
             if (EventChoice2Button)
@@ -2534,10 +2609,30 @@ namespace WitsAndFools
                     EventChoice2Button.onClick.RemoveAllListeners();
                     EventChoice2Button.onClick.AddListener(OnEventChoice2);
                     if (EventChoice2Label) EventChoice2Label.text = choice2;
+                    SetChoiceAccent(EventChoice2Button, accent2 ?? ChoiceSafe);
                 }
             }
 
             if (EventContinueButton) EventContinueButton.gameObject.SetActive(false);
+        }
+
+        void SetChoiceAccent(Button btn, Color color)
+        {
+            var rt = (RectTransform)btn.transform;
+            var existing = rt.Find("ChoiceAccent");
+            if (existing) Destroy(existing.gameObject);
+
+            var accent = new GameObject("ChoiceAccent", typeof(RectTransform), typeof(Image));
+            accent.transform.SetParent(rt, false);
+            accent.transform.SetAsFirstSibling();
+            var aRT = (RectTransform)accent.transform;
+            aRT.anchorMin = Vector2.zero;
+            aRT.anchorMax = new Vector2(0, 1);
+            aRT.pivot = new Vector2(0, 0.5f);
+            aRT.sizeDelta = new Vector2(5, 0);
+            aRT.anchoredPosition = Vector2.zero;
+            accent.GetComponent<Image>().color = color;
+            accent.GetComponent<Image>().raycastTarget = false;
         }
 
         void ShowEventOutcome(string outcome)
@@ -3001,7 +3096,7 @@ namespace WitsAndFools
             };
             var outline = cardGO.AddComponent<Outline>();
             outline.effectColor = rarityBorder;
-            outline.effectDistance = new Vector2(2, -2);
+            outline.effectDistance = new Vector2(width > 150 ? 3 : 2, width > 150 ? -3 : -2);
 
             cardGO.GetComponent<Image>().color = ThemePalette.CardCream;
 
@@ -3187,12 +3282,47 @@ namespace WitsAndFools
 
         void CreateCardRewardButton(CardDefinition def)
         {
-            var miniCard = CreateMiniCard(def, CardRewardContainer, 140, 200);
-            var le = miniCard.AddComponent<LayoutElement>();
-            le.preferredWidth = 140;
-            le.preferredHeight = 200;
+            const float cardW = 220, cardH = 310, labelH = 24;
+            var wrapper = new GameObject("RewardSlot_" + def.Id, typeof(RectTransform));
+            wrapper.transform.SetParent(CardRewardContainer, false);
+            var wrapperRT = (RectTransform)wrapper.transform;
+            wrapperRT.sizeDelta = new Vector2(cardW, cardH + labelH);
 
-            var btn = miniCard.AddComponent<Button>();
+            var le = wrapper.AddComponent<LayoutElement>();
+            le.preferredWidth = cardW;
+            le.preferredHeight = cardH + labelH;
+
+            var miniCard = CreateMiniCard(def, wrapper.transform, cardW, cardH);
+            var miniRT = (RectTransform)miniCard.transform;
+            miniRT.anchorMin = new Vector2(0.5f, 1);
+            miniRT.anchorMax = new Vector2(0.5f, 1);
+            miniRT.pivot = new Vector2(0.5f, 1);
+            miniRT.anchoredPosition = Vector2.zero;
+
+            var rarityColor = def.Rarity switch
+            {
+                CardRarity.Common => ThemePalette.RarityCommon,
+                CardRarity.Uncommon => ThemePalette.RarityUncommon,
+                CardRarity.Rare => ThemePalette.RarityRare,
+                _ => ThemePalette.DustyTan
+            };
+            var rarityLabelGO = new GameObject("RarityLabel", typeof(RectTransform));
+            rarityLabelGO.transform.SetParent(wrapper.transform, false);
+            var rlRT = (RectTransform)rarityLabelGO.transform;
+            rlRT.anchorMin = new Vector2(0, 0);
+            rlRT.anchorMax = new Vector2(1, 0);
+            rlRT.pivot = new Vector2(0.5f, 0);
+            rlRT.anchoredPosition = Vector2.zero;
+            rlRT.sizeDelta = new Vector2(0, labelH);
+            var rlTMP = rarityLabelGO.AddComponent<TextMeshProUGUI>();
+            rlTMP.text = def.Rarity.ToString().ToUpper();
+            rlTMP.fontSize = 14;
+            rlTMP.color = rarityColor;
+            rlTMP.alignment = TextAlignmentOptions.Center;
+            rlTMP.raycastTarget = false;
+            if (FontAssets.Heading) rlTMP.font = FontAssets.Heading;
+
+            var btn = wrapper.AddComponent<Button>();
             var captured = def;
             btn.onClick.AddListener(() => OnCardRewardPicked(captured));
         }
@@ -3461,6 +3591,8 @@ namespace WitsAndFools
             if (_run.PlayerDeckCardIds.Count >= 20) return;
 
             var offerings = PickCardRewardOfferings(2);
+            if (offerings.Count > 0)
+                CreateShopSectionHeader("Cards for Sale", new Color(0.1f, 0.54f, 0.48f));
             foreach (var cardDef in offerings)
             {
                 int price = cardDef.Rarity switch
