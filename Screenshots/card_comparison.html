@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Framed Card Design — Mockup vs Unity Comparison</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #111; color: #F5F0E0; font-family: 'Segoe UI', sans-serif; padding: 30px; }
+  h1 { text-align: center; color: #D4A846; font-size: 24px; margin-bottom: 6px; }
+  .subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 30px; }
+  .comparison { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; margin-bottom: 40px; }
+  .side { flex: 1; max-width: 700px; min-width: 300px; }
+  .side h2 { text-align: center; font-size: 16px; color: #CC9933; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #333; }
+  .side img { width: 100%; border-radius: 6px; border: 1px solid #333; }
+  .notes { max-width: 900px; margin: 0 auto; }
+  .notes h3 { color: #D4A846; font-size: 15px; margin: 20px 0 10px; }
+  .notes ul { padding-left: 20px; }
+  .notes li { color: #aaa; font-size: 13px; margin-bottom: 6px; line-height: 1.5; }
+  .notes li strong { color: #F5F0E0; }
+  .match { color: #55AA55; }
+  .todo { color: #CC9933; }
+  .new { color: #5599DD; }
+</style>
+</head>
+<body>
+
+<h1>Framed Card Design Comparison</h1>
+<p class="subtitle">HTML Mockup vs Unity Implementation — Wits and Fools</p>
+
+<div class="comparison">
+  <div class="side">
+    <h2>HTML Mockup (Target)</h2>
+    <iframe src="../Assets/Art/Generated/Cards/Schemer/card_mockup.html" width="100%" height="800" style="border:1px solid #333; border-radius:6px; background:#111;"></iframe>
+  </div>
+  <div class="side">
+    <h2>Unity Implementation (with Frame Texture)</h2>
+    <img src="framed_cards_with_frame_overlay.png" alt="Unity framed cards with gold frame overlay">
+  </div>
+</div>
+
+<div class="notes">
+  <h3>Structure Match Checklist</h3>
+  <ul>
+    <li><strong class="match">Top Band</strong> — Dark background with rank/suit (left), card name (center), doctrine badge (right). Gold separator line at bottom edge.</li>
+    <li><strong class="match">Art Window</strong> — Full-color card artwork fills the center between bands. Loaded from Resources/CardArt/ at runtime. 10 Schemer cards have generated Renaissance oil painting art.</li>
+    <li><strong class="match">Bottom Band</strong> — Colored ability dot (left), ability name label, rarity pip glyph (right). Gold separator line at top edge.</li>
+    <li><strong class="match">Rarity Borders</strong> — Common (brown #AA8855), Uncommon (blue-grey #AABBCC), Rare (gold #DDAA33 with thicker 3px border).</li>
+    <li><strong class="match">Inner Gold Filigree</strong> — Subtle gold inner border, brighter for Rare cards.</li>
+    <li><strong class="match">Size Scaling</strong> — Text sizes, dot sizes, band heights all scale correctly across 88x126 (deck browser), 130x186 (detail), and 220x310 (card reward).</li>
+    <li><strong class="match">Dark Frame</strong> — Near-black card frame background (#0F0C08) instead of old cream (#F5F0E0).</li>
+    <li><strong class="match">Light Text on Dark</strong> — Card name is parchment-colored, rank/suit uses red or dusty tan for dark-background visibility.</li>
+    <li><strong class="match">Art Fills Naturally</strong> — Artwork covers the art window without grey overlay or transparency — vivid, full-color portraits framed by the dark bands.</li>
+    <li><strong class="new">Gold Frame Texture Overlay</strong> — 9-sliced ornate gold frame (NanoBanana-generated dark mahogany + gold leaf scrollwork) rendered on top of card at all sizes. fillCenter=false so art shows through. pixelsPerUnitMultiplier scales border thickness per card size tier.</li>
+  </ul>
+
+  <h3>Frame Textures Generated</h3>
+  <ul>
+    <li><strong class="match">card_frame_gold.png</strong> — Dark mahogany + gold leaf scrollwork (selected, integrated into Unity)</li>
+    <li><strong>card_frame_iron.png</strong> — Wrought iron gothic with shields and rivets</li>
+    <li><strong>card_frame_leather.png</strong> — Tooled leather with gold-stamped fleur-de-lis</li>
+    <li><strong>card_frame_top_band.png</strong> — Horizontal header strip</li>
+    <li><strong>card_frame_bottom_band.png</strong> — Horizontal footer strip with gold accent</li>
+  </ul>
+
+  <h3>Remaining Work</h3>
+  <ul>
+    <li><strong class="todo">Hover/Tap Ability Overlay</strong> — In the HTML mockup, hovering the art window slides up the ability description. In Unity, this would trigger on pointer enter/click.</li>
+    <li><strong class="todo">Remaining Card Art</strong> — Generate art for the other 89 cards (Brute, Trickster, Hoarder, Neutral), 28 relics, and 17 opponent portraits.</li>
+    <li><strong class="todo">Alternative Frame Styles</strong> — Iron and leather frames generated but not yet integrated as rarity-specific variants (e.g. iron for Common, leather for Uncommon, gold for Rare).</li>
+  </ul>
+</div>
+
+</body>
+</html>

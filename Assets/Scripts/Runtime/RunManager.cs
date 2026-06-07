@@ -3207,10 +3207,19 @@ namespace WitsAndFools
 
         GameObject CreateMiniCard(CardDefinition def, Transform parent, float width, float height)
         {
+            bool isSmall = width <= 100;
+            bool isLarge = width > 150;
+            float topBandH = isSmall ? 20 : isLarge ? 30 : 24;
+            float bottomBandH = isSmall ? 16 : isLarge ? 24 : 20;
+            float borderW = def.Rarity == CardRarity.Rare ? 3 : 2;
+
             var cardGO = new GameObject("Card_" + def.Id, typeof(RectTransform), typeof(Image));
             cardGO.transform.SetParent(parent, false);
             var rt = (RectTransform)cardGO.transform;
             rt.sizeDelta = new Vector2(width, height);
+
+            // Dark card frame background
+            cardGO.GetComponent<Image>().color = new Color(0.06f, 0.05f, 0.03f);
 
             var rarityBorder = def.Rarity switch
             {
@@ -3221,40 +3230,19 @@ namespace WitsAndFools
             };
             var outline = cardGO.AddComponent<Outline>();
             outline.effectColor = rarityBorder;
-            outline.effectDistance = new Vector2(width > 150 ? 3 : 2, width > 150 ? -3 : -2);
+            outline.effectDistance = new Vector2(borderW, -borderW);
 
-            cardGO.GetComponent<Image>().color = ThemePalette.CardCream;
+            // Inner gold filigree border
+            var filigree = cardGO.AddComponent<Outline>();
+            filigree.effectColor = def.Rarity == CardRarity.Rare
+                ? new Color(0.87f, 0.67f, 0.2f, 0.35f)
+                : new Color(0.83f, 0.66f, 0.27f, 0.2f);
+            filigree.effectDistance = new Vector2(1, -1);
 
             Rank displayRank = def.Rank;
             if (_run != null && _run.CardRankOverrides.TryGetValue(def.Id, out var overrideRank))
                 displayRank = overrideRank;
 
-            // Rank + Suit
-            var rankGO = new GameObject("RankSuit", typeof(RectTransform));
-            rankGO.transform.SetParent(cardGO.transform, false);
-            var rankRT = (RectTransform)rankGO.transform;
-            rankRT.anchorMin = new Vector2(0, 1);
-            rankRT.anchorMax = new Vector2(0.5f, 1);
-            rankRT.pivot = new Vector2(0, 1);
-            rankRT.anchoredPosition = new Vector2(4, -3);
-            rankRT.sizeDelta = new Vector2(0, 16);
-            var rankTMP = rankGO.AddComponent<TextMeshProUGUI>();
-            if (FontAssets.Mono) rankTMP.font = FontAssets.Mono;
-            rankTMP.text = $"{displayRank.Label()}{def.Suit.Glyph()}";
-            rankTMP.fontSize = width > 110 ? 14 : 11;
-            rankTMP.color = def.Suit.IsRed() ? ThemePalette.RedSuit : new Color(0.05f, 0.05f, 0.05f);
-            rankTMP.alignment = TextAlignmentOptions.TopLeft;
-            rankTMP.raycastTarget = false;
-
-            // Doctrine badge
-            var docGO = new GameObject("Doc", typeof(RectTransform), typeof(Image));
-            docGO.transform.SetParent(cardGO.transform, false);
-            var docRT = (RectTransform)docGO.transform;
-            docRT.anchorMin = new Vector2(1, 1);
-            docRT.anchorMax = new Vector2(1, 1);
-            docRT.pivot = new Vector2(1, 1);
-            docRT.anchoredPosition = new Vector2(-3, -3);
-            docRT.sizeDelta = new Vector2(28, 12);
             var docColor = def.Doctrine switch
             {
                 DoctrineType.Schemer => new Color(0.1f, 0.54f, 0.48f),
@@ -3263,7 +3251,78 @@ namespace WitsAndFools
                 DoctrineType.Hoarder => new Color(0.71f, 0.33f, 0.04f),
                 _ => new Color(0.42f, 0.45f, 0.5f)
             };
+
+            // === TOP BAND ===
+            var topBand = new GameObject("TopBand", typeof(RectTransform), typeof(Image));
+            topBand.transform.SetParent(cardGO.transform, false);
+            var topRT = (RectTransform)topBand.transform;
+            topRT.anchorMin = new Vector2(0, 1);
+            topRT.anchorMax = new Vector2(1, 1);
+            topRT.pivot = new Vector2(0.5f, 1);
+            topRT.anchoredPosition = Vector2.zero;
+            topRT.sizeDelta = new Vector2(0, topBandH);
+            topBand.GetComponent<Image>().color = new Color(0.12f, 0.09f, 0.06f, 0.95f);
+            topBand.GetComponent<Image>().raycastTarget = false;
+
+            // Gold separator at bottom of top band
+            var topSep = new GameObject("TopSep", typeof(RectTransform), typeof(Image));
+            topSep.transform.SetParent(topBand.transform, false);
+            var tsRT = (RectTransform)topSep.transform;
+            tsRT.anchorMin = new Vector2(0, 0);
+            tsRT.anchorMax = new Vector2(1, 0);
+            tsRT.pivot = new Vector2(0.5f, 0);
+            tsRT.anchoredPosition = Vector2.zero;
+            tsRT.sizeDelta = new Vector2(0, 1);
+            topSep.GetComponent<Image>().color = new Color(0.83f, 0.66f, 0.27f, 0.25f);
+            topSep.GetComponent<Image>().raycastTarget = false;
+
+            // Rank + Suit (top band left)
+            var rankGO = new GameObject("RankSuit", typeof(RectTransform));
+            rankGO.transform.SetParent(topBand.transform, false);
+            var rankRT = (RectTransform)rankGO.transform;
+            rankRT.anchorMin = new Vector2(0, 0);
+            rankRT.anchorMax = new Vector2(0.3f, 1);
+            rankRT.offsetMin = new Vector2(4, 0);
+            rankRT.offsetMax = Vector2.zero;
+            var rankTMP = rankGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Mono) rankTMP.font = FontAssets.Mono;
+            rankTMP.text = $"{displayRank.Label()}{def.Suit.Glyph()}";
+            rankTMP.fontSize = isSmall ? 10 : isLarge ? 15 : 11;
+            rankTMP.color = def.Suit.IsRed() ? ThemePalette.RedSuit : ThemePalette.DustyTan;
+            rankTMP.alignment = TextAlignmentOptions.MidlineLeft;
+            rankTMP.raycastTarget = false;
+
+            // Card name (top band center)
+            var nameGO = new GameObject("Name", typeof(RectTransform));
+            nameGO.transform.SetParent(topBand.transform, false);
+            var nameRT = (RectTransform)nameGO.transform;
+            nameRT.anchorMin = new Vector2(0.25f, 0);
+            nameRT.anchorMax = new Vector2(0.75f, 1);
+            nameRT.offsetMin = Vector2.zero;
+            nameRT.offsetMax = Vector2.zero;
+            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Heading) nameTMP.font = FontAssets.Heading;
+            nameTMP.text = def.Name;
+            nameTMP.fontSize = isSmall ? 7 : isLarge ? 11 : 8;
+            nameTMP.color = ThemePalette.Parchment;
+            nameTMP.alignment = TextAlignmentOptions.Center;
+            nameTMP.enableWordWrapping = false;
+            nameTMP.overflowMode = TextOverflowModes.Ellipsis;
+            nameTMP.raycastTarget = false;
+
+            // Doctrine badge (top band right)
+            float badgeW = isSmall ? 22 : isLarge ? 32 : 28;
+            float badgeH = isSmall ? 10 : isLarge ? 14 : 12;
+            var docGO = new GameObject("Doc", typeof(RectTransform), typeof(Image));
+            docGO.transform.SetParent(topBand.transform, false);
+            var docRT = (RectTransform)docGO.transform;
+            docRT.anchorMin = new Vector2(1, 0.5f);
+            docRT.anchorMax = new Vector2(1, 0.5f);
+            docRT.pivot = new Vector2(1, 0.5f);
+            docRT.anchoredPosition = new Vector2(-3, 0);
+            docRT.sizeDelta = new Vector2(badgeW, badgeH);
             docGO.GetComponent<Image>().color = docColor;
+            docGO.GetComponent<Image>().raycastTarget = false;
             var docLabel = new GameObject("DocLabel", typeof(RectTransform));
             docLabel.transform.SetParent(docGO.transform, false);
             var dlRT = (RectTransform)docLabel.transform;
@@ -3273,70 +3332,132 @@ namespace WitsAndFools
             dlRT.offsetMax = Vector2.zero;
             var dlTMP = docLabel.AddComponent<TextMeshProUGUI>();
             dlTMP.text = def.Doctrine.ToString().Substring(0, 3).ToUpper();
-            dlTMP.fontSize = 7;
+            dlTMP.fontSize = isSmall ? 6 : isLarge ? 8 : 7;
             dlTMP.color = Color.white;
             dlTMP.alignment = TextAlignmentOptions.Center;
             dlTMP.raycastTarget = false;
 
-            // Card name
-            var nameGO = new GameObject("Name", typeof(RectTransform));
-            nameGO.transform.SetParent(cardGO.transform, false);
-            var nameRT = (RectTransform)nameGO.transform;
-            nameRT.anchorMin = new Vector2(0, 1);
-            nameRT.anchorMax = new Vector2(1, 1);
-            nameRT.pivot = new Vector2(0.5f, 1);
-            nameRT.anchoredPosition = new Vector2(0, -20);
-            nameRT.sizeDelta = new Vector2(-8, 16);
-            var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
-            if (FontAssets.Heading) nameTMP.font = FontAssets.Heading;
-            nameTMP.text = def.Name;
-            nameTMP.fontSize = width > 110 ? 10 : 8;
-            nameTMP.color = new Color(0.05f, 0.05f, 0.05f);
-            nameTMP.alignment = TextAlignmentOptions.Center;
-            nameTMP.enableWordWrapping = false;
-            nameTMP.overflowMode = TextOverflowModes.Ellipsis;
-            nameTMP.raycastTarget = false;
+            // === ART WINDOW (center, fills between bands) ===
+            var artGO = new GameObject("ArtWindow", typeof(RectTransform), typeof(Image));
+            artGO.transform.SetParent(cardGO.transform, false);
+            var artRT = (RectTransform)artGO.transform;
+            artRT.anchorMin = Vector2.zero;
+            artRT.anchorMax = Vector2.one;
+            artRT.offsetMin = new Vector2(0, bottomBandH);
+            artRT.offsetMax = new Vector2(0, -topBandH);
+            var artImg = artGO.GetComponent<Image>();
+            var artSprite = Resources.Load<Sprite>("CardArt/" + def.Id);
+            if (artSprite != null)
+            {
+                artImg.sprite = artSprite;
+                artImg.type = Image.Type.Simple;
+                artImg.preserveAspect = false;
+                artImg.color = Color.white;
+            }
+            else
+            {
+                var artTint = docColor * 0.35f;
+                artTint.a = 1f;
+                artImg.color = artTint;
+            }
+            artImg.raycastTarget = false;
 
-            // Ability bar at bottom
+            // === BOTTOM BAND ===
+            var bottomBand = new GameObject("BottomBand", typeof(RectTransform), typeof(Image));
+            bottomBand.transform.SetParent(cardGO.transform, false);
+            var botRT = (RectTransform)bottomBand.transform;
+            botRT.anchorMin = Vector2.zero;
+            botRT.anchorMax = new Vector2(1, 0);
+            botRT.pivot = new Vector2(0.5f, 0);
+            botRT.anchoredPosition = Vector2.zero;
+            botRT.sizeDelta = new Vector2(0, bottomBandH);
+            bottomBand.GetComponent<Image>().color = new Color(0.12f, 0.09f, 0.06f, 0.95f);
+            bottomBand.GetComponent<Image>().raycastTarget = false;
+
+            // Gold separator at top of bottom band
+            var botSep = new GameObject("BotSep", typeof(RectTransform), typeof(Image));
+            botSep.transform.SetParent(bottomBand.transform, false);
+            var bsRT = (RectTransform)botSep.transform;
+            bsRT.anchorMin = new Vector2(0, 1);
+            bsRT.anchorMax = new Vector2(1, 1);
+            bsRT.pivot = new Vector2(0.5f, 1);
+            bsRT.anchoredPosition = Vector2.zero;
+            bsRT.sizeDelta = new Vector2(0, 1);
+            botSep.GetComponent<Image>().color = new Color(0.83f, 0.66f, 0.27f, 0.25f);
+            botSep.GetComponent<Image>().raycastTarget = false;
+
             if (def.HasAbility)
             {
-                var abilBarGO = new GameObject("AbilBar", typeof(RectTransform), typeof(Image));
-                abilBarGO.transform.SetParent(cardGO.transform, false);
-                var abRT = (RectTransform)abilBarGO.transform;
-                abRT.anchorMin = Vector2.zero;
-                abRT.anchorMax = new Vector2(1, 0);
-                abRT.pivot = new Vector2(0.5f, 0);
-                abRT.anchoredPosition = Vector2.zero;
-                abRT.sizeDelta = new Vector2(0, 16);
-                abilBarGO.GetComponent<Image>().color = new Color(0, 0, 0, 0.06f);
-                abilBarGO.GetComponent<Image>().raycastTarget = false;
-
+                float dotSize = isSmall ? 5 : isLarge ? 8 : 6;
                 var dotGO = new GameObject("Dot", typeof(RectTransform), typeof(Image));
-                dotGO.transform.SetParent(abilBarGO.transform, false);
+                dotGO.transform.SetParent(bottomBand.transform, false);
                 var dotRT = (RectTransform)dotGO.transform;
                 dotRT.anchorMin = new Vector2(0, 0.5f);
                 dotRT.anchorMax = new Vector2(0, 0.5f);
                 dotRT.pivot = new Vector2(0.5f, 0.5f);
-                dotRT.anchoredPosition = new Vector2(8, 0);
-                dotRT.sizeDelta = new Vector2(6, 6);
+                dotRT.anchoredPosition = new Vector2(dotSize + 2, 0);
+                dotRT.sizeDelta = new Vector2(dotSize, dotSize);
                 dotGO.GetComponent<Image>().color = ThemePalette.AbilityBadgeColor(def.Ability.Value);
                 dotGO.GetComponent<Image>().raycastTarget = false;
 
                 var abLabelGO = new GameObject("AbLabel", typeof(RectTransform));
-                abLabelGO.transform.SetParent(abilBarGO.transform, false);
+                abLabelGO.transform.SetParent(bottomBand.transform, false);
                 var abLabelRT = (RectTransform)abLabelGO.transform;
                 abLabelRT.anchorMin = Vector2.zero;
-                abLabelRT.anchorMax = Vector2.one;
-                abLabelRT.offsetMin = new Vector2(14, 0);
-                abLabelRT.offsetMax = new Vector2(-2, 0);
+                abLabelRT.anchorMax = new Vector2(0.8f, 1);
+                abLabelRT.offsetMin = new Vector2(dotSize * 2 + 4, 0);
+                abLabelRT.offsetMax = Vector2.zero;
                 var abLabelTMP = abLabelGO.AddComponent<TextMeshProUGUI>();
                 abLabelTMP.text = def.Ability.Value.DisplayName();
-                abLabelTMP.fontSize = 8;
-                abLabelTMP.color = new Color(0.33f, 0.33f, 0.33f);
+                abLabelTMP.fontSize = isSmall ? 7 : isLarge ? 10 : 8;
+                abLabelTMP.color = ThemePalette.DustyTan;
                 abLabelTMP.alignment = TextAlignmentOptions.MidlineLeft;
                 abLabelTMP.enableWordWrapping = false;
                 abLabelTMP.overflowMode = TextOverflowModes.Ellipsis;
                 abLabelTMP.raycastTarget = false;
+            }
+
+            // Rarity pip (bottom band right)
+            var rarityPipGlyph = def.Rarity switch
+            {
+                CardRarity.Uncommon => "◆",
+                CardRarity.Rare => "★",
+                _ => "●"
+            };
+            var rpGO = new GameObject("RarityPip", typeof(RectTransform));
+            rpGO.transform.SetParent(bottomBand.transform, false);
+            var rpRT = (RectTransform)rpGO.transform;
+            rpRT.anchorMin = new Vector2(1, 0);
+            rpRT.anchorMax = new Vector2(1, 1);
+            rpRT.pivot = new Vector2(1, 0.5f);
+            rpRT.anchoredPosition = new Vector2(-4, 0);
+            rpRT.sizeDelta = new Vector2(20, 0);
+            var rpTMP = rpGO.AddComponent<TextMeshProUGUI>();
+            if (FontAssets.Mono) rpTMP.font = FontAssets.Mono;
+            rpTMP.text = rarityPipGlyph;
+            rpTMP.fontSize = isSmall ? 7 : isLarge ? 10 : 8;
+            rpTMP.color = rarityBorder;
+            rpTMP.alignment = TextAlignmentOptions.MidlineRight;
+            rpTMP.raycastTarget = false;
+
+            // === FRAME OVERLAY (9-sliced ornate border on top of everything) ===
+            var frameSprite = Resources.Load<Sprite>("CardFrameGold");
+            if (frameSprite != null)
+            {
+                var frameGO = new GameObject("FrameOverlay", typeof(RectTransform), typeof(Image));
+                frameGO.transform.SetParent(cardGO.transform, false);
+                var frameRT = (RectTransform)frameGO.transform;
+                frameRT.anchorMin = Vector2.zero;
+                frameRT.anchorMax = Vector2.one;
+                frameRT.offsetMin = Vector2.zero;
+                frameRT.offsetMax = Vector2.zero;
+                var frameImg = frameGO.GetComponent<Image>();
+                frameImg.sprite = frameSprite;
+                frameImg.type = Image.Type.Sliced;
+                frameImg.fillCenter = false;
+                frameImg.pixelsPerUnitMultiplier = isSmall ? 4.5f : isLarge ? 1.8f : 3f;
+                frameImg.color = new Color(1f, 1f, 1f, isSmall ? 0.5f : 0.75f);
+                frameImg.raycastTarget = false;
             }
 
             return cardGO;
