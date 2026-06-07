@@ -53,6 +53,9 @@ namespace WitsAndFools.EditorTools
             var rng = new Random(seed);
             var run = new RunState { Seed = seed };
             run.InitDoctrineDeck(doctrine);
+            if (doctrine == DoctrineType.Hoarder) run.Prestige = 8;
+            if (doctrine == DoctrineType.Schemer)
+                TryRemoveWeakestCard(run, rng);
 
             var log = new RunLog { Doctrine = doctrine, Seed = seed };
 
@@ -88,14 +91,14 @@ namespace WitsAndFools.EditorTools
                             {
                                 run.MatchesWon++;
                                 int florins = CalculateFlorins(act, node.Type);
+                                if (run.PlayerDoctrine == DoctrineType.Hoarder)
+                                    florins += Math.Max(0, (run.PlayerDeckCardIds.Count - 10) / 3);
                                 run.Florins += florins;
 
-                                var cardReward = PickCardReward(run, node.Type == MapNodeType.EliteMatch, rng);
-                                if (cardReward != null)
-                                {
-                                    run.PlayerDeckCardIds.Add(cardReward.Id);
-                                    actLog.CardsAdded++;
-                                }
+                                actLog.CardsAdded += AwardDoctrineCards(run, node.Type == MapNodeType.EliteMatch, rng);
+
+                                if (run.PlayerDoctrine == DoctrineType.Brute && rng.Next(100) < 30)
+                                    TryRemoveWeakestCard(run, rng);
 
                                 if (node.Type == MapNodeType.EliteMatch)
                                     TryAwardRelic(run, rng);
@@ -207,20 +210,94 @@ namespace WitsAndFools.EditorTools
             return matchLog;
         }
 
-        static CardDefinition PickCardReward(RunState run, bool eliteWeighted, Random rng)
+        static int AwardDoctrineCards(RunState run, bool isElite, Random rng)
         {
-            if (!run.PlayerDoctrine.HasValue) return null;
+            if (!run.PlayerDoctrine.HasValue) return 0;
             var pool = CardCatalog.Draftable(run.PlayerDoctrine.Value);
             var candidates = pool.Where(c => !run.PlayerDeckCardIds.Contains(c.Id)).ToList();
-            if (candidates.Count == 0) return null;
+            if (candidates.Count == 0) return 0;
 
-            if (eliteWeighted)
+            switch (run.PlayerDoctrine.Value)
             {
-                var rares = candidates.Where(c => c.Rarity == CardRarity.Rare).ToList();
-                if (rares.Count > 0 && rng.Next(100) < 40)
-                    return rares[rng.Next(rares.Count)];
+                case DoctrineType.Schemer:
+                {
+                    int picks = Math.Min(3, candidates.Count);
+                    var options = new List<CardDefinition>();
+                    var temp = new List<CardDefinition>(candidates);
+                    for (int i = 0; i < picks; i++)
+                    {
+                        int idx = rng.Next(temp.Count);
+                        options.Add(temp[idx]);
+                        temp.RemoveAt(idx);
+                    }
+                    var best = options.OrderByDescending(c => (int)c.Rarity).First();
+                    run.PlayerDeckCardIds.Add(best.Id);
+                    return 1;
+                }
+                case DoctrineType.Hoarder:
+                {
+                    int picks = Math.Min(3, candidates.Count);
+                    var options = new List<CardDefinition>();
+                    var temp = new List<CardDefinition>(candidates);
+                    for (int i = 0; i < picks; i++)
+                    {
+                        int idx = rng.Next(temp.Count);
+                        options.Add(temp[idx]);
+                        temp.RemoveAt(idx);
+                    }
+                    var best = options.OrderByDescending(c => (int)c.Rarity).First();
+                    run.PlayerDeckCardIds.Add(best.Id);
+                    return 1;
+                }
+                case DoctrineType.Trickster:
+                {
+                    if (run.CurrentAct <= 2)
+                    {
+                        var nonRare = candidates.Where(c => c.Rarity != CardRarity.Rare).ToList();
+                        if (nonRare.Count > 0) candidates = nonRare;
+                    }
+                    var uncommonPlus = candidates.Where(c => c.Rarity >= CardRarity.Uncommon).ToList();
+                    if (uncommonPlus.Count > 0 && rng.Next(100) < 40)
+                    {
+                        run.PlayerDeckCardIds.Add(uncommonPlus[rng.Next(uncommonPlus.Count)].Id);
+                        return 1;
+                    }
+                    var commons = candidates.Where(c => c.Rarity == CardRarity.Common).ToList();
+                    if (commons.Count > 0)
+                    {
+                        run.PlayerDeckCardIds.Add(commons[rng.Next(commons.Count)].Id);
+                        return 1;
+                    }
+                    run.PlayerDeckCardIds.Add(candidates[rng.Next(candidates.Count)].Id);
+                    return 1;
+                }
+                default:
+                {
+                    if (isElite)
+                    {
+                        var rares = candidates.Where(c => c.Rarity == CardRarity.Rare).ToList();
+                        if (rares.Count > 0 && rng.Next(100) < 40)
+                        {
+                            run.PlayerDeckCardIds.Add(rares[rng.Next(rares.Count)].Id);
+                            return 1;
+                        }
+                    }
+                    run.PlayerDeckCardIds.Add(candidates[rng.Next(candidates.Count)].Id);
+                    return 1;
+                }
             }
-            return candidates[rng.Next(candidates.Count)];
+        }
+
+        static void TryRemoveWeakestCard(RunState run, Random rng)
+        {
+            if (run.PlayerDeckCardIds.Count <= 8) return;
+            var commons = run.PlayerDeckCardIds
+                .Select(id => CardCatalog.Get(id))
+                .Where(c => c != null && c.Rarity == CardRarity.Common)
+                .ToList();
+            if (commons.Count == 0) return;
+            var weakest = commons[rng.Next(commons.Count)];
+            run.PlayerDeckCardIds.Remove(weakest.Id);
         }
 
         static void TryAwardRelic(RunState run, Random rng)
@@ -242,32 +319,108 @@ namespace WitsAndFools.EditorTools
 
         static void SimulateShop(RunState run, Random rng, ActLog actLog)
         {
-            if (run.Florins >= 6 && run.PlayerDoctrine.HasValue)
+            if (!run.PlayerDoctrine.HasValue) return;
+            switch (run.PlayerDoctrine.Value)
             {
-                var card = PickCardReward(run, false, rng);
-                if (card != null)
-                {
-                    run.PlayerDeckCardIds.Add(card.Id);
-                    run.Florins -= 6;
-                    actLog.CardsAdded++;
-                    actLog.ShopPurchases++;
-                }
+                case DoctrineType.Schemer:
+                    if (run.Florins >= 8 && run.PlayerDeckCardIds.Count > 10)
+                    {
+                        TryRemoveWeakestCard(run, rng);
+                        run.Florins -= 8;
+                        actLog.ShopPurchases++;
+                    }
+                    else if (run.Florins >= 6)
+                    {
+                        actLog.CardsAdded += AwardDoctrineCards(run, false, rng);
+                        run.Florins -= 6;
+                        actLog.ShopPurchases++;
+                    }
+                    break;
+                case DoctrineType.Hoarder:
+                    if (run.Florins >= 4)
+                    {
+                        actLog.CardsAdded += AwardDoctrineCards(run, false, rng);
+                        run.Florins -= 4;
+                        actLog.ShopPurchases++;
+                    }
+                    if (run.Florins >= 6 && run.PlayerDeckCardIds.Count > 12)
+                    {
+                        TryRemoveWeakestCard(run, rng);
+                        run.Florins -= 6;
+                        actLog.ShopPurchases++;
+                    }
+                    break;
+                case DoctrineType.Brute:
+                    if (run.Florins >= 6)
+                    {
+                        actLog.CardsAdded += AwardDoctrineCards(run, false, rng);
+                        run.Florins -= 6;
+                        actLog.ShopPurchases++;
+                    }
+                    if (run.Florins >= 5 && run.PlayerDeckCardIds.Count > 8)
+                    {
+                        TryRemoveWeakestCard(run, rng);
+                        run.Florins -= 5;
+                        actLog.ShopPurchases++;
+                    }
+                    break;
+                default:
+                    if (run.Florins >= 6)
+                    {
+                        actLog.CardsAdded += AwardDoctrineCards(run, false, rng);
+                        run.Florins -= 6;
+                        actLog.ShopPurchases++;
+                    }
+                    break;
             }
         }
 
         static void SimulateRumor(RunState run, Random rng, ActLog actLog)
         {
             int roll = rng.Next(100);
-            if (roll < 30) run.Florins += 5;
-            else if (roll < 60) run.Florins += 3;
-            else if (roll < 80) { run.Florins += 8; run.PlayerBurdens.Add(BurdenType.MarkedCards); }
-            else run.Florins += 3;
+            switch (run.PlayerDoctrine ?? DoctrineType.Neutral)
+            {
+                case DoctrineType.Schemer:
+                    if (roll < 40) run.Florins += 6;
+                    else if (roll < 70) { run.Florins += 4; if (run.PlayerBurdens.Count > 0) run.PlayerBurdens.RemoveAt(0); }
+                    else if (roll < 85) { run.Florins += 10; run.PlayerBurdens.Add(BurdenType.MarkedCards); }
+                    else run.Florins += 4;
+                    break;
+                case DoctrineType.Hoarder:
+                    int bonus = Math.Min(run.PlayerBurdens.Count * 3, 9);
+                    if (roll < 35) run.Florins += 7 + bonus;
+                    else if (roll < 65) run.Florins += 4 + bonus;
+                    else if (roll < 80) { run.Florins += 12; run.PlayerBurdens.Add(BurdenType.HeavyPurse); }
+                    else run.Florins += 3;
+                    break;
+                default:
+                    if (roll < 30) run.Florins += 5;
+                    else if (roll < 60) run.Florins += 3;
+                    else if (roll < 80) { run.Florins += 8; run.PlayerBurdens.Add(BurdenType.MarkedCards); }
+                    else run.Florins += 3;
+                    break;
+            }
         }
 
         static void SimulateRest(RunState run, Random rng, ActLog actLog)
         {
-            if (run.PlayerBurdens.Count > 0 && rng.Next(100) < 60)
-                run.PlayerBurdens.RemoveAt(rng.Next(run.PlayerBurdens.Count));
+            switch (run.PlayerDoctrine ?? DoctrineType.Neutral)
+            {
+                case DoctrineType.Brute:
+                    if (run.PlayerBurdens.Count > 0 && rng.Next(100) < 60)
+                        run.PlayerBurdens.RemoveAt(rng.Next(run.PlayerBurdens.Count));
+                    if (run.Prestige < 7 && rng.Next(100) < 40)
+                        run.Prestige++;
+                    break;
+                case DoctrineType.Trickster:
+                    if (run.PlayerBurdens.Count > 0 && rng.Next(100) < 70)
+                        run.PlayerBurdens.RemoveAt(rng.Next(run.PlayerBurdens.Count));
+                    break;
+                default:
+                    if (run.PlayerBurdens.Count > 0 && rng.Next(100) < 60)
+                        run.PlayerBurdens.RemoveAt(rng.Next(run.PlayerBurdens.Count));
+                    break;
+            }
         }
 
         // ---------- Reporting ----------
