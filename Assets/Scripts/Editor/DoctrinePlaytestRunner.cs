@@ -95,10 +95,11 @@ namespace WitsAndFools.EditorTools
                                     florins += Math.Max(0, (run.PlayerDeckCardIds.Count - 10) / 3);
                                 run.Florins += florins;
 
-                                actLog.CardsAdded += AwardDoctrineCards(run, node.Type == MapNodeType.EliteMatch, rng);
+                                bool skipReward = ShouldSkipCardReward(run, rng);
+                                if (!skipReward)
+                                    actLog.CardsAdded += AwardDoctrineCards(run, node.Type == MapNodeType.EliteMatch, rng);
 
-                                if (run.PlayerDoctrine == DoctrineType.Brute && rng.Next(100) < 30)
-                                    TryRemoveWeakestCard(run, rng);
+                                ApplyPostMatchDeckManagement(run, node.Type == MapNodeType.EliteMatch, rng);
 
                                 if (node.Type == MapNodeType.EliteMatch)
                                     TryAwardRelic(run, rng);
@@ -300,6 +301,80 @@ namespace WitsAndFools.EditorTools
             run.PlayerDeckCardIds.Remove(weakest.Id);
         }
 
+        static bool ShouldSkipCardReward(RunState run, Random rng)
+        {
+            if (!run.PlayerDoctrine.HasValue) return false;
+            switch (run.PlayerDoctrine.Value)
+            {
+                case DoctrineType.Schemer:
+                    if (run.PlayerDeckCardIds.Count > 14) return rng.Next(100) < 60;
+                    if (run.PlayerDeckCardIds.Count > 12) return rng.Next(100) < 30;
+                    return false;
+                case DoctrineType.Brute:
+                    if (run.PlayerDeckCardIds.Count > 16) return rng.Next(100) < 30;
+                    return false;
+                case DoctrineType.Trickster:
+                    if (run.PlayerDeckCardIds.Count > 18) return rng.Next(100) < 40;
+                    if (run.PlayerDeckCardIds.Count > 15) return rng.Next(100) < 20;
+                    return false;
+                case DoctrineType.Hoarder:
+                    if (run.PlayerDeckCardIds.Count > 16) return rng.Next(100) < 30;
+                    if (run.PlayerDeckCardIds.Count > 14) return rng.Next(100) < 15;
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
+        static void ApplyPostMatchDeckManagement(RunState run, bool isElite, Random rng)
+        {
+            if (!run.PlayerDoctrine.HasValue) return;
+            switch (run.PlayerDoctrine.Value)
+            {
+                case DoctrineType.Schemer:
+                    // Expurgator/Censor: if owned, chance to exile a card post-match
+                    if (run.PlayerDeckCardIds.Contains("schemer_expurgator") && rng.Next(100) < 40)
+                        TryRemoveWeakestCard(run, rng);
+                    if (run.PlayerDeckCardIds.Contains("schemer_censor") && rng.Next(100) < 25)
+                        TryRemoveWeakestCard(run, rng);
+                    break;
+                case DoctrineType.Brute:
+                    if (rng.Next(100) < 15)
+                        TryRemoveWeakestCard(run, rng);
+                    if (run.PlayerDeckCardIds.Contains("brute_scorched_earth") && rng.Next(100) < 20)
+                        TryRemoveWeakestCard(run, rng);
+                    if (run.PlayerDeckCardIds.Contains("brute_forge_master") && isElite && rng.Next(100) < 40)
+                        TryRemoveWeakestCard(run, rng);
+                    break;
+                case DoctrineType.Trickster:
+                    // Transform only at shops — no free post-match transforms
+                    break;
+                case DoctrineType.Hoarder:
+                    if (run.PlayerDeckCardIds.Count > 12 && rng.Next(100) < 15)
+                        TryRemoveWeakestCard(run, rng);
+                    break;
+            }
+        }
+
+        static void TryTransformCard(RunState run, Random rng)
+        {
+            if (!run.PlayerDoctrine.HasValue) return;
+            var pool = CardCatalog.Draftable(run.PlayerDoctrine.Value);
+            var ownedCommons = run.PlayerDeckCardIds
+                .Select(id => CardCatalog.Get(id))
+                .Where(c => c != null && c.Rarity == CardRarity.Common)
+                .ToList();
+            if (ownedCommons.Count == 0) return;
+            var uncommons = pool
+                .Where(c => c.Rarity == CardRarity.Uncommon && !run.PlayerDeckCardIds.Contains(c.Id))
+                .ToList();
+            if (uncommons.Count == 0) return;
+            var oldCard = ownedCommons[rng.Next(ownedCommons.Count)];
+            var newCard = uncommons[rng.Next(uncommons.Count)];
+            run.PlayerDeckCardIds.Remove(oldCard.Id);
+            run.PlayerDeckCardIds.Add(newCard.Id);
+        }
+
         static void TryAwardRelic(RunState run, Random rng)
         {
             if (run.PlayerRelics.Count >= 5) return;
@@ -323,10 +398,11 @@ namespace WitsAndFools.EditorTools
             switch (run.PlayerDoctrine.Value)
             {
                 case DoctrineType.Schemer:
-                    if (run.Florins >= 8 && run.PlayerDeckCardIds.Count > 10)
+                    // Schemer prioritizes removal at half price (4 florins)
+                    if (run.Florins >= 4 && run.PlayerDeckCardIds.Count > 9)
                     {
                         TryRemoveWeakestCard(run, rng);
-                        run.Florins -= 8;
+                        run.Florins -= 4;
                         actLog.ShopPurchases++;
                     }
                     else if (run.Florins >= 6)
@@ -337,16 +413,16 @@ namespace WitsAndFools.EditorTools
                     }
                     break;
                 case DoctrineType.Hoarder:
-                    if (run.Florins >= 4)
+                    if (run.Florins >= 6)
                     {
                         actLog.CardsAdded += AwardDoctrineCards(run, false, rng);
-                        run.Florins -= 4;
+                        run.Florins -= 6;
                         actLog.ShopPurchases++;
                     }
-                    if (run.Florins >= 6 && run.PlayerDeckCardIds.Count > 12)
+                    if (run.Florins >= 8 && run.PlayerDeckCardIds.Count > 14)
                     {
                         TryRemoveWeakestCard(run, rng);
-                        run.Florins -= 6;
+                        run.Florins -= 8;
                         actLog.ShopPurchases++;
                     }
                     break;
@@ -361,6 +437,21 @@ namespace WitsAndFools.EditorTools
                     {
                         TryRemoveWeakestCard(run, rng);
                         run.Florins -= 5;
+                        actLog.ShopPurchases++;
+                    }
+                    break;
+                case DoctrineType.Trickster:
+                    // Trickster buys a card, then can pay 10 to transform a common
+                    if (run.Florins >= 6)
+                    {
+                        actLog.CardsAdded += AwardDoctrineCards(run, false, rng);
+                        run.Florins -= 6;
+                        actLog.ShopPurchases++;
+                    }
+                    if (run.Florins >= 10)
+                    {
+                        TryTransformCard(run, rng);
+                        run.Florins -= 10;
                         actLog.ShopPurchases++;
                     }
                     break;
