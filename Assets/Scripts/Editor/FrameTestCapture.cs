@@ -124,5 +124,124 @@ public static class FrameTestCapture
         Object.DestroyImmediate(camGO);
         Object.DestroyImmediate(canvasGO);
     }
+
+    [MenuItem("Wits and Fools/Test/Capture All Card Art Grid")]
+    public static void CaptureGrid()
+    {
+        var catPath = "Assets/Data/card_catalog.json";
+        CardCatalogLoader.LoadFromJson(File.ReadAllText(catPath));
+
+        var allCards = new System.Collections.Generic.List<CardDefinition>();
+        foreach (var doc in new[] { DoctrineType.Schemer, DoctrineType.Brute, DoctrineType.Trickster, DoctrineType.Hoarder })
+        {
+            var docCards = CardCatalog.Draftable(doc);
+            foreach (var c in docCards)
+            {
+                if (Resources.Load<Sprite>("CardArt/" + c.Id) != null)
+                    allCards.Add(c);
+            }
+        }
+        // Add neutral cards with art
+        foreach (var c in CardCatalog.All())
+        {
+            if (c.Doctrine == DoctrineType.Neutral && Resources.Load<Sprite>("CardArt/" + c.Id) != null)
+                allCards.Add(c);
+        }
+
+        if (allCards.Count == 0)
+        {
+            Debug.LogError("No cards with art found");
+            return;
+        }
+
+        int cols = 10;
+        int rows = (allCards.Count + cols - 1) / cols;
+        int cardW = 130, cardH = 186;
+        int pad = 12;
+        int rtW = cols * (cardW + pad) + pad + 200;
+        int rtH = rows * (cardH + pad + 20) + 100;
+
+        var camGO = new GameObject("GridCam");
+        var cam = camGO.AddComponent<Camera>();
+        cam.orthographic = true;
+        cam.orthographicSize = rtH / 2f;
+        cam.nearClipPlane = 0.1f;
+        cam.farClipPlane = 100f;
+        cam.clearFlags = CameraClearFlags.SolidColor;
+        cam.backgroundColor = new Color(0.08f, 0.06f, 0.04f);
+        camGO.transform.position = new Vector3(rtW / 2f, rtH / 2f, -10f);
+
+        var canvasGO = new GameObject("GridCanvas");
+        var canvas = canvasGO.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceCamera;
+        canvas.worldCamera = cam;
+        canvas.planeDistance = 10f;
+        var scaler = canvasGO.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(rtW, rtH);
+        scaler.matchWidthOrHeight = 0.5f;
+        canvasGO.AddComponent<GraphicRaycaster>();
+
+        var bg = new GameObject("BG", typeof(RectTransform), typeof(Image));
+        bg.transform.SetParent(canvasGO.transform, false);
+        var bgRT = (RectTransform)bg.transform;
+        bgRT.anchorMin = Vector2.zero;
+        bgRT.anchorMax = Vector2.one;
+        bgRT.offsetMin = Vector2.zero;
+        bgRT.offsetMax = Vector2.zero;
+        bg.GetComponent<Image>().color = new Color(0.08f, 0.06f, 0.04f);
+
+        var rm = Object.FindAnyObjectByType<RunManager>();
+        if (rm == null)
+        {
+            Debug.LogError("RunManager not found");
+            Object.DestroyImmediate(canvasGO);
+            Object.DestroyImmediate(camGO);
+            return;
+        }
+
+        var createMethod = typeof(RunManager).GetMethod("CreateMiniCard",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        float originX = -(rtW / 2f) + pad + cardW / 2f;
+        float originY = (rtH / 2f) - 60;
+
+        for (int i = 0; i < allCards.Count; i++)
+        {
+            int col = i % cols;
+            int row = i / cols;
+            var card = allCards[i];
+
+            var cardGO = (GameObject)createMethod.Invoke(rm,
+                new object[] { card, canvasGO.transform, (float)cardW, (float)cardH });
+            var crt = (RectTransform)cardGO.transform;
+            crt.anchoredPosition = new Vector2(
+                originX + col * (cardW + pad),
+                originY - row * (cardH + pad + 20));
+        }
+
+        Canvas.ForceUpdateCanvases();
+
+        var rt2 = new RenderTexture(rtW, rtH, 24, RenderTextureFormat.ARGB32);
+        cam.targetTexture = rt2;
+        cam.Render();
+
+        RenderTexture.active = rt2;
+        var tex2 = new Texture2D(rtW, rtH, TextureFormat.RGB24, false);
+        tex2.ReadPixels(new Rect(0, 0, rtW, rtH), 0, 0);
+        tex2.Apply();
+        RenderTexture.active = null;
+
+        Directory.CreateDirectory("Screenshots");
+        var pngData = tex2.EncodeToPNG();
+        File.WriteAllBytes("Screenshots/all_card_art_grid.png", pngData);
+        Debug.Log($"Card grid: {allCards.Count} cards saved ({pngData.Length / 1024}KB)");
+
+        cam.targetTexture = null;
+        Object.DestroyImmediate(rt2);
+        Object.DestroyImmediate(tex2);
+        Object.DestroyImmediate(camGO);
+        Object.DestroyImmediate(canvasGO);
+    }
 }
 }
