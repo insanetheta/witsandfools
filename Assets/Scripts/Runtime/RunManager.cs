@@ -320,16 +320,17 @@ namespace WitsAndFools
 
         void AutoHandleShop()
         {
-            if (_run.Florins >= 8 && _run.PlayerDeckCardIds.Count > 8 && _run.CardRemovalsPurchased < 3)
+            int removalPrice = GetCardRemovalPrice();
+            if (_run.Florins >= removalPrice && _run.PlayerDeckCardIds.Count > 8 && _run.CardRemovalsPurchased < 3)
             {
                 string weakest = FindWeakestDeckCard();
                 if (weakest != null)
                 {
                     string removedName = CardCatalog.TryGet(weakest, out var wDef) ? wDef.Name : weakest;
                     _run.PlayerDeckCardIds.Remove(weakest);
-                    _run.Florins -= 8;
+                    _run.Florins -= removalPrice;
                     _run.CardRemovalsPurchased++;
-                    OnShopAction?.Invoke($"Removed '{removedName}' from deck (-8 florins, {_run.Florins} remaining)");
+                    OnShopAction?.Invoke($"Removed '{removedName}' from deck (-{removalPrice} florins, {_run.Florins} remaining)");
                     OnResultContinue();
                     return;
                 }
@@ -558,6 +559,20 @@ namespace WitsAndFools
             {
                 var doc = _run.PlayerDoctrine.Value;
                 AbilitiesLabel.text = $"{doc.DisplayName()} | Deck: {_run.PlayerDeckCardIds.Count}";
+            }
+            if (GameManager.Hud && GameManager.Hud.PhaseLabel && _phase != RunPhase.InMatch)
+            {
+                string phaseText = _phase switch
+                {
+                    RunPhase.MapSelect => $"Act {_run.CurrentAct + 1}",
+                    RunPhase.Shop => "Shop",
+                    RunPhase.Event => "Event",
+                    RunPhase.Rest => "Rest",
+                    RunPhase.PreMatch => "Preparing...",
+                    RunPhase.PostMatch => "Victory",
+                    _ => ""
+                };
+                GameManager.Hud.PhaseLabel.text = phaseText;
             }
         }
 
@@ -1283,7 +1298,10 @@ namespace WitsAndFools
 
             if (won)
             {
-                ShowCardReward();
+                if (ShouldSkipCardReward())
+                    FinishCardReward();
+                else
+                    ShowCardReward();
             }
 
             if (ResultContinueButton)
@@ -1756,7 +1774,8 @@ namespace WitsAndFools
             var upgradeOffering = PickCardUpgradeOffering();
             bool hasBurden = _run.PlayerBurdens.Count > 0;
             bool hasRemoval = _run.PlayerDeckCardIds.Count > 8 && _run.CardRemovalsPurchased < 3;
-            if (upgradeOffering.HasValue || hasBurden || hasRemoval)
+            bool hasTransform = _run.PlayerDoctrine == DoctrineType.Trickster && HasTransformableCommon();
+            if (upgradeOffering.HasValue || hasBurden || hasRemoval || hasTransform)
             {
                 CreateShopSectionHeader("Services", new Color(0.5f, 0.65f, 0.5f));
                 hasServices = true;
@@ -1770,6 +1789,9 @@ namespace WitsAndFools
 
             if (hasRemoval)
                 CreateCardRemovalButton();
+
+            if (_run.PlayerDoctrine == DoctrineType.Trickster && HasTransformableCommon())
+                CreateCardTransformButton();
         }
 
         void CreateShopSectionHeader(string title, Color accentColor)
@@ -1983,16 +2005,28 @@ namespace WitsAndFools
             btn.onClick.AddListener(() => OnShopRemoveBurden(burden, price));
         }
 
+        int GetCardRemovalPrice()
+        {
+            int price = _run.PlayerDoctrine switch
+            {
+                DoctrineType.Schemer => 4,
+                DoctrineType.Brute => 5,
+                DoctrineType.Hoarder => 8,
+                _ => 8
+            };
+            if (Ascension.InflatedPrices(_run.AscensionLevel))
+                price = (int)(price * 1.25f);
+            if (_run.PlayerBurdens.Contains(BurdenType.BadReputation))
+                price = (int)(price * 1.20f);
+            return price;
+        }
+
         void CreateCardRemovalButton()
         {
             string weakest = FindWeakestDeckCard();
             if (weakest == null) return;
             string cardName = CardCatalog.TryGet(weakest, out var wDef) ? wDef.Name : weakest;
-            int price = 8;
-            if (Ascension.InflatedPrices(_run.AscensionLevel))
-                price = (int)(price * 1.25f);
-            if (_run.PlayerBurdens.Contains(BurdenType.BadReputation))
-                price = (int)(price * 1.20f);
+            int price = GetCardRemovalPrice();
             bool canBuy = _run.Florins >= price;
 
             var btnGO = new GameObject("CardRemoval", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
@@ -2030,6 +2064,86 @@ namespace WitsAndFools
             _run.CardAbilityOverrides.Remove(cardId);
             _run.CardRankOverrides.Remove(cardId);
             _run.CardRemovalsPurchased++;
+            UpdateRunHud();
+            UpdateShopFlorins();
+            PopulateShopItems();
+        }
+
+        bool HasTransformableCommon()
+        {
+            if (!_run.PlayerDoctrine.HasValue) return false;
+            foreach (var id in _run.PlayerDeckCardIds)
+            {
+                if (CardCatalog.TryGet(id, out var def) && def.Rarity == CardRarity.Common)
+                    return true;
+            }
+            return false;
+        }
+
+        void CreateCardTransformButton()
+        {
+            int price = 10;
+            if (Ascension.InflatedPrices(_run.AscensionLevel))
+                price = (int)(price * 1.25f);
+            if (_run.PlayerBurdens.Contains(BurdenType.BadReputation))
+                price = (int)(price * 1.20f);
+            bool canBuy = _run.Florins >= price;
+
+            var btnGO = new GameObject("CardTransform", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
+            btnGO.transform.SetParent(ShopItemContainer, false);
+            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.18f, 0.12f, 0.30f, 0.85f) : ThemePalette.LockedGray;
+            var le = btnGO.GetComponent<LayoutElement>();
+            le.preferredHeight = 70;
+            le.preferredWidth = 550;
+
+            var lblGO = new GameObject("Label", typeof(RectTransform));
+            lblGO.transform.SetParent(btnGO.transform, false);
+            var lblRT = (RectTransform)lblGO.transform;
+            lblRT.anchorMin = Vector2.zero;
+            lblRT.anchorMax = Vector2.one;
+            lblRT.offsetMin = new Vector2(16, 0);
+            lblRT.offsetMax = new Vector2(-16, 0);
+            var lbl = lblGO.AddComponent<TextMeshProUGUI>();
+            lbl.text = $"Transform a Common → Uncommon  —  {price}f";
+            lbl.alignment = TextAlignmentOptions.Center;
+            lbl.fontSize = 20;
+            lbl.color = canBuy ? new Color(0.7f, 0.55f, 0.9f) : ThemePalette.DisabledText;
+            lbl.raycastTarget = false;
+
+            var btn = btnGO.GetComponent<Button>();
+            btn.interactable = canBuy;
+            int capturedPrice = price;
+            btn.onClick.AddListener(() => OnShopTransformCard(capturedPrice));
+        }
+
+        void OnShopTransformCard(int price)
+        {
+            if (_run.Florins < price || !_run.PlayerDoctrine.HasValue) return;
+            var commons = new List<string>();
+            foreach (var id in _run.PlayerDeckCardIds)
+            {
+                if (CardCatalog.TryGet(id, out var def) && def.Rarity == CardRarity.Common)
+                    commons.Add(id);
+            }
+            if (commons.Count == 0) return;
+
+            var pool = CardCatalog.Draftable(_run.PlayerDoctrine.Value);
+            var uncommons = new List<CardDefinition>();
+            foreach (var c in pool)
+            {
+                if (c.Rarity == CardRarity.Uncommon && !_run.PlayerDeckCardIds.Contains(c.Id))
+                    uncommons.Add(c);
+            }
+            if (uncommons.Count == 0) return;
+
+            string oldId = commons[_rng.Next(commons.Count)];
+            var newCard = uncommons[_rng.Next(uncommons.Count)];
+            _run.PlayerDeckCardIds.Remove(oldId);
+            _run.PlayerDeckCardIds.Add(newCard.Id);
+            _run.Florins -= price;
+
+            string oldName = CardCatalog.TryGet(oldId, out var oldDef) ? oldDef.Name : oldId;
+            Debug.Log($"[RunManager] Transformed '{oldName}' → '{newCard.Name}'. Deck size: {_run.PlayerDeckCardIds.Count}");
             UpdateRunHud();
             UpdateShopFlorins();
             PopulateShopItems();
@@ -3587,10 +3701,89 @@ namespace WitsAndFools
             FinishCardReward();
         }
 
+        bool ShouldSkipCardReward()
+        {
+            if (_run?.PlayerDoctrine == null) return false;
+            int deckSize = _run.PlayerDeckCardIds.Count;
+            switch (_run.PlayerDoctrine.Value)
+            {
+                case DoctrineType.Schemer:
+                    if (deckSize > 14) return _rng.Next(100) < 60;
+                    if (deckSize > 12) return _rng.Next(100) < 30;
+                    return false;
+                case DoctrineType.Brute:
+                    if (deckSize > 16) return _rng.Next(100) < 30;
+                    return false;
+                case DoctrineType.Trickster:
+                    if (deckSize > 18) return _rng.Next(100) < 40;
+                    if (deckSize > 15) return _rng.Next(100) < 20;
+                    return false;
+                case DoctrineType.Hoarder:
+                    if (deckSize > 16) return _rng.Next(100) < 30;
+                    if (deckSize > 14) return _rng.Next(100) < 15;
+                    return false;
+                default:
+                    return false;
+            }
+        }
+
+        void ApplyPostMatchDeckManagement()
+        {
+            if (_run?.PlayerDoctrine == null) return;
+            bool isElite = _currentNode?.Type == MapNodeType.EliteMatch || _currentNode?.Type == MapNodeType.BossMatch;
+            string removed = null;
+            switch (_run.PlayerDoctrine.Value)
+            {
+                case DoctrineType.Schemer:
+                    if (_run.PlayerDeckCardIds.Contains("schemer_expurgator") && _rng.Next(100) < 40)
+                        removed = RemoveWeakestCommon();
+                    if (removed == null && _run.PlayerDeckCardIds.Contains("schemer_censor") && _rng.Next(100) < 25)
+                        removed = RemoveWeakestCommon();
+                    break;
+                case DoctrineType.Brute:
+                    if (_rng.Next(100) < 15)
+                        removed = RemoveWeakestCommon();
+                    if (removed == null && _run.PlayerDeckCardIds.Contains("brute_scorched_earth") && _rng.Next(100) < 20)
+                        removed = RemoveWeakestCommon();
+                    if (removed == null && _run.PlayerDeckCardIds.Contains("brute_forge_master") && isElite && _rng.Next(100) < 40)
+                        removed = RemoveWeakestCommon();
+                    break;
+                case DoctrineType.Hoarder:
+                    if (_run.PlayerDeckCardIds.Count > 12 && _rng.Next(100) < 15)
+                        removed = RemoveWeakestCommon();
+                    break;
+            }
+            if (removed != null)
+            {
+                Debug.Log($"[RunManager] Post-match deck management: removed '{removed}'. Deck size: {_run.PlayerDeckCardIds.Count}");
+                UpdateRunHud();
+            }
+        }
+
+        string RemoveWeakestCommon()
+        {
+            if (_run.PlayerDeckCardIds.Count <= 8) return null;
+            string weakest = null;
+            int weakestRank = int.MaxValue;
+            foreach (var id in _run.PlayerDeckCardIds)
+            {
+                if (!CardCatalog.TryGet(id, out var def)) continue;
+                if (def.Rarity != CardRarity.Common) continue;
+                int rank = (int)def.Rank;
+                if (rank < weakestRank) { weakestRank = rank; weakest = id; }
+            }
+            if (weakest == null) return null;
+            _run.PlayerDeckCardIds.Remove(weakest);
+            string name = CardCatalog.TryGet(weakest, out var wDef) ? wDef.Name : weakest;
+            return name;
+        }
+
         void FinishCardReward()
         {
             _cardRewardOfferings = null;
             HideCardReward();
+
+            ApplyPostMatchDeckManagement();
 
             _abilityPickOfferings = PickAbilityOfferings(3);
             if (_abilityPickOfferings.Count > 0)
