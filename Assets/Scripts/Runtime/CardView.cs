@@ -21,6 +21,11 @@ namespace WitsAndFools
         public Image BackImage;
         public TMP_Text NameLabel;
         public TMP_Text AbilityBadge;
+        public Image AbilityBadgeBg;      // colored strip behind the ability word
+        public GameObject BonusChip;      // "+2" rank-bonus chip (top-right)
+        public TMP_Text BonusChipLabel;
+        public GameObject TrumpFlag;      // "♥ TRUMP" flag shown on trump defenses
+        public TMP_Text TrumpFlagLabel;
 
         [Header("Visual settings")]
         public Color FaceColor = default;
@@ -56,7 +61,23 @@ namespace WitsAndFools
         public void Bind(Card card, bool faceUp)
         {
             _card = card;
+            SetBonus(0);
+            SetTrumpFlag(false, default);
             SetFaceUp(faceUp);
+        }
+
+        public void SetBonus(int bonus)
+        {
+            if (!BonusChip) return;
+            BonusChip.SetActive(bonus > 0);
+            if (bonus > 0 && BonusChipLabel) BonusChipLabel.text = $"+{bonus}";
+        }
+
+        public void SetTrumpFlag(bool show, Suit trump)
+        {
+            if (!TrumpFlag) return;
+            TrumpFlag.SetActive(show);
+            if (show && TrumpFlagLabel) TrumpFlagLabel.text = $"{trump.Glyph()} TRUMP";
         }
 
         public void SetFaceUp(bool faceUp)
@@ -97,16 +118,22 @@ namespace WitsAndFools
                 if (_card.HasAbility)
                 {
                     AbilityBadge.gameObject.SetActive(true);
-                    string triggerPrefix = _card.Trigger switch {
-                        TriggerTiming.OnAttack => "ATK ",
-                        TriggerTiming.OnDefend => "DEF ",
-                        TriggerTiming.Passive => "PAS ",
-                        _ => ""
-                    };
-                    AbilityBadge.text = triggerPrefix + _card.Ability.Value.ShortName();
-                    AbilityBadge.color = AbilityBadgeColor(_card.Ability.Value);
+                    AbilityBadge.text = _card.Ability.Value.DisplayName();
+                    if (AbilityBadgeBg)
+                    {
+                        // colored strip + white text (role comes from the bout slot, timing from the tooltip)
+                        AbilityBadgeBg.gameObject.SetActive(true);
+                        AbilityBadgeBg.color = AbilityBadgeColor(_card.Ability.Value);
+                        AbilityBadge.color = Color.white;
+                    }
+                    else
+                        AbilityBadge.color = AbilityBadgeColor(_card.Ability.Value);
                 }
-                else AbilityBadge.gameObject.SetActive(false);
+                else
+                {
+                    AbilityBadge.gameObject.SetActive(false);
+                    if (AbilityBadgeBg) AbilityBadgeBg.gameObject.SetActive(false);
+                }
             }
             ApplyOutline();
         }

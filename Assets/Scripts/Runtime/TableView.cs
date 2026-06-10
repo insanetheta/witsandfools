@@ -14,13 +14,21 @@ namespace WitsAndFools
         public HandLayout OpponentHand;
 
         [Header("Center")]
-        public RectTransform DeckSlot;
+        public RectTransform DeckSlot;       // legacy shared-deck slot (unused in dual-deck)
         public TMP_Text DeckCountLabel;
         public RectTransform TrumpSlot;
-        public RectTransform DiscardSlot;
+        public RectTransform DiscardSlot;    // removed-from-game pile (off the felt)
         public TMP_Text DiscardCountLabel;
         public RectTransform BoutArea;       // parent for attacker/defender card positions
         public RectTransform CardSpawnRoot;  // where transient cards (deal animations) start
+
+        [Header("Dual-deck piles")]
+        public RectTransform PlayerDeckSlot;     // your draw pile, on your side of the felt
+        public TMP_Text PlayerDeckCountBadge;
+        public RectTransform OpponentDeckSlot;   // foe's draw pile, on their side
+        public TMP_Text OpponentDeckCountBadge;
+        public TMP_Text TrumpRuleLabel;          // "Hearts beat any other suit"
+        public TMP_Text TrumpGlyphLabel;         // big suit glyph on the trump card visual
 
         [Header("Bout layout")]
         public float BoutSlotSpacing = 130f;

@@ -1171,6 +1171,10 @@ namespace WitsAndFools
                 var archColor = ArchetypeColor(node.Opponent.Archetype);
                 GameManager.Hud.SetOpponent(node.Opponent.Name, archName, portrait, archColor);
 
+                if (_run.PlayerDoctrine.HasValue)
+                    GameManager.Hud.SetPlayerIdentity($"The {_run.PlayerDoctrine.Value}",
+                        $"You · Act {_run.CurrentAct + 1} of 5");
+
                 if (!string.IsNullOrEmpty(node.Opponent.GimmickDescription))
                     GameManager.Hud.SetInfo(node.Opponent.GimmickDescription);
             }

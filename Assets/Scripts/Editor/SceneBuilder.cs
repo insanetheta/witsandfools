@@ -114,141 +114,110 @@ namespace WitsAndFools.EditorTools
             // Store first edge image for per-act color updates
             var frameEdgeImg = frame.GetChild(0).GetComponent<Image>();
 
-            // ----- HUD bar (top) -----
-            var hudBar = NewChild(canvasRT, "HudBar");
-            var hudBarImg = hudBar.gameObject.AddComponent<Image>();
-            hudBarImg.color = new Color(0, 0, 0, 0.55f);
-            hudBar.anchorMin = new Vector2(0, 1);
-            hudBar.anchorMax = new Vector2(1, 1);
-            hudBar.pivot = new Vector2(0.5f, 1);
-            hudBar.sizeDelta = new Vector2(0, 70);
-            hudBar.anchoredPosition = Vector2.zero;
+            // ----- Opponent identity panel (top-left): portrait, name, hand count, pips, race meter -----
+            var oppPanel = BuildIdentityPanel(canvasRT, "OpponentPanel",
+                anchorTop: true, keyline: ThemePalette.VenetianRed,
+                out var portraitImg, out var oppMonogram, out var oppNameLabel, out var oppArchLabel,
+                out var oppHandCountP, out var oppResLabelP, out var oppPips,
+                out var oppRaceFill, out var oppRaceLabel);
 
-            var turnLabel = AddText(hudBar, "TurnLabel", "—", anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.MidlineLeft, fontSize: 30, color: Color.white,
-                font: HeadingFont);
-            turnLabel.margin = new Vector4(16, 0, 0, 0);
+            // ----- Action zone (bottom-right): phase line + bout chip + commit button -----
+            var actionZone = NewChild(canvasRT, "ActionZone");
+            actionZone.anchorMin = new Vector2(1, 0);
+            actionZone.anchorMax = new Vector2(1, 0);
+            actionZone.pivot = new Vector2(1, 0);
+            actionZone.sizeDelta = new Vector2(330, 175);
+            actionZone.anchoredPosition = new Vector2(-20, 84);
 
-            var trumpLabel = AddText(hudBar, "TrumpLabel", "Trump: ♥", anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(1f, 1),
-                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center, fontSize: 30, color: Color.white,
-                font: DefaultFont);
+            var phaseLine = AddText(actionZone, "ActionPhaseLine", "",
+                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(0.5f, 1), alignment: TextAlignmentOptions.Center,
+                fontSize: 15, color: ThemePalette.Sage, font: HeadingFont);
+            ((RectTransform)phaseLine.transform).sizeDelta = new Vector2(0, 26);
+            phaseLine.fontStyle = FontStyles.Bold;
 
-            // ----- Opponent Nameplate (top-left, below HUD bar) -----
-            var nameplate = NewChild(canvasRT, "OpponentNameplate");
-            nameplate.anchorMin = new Vector2(0, 1);
-            nameplate.anchorMax = new Vector2(0, 1);
-            nameplate.pivot = new Vector2(0, 1);
-            nameplate.sizeDelta = new Vector2(380, 80);
-            nameplate.anchoredPosition = new Vector2(16, -76);
-            var nameplateBg = nameplate.gameObject.AddComponent<Image>();
-            nameplateBg.color = new Color(0, 0, 0, 0.6f);
-            nameplateBg.raycastTarget = false;
+            var boutChip = AddText(actionZone, "BoutChipLabel", "BOUT 1/12",
+                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(0.5f, 1), alignment: TextAlignmentOptions.Center,
+                fontSize: 13, color: ThemePalette.DustyTan, font: HeadingFont);
+            var boutChipRT = (RectTransform)boutChip.transform;
+            boutChipRT.sizeDelta = new Vector2(0, 22);
+            boutChipRT.anchoredPosition = new Vector2(0, -30);
 
-            var portraitRT = NewChild(nameplate, "Portrait");
-            portraitRT.anchorMin = new Vector2(0, 0.5f);
-            portraitRT.anchorMax = new Vector2(0, 0.5f);
-            portraitRT.pivot = new Vector2(0, 0.5f);
-            portraitRT.sizeDelta = new Vector2(66, 66);
-            portraitRT.anchoredPosition = new Vector2(7, 0);
-            var portraitImg = portraitRT.gameObject.AddComponent<Image>();
-            portraitImg.color = ThemePalette.WarmSlate;
-            portraitImg.preserveAspect = true;
-            portraitImg.raycastTarget = false;
-            var portraitOutline = portraitRT.gameObject.AddComponent<Outline>();
-            portraitOutline.effectColor = new Color(0.75f, 0.65f, 0.45f, 0.7f);
-            portraitOutline.effectDistance = new Vector2(2, -2);
-
-            var oppNameLabel = AddText(nameplate, "OpponentName", "Opponent",
-                anchorMin: new Vector2(0, 0.5f), anchorMax: new Vector2(1, 1),
-                pivot: new Vector2(0, 1), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 22, color: ThemePalette.Parchment, font: HeadingFont);
-            var oppNameRT = (RectTransform)oppNameLabel.transform;
-            oppNameRT.offsetMin = new Vector2(80, 0);
-            oppNameRT.offsetMax = new Vector2(-8, -2);
-
-            var oppArchLabel = AddText(nameplate, "OpponentArchetype", "The Fox",
-                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(1, 0.5f),
-                pivot: new Vector2(0, 0), alignment: TextAlignmentOptions.MidlineLeft,
-                fontSize: 16, color: ThemePalette.DustyTan);
-            var oppArchRT = (RectTransform)oppArchLabel.transform;
-            oppArchRT.offsetMin = new Vector2(80, 2);
-            oppArchRT.offsetMax = new Vector2(-8, 0);
-
-            // ----- End-bout button (bottom-right, above player hand) -----
-            var endBoutBtn = AddButton(canvasRT, "EndBoutButton", "End Bout");
-            endBoutBtn.anchorMin = new Vector2(1, 0);
+            var endBoutBtn = AddButton(actionZone, "EndBoutButton", "End Bout");
+            endBoutBtn.anchorMin = new Vector2(0, 0);
             endBoutBtn.anchorMax = new Vector2(1, 0);
-            endBoutBtn.pivot = new Vector2(1, 0);
-            endBoutBtn.sizeDelta = new Vector2(180, 52);
-            endBoutBtn.anchoredPosition = new Vector2(-16, 310);
+            endBoutBtn.pivot = new Vector2(0.5f, 0);
+            endBoutBtn.sizeDelta = new Vector2(0, 66);
+            endBoutBtn.anchoredPosition = Vector2.zero;
 
-            // ----- Center band: deck/trump anchored to LEFT edge, discard anchored to RIGHT edge,
-            // bout area in the middle. Anchoring to edges keeps everything visible at narrow aspect ratios.
+            // ----- Dual-deck piles: each player's draw pile on their side of the felt -----
+            var oppDeckSlot = BuildDeckPile(canvasRT, "OpponentDeckPile",
+                anchor: new Vector2(0, 1), pos: new Vector2(190, -290), rotation: -8f,
+                edgeColor: ThemePalette.VenetianRed, label: "FOE DECK", out var oppDeckBadge);
+
+            var playerDeckSlot = BuildDeckPile(canvasRT, "PlayerDeckPile",
+                anchor: new Vector2(1, 0), pos: new Vector2(-420, 250), rotation: 7f,
+                edgeColor: ThemePalette.Gold, label: "YOUR DECK", out var playerDeckBadge);
+
+            // Removed pile: off the felt (out of the game), dimmed
+            var discardSlot = BuildDeckPile(canvasRT, "RemovedPile",
+                anchor: new Vector2(1, 1), pos: new Vector2(-110, -160), rotation: 4f,
+                edgeColor: new Color(0.42f, 0.40f, 0.36f), label: "REMOVED", out var discardCountLabel,
+                dimmed: true);
+
+            // Legacy shared-deck anchor: kept for draw animations' origin in legacy mode.
             var deckSlot = NewChild(canvasRT, "DeckSlot");
-            deckSlot.anchorMin = new Vector2(0, 0.5f);
-            deckSlot.anchorMax = new Vector2(0, 0.5f);
-            deckSlot.pivot = new Vector2(0, 0.5f);
-            deckSlot.sizeDelta = new Vector2(110, 160);
-            deckSlot.anchoredPosition = new Vector2(30, 0);
-            var deckImg = deckSlot.gameObject.AddComponent<Image>();
-            deckImg.color = ThemePalette.DeckSlotDark;
-            // Deck "stack" visual using offset rectangles
-            for (int i = 0; i < 6; i++)
-            {
-                var stack = NewChild(deckSlot, $"DeckStack{i}");
-                stack.sizeDelta = new Vector2(110, 160);
-                stack.anchoredPosition = new Vector2(55 - i * 0.5f, i * 0.6f); // pivot is left so center is +55
-                var img = stack.gameObject.AddComponent<Image>();
-                img.color = ThemePalette.CrimsonCard;
-                img.raycastTarget = false;
-            }
-
-            // Deck count overlay
-            var deckCountLabel = AddText(deckSlot, "DeckCountLabel", "0",
+            deckSlot.anchorMin = new Vector2(1, 0);
+            deckSlot.anchorMax = new Vector2(1, 0);
+            deckSlot.pivot = new Vector2(0.5f, 0.5f);
+            deckSlot.sizeDelta = new Vector2(10, 10);
+            deckSlot.anchoredPosition = new Vector2(-420, 250);
+            var deckCountLabel = AddText(deckSlot, "DeckCountLabel", "",
                 anchorMin: Vector2.zero, anchorMax: Vector2.one,
                 pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.Center,
-                fontSize: 32, color: Color.white, font: MonoFont);
-            var deckCountRT = (RectTransform)deckCountLabel.transform;
-            deckCountRT.anchoredPosition = new Vector2(55, 0);
-            deckCountLabel.fontSize = 24;
-            deckCountLabel.outlineWidth = 0.3f;
-            deckCountLabel.outlineColor = Color.black;
+                fontSize: 1, color: Color.clear, font: MonoFont);
 
-            // Trump card sits to the right of the deck, rotated 90° (handled by GameManager) so it peeks out.
-            var trumpSlot = NewChild(canvasRT, "TrumpSlot");
-            trumpSlot.anchorMin = new Vector2(0, 0.5f);
-            trumpSlot.anchorMax = new Vector2(0, 0.5f);
-            trumpSlot.pivot = new Vector2(0, 0.5f);
-            trumpSlot.sizeDelta = new Vector2(160, 110);
-            trumpSlot.anchoredPosition = new Vector2(100, 0);
+            // ----- Trump panel: on the felt, mid right edge, with its rule spelled out -----
+            var trumpPanel = NewChild(canvasRT, "TrumpPanel");
+            trumpPanel.anchorMin = new Vector2(1, 0.5f);
+            trumpPanel.anchorMax = new Vector2(1, 0.5f);
+            trumpPanel.pivot = new Vector2(0.5f, 0.5f);
+            trumpPanel.sizeDelta = new Vector2(200, 240);
+            trumpPanel.anchoredPosition = new Vector2(-200, 30);
 
-            // Discard pile on the right edge.
-            var discardSlot = NewChild(canvasRT, "DiscardSlot");
-            discardSlot.anchorMin = new Vector2(1, 0.5f);
-            discardSlot.anchorMax = new Vector2(1, 0.5f);
-            discardSlot.pivot = new Vector2(1, 0.5f);
-            discardSlot.sizeDelta = new Vector2(110, 160);
-            discardSlot.anchoredPosition = new Vector2(-30, 0);
-            var discardImg = discardSlot.gameObject.AddComponent<Image>();
-            discardImg.color = new Color(1, 1, 1, 0.05f);
-            // Add a "Discard" label
-            AddText(discardSlot, "DiscardLabel", "Discard",
-                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(1, 1),
-                pivot: new Vector2(0.5f, 0),
-                alignment: TextAlignmentOptions.Center, fontSize: 18,
-                color: new Color(1, 1, 1, 0.65f));
-            var discardCountLabel = AddText(discardSlot, "DiscardCountLabel", "0",
+            var trumpSlot = NewChild(trumpPanel, "TrumpSlot");
+            trumpSlot.anchorMin = new Vector2(0.5f, 1);
+            trumpSlot.anchorMax = new Vector2(0.5f, 1);
+            trumpSlot.pivot = new Vector2(0.5f, 1);
+            trumpSlot.sizeDelta = new Vector2(110, 160);
+            trumpSlot.anchoredPosition = new Vector2(0, 0);
+            trumpSlot.localRotation = Quaternion.Euler(0, 0, 12f);
+
+            var trumpLabel = AddText(trumpPanel, "TrumpLabel", "TRUMP ♥",
                 anchorMin: new Vector2(0, 0), anchorMax: new Vector2(1, 0),
-                pivot: new Vector2(0.5f, 0),
-                alignment: TextAlignmentOptions.Center, fontSize: 20,
-                color: ThemePalette.Parchment, font: DefaultFont);
-            discardCountLabel.fontStyle = FontStyles.Bold;
+                pivot: new Vector2(0.5f, 0), alignment: TextAlignmentOptions.Center,
+                fontSize: 18, color: ThemePalette.Gold, font: HeadingFont);
+            var trumpLabelRT = (RectTransform)trumpLabel.transform;
+            trumpLabelRT.sizeDelta = new Vector2(0, 26);
+            trumpLabelRT.anchoredPosition = new Vector2(0, 36);
+            trumpLabel.fontStyle = FontStyles.Bold;
+
+            var trumpRule = AddText(trumpPanel, "TrumpRuleLabel", "",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(1, 0),
+                pivot: new Vector2(0.5f, 0), alignment: TextAlignmentOptions.Center,
+                fontSize: 14, color: ThemePalette.DustyTan, font: DefaultFont);
+            var trumpRuleRT = (RectTransform)trumpRule.transform;
+            trumpRuleRT.sizeDelta = new Vector2(0, 36);
+            trumpRuleRT.anchoredPosition = new Vector2(0, 0);
+            trumpRule.fontStyle = FontStyles.Italic;
+            trumpRule.enableWordWrapping = true;
 
             var boutArea = NewChild(canvasRT, "BoutArea");
             boutArea.anchorMin = new Vector2(0.5f, 0.5f);
             boutArea.anchorMax = new Vector2(0.5f, 0.5f);
-            boutArea.sizeDelta = new Vector2(900, 240);
-            boutArea.anchoredPosition = new Vector2(0, 0);
+            boutArea.sizeDelta = new Vector2(900, 280);
+            boutArea.anchoredPosition = new Vector2(0, 40);
 
             // ----- Hands -----
             var playerHand = NewChild(canvasRT, "PlayerHand");
@@ -283,16 +252,28 @@ namespace WitsAndFools.EditorTools
             table.DiscardCountLabel = discardCountLabel;
             table.BoutArea = boutArea;
             table.CardSpawnRoot = canvasRT;
+            table.PlayerDeckSlot = playerDeckSlot;
+            table.PlayerDeckCountBadge = playerDeckBadge;
+            table.OpponentDeckSlot = oppDeckSlot;
+            table.OpponentDeckCountBadge = oppDeckBadge;
+            table.TrumpRuleLabel = trumpRule;
 
             // ----- HUD wiring -----
             var hudGO = new GameObject("HudView");
             var hud = hudGO.AddComponent<HudView>();
-            hud.PhaseLabel = turnLabel;
             hud.TrumpLabel = trumpLabel;
             hud.EndBoutButton = endBoutBtn.GetComponent<Button>();
             hud.OpponentPortrait = portraitImg;
+            hud.OpponentPortraitMonogram = oppMonogram;
             hud.OpponentNameLabel = oppNameLabel;
             hud.OpponentArchetypeLabel = oppArchLabel;
+            hud.OpponentHandCount = oppHandCountP;
+            hud.OpponentResourceLabel = oppResLabelP;
+            hud.OpponentPips = oppPips;
+            hud.OpponentRaceFill = oppRaceFill;
+            hud.OpponentRaceLabel = oppRaceLabel;
+            hud.ActionPhaseLine = phaseLine;
+            hud.BoutChipLabel = boutChip;
 
             // ----- Game-over panel -----
             var goPanel = NewChild(canvasRT, "GameOverPanel");
@@ -400,106 +381,70 @@ namespace WitsAndFools.EditorTools
             infoLabel.gameObject.SetActive(false);
             hud.InfoLabel = infoLabel;
 
-            // ----- Opponent info strip (dark panel extending right from nameplate) -----
-            var oppInfoStrip = NewChild(canvasRT, "OpponentInfoStrip");
-            oppInfoStrip.anchorMin = new Vector2(0, 1);
-            oppInfoStrip.anchorMax = new Vector2(1, 1);
-            oppInfoStrip.pivot = new Vector2(0.5f, 1);
-            oppInfoStrip.offsetMin = new Vector2(410, -122);
-            oppInfoStrip.offsetMax = new Vector2(-16, -82);
-            var oppInfoBg = oppInfoStrip.gameObject.AddComponent<Image>();
-            oppInfoBg.color = new Color(0, 0, 0, 0.55f);
-            oppInfoBg.raycastTarget = false;
+            // ----- Player identity panel (bottom-left): mirrors the opponent panel -----
+            var playerPanel = BuildIdentityPanel(canvasRT, "PlayerPanel",
+                anchorTop: false, keyline: ThemePalette.Gold,
+                out _, out var playerMonogram, out var playerNameLabel, out var playerTitleLabel,
+                out var playerHandCountP, out var playerResLabelP, out var playerPips,
+                out var playerRaceFill, out var playerRaceLabel);
+            hud.PlayerNameLabel = playerNameLabel;
+            hud.PlayerTitleLabel = playerTitleLabel;
+            hud.PlayerPortraitLabel = playerMonogram;
+            hud.PlayerHandCount = playerHandCountP;
+            hud.PlayerResourceLabel = playerResLabelP;
+            hud.PlayerPips = playerPips;
+            hud.PlayerRaceFill = playerRaceFill;
+            hud.PlayerRaceLabel = playerRaceLabel;
+            playerNameLabel.text = "YOU";
+            playerTitleLabel.text = "";
 
-            var oppResLabel = AddText(oppInfoStrip, "OpponentResourceLabel", "",
-                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 1),
-                pivot: new Vector2(0, 0.5f),
-                alignment: TextAlignmentOptions.MidlineLeft, fontSize: 22,
-                color: ThemePalette.Gold, font: DefaultFont);
-            oppResLabel.fontStyle = FontStyles.Bold;
-            var oppResRT = (RectTransform)oppResLabel.transform;
-            oppResRT.offsetMin = new Vector2(12, 0);
-            oppResRT.offsetMax = new Vector2(0, 0);
-            oppResLabel.gameObject.SetActive(true);
-            hud.OpponentResourceLabel = oppResLabel;
+            // ----- Event log ("Table Talk", left edge): the record of plays and triggers -----
+            var logPanel = NewChild(canvasRT, "EventLogPanel");
+            logPanel.anchorMin = new Vector2(0, 0.5f);
+            logPanel.anchorMax = new Vector2(0, 0.5f);
+            logPanel.pivot = new Vector2(0, 0.5f);
+            logPanel.sizeDelta = new Vector2(350, 168);
+            logPanel.anchoredPosition = new Vector2(16, -30);
+            var logBg = logPanel.gameObject.AddComponent<Image>();
+            logBg.color = new Color(0.04f, 0.04f, 0.08f, 0.82f);
+            logBg.raycastTarget = false;
 
-            var oppDeckCount = AddText(oppInfoStrip, "OpponentDeckCountLabel", "Deck: 0",
-                anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(0.7f, 1),
-                pivot: new Vector2(0.5f, 0.5f),
-                alignment: TextAlignmentOptions.Center, fontSize: 20,
-                color: Color.white, font: MonoFont);
-            oppDeckCount.fontStyle = FontStyles.Bold;
-            hud.OpponentDeckCountLabel = oppDeckCount;
+            var logTitle = AddText(logPanel, "LogTitle", "TABLE TALK",
+                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(0.5f, 1), alignment: TextAlignmentOptions.MidlineLeft,
+                fontSize: 13, color: ThemePalette.DustyTan, font: HeadingFont);
+            var logTitleRT = (RectTransform)logTitle.transform;
+            logTitleRT.sizeDelta = new Vector2(0, 26);
+            logTitle.margin = new Vector4(12, 0, 0, 0);
 
-            var oppHandCount = AddText(oppInfoStrip, "OpponentHandCount", "",
-                anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1, 1),
-                pivot: new Vector2(1, 0.5f),
-                alignment: TextAlignmentOptions.MidlineRight, fontSize: 20,
-                color: ThemePalette.Parchment, font: DefaultFont);
-            oppHandCount.fontStyle = FontStyles.Bold;
-            var oppHCRT = (RectTransform)oppHandCount.transform;
-            oppHCRT.offsetMin = new Vector2(0, 0);
-            oppHCRT.offsetMax = new Vector2(-12, 0);
-            hud.OpponentHandCount = oppHandCount;
+            var logText = AddText(logPanel, "EventLogText", "",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(1, 1),
+                pivot: new Vector2(0.5f, 0.5f), alignment: TextAlignmentOptions.BottomLeft,
+                fontSize: 17, color: ThemePalette.DustyTan, font: DefaultFont);
+            var logTextRT = (RectTransform)logText.transform;
+            logTextRT.offsetMin = new Vector2(12, 8);
+            logTextRT.offsetMax = new Vector2(-10, -26);
+            logText.enableWordWrapping = false;
+            logText.overflowMode = TextOverflowModes.Ellipsis;
+            logText.richText = true;
+            hud.EventLogText = logText;
 
-            // ----- Player info strip (dark panel above run HUD bar, bottom-left) -----
-            var playerInfoStrip = NewChild(canvasRT, "PlayerInfoStrip");
-            playerInfoStrip.anchorMin = new Vector2(0, 0);
-            playerInfoStrip.anchorMax = new Vector2(0.5f, 0);
-            playerInfoStrip.pivot = new Vector2(0, 0);
-            playerInfoStrip.offsetMin = new Vector2(16, 132);
-            playerInfoStrip.offsetMax = new Vector2(-16, 168);
-            var playerInfoBg = playerInfoStrip.gameObject.AddComponent<Image>();
-            playerInfoBg.color = new Color(0, 0, 0, 0.55f);
-            playerInfoBg.raycastTarget = false;
-
-            var playerResLabel = AddText(playerInfoStrip, "PlayerResourceLabel", "",
-                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0.4f, 1),
-                pivot: new Vector2(0, 0.5f),
-                alignment: TextAlignmentOptions.MidlineLeft, fontSize: 22,
-                color: ThemePalette.Gold, font: DefaultFont);
-            playerResLabel.fontStyle = FontStyles.Bold;
-            var playerResRT = (RectTransform)playerResLabel.transform;
-            playerResRT.offsetMin = new Vector2(12, 0);
-            playerResRT.offsetMax = new Vector2(0, 0);
-            playerResLabel.gameObject.SetActive(true);
-            hud.PlayerResourceLabel = playerResLabel;
-
-            var playerDeckCount = AddText(playerInfoStrip, "PlayerDeckCountLabel", "Deck: 0",
-                anchorMin: new Vector2(0.4f, 0), anchorMax: new Vector2(0.7f, 1),
-                pivot: new Vector2(0.5f, 0.5f),
-                alignment: TextAlignmentOptions.Center, fontSize: 20,
-                color: Color.white, font: MonoFont);
-            playerDeckCount.fontStyle = FontStyles.Bold;
-            hud.PlayerDeckCountLabel = playerDeckCount;
-
-            var playerHandCount = AddText(playerInfoStrip, "PlayerHandCount", "",
-                anchorMin: new Vector2(0.7f, 0), anchorMax: new Vector2(1, 1),
-                pivot: new Vector2(1, 0.5f),
-                alignment: TextAlignmentOptions.MidlineRight, fontSize: 20,
-                color: ThemePalette.Parchment, font: DefaultFont);
-            playerHandCount.fontStyle = FontStyles.Bold;
-            var playerHCRT = (RectTransform)playerHandCount.transform;
-            playerHCRT.offsetMin = new Vector2(0, 0);
-            playerHCRT.offsetMax = new Vector2(-12, 0);
-            hud.PlayerHandCount = playerHandCount;
-
-            // ----- Bout state banner (top-center, with dark panel) -----
+            // ----- Phase ribbon (secondary echo, in the gap between foe hand and bout) -----
             var boutPanel = NewChild(canvasRT, "BoutStatePanel");
-            boutPanel.anchorMin = new Vector2(0.3f, 1);
-            boutPanel.anchorMax = new Vector2(0.7f, 1);
+            boutPanel.anchorMin = new Vector2(0.5f, 1);
+            boutPanel.anchorMax = new Vector2(0.5f, 1);
             boutPanel.pivot = new Vector2(0.5f, 1);
-            boutPanel.sizeDelta = new Vector2(0, 36);
-            boutPanel.anchoredPosition = new Vector2(0, -112);
+            boutPanel.sizeDelta = new Vector2(560, 38);
+            boutPanel.anchoredPosition = new Vector2(0, -262);
             var boutPanelBg = boutPanel.gameObject.AddComponent<Image>();
-            boutPanelBg.color = new Color(0, 0, 0, 0.55f);
+            boutPanelBg.color = new Color(0.04f, 0.04f, 0.08f, 0.82f);
             boutPanelBg.raycastTarget = false;
             boutPanel.gameObject.SetActive(false);
 
             var boutBanner = AddText(boutPanel, "BoutStateBanner", "",
                 anchorMin: Vector2.zero, anchorMax: Vector2.one,
                 pivot: new Vector2(0.5f, 0.5f),
-                alignment: TextAlignmentOptions.Center, fontSize: 24,
+                alignment: TextAlignmentOptions.Center, fontSize: 19,
                 color: Color.white, font: HeadingFont);
             boutBanner.fontStyle = FontStyles.Bold;
             hud.BoutStateBanner = boutBanner;
@@ -585,11 +530,12 @@ namespace WitsAndFools.EditorTools
             felt.SetParent(matchPanel, true);
             frame.SetParent(matchPanel, true);
             vignette.SetParent(matchPanel, true); // behind HUD/cards so it doesn't obscure UI
-            hudBar.SetParent(matchPanel, true);
-            nameplate.SetParent(matchPanel, true);
-            endBoutBtn.SetParent(matchPanel, true);
+            oppPanel.SetParent(matchPanel, true);
+            actionZone.SetParent(matchPanel, true);
+            oppDeckSlot.SetParent(matchPanel, true);
+            playerDeckSlot.SetParent(matchPanel, true);
             deckSlot.SetParent(matchPanel, true);
-            trumpSlot.SetParent(matchPanel, true);
+            trumpPanel.SetParent(matchPanel, true);
             discardSlot.SetParent(matchPanel, true);
             boutArea.SetParent(matchPanel, true);
             playerHand.SetParent(matchPanel, true);
@@ -601,8 +547,8 @@ namespace WitsAndFools.EditorTools
             ((RectTransform)deckTopLabel.transform).SetParent(matchPanel, true);
             ((RectTransform)infoLabel.transform).SetParent(matchPanel, true);
             boutPanel.SetParent(matchPanel, true);
-            playerInfoStrip.SetParent(matchPanel, true);
-            oppInfoStrip.SetParent(matchPanel, true);
+            playerPanel.SetParent(matchPanel, true);
+            logPanel.SetParent(matchPanel, true);
             feedbackPanel.SetParent(matchPanel, true);
             peekPanel.SetParent(matchPanel, true);
             matchPanel.gameObject.SetActive(false);
@@ -1122,6 +1068,196 @@ namespace WitsAndFools.EditorTools
         }
 
         // ---------- helpers ----------
+
+        // Identity panel: portrait + monogram, name/title, hand count + resource pips, race meter.
+        static RectTransform BuildIdentityPanel(RectTransform canvasRT, string name, bool anchorTop, Color keyline,
+            out Image portraitImg, out TMP_Text monogram, out TMP_Text nameLabel, out TMP_Text titleLabel,
+            out TMP_Text handCount, out TMP_Text resLabel, out Image[] pips,
+            out Image raceFill, out TMP_Text raceLabel)
+        {
+            var panel = NewChild(canvasRT, name);
+            var a = anchorTop ? new Vector2(0, 1) : new Vector2(0, 0);
+            panel.anchorMin = a; panel.anchorMax = a; panel.pivot = a;
+            panel.sizeDelta = new Vector2(400, 150);
+            panel.anchoredPosition = anchorTop ? new Vector2(16, -16) : new Vector2(16, 86);
+            var bg = panel.gameObject.AddComponent<Image>();
+            bg.color = new Color(0.06f, 0.08f, 0.12f, 0.93f);
+            bg.raycastTarget = false;
+
+            var key = NewChild(panel, "Keyline");
+            key.anchorMin = new Vector2(0, 0); key.anchorMax = new Vector2(0, 1); key.pivot = new Vector2(0, 0.5f);
+            key.sizeDelta = new Vector2(4, 0);
+            var keyImg = key.gameObject.AddComponent<Image>();
+            keyImg.color = keyline;
+            keyImg.raycastTarget = false;
+
+            var portraitRT = NewChild(panel, "Portrait");
+            portraitRT.anchorMin = new Vector2(0, 1); portraitRT.anchorMax = new Vector2(0, 1);
+            portraitRT.pivot = new Vector2(0, 1);
+            portraitRT.sizeDelta = new Vector2(60, 60);
+            portraitRT.anchoredPosition = new Vector2(14, -12);
+            portraitImg = portraitRT.gameObject.AddComponent<Image>();
+            portraitImg.color = ThemePalette.WarmSlate;
+            portraitImg.preserveAspect = true;
+            portraitImg.raycastTarget = false;
+            var portraitOutline = portraitRT.gameObject.AddComponent<Outline>();
+            portraitOutline.effectColor = new Color(0.75f, 0.65f, 0.45f, 0.7f);
+            portraitOutline.effectDistance = new Vector2(2, -2);
+
+            monogram = AddText(portraitRT, "Monogram", "?",
+                anchorMin: Vector2.zero, anchorMax: Vector2.one, pivot: new Vector2(0.5f, 0.5f),
+                alignment: TextAlignmentOptions.Center, fontSize: 30, color: ThemePalette.Gold, font: HeadingFont);
+            monogram.fontStyle = FontStyles.Bold;
+
+            nameLabel = AddText(panel, "NameLabel", "—",
+                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(1, 1), pivot: new Vector2(0, 1),
+                alignment: TextAlignmentOptions.MidlineLeft, fontSize: 21, color: ThemePalette.Parchment, font: HeadingFont);
+            var nameRT = (RectTransform)nameLabel.transform;
+            nameRT.sizeDelta = new Vector2(-96, 32); nameRT.anchoredPosition = new Vector2(84, -10);
+
+            titleLabel = AddText(panel, "TitleLabel", "",
+                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(1, 1), pivot: new Vector2(0, 1),
+                alignment: TextAlignmentOptions.MidlineLeft, fontSize: 15, color: ThemePalette.DustyTan);
+            var titleRT = (RectTransform)titleLabel.transform;
+            titleRT.sizeDelta = new Vector2(-96, 22); titleRT.anchoredPosition = new Vector2(84, -42);
+            titleLabel.fontStyle = FontStyles.Italic;
+
+            // statline: hand count + resource label + pips
+            handCount = AddText(panel, "HandCount", "Hand 0",
+                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(0, 1), pivot: new Vector2(0, 1),
+                alignment: TextAlignmentOptions.MidlineLeft, fontSize: 17, color: ThemePalette.Parchment);
+            var hcRT = (RectTransform)handCount.transform;
+            hcRT.sizeDelta = new Vector2(100, 26); hcRT.anchoredPosition = new Vector2(16, -82);
+            handCount.richText = true;
+
+            resLabel = AddText(panel, "ResourceLabel", "",
+                anchorMin: new Vector2(0, 1), anchorMax: new Vector2(0, 1), pivot: new Vector2(0, 1),
+                alignment: TextAlignmentOptions.MidlineLeft, fontSize: 15, color: ThemePalette.Gold);
+            var resRT = (RectTransform)resLabel.transform;
+            resRT.sizeDelta = new Vector2(70, 26); resRT.anchoredPosition = new Vector2(140, -82);
+
+            pips = new Image[5];
+            var knob = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+            for (int i = 0; i < 5; i++)
+            {
+                var pip = NewChild(panel, $"Pip{i}");
+                pip.anchorMin = new Vector2(0, 1); pip.anchorMax = new Vector2(0, 1); pip.pivot = new Vector2(0, 1);
+                pip.sizeDelta = new Vector2(16, 16);
+                pip.anchoredPosition = new Vector2(216 + i * 22, -86);
+                var pipImg = pip.gameObject.AddComponent<Image>();
+                pipImg.sprite = knob;
+                pipImg.color = new Color(0.35f, 0.28f, 0.19f, 0.9f);
+                pipImg.raycastTarget = false;
+                pips[i] = pipImg;
+            }
+
+            // race meter: label row + fill bar + WIN cap
+            var raceTitle = AddText(panel, "RaceTitle", "RACE TO ZERO",
+                anchorMin: new Vector2(0, 0), anchorMax: new Vector2(0, 0), pivot: new Vector2(0, 0),
+                alignment: TextAlignmentOptions.MidlineLeft, fontSize: 12, color: ThemePalette.DustyTan, font: HeadingFont);
+            var rtTitleRT = (RectTransform)raceTitle.transform;
+            rtTitleRT.sizeDelta = new Vector2(160, 20); rtTitleRT.anchoredPosition = new Vector2(16, 28);
+
+            raceLabel = AddText(panel, "RaceLabel", "",
+                anchorMin: new Vector2(1, 0), anchorMax: new Vector2(1, 0), pivot: new Vector2(1, 0),
+                alignment: TextAlignmentOptions.MidlineRight, fontSize: 15, color: ThemePalette.Gold, font: HeadingFont);
+            var raceLblRT = (RectTransform)raceLabel.transform;
+            raceLblRT.sizeDelta = new Vector2(130, 20); raceLblRT.anchoredPosition = new Vector2(-48, 28);
+
+            var barBg = NewChild(panel, "RaceBarBg");
+            barBg.anchorMin = new Vector2(0, 0); barBg.anchorMax = new Vector2(1, 0); barBg.pivot = new Vector2(0, 0);
+            barBg.offsetMin = new Vector2(16, 12); barBg.offsetMax = new Vector2(-48, 0);
+            barBg.sizeDelta = new Vector2(barBg.sizeDelta.x, 11);
+            var barBgImg = barBg.gameObject.AddComponent<Image>();
+            barBgImg.color = new Color(0.04f, 0.06f, 0.09f, 1f);
+            barBgImg.raycastTarget = false;
+
+            var barFill = NewChild(barBg, "RaceBarFill");
+            FillParent(barFill);
+            barFill.offsetMin = new Vector2(1, 1); barFill.offsetMax = new Vector2(-1, -1);
+            raceFill = barFill.gameObject.AddComponent<Image>();
+            raceFill.sprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/UISprite.psd");
+            raceFill.type = Image.Type.Filled;
+            raceFill.fillMethod = Image.FillMethod.Horizontal;
+            raceFill.fillAmount = 0f;
+            raceFill.color = ThemePalette.Gold;
+            raceFill.raycastTarget = false;
+
+            var winCap = AddText(panel, "WinCap", "WIN",
+                anchorMin: new Vector2(1, 0), anchorMax: new Vector2(1, 0), pivot: new Vector2(1, 0),
+                alignment: TextAlignmentOptions.MidlineLeft, fontSize: 11, color: ThemePalette.DustyTan, font: HeadingFont);
+            var winRT = (RectTransform)winCap.transform;
+            winRT.sizeDelta = new Vector2(34, 16); winRT.anchoredPosition = new Vector2(-12, 10);
+
+            return panel;
+        }
+
+        // A physical draw/removed pile: 3 offset card backs, count badge, label.
+        static RectTransform BuildDeckPile(RectTransform canvasRT, string name, Vector2 anchor, Vector2 pos,
+            float rotation, Color edgeColor, string label, out TMP_Text countBadge, bool dimmed = false)
+        {
+            var pile = NewChild(canvasRT, name);
+            pile.anchorMin = anchor; pile.anchorMax = anchor; pile.pivot = new Vector2(0.5f, 0.5f);
+            pile.sizeDelta = new Vector2(110, 160);
+            pile.anchoredPosition = pos;
+            pile.localRotation = Quaternion.Euler(0, 0, rotation);
+
+            var backSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Cards/card_back.png");
+            float[] rots = { -3f, 2f, -0.5f };
+            Vector2[] offs = { new(2, 3), new(-1, 1), Vector2.zero };
+            for (int i = 0; i < 3; i++)
+            {
+                var cardRT = NewChild(pile, $"Stack{i}");
+                cardRT.sizeDelta = new Vector2(100, 144);
+                cardRT.anchoredPosition = offs[i];
+                cardRT.localRotation = Quaternion.Euler(0, 0, rots[i]);
+                var img = cardRT.gameObject.AddComponent<Image>();
+                if (backSprite) { img.sprite = backSprite; img.color = dimmed ? new Color(0.5f, 0.48f, 0.46f) : Color.white; }
+                else img.color = dimmed ? new Color(0.32f, 0.28f, 0.26f) : ThemePalette.CrimsonCard;
+                img.raycastTarget = false;
+                var edge = cardRT.gameObject.AddComponent<Outline>();
+                edge.effectColor = edgeColor;
+                edge.effectDistance = new Vector2(2, -2);
+            }
+
+            var knobSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Knob.psd");
+            var badgeOuter = NewChild(pile, "CountBadgeOuter");
+            badgeOuter.anchorMin = new Vector2(1, 0); badgeOuter.anchorMax = new Vector2(1, 0);
+            badgeOuter.pivot = new Vector2(0.5f, 0.5f);
+            badgeOuter.sizeDelta = new Vector2(46, 46);
+            badgeOuter.anchoredPosition = new Vector2(6, 2);
+            badgeOuter.localRotation = Quaternion.Euler(0, 0, -rotation); // keep badge upright
+            var outerImg = badgeOuter.gameObject.AddComponent<Image>();
+            outerImg.sprite = knobSprite;
+            outerImg.color = dimmed ? ThemePalette.DustyTan : ThemePalette.Gold;
+            outerImg.raycastTarget = false;
+
+            var badgeInner = NewChild(badgeOuter, "CountBadgeInner");
+            badgeInner.anchorMin = new Vector2(0.5f, 0.5f); badgeInner.anchorMax = new Vector2(0.5f, 0.5f);
+            badgeInner.pivot = new Vector2(0.5f, 0.5f);
+            badgeInner.sizeDelta = new Vector2(40, 40);
+            var innerImg = badgeInner.gameObject.AddComponent<Image>();
+            innerImg.sprite = knobSprite;
+            innerImg.color = ThemePalette.DarkSlate;
+            innerImg.raycastTarget = false;
+
+            countBadge = AddText(badgeInner, "Count", "0",
+                anchorMin: Vector2.zero, anchorMax: Vector2.one, pivot: new Vector2(0.5f, 0.5f),
+                alignment: TextAlignmentOptions.Center, fontSize: 19,
+                color: dimmed ? ThemePalette.DustyTan : ThemePalette.Gold, font: HeadingFont);
+            countBadge.fontStyle = FontStyles.Bold;
+
+            var pileLabel = AddText(pile, "PileLabel", label,
+                anchorMin: new Vector2(0.5f, 0), anchorMax: new Vector2(0.5f, 0), pivot: new Vector2(0.5f, 1),
+                alignment: TextAlignmentOptions.Center, fontSize: 14,
+                color: ThemePalette.Parchment, font: HeadingFont);
+            var pileLabelRT = (RectTransform)pileLabel.transform;
+            pileLabelRT.sizeDelta = new Vector2(160, 22);
+            pileLabelRT.anchoredPosition = new Vector2(0, -8);
+            pileLabelRT.localRotation = Quaternion.Euler(0, 0, -rotation);
+
+            return pile;
+        }
 
         static RectTransform NewChild(Transform parent, string name)
         {

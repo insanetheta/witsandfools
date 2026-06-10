@@ -33,6 +33,7 @@ namespace WitsAndFools
         readonly List<CardView> _attackViews = new();   // bout slot index -> view
         readonly List<CardView> _defenseViews = new();
         CardView _trumpView;
+        readonly int[] _matchStartTotals = new int[2];
         bool _humanIsPlayerZero;
 
         const int HumanPlayerIndex = 0;
@@ -288,11 +289,17 @@ namespace WitsAndFools
 
         void OnSetupComplete()
         {
-            // Build trump card visual (face-up, peeking out from under the deck, rotated 90°)
+            // Trump card sits upright in the trump panel (the panel itself is tilted).
             _trumpView = SpawnCardView(Engine.TrumpCard, faceUp: true, parent: Table.TrumpSlot);
             var trumpRT = (RectTransform)_trumpView.transform;
+            trumpRT.anchorMin = trumpRT.anchorMax = new Vector2(0.5f, 0.5f);
             trumpRT.anchoredPosition = Vector2.zero;
-            trumpRT.localRotation = Quaternion.Euler(0, 0, 90);
+            trumpRT.localRotation = Quaternion.identity;
+
+            // Win-condition baseline for the race meters.
+            for (int p = 0; p < 2; p++)
+                _matchStartTotals[p] = Engine.HandCount(p) + Engine.DeckCountOf(p);
+            Hud?.ClearLog();
 
             // Build hands
             foreach (var c in Engine.HandOf(HumanPlayerIndex).Cards)
@@ -368,6 +375,7 @@ namespace WitsAndFools
             ((RectTransform)view.transform).anchoredPosition = Vector2.zero; // start at center, then animate
             RelayoutBout();
 
+            PushLog(attackerIndex, $"attacks: {CardLogName(card)}");
             UpdateHud();
             ApplyHighlightForPhase();
         }
@@ -409,6 +417,14 @@ namespace WitsAndFools
             ((RectTransform)view.transform).anchoredPosition = Vector2.zero;
             RelayoutBout();
 
+            // Trump plays are self-explaining: flag the defense that used trump on a non-trump attack.
+            bool trumped = card.Suit == Engine.Trump
+                && slot < Engine.Bout.AttackCount && Engine.Bout.Attacks[slot].Suit != Engine.Trump;
+            view.SetTrumpFlag(trumped, Engine.Trump);
+            PushLog(defenderIndex, trumped
+                ? $"defends with trump: {CardLogName(card)}"
+                : $"defends: {CardLogName(card)}", highlight: trumped);
+
             UpdateHud();
             ApplyHighlightForPhase();
         }
@@ -430,24 +446,45 @@ namespace WitsAndFools
             foreach (var c in _loop.Controllers)
                 if (c is AIPlayer ai) ai.NotifyBoutResolved();
 
-            // Move all bout cards to discard or to the eater's hand area.
+            // Move all bout cards to the removed pile or to the eater's hand area.
             // Engine has already updated hand state; visuals follow the data.
             if (outcome == BoutOutcome.DefenderWonAllDiscarded)
             {
-                foreach (var v in _attackViews) if (v) StartCoroutine(MoveAndDestroy(v, Table.DiscardSlot.position, MoveSeconds));
-                foreach (var v in _defenseViews) if (v) StartCoroutine(MoveAndDestroy(v, Table.DiscardSlot.position, MoveSeconds));
+                int eaten = 0;
+                foreach (var v in _attackViews) if (v) { StartCoroutine(MoveAndDestroy(v, Table.DiscardSlot.position, MoveSeconds)); eaten++; }
+                foreach (var v in _defenseViews) if (v) { StartCoroutine(MoveAndDestroy(v, Table.DiscardSlot.position, MoveSeconds)); eaten++; }
+                if (eaten > 0) Hud?.PushLog($"Bout ends — {eaten} cards removed from the game");
             }
             else
             {
                 // Defender ate. Convert visuals into hand-cards for the defender.
                 int defenderBefore = Engine.AttackerIndex == HumanPlayerIndex ? 1 - HumanPlayerIndex : HumanPlayerIndex;
                 bool defenderIsHuman = defenderBefore == HumanPlayerIndex;
-                foreach (var v in _attackViews) if (v) AbsorbIntoHand(v, defenderIsHuman, faceUp: defenderIsHuman);
-                foreach (var v in _defenseViews) if (v) AbsorbIntoHand(v, defenderIsHuman, faceUp: defenderIsHuman);
+                int eaten = 0;
+                foreach (var v in _attackViews) if (v) { AbsorbIntoHand(v, defenderIsHuman, faceUp: defenderIsHuman); eaten++; }
+                foreach (var v in _defenseViews) if (v) { AbsorbIntoHand(v, defenderIsHuman, faceUp: defenderIsHuman); eaten++; }
+                PushLog(defenderBefore, $"eats {eaten} cards", highlight: true);
             }
             _attackViews.Clear();
             _defenseViews.Clear();
             UpdateHud();
+        }
+
+        // ---------- Event log helpers ----------
+
+        void PushLog(int playerIndex, string action, bool highlight = false)
+        {
+            if (!Hud) return;
+            string who = playerIndex == HumanPlayerIndex ? "You" : OpponentName;
+            Hud.PushLog($"<b>{who}</b> {action}", highlight);
+        }
+
+        string CardLogName(Card card)
+        {
+            string rank = $"{card.Rank.Label()}{card.Suit.Glyph()}";
+            if (card.DefinitionId != null && CardCatalog.TryGet(card.DefinitionId, out var def))
+                return $"{rank} {def.Name}";
+            return rank;
         }
 
         void OnDrew(int playerIndex, int drawnCount)
@@ -577,7 +614,8 @@ namespace WitsAndFools
             if (Hud == null) return;
             string who = playerIndex == HumanPlayerIndex ? "You" : OpponentName;
             string name = card.DefinitionId != null && CardCatalog.TryGet(card.DefinitionId, out var def) ? def.Name : card.ToString();
-            string text = $"{who}: {name} → {ability.ShortName()}";
+            string text = $"{who}: {name} → {ability.DisplayName()}";
+            PushLog(playerIndex, $"{name} → {ability.DisplayName()}", highlight: true);
 
             if (ability == AbilityType.Peek && playerIndex == HumanPlayerIndex)
             {
@@ -704,7 +742,8 @@ namespace WitsAndFools
                 if (!oldCards.Contains(kv.Key))
                     newViews.Add(kv.Value);
 
-            if (newViews.Count > 0 && Table.DeckSlot)
+            var playerDeckOrigin = Table.PlayerDeckSlot ? Table.PlayerDeckSlot : Table.DeckSlot;
+            if (newViews.Count > 0 && playerDeckOrigin)
             {
                 var handRT = (RectTransform)Table.PlayerHand.transform;
                 var targets = new Vector2[newViews.Count];
@@ -713,7 +752,7 @@ namespace WitsAndFools
 
                 Vector2 deckLocal;
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                    handRT, RectTransformUtility.WorldToScreenPoint(null, Table.DeckSlot.position),
+                    handRT, RectTransformUtility.WorldToScreenPoint(null, playerDeckOrigin.position),
                     null, out deckLocal);
 
                 foreach (var v in newViews)
@@ -793,7 +832,8 @@ namespace WitsAndFools
             _humanCardViews.Remove(view.Card);
             Table.PlayerHand.Remove(view);
             view.SetFaceUp(false);
-            var deckPos = Table.DeckSlot ? Table.DeckSlot.position : Table.DiscardSlot.position;
+            var deckTarget = Table.PlayerDeckSlot ? Table.PlayerDeckSlot : Table.DeckSlot;
+            var deckPos = deckTarget ? deckTarget.position : Table.DiscardSlot.position;
             StartCoroutine(MoveAndDestroy(view, deckPos, MoveSeconds));
 
             Hud?.HideAbilityFeedback();
@@ -824,6 +864,10 @@ namespace WitsAndFools
 
         void OnTrumpChanged(Suit newSuit)
         {
+            // Flip the trump card visual to the new suit.
+            if (_trumpView)
+                _trumpView.Bind(new Card(newSuit, Engine.TrumpCard.Rank, null), faceUp: true);
+            Hud?.PushLog($"Trump changes to {newSuit.Glyph()} {newSuit}", highlight: true);
             UpdateHud();
             ApplyHighlightForPhase();
         }
@@ -913,39 +957,68 @@ namespace WitsAndFools
             int playerDeck = Engine.DeckCountOf(HumanPlayerIndex);
             int oppDeck = Engine.DeckCountOf(1 - HumanPlayerIndex);
             Hud.SetDeckCounts(playerDeck, oppDeck);
-            if (Table && Table.DeckCountLabel)
-                Table.DeckCountLabel.text = playerDeck.ToString();
+            if (Table)
+            {
+                if (Table.PlayerDeckCountBadge)
+                {
+                    Table.PlayerDeckCountBadge.text = playerDeck.ToString();
+                    Table.PlayerDeckCountBadge.color = playerDeck == 0 ? ThemePalette.VenetianRed : ThemePalette.Gold;
+                }
+                if (Table.OpponentDeckCountBadge)
+                {
+                    Table.OpponentDeckCountBadge.text = oppDeck.ToString();
+                    Table.OpponentDeckCountBadge.color = oppDeck == 0 ? ThemePalette.VenetianRed : ThemePalette.Gold;
+                }
+                if (Table.TrumpRuleLabel)
+                    Table.TrumpRuleLabel.text = $"{Engine.Trump} beat any other suit";
+            }
             Hud.SetTrump(Engine.Trump);
-            if (Hud.PhaseLabel) Hud.PhaseLabel.text = $"Bout {Engine.BoutCount + 1}";
+            Hud.SetBoutChip(Engine.BoutCount + 1, Engine.Config.MaxBouts);
+
             string phase;
             Color boutColor;
-            if (Engine.Phase == Phase.GameOver) { phase = "Game over"; boutColor = ThemePalette.WarmSlate; }
+            if (Engine.Phase == Phase.GameOver) { phase = "GAME OVER"; boutColor = ThemePalette.WarmSlate; }
             else if (Engine.Phase == Phase.Attack)
             {
                 bool yourTurn = Engine.AttackerIndex == HumanPlayerIndex;
                 int undefended = Engine.UndefendedCount;
-                phase = yourTurn ? $"YOUR ATTACK  |  Undefended: {undefended}" : $"{OpponentName.ToUpper()} ATTACKS  |  Undefended: {undefended}";
+                string sub = undefended == 0 ? "all attacks parried" : $"{undefended} open";
+                phase = yourTurn ? $"YOUR ATTACK · {sub}" : $"{OpponentName.ToUpper()} ATTACKS";
                 boutColor = yourTurn ? ThemePalette.Sage : ThemePalette.VenetianRed;
             }
             else if (Engine.Phase == Phase.Defense)
             {
                 bool yourTurn = Engine.DefenderIndex == HumanPlayerIndex;
                 int undefended = Engine.UndefendedCount;
-                phase = yourTurn ? $"DEFEND!  |  Undefended: {undefended}" : $"{OpponentName.ToUpper()} DEFENDS  |  Undefended: {undefended}";
+                phase = yourTurn ? $"DEFEND! · {undefended} open" : $"{OpponentName.ToUpper()} DEFENDS";
                 boutColor = yourTurn ? ThemePalette.VenetianRed : ThemePalette.Sage;
             }
             else { phase = "..."; boutColor = ThemePalette.WarmSlate; }
             Hud.SetBoutState(phase, boutColor);
+            Hud.SetActionZone(phase, boutColor);
 
             int playerCards = Engine.HandCount(HumanPlayerIndex);
             int oppCards = Engine.HandCount(1 - HumanPlayerIndex);
             Hud.SetHandCounts(playerCards, oppCards);
 
+            // Race to zero: remaining = hand + draw pile; first to shed everything wins.
+            Hud.SetRace(0, playerCards + playerDeck, _matchStartTotals[HumanPlayerIndex]);
+            Hud.SetRace(1, oppCards + oppDeck, _matchStartTotals[1 - HumanPlayerIndex]);
+
             ReconcileHumanCardViews();
             ReconcileOpponentCardViews(oppCards);
 
+            // Rank-bonus chips on bout attacks (Conquer / Heavy Hand)
+            for (int i = 0; i < _attackViews.Count; i++)
+                if (_attackViews[i])
+                    _attackViews[i].SetBonus(i < Engine.Bout.AttackCount ? Engine.Bout.BonusAt(i) : 0);
+
             if (Table && Table.DiscardCountLabel)
-                Table.DiscardCountLabel.gameObject.SetActive(false);
+            {
+                Table.DiscardCountLabel.gameObject.SetActive(true);
+                int removed = Engine.DiscardCountOf(0) + Engine.DiscardCountOf(1);
+                Table.DiscardCountLabel.text = removed.ToString();
+            }
 
             if (Engine.Config.SpysMonocle[HumanPlayerIndex])
                 Hud.SetDeckTop(Engine.DeckTopCard);
