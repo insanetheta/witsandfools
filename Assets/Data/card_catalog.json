@@ -302,7 +302,7 @@
       "rank": 14,
       "doctrine": "Schemer",
       "trigger": "OnAttack",
-      "ability": "Masterstroke: spend 4 Intel — opponent discards their 2 highest-rank cards, you draw 1.",
+      "ability": "Masterstroke: spend 3 Intel — opponent discards their 2 highest-rank cards, you draw 1.",
       "flavorText": "His questions have only one answer, and it is always confession.",
       "rarity": "Rare",
       "startingDeck": false,
@@ -666,7 +666,7 @@
       "rank": 8,
       "doctrine": "Trickster",
       "trigger": "OnDefend",
-      "ability": "Draw 1 card. Bury opponent's weakest card to bottom of their deck.",
+      "ability": "Spend 1 Favor. Draw 1 card and bury opponent's weakest card to the bottom of their deck.",
       "flavorText": "The stars say you will lose. The stars are never wrong.",
       "rarity": "Uncommon",
       "startingDeck": true,
@@ -708,7 +708,7 @@
       "ability": "Draw 2 cards.",
       "flavorText": "The customs men search the wrong crate every time.",
       "rarity": "Uncommon",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "Brace"
     },
     {
@@ -734,7 +734,7 @@
       "ability": "Automatically defend the first undefended attack.",
       "flavorText": "Which one is the reflection?",
       "rarity": "Rare",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Fortify"
     },
     {
@@ -773,7 +773,7 @@
       "ability": "Discard undefended attacks instead of eating them.",
       "flavorText": "The chains were real. The locks were not.",
       "rarity": "Rare",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "SlipAway"
     },
     {
@@ -799,7 +799,7 @@
       "ability": "Gain 1 Favor.",
       "flavorText": "Your blade finds only your own reflection.",
       "rarity": "Rare",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "ResourceGain"
     },
     {
@@ -903,7 +903,7 @@
       "ability": "Spend 3 Luck: draw 3 cards.",
       "flavorText": "One man's trash is another man's arsenal.",
       "rarity": "Common",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "Patronage"
     },
     {
@@ -955,7 +955,7 @@
       "ability": "At bout start, if you hold 3 or fewer cards, draw 1.",
       "flavorText": "Age only increases value, never diminishes it.",
       "rarity": "Common",
-      "startingDeck": true,
+      "startingDeck": false,
       "abilityType": "SteadyHand"
     },
     {
@@ -1033,7 +1033,7 @@
       "ability": "If you hold more cards than your opponent, this card attacks with +2 rank.",
       "flavorText": "The guilds control the flow of everything worth having.",
       "rarity": "Uncommon",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "HeavyHand"
     },
     {
@@ -1111,7 +1111,7 @@
       "ability": "Draw 2 cards from your deck.",
       "flavorText": "The vault opens for those who've earned its trust.",
       "rarity": "Rare",
-      "startingDeck": false,
+      "startingDeck": true,
       "abilityType": "Brace"
     },
     {

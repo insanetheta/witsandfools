@@ -23,17 +23,15 @@ namespace WitsAndFools.EditorTools
 
         static void RunMatrix(int gamesPerMatchup)
         {
-            if (!CardCatalog.IsInitialized)
+            // Always reload so catalog JSON edits take effect without a domain reload.
+            string path = Path.Combine(Application.dataPath, "Data", "card_catalog.json");
+            if (!File.Exists(path))
             {
-                string path = Path.Combine(Application.dataPath, "Data", "card_catalog.json");
-                if (!File.Exists(path))
-                {
-                    Debug.LogError($"Card catalog not found at: {path}");
-                    return;
-                }
-                CardCatalogLoader.LoadFromJson(File.ReadAllText(path));
-                Debug.Log($"Loaded {CardCatalog.Count} cards from catalog.");
+                Debug.LogError($"Card catalog not found at: {path}");
+                return;
             }
+            CardCatalog.Clear();
+            CardCatalogLoader.LoadFromJson(File.ReadAllText(path));
 
             var sb = new StringBuilder();
             sb.AppendLine($"=== Doctrine Balance Matrix: {gamesPerMatchup} games per matchup ===");

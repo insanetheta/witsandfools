@@ -1013,6 +1013,7 @@ namespace WitsAndFools
 
                 case AbilityType.TrapCard:
                 {
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     DrawCards(playerIndex, 1);
                     if (_hands[opponent].Count > 0)
                     {
