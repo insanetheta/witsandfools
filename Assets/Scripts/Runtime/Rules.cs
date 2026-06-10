@@ -27,7 +27,13 @@ namespace WitsAndFools
         {
             if (slot < 0 || slot >= bout.Attacks.Count) return false;
             if (bout.Defenses[slot] != null) return false;
-            return Beats(card, bout.Attacks[slot], trump);
+            var attack = bout.Attacks[slot];
+            int bonus = bout.BonusAt(slot);
+            if (card.Suit == attack.Suit)
+                return (int)card.Rank > (int)attack.Rank + bonus;
+            if (card.Suit == trump && attack.Suit != trump)
+                return true;
+            return false;
         }
     }
 }

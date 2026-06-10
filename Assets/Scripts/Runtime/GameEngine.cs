@@ -30,7 +30,7 @@ namespace WitsAndFools
         public Suit Trump { get; private set; }
         public Card TrumpCard { get; private set; }
         bool _trumpStillInDeck = true;
-        bool _trumpChangerUsed;
+        readonly bool[] _trumpChangerUsed = new bool[2];
         int? _seizeInitiativePlayer;
         bool _doubleTroubleActive;
         int _pileOnBonus;
@@ -99,8 +99,12 @@ namespace WitsAndFools
         public event Action<Suit> OnTrumpChanged;
         public event Action<int, ResourceType, int> OnResourceChanged;
         public event Action<int, int> OnDesperationDiscard;
+        public event Action<int> OnStackPutBackRequired;
 
-        public bool TrumpChangerUsed => _trumpChangerUsed;
+        public bool AwaitingStackPutBack(int playerIndex) => _awaitingStackPutBack[playerIndex];
+        bool[] _awaitingStackPutBack = new bool[2];
+
+        public bool TrumpChangerUsedBy(int player) => _trumpChangerUsed[player];
         public bool DoubleTroubleActive => _doubleTroubleActive;
 
         public int GetResource(int player) => _resource[player];
@@ -121,6 +125,24 @@ namespace WitsAndFools
             if (_resource[player] < cost) return false;
             _resource[player] -= cost;
             OnResourceChanged?.Invoke(player, _config.ArchetypeResource[player].Value, _resource[player]);
+            return true;
+        }
+
+        // Internal ability costs only bind when the resource economy is on;
+        // otherwise abilities fire free (legacy/smoke-test mode).
+        bool TryPayAbilityCost(int player, int cost)
+        {
+            if (!_config.AbilitiesCostResource || cost <= 0) return true;
+            return SpendResource(player, cost);
+        }
+
+        public bool CompleteStackPutBack(int playerIndex, Card card)
+        {
+            if (!_awaitingStackPutBack[playerIndex]) return false;
+            if (!_hands[playerIndex].Contains(card)) return false;
+            _hands[playerIndex].Remove(card);
+            PutOnTopOfDeck(playerIndex, card);
+            _awaitingStackPutBack[playerIndex] = false;
             return true;
         }
 
@@ -194,7 +216,8 @@ namespace WitsAndFools
             WinnerIndex = null;
             FoolIndex = null;
             _trumpStillInDeck = true;
-            _trumpChangerUsed = false;
+            _trumpChangerUsed[0] = false;
+            _trumpChangerUsed[1] = false;
             _seizeInitiativePlayer = null;
             _doubleTroubleActive = false;
             _pileOnBonus = 0;
@@ -533,7 +556,7 @@ namespace WitsAndFools
                     if (worst.HasValue)
                     {
                         _hands[playerIndex].Remove(worst.Value);
-                        AddToDiscard(worst.Value, playerIndex);
+                        RecycleCard(worst.Value, playerIndex);
                         discarded++;
                     }
                 }
@@ -647,7 +670,7 @@ namespace WitsAndFools
             switch (ability)
             {
                 case AbilityType.TrumpChanger:
-                    return !_trumpChangerUsed;
+                    return !_trumpChangerUsed[playerIndex];
                 case AbilityType.ExtraDraw:
                 case AbilityType.ExtraDrawPlus:
                     return Phase == Phase.Attack && DeckCountFor(playerIndex) > 0;
@@ -716,7 +739,9 @@ namespace WitsAndFools
 
                 // Brute: Warlord
                 case AbilityType.Conquer:
-                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && DeckCountFor(playerIndex) > 0;
+                    return Phase == Phase.Attack && _resource[playerIndex] >= 1 && !_bout.IsEmpty;
+                case AbilityType.HeavyHand:
+                    return Phase == Phase.Attack && !_bout.IsEmpty;
                 case AbilityType.Intimidate:
                     return Phase == Phase.Attack && _resource[playerIndex] >= 1 && _hands[1 - playerIndex].Count > 0;
                 case AbilityType.CrownSeize:
@@ -807,20 +832,19 @@ namespace WitsAndFools
             switch (ability)
             {
                 case AbilityType.TrumpChanger:
+                    if (_trumpChangerUsed[playerIndex]) break;
                     Trump = card.Suit;
-                    _trumpChangerUsed = true;
+                    _trumpChangerUsed[playerIndex] = true;
                     OnTrumpChanged?.Invoke(Trump);
                     ApplyGracefulManners();
                     break;
 
                 case AbilityType.ExtraDraw:
-                    int edTarget = _hands[DefenderIndex].Count + 2;
-                    DrawTo(DefenderIndex, edTarget);
+                    DrawCards(playerIndex, 1);
                     break;
 
                 case AbilityType.ExtraDrawPlus:
-                    int edpTarget = _hands[DefenderIndex].Count + 3;
-                    DrawTo(DefenderIndex, edpTarget);
+                    DrawCards(playerIndex, 2);
                     break;
 
                 case AbilityType.Blocker:
@@ -875,7 +899,7 @@ namespace WitsAndFools
                     break;
 
                 case AbilityType.Deflect:
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     AttackerIndex = 1 - AttackerIndex;
                     Phase = Phase.Defense;
                     break;
@@ -915,12 +939,12 @@ namespace WitsAndFools
                 // --- Rogue: Shadow ---
 
                 case AbilityType.Riposte:
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     DiscardRandomCards(opponent, 1);
                     break;
 
                 case AbilityType.RipostePlus:
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     DiscardRandomCards(opponent, 2);
                     break;
 
@@ -935,12 +959,12 @@ namespace WitsAndFools
                     break;
 
                 case AbilityType.DoubleAgent:
-                    SpendResource(playerIndex, 3);
+                    if (!TryPayAbilityCost(playerIndex, 3)) break;
                     StealRandomCard(playerIndex, opponent);
                     break;
 
                 case AbilityType.Blackmail:
-                    SpendResource(playerIndex, 2);
+                    if (!TryPayAbilityCost(playerIndex, 2)) break;
                     DiscardHighestCards(opponent, 2);
                     break;
 
@@ -975,7 +999,7 @@ namespace WitsAndFools
 
                 case AbilityType.SmokeBomb:
                 {
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     CollectCrownOfThornsRanks();
                     DiscardBoutCards();
                     _bout.Clear();
@@ -1002,7 +1026,7 @@ namespace WitsAndFools
 
                 case AbilityType.Rampage:
                 {
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     int played = 0;
                     while (played < 2 && CanDrawFromDeck(playerIndex))
                     {
@@ -1026,13 +1050,13 @@ namespace WitsAndFools
                     break;
 
                 case AbilityType.IronGrip:
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     DrawCards(playerIndex, 3);
                     break;
 
                 case AbilityType.Brawl:
                 {
-                    SpendResource(playerIndex, 2);
+                    if (!TryPayAbilityCost(playerIndex, 2)) break;
                     for (int p = 0; p < 2; p++)
                     {
                         var toDiscard = new List<Card>(_hands[p].Cards);
@@ -1051,29 +1075,27 @@ namespace WitsAndFools
 
                 case AbilityType.Conquer:
                 {
-                    SpendResource(playerIndex, 1);
-                    if (CanDrawFromDeck(playerIndex))
-                    {
-                        var drawn = DrawFromDeck(playerIndex);
-                        _hands[playerIndex].Add(drawn);
-                        int d = 1;
-                        if (drawn.Suit == Trump && CanDrawFromDeck(playerIndex))
-                        {
-                            _hands[playerIndex].Add(DrawFromDeck(playerIndex));
-                            d++;
-                        }
-                        OnDrew?.Invoke(playerIndex, d);
-                    }
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
+                    int cqSlot = _bout.AttackCount - 1;
+                    if (cqSlot >= 0) _bout.AddAttackBonus(cqSlot, 2);
+                    break;
+                }
+
+                case AbilityType.HeavyHand:
+                {
+                    if (_hands[playerIndex].Count <= _hands[opponent].Count) break;
+                    int hhSlot = _bout.AttackCount - 1;
+                    if (hhSlot >= 0) _bout.AddAttackBonus(hhSlot, 2);
                     break;
                 }
 
                 case AbilityType.Intimidate:
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     DiscardRandomNonTrump(opponent, 1);
                     break;
 
                 case AbilityType.CrownSeize:
-                    SpendResource(playerIndex, 3);
+                    if (!TryPayAbilityCost(playerIndex, 3)) break;
                     Trump = card.Suit;
                     OnTrumpChanged?.Invoke(Trump);
                     ApplyGracefulManners();
@@ -1083,37 +1105,37 @@ namespace WitsAndFools
                 // --- Diplomat: Courtier ---
 
                 case AbilityType.CourtIntrigue:
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     SortTopDeck(playerIndex, 3);
                     DrawCards(playerIndex, 1);
                     break;
 
                 case AbilityType.RoyalDecree:
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     DrawCards(playerIndex, 2);
                     DiscardRandomCards(opponent, 1);
                     break;
 
                 case AbilityType.Patronage:
-                    SpendResource(playerIndex, 3);
+                    if (!TryPayAbilityCost(playerIndex, 3)) break;
                     DrawCards(playerIndex, 3);
                     break;
 
                 // --- Diplomat: Puppeteer ---
 
                 case AbilityType.PullStrings:
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     DiscardRandomCards(opponent, 2);
                     break;
 
                 case AbilityType.Misdirection:
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     _bout.AttacksCapped = true;
                     DiscardRandomCards(opponent, 1);
                     break;
 
                 case AbilityType.ForcedHand:
-                    SpendResource(playerIndex, 2);
+                    if (!TryPayAbilityCost(playerIndex, 2)) break;
                     DiscardHighestCards(opponent, 1);
                     break;
 
@@ -1141,7 +1163,7 @@ namespace WitsAndFools
 
                 case AbilityType.SafePassage:
                 {
-                    SpendResource(playerIndex, 2);
+                    if (!TryPayAbilityCost(playerIndex, 2)) break;
                     for (int i = 0; i < _bout.Defenses.Count; i++)
                     {
                         if (_bout.Defenses[i] == null)
@@ -1153,7 +1175,7 @@ namespace WitsAndFools
 
                 case AbilityType.Treaty:
                 {
-                    SpendResource(playerIndex, 3);
+                    if (!TryPayAbilityCost(playerIndex, 3)) break;
                     for (int p = 0; p < 2; p++)
                     {
                         int need = 6 - _hands[p].Count;
@@ -1166,19 +1188,15 @@ namespace WitsAndFools
 
                 case AbilityType.StackTheDeck:
                 {
-                    var worst = FindWorstCard(_hands[playerIndex], Trump);
-                    if (worst.HasValue)
-                    {
-                        _hands[playerIndex].Remove(worst.Value);
-                        PutOnTopOfDeck(playerIndex, worst.Value);
-                    }
                     DrawCards(playerIndex, 2);
+                    _awaitingStackPutBack[playerIndex] = true;
+                    OnStackPutBackRequired?.Invoke(playerIndex);
                     break;
                 }
 
                 case AbilityType.SecondDeal:
                 {
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     DrawCards(playerIndex, 2);
                     var worst = FindWorstCard(_hands[playerIndex], Trump);
                     if (worst.HasValue)
@@ -1191,7 +1209,7 @@ namespace WitsAndFools
 
                 case AbilityType.ColdRead:
                 {
-                    SpendResource(playerIndex, 2);
+                    if (!TryPayAbilityCost(playerIndex, 2)) break;
                     DrawCards(playerIndex, 3);
                     var worst = FindWorstCard(_hands[playerIndex], Trump);
                     if (worst.HasValue)
@@ -1207,6 +1225,7 @@ namespace WitsAndFools
                 case AbilityType.AllIn:
                 {
                     int luck = _resource[playerIndex];
+                    if (_config.AbilitiesCostResource && luck < 1) break;
                     SpendResource(playerIndex, luck);
                     DrawCards(playerIndex, luck);
                     break;
@@ -1214,7 +1233,7 @@ namespace WitsAndFools
 
                 case AbilityType.DoubleOrNothing:
                 {
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     DrawCards(playerIndex, 2);
                     var worst = FindWorstCard(_hands[playerIndex], Trump);
                     if (worst.HasValue)
@@ -1227,7 +1246,7 @@ namespace WitsAndFools
 
                 case AbilityType.LuckyStreak:
                 {
-                    SpendResource(playerIndex, 2);
+                    if (!TryPayAbilityCost(playerIndex, 2)) break;
                     if (CanDrawFromDeck(playerIndex))
                     {
                         var ls1 = DrawFromDeck(playerIndex);
@@ -1264,7 +1283,7 @@ namespace WitsAndFools
 
                 case AbilityType.Misdeal:
                 {
-                    SpendResource(playerIndex, 1);
+                    if (!TryPayAbilityCost(playerIndex, 1)) break;
                     var attacks = new List<Card>();
                     for (int i = 0; i < _bout.Attacks.Count; i++)
                     {
@@ -1281,7 +1300,7 @@ namespace WitsAndFools
 
                 case AbilityType.WildCard:
                 {
-                    SpendResource(playerIndex, 2);
+                    if (!TryPayAbilityCost(playerIndex, 2)) break;
                     var pile = _playerDiscards[playerIndex];
                     if (pile.Count > 0)
                     {
@@ -1417,7 +1436,7 @@ namespace WitsAndFools
                         var worst = FindWorstCard(_hands[opponent], Trump);
                         if (!worst.HasValue) break;
                         _hands[opponent].Remove(worst.Value);
-                        AddToDiscard(worst.Value, opponent);
+                        RecycleCard(worst.Value, opponent);
                     }
                     break;
                 }

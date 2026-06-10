@@ -63,6 +63,26 @@ namespace WitsAndFools
 
             if (Engine.Phase == Phase.GameOver) return;
 
+            if (_awaitingStackPutBack || Engine.AwaitingStackPutBack(HumanPlayerIndex))
+            {
+                if (_autoPlay && Engine.AwaitingStackPutBack(HumanPlayerIndex))
+                {
+                    _awaitingStackPutBack = false;
+                    if (_stackPutBackCoroutine != null) { StopCoroutine(_stackPutBackCoroutine); _stackPutBackCoroutine = null; }
+                    Hud?.HideAbilityFeedback();
+                    AutoCompleteStackPutBack();
+                }
+                return;
+            }
+
+            int aiIndex = 1 - HumanPlayerIndex;
+            if (Engine.AwaitingStackPutBack(aiIndex) && _loop.Controllers[aiIndex].Kind == PlayerKind.AI)
+            {
+                _loop.Controllers[aiIndex].RequestAction(Engine, aiIndex);
+                ReconcileHumanCardViews();
+                UpdateHud();
+            }
+
             _matchFrames++;
 
             int active = Engine.Phase == Phase.Defense ? Engine.DefenderIndex : Engine.AttackerIndex;
@@ -230,6 +250,7 @@ namespace WitsAndFools
             Engine.OnAbilityUsed += OnAbilityUsed;
             Engine.OnTrumpChanged += OnTrumpChanged;
             Engine.OnResourceChanged += OnResourceChanged;
+            Engine.OnStackPutBackRequired += OnStackPutBackRequired;
         }
 
         void WireHudButtons()
@@ -637,9 +658,152 @@ namespace WitsAndFools
             _feedbackCoroutine = null;
         }
 
+        // ---------- StackTheDeck: draw 2 then choose 1 to put back ----------
+
+        bool _awaitingStackPutBack;
+        Coroutine _stackPutBackCoroutine;
+
+        void OnStackPutBackRequired(int playerIndex)
+        {
+            if (playerIndex != HumanPlayerIndex) return;
+            if (_autoPlay)
+            {
+                AutoCompleteStackPutBack();
+                return;
+            }
+            _stackPutBackCoroutine = StartCoroutine(StackPutBackSequence());
+        }
+
+        void AutoCompleteStackPutBack()
+        {
+            var hand = Engine.HandOf(HumanPlayerIndex).Cards;
+            Card? worst = null;
+            int worstRank = int.MaxValue;
+            foreach (var c in hand)
+            {
+                int rank = (int)c.Rank;
+                if (c.Suit != Engine.Trump && rank < worstRank) { worst = c; worstRank = rank; }
+            }
+            worst ??= hand.Count > 0 ? hand[0] : (Card?)null;
+            if (worst.HasValue)
+            {
+                Engine.CompleteStackPutBack(HumanPlayerIndex, worst.Value);
+                ReconcileHumanCardViews();
+                UpdateHud();
+            }
+        }
+
+        IEnumerator StackPutBackSequence()
+        {
+            var oldCards = new HashSet<Card>(_humanCardViews.Keys);
+            ReconcileHumanCardViews();
+            UpdateHud();
+
+            var newViews = new List<CardView>();
+            foreach (var kv in _humanCardViews)
+                if (!oldCards.Contains(kv.Key))
+                    newViews.Add(kv.Value);
+
+            if (newViews.Count > 0 && Table.DeckSlot)
+            {
+                var handRT = (RectTransform)Table.PlayerHand.transform;
+                var targets = new Vector2[newViews.Count];
+                for (int i = 0; i < newViews.Count; i++)
+                    targets[i] = ((RectTransform)newViews[i].transform).anchoredPosition;
+
+                Vector2 deckLocal;
+                RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                    handRT, RectTransformUtility.WorldToScreenPoint(null, Table.DeckSlot.position),
+                    null, out deckLocal);
+
+                foreach (var v in newViews)
+                {
+                    ((RectTransform)v.transform).anchoredPosition = deckLocal;
+                    v.SetFaceUp(false);
+                }
+                yield return null;
+
+                foreach (var v in newViews)
+                    v.SetFaceUp(true);
+
+                float elapsed = 0f;
+                float duration = MoveSeconds * 1.5f;
+                while (elapsed < duration)
+                {
+                    elapsed += Time.deltaTime;
+                    float e = EaseOutCubic(Mathf.Clamp01(elapsed / duration));
+                    for (int i = 0; i < newViews.Count; i++)
+                    {
+                        if (!newViews[i]) continue;
+                        ((RectTransform)newViews[i].transform).anchoredPosition =
+                            Vector2.LerpUnclamped(deckLocal, targets[i], e);
+                    }
+                    yield return null;
+                }
+
+                for (int i = 0; i < newViews.Count; i++)
+                    if (newViews[i])
+                        ((RectTransform)newViews[i].transform).anchoredPosition = targets[i];
+            }
+
+            foreach (var kv in _humanCardViews)
+                StartCoroutine(JiggleCard((RectTransform)kv.Value.transform));
+            yield return new WaitForSeconds(0.25f);
+
+            _awaitingStackPutBack = true;
+            foreach (var kv in _humanCardViews)
+            {
+                kv.Value.SetHighlight(CardView.Highlight.Playable);
+                kv.Value.OnClicked = OnStackPutBackCardClicked;
+            }
+
+            Hud?.ShowAbilityFeedback("Choose a card to put on top of your deck", ThemePalette.Gold);
+        }
+
+        IEnumerator JiggleCard(RectTransform rt)
+        {
+            if (!rt) yield break;
+            var original = rt.anchoredPosition;
+            float amplitude = 6f;
+            float duration = 0.2f;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float t = elapsed / duration;
+                float offset = Mathf.Sin(t * Mathf.PI * 3f) * amplitude * (1f - t);
+                if (rt) rt.anchoredPosition = original + new Vector2(0, offset);
+                yield return null;
+            }
+            if (rt) rt.anchoredPosition = original;
+        }
+
+        void OnStackPutBackCardClicked(CardView view)
+        {
+            if (!_awaitingStackPutBack) return;
+            _awaitingStackPutBack = false;
+
+            bool ok = Engine.CompleteStackPutBack(HumanPlayerIndex, view.Card);
+            if (!ok)
+            {
+                _awaitingStackPutBack = true;
+                return;
+            }
+
+            _humanCardViews.Remove(view.Card);
+            Table.PlayerHand.Remove(view);
+            view.SetFaceUp(false);
+            var deckPos = Table.DeckSlot ? Table.DeckSlot.position : Table.DiscardSlot.position;
+            StartCoroutine(MoveAndDestroy(view, deckPos, MoveSeconds));
+
+            Hud?.HideAbilityFeedback();
+            UpdateHud();
+            ApplyHighlightForPhase();
+        }
+
         bool AbilityValidForPhase(AbilityType ability) => ability switch
         {
-            AbilityType.TrumpChanger => !Engine.TrumpChangerUsed,
+            AbilityType.TrumpChanger => !Engine.TrumpChangerUsedBy(HumanPlayerIndex),
             AbilityType.ExtraDraw => Engine.Phase == Phase.Attack && Engine.DeckCount > 0,
             AbilityType.DoubleTrouble => Engine.Phase == Phase.Attack,
             AbilityType.Blocker => Engine.Phase == Phase.Defense,

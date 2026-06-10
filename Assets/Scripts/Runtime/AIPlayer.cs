@@ -22,6 +22,12 @@ namespace WitsAndFools
 
         public void RequestAction(GameEngine engine, int playerIndex)
         {
+            if (engine.AwaitingStackPutBack(playerIndex))
+            {
+                CompleteStackPutBack(engine, playerIndex);
+                return;
+            }
+
             if (RandomMoveChance > 0 && _rng.NextDouble() < RandomMoveChance)
             {
                 if (TryRandomAction(engine, playerIndex)) return;
@@ -211,7 +217,11 @@ namespace WitsAndFools
 
                 case AbilityType.Conquer:
                     return engine.Phase == Phase.Attack && engine.GetResource(playerIndex) >= 1
-                        && engine.DeckCount > 0;
+                        && !engine.Bout.IsEmpty;
+
+                case AbilityType.HeavyHand:
+                    return engine.Phase == Phase.Attack && !engine.Bout.IsEmpty
+                        && hand.Count > engine.HandOf(1 - playerIndex).Count;
 
                 case AbilityType.Intimidate:
                     return engine.Phase == Phase.Attack && engine.GetResource(playerIndex) >= 1
@@ -703,6 +713,7 @@ namespace WitsAndFools
                 AbilityType.Rampage => 5,
                 AbilityType.Haymaker => 3,
                 AbilityType.Conquer => 3,
+                AbilityType.HeavyHand => 3,
                 AbilityType.Intimidate => 4,
                 AbilityType.RoyalDecree => 3,
                 _ => 2,
@@ -742,6 +753,22 @@ namespace WitsAndFools
             if (c.Suit == trump) score -= 5;
             score += DefenseAbilityBonus(c);
             return score;
+        }
+
+        void CompleteStackPutBack(GameEngine engine, int playerIndex)
+        {
+            var hand = engine.HandOf(playerIndex).Cards;
+            if (hand.Count == 0) return;
+            Card worst = hand[0];
+            int worstScore = int.MaxValue;
+            foreach (var c in hand)
+            {
+                int score = (int)c.Rank;
+                if (c.Suit == engine.Trump) score += 20;
+                if (c.HasAbility) score += 10;
+                if (score < worstScore) { worst = c; worstScore = score; }
+            }
+            engine.CompleteStackPutBack(playerIndex, worst);
         }
     }
 }

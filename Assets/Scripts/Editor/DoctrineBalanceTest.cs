@@ -136,6 +136,7 @@ namespace WitsAndFools.EditorTools
                 var config = new MatchConfig();
                 config.ArchetypeResource[0] = d0.Resource();
                 config.ArchetypeResource[1] = d1.Resource();
+                config.AbilitiesCostResource = true; // match production (MatchSetup)
 
                 var engine = new GameEngine(seed, config, deck0, deck1);
                 var ai0 = new AIPlayer("P0", seed);
@@ -148,6 +149,8 @@ namespace WitsAndFools.EditorTools
                 int safety = 0;
                 while (engine.Phase != Phase.GameOver && safety++ < 5000)
                 {
+                    if (engine.AwaitingStackPutBack(0)) { ai0.RequestAction(engine, 0); continue; }
+                    if (engine.AwaitingStackPutBack(1)) { ai1.RequestAction(engine, 1); continue; }
                     int active = engine.Phase == Phase.Defense ? engine.DefenderIndex : engine.AttackerIndex;
                     if (active == 0)
                         ai0.RequestAction(engine, 0);

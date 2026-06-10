@@ -6,6 +6,7 @@ namespace WitsAndFools
     {
         readonly List<Card> _attacks = new();
         readonly List<Card?> _defenses = new();
+        readonly List<int> _attackBonuses = new();
         readonly HashSet<int> _autoDefended = new();
         public bool AttacksCapped { get; set; }
         readonly HashSet<Rank> _bonusRanks = new();
@@ -30,7 +31,16 @@ namespace WitsAndFools
         {
             _attacks.Add(card);
             _defenses.Add(null);
+            _attackBonuses.Add(0);
         }
+
+        public void AddAttackBonus(int slot, int bonus)
+        {
+            if (slot >= 0 && slot < _attackBonuses.Count) _attackBonuses[slot] += bonus;
+        }
+
+        public int BonusAt(int slot) =>
+            slot >= 0 && slot < _attackBonuses.Count ? _attackBonuses[slot] : 0;
 
         public bool TryDefend(int slot, Card defenseCard)
         {
@@ -63,6 +73,7 @@ namespace WitsAndFools
             if (slot < 0 || slot >= _attacks.Count) return;
             _attacks.RemoveAt(slot);
             _defenses.RemoveAt(slot);
+            _attackBonuses.RemoveAt(slot);
             _autoDefended.Remove(slot);
             var shifted = new HashSet<int>();
             foreach (int i in _autoDefended)
@@ -86,6 +97,7 @@ namespace WitsAndFools
         {
             _attacks.Clear();
             _defenses.Clear();
+            _attackBonuses.Clear();
             _autoDefended.Clear();
             _bonusRanks.Clear();
             AttacksCapped = false;
