@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Wits &amp; Fools — Match Board Mockup v4 (Dual-Deck)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#0A0A14; --deep-navy:#141C28; --dark-slate:#1E2832; --warm-slate:#2A3442;
+    --bronze:#5A4830; --parchment:#F0E6D2; --dusty-tan:#A89B8C; --gold:#D4A846; --gold-dark:#B8922C;
+    --venetian-red:#B84040; --royal-blue:#4477AA; --sage:#66B866; --amber:#CC8833;
+    --felt:#21492E; --felt-dark:#173420; --card-cream:#F5F0E0; --crimson-card:#8C2020;
+    --red-suit:#B02020; --black-suit:#1A1A1A;
+    --atk:#A83232; --def:#33689C; --util:#7A5E1A; --pas:#3F7E3F;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--midnight); color:var(--parchment); font-family:'Crimson Pro',serif; padding:24px; display:flex; flex-direction:column; align-items:center; gap:28px;}
+  h1,h2,h3{font-family:'Cinzel',serif;}
+  h1{font-size:22px; color:var(--gold); letter-spacing:2px;}
+  h2{font-size:16px; color:var(--gold); letter-spacing:1.5px; margin-bottom:10px;}
+  .note{color:var(--dusty-tan); font-size:15px; max-width:1100px; line-height:1.45;}
+
+  /* ============ BOARD FRAME ============ */
+  .board{
+    position:relative; width:1280px; height:800px; overflow:hidden; border:2px solid var(--bronze); border-radius:6px;
+    background:
+      radial-gradient(ellipse 90% 75% at 50% 48%, rgba(212,168,70,.10), transparent 60%),
+      radial-gradient(ellipse 120% 100% at 50% 110%, #1a1410 0%, transparent 55%),
+      linear-gradient(180deg, #14100C 0%, #1C150F 45%, #120E0A 100%);
+  }
+  .table-oval{
+    position:absolute; left:50%; top:51%; transform:translate(-50%,-50%);
+    width:1060px; height:600px; border-radius:50% / 46%;
+    background:radial-gradient(ellipse at 50% 38%, #2B5C3A 0%, var(--felt) 45%, var(--felt-dark) 100%);
+    box-shadow: 0 0 0 14px #3A2C1B, 0 0 0 17px #241A0F, 0 30px 80px rgba(0,0,0,.8), inset 0 0 90px rgba(0,0,0,.55);
+  }
+  .table-oval::after{
+    content:""; position:absolute; left:50%; top:-7%; transform:translateX(-50%);
+    width:300px; height:140px; border-radius:50%;
+    background:radial-gradient(ellipse, rgba(255,200,110,.16), transparent 70%);
+  }
+
+  /* ============ CARDS ============ */
+  .card{
+    width:88px; height:126px; border-radius:7px; position:relative; flex-shrink:0;
+    background:var(--card-cream);
+    box-shadow:0 3px 8px rgba(0,0,0,.55), inset 0 0 0 1px rgba(0,0,0,.18);
+  }
+  .card .corner{position:absolute; top:5px; left:7px; font-size:16px; font-weight:700; line-height:1;}
+  .card .corner.br{top:auto; left:auto; bottom:22px; right:7px; transform:rotate(180deg);}
+  .card .pip{position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); font-size:32px;}
+  .card .cname{position:absolute; top:25px; left:0; right:0; text-align:center; font-size:11px; font-style:italic; color:#5A4A32; padding:0 7px; line-height:1.05;}
+  .card.red .corner,.card.red .pip{color:var(--red-suit);}
+  .card.black .corner,.card.black .pip{color:var(--black-suit);}
+
+  /* ability strip: >=12px, full word, AA contrast */
+  .card .abl{
+    position:absolute; bottom:0; left:0; right:0; height:19px;
+    display:flex; align-items:center; justify-content:flex-start; gap:4px; padding-left:7px;
+    font-size:12px; font-weight:700; letter-spacing:.3px; color:#FFF;
+    border-radius:0 0 6px 6px;
+  }
+  .abl.atk{background:var(--atk);} .abl.def{background:var(--def);} .abl.util{background:var(--util);} .abl.pas{background:var(--pas);}
+
+  .card.back{
+    background:linear-gradient(135deg, #7A1C1C 0%, var(--crimson-card) 50%, #6E1818 100%);
+    box-shadow:0 3px 8px rgba(0,0,0,.55), inset 0 0 0 2px #C8A040, inset 0 0 0 5px rgba(200,160,64,.25);
+  }
+  .card.back::after{
+    content:"❦"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-size:34px; color:rgba(200,160,64,.65);
+  }
+  .card.small{width:66px; height:95px;}
+  .card.small .pip{font-size:24px;}
+  .card.small.back::after{font-size:25px;}
+
+  .card.playable{box-shadow:0 0 0 2.5px var(--gold), 0 0 18px rgba(212,168,70,.55), 0 3px 8px rgba(0,0,0,.5);}
+  .card.disabled{filter:brightness(.68) saturate(.65);}
+  .card.hover-glow{box-shadow:0 0 0 2.5px #FFE9A8, 0 0 26px rgba(255,233,168,.8), 0 3px 8px rgba(0,0,0,.5); transform:translateY(-10px);}
+
+  /* trump-play rim: marks a defense made with trump */
+  .card.trump-play{box-shadow:0 0 0 2.5px var(--venetian-red), 0 0 16px rgba(220,90,90,.65), 0 3px 8px rgba(0,0,0,.5);}
+  .trump-flag{
+    position:absolute; top:-9px; left:50%; transform:translateX(-50%); z-index:6;
+    background:var(--venetian-red); color:#FFF; font-family:'Cinzel',serif; font-size:10px; font-weight:700;
+    letter-spacing:1px; padding:2px 7px; border-radius:3px; border:1px solid #E8A0A0; white-space:nowrap;
+  }
+
+  .bonus-chip{
+    position:absolute; top:-10px; right:-10px; z-index:5;
+    background:radial-gradient(circle at 35% 30%, #E45A5A, var(--atk) 70%);
+    color:#fff; font-family:'Cinzel',serif; font-weight:700; font-size:12px;
+    width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    border:2px solid #F0D9A0; box-shadow:0 2px 6px rgba(0,0,0,.6);
+  }
+
+  /* ============ HAND FANS ============ */
+  .opp-hand{position:absolute; top:30px; left:50%; transform:translateX(-50%); display:flex; z-index:3;}
+  .opp-hand .card{margin:0 -19px;}
+  .opp-hand .card:nth-child(odd){transform:rotate(-2.5deg) translateY(2px);}
+  .opp-hand .card:nth-child(even){transform:rotate(2deg);}
+
+  .player-hand{position:absolute; bottom:56px; left:50%; transform:translateX(-50%); display:flex; z-index:6; align-items:flex-end;}
+  .player-hand .card{margin:0 -12px; transition:transform .1s;}
+  .player-hand .card:nth-child(1){transform:rotate(-4.5deg) translateY(7px);}
+  .player-hand .card:nth-child(2){transform:rotate(-1.5deg);}
+  .player-hand .card:nth-child(3){transform:rotate(1.5deg);}
+  .player-hand .card:nth-child(4){transform:rotate(4.5deg) translateY(7px);}
+
+  /* ============ PILES ============ */
+  .pile{position:absolute; z-index:4;}
+  .pile .stack{position:relative;}
+  .pile .stack .card{position:absolute; top:0; left:0;}
+  .pile .stack .card:nth-child(1){transform:rotate(-3deg) translate(2px,3px);}
+  .pile .stack .card:nth-child(2){transform:rotate(2deg) translate(-1px,1px);}
+  .pile .stack .card:nth-child(3){transform:rotate(-.5deg);}
+  .pile .count{
+    position:absolute; right:-14px; bottom:-10px; z-index:6;
+    min-width:34px; height:34px; padding:0 7px; border-radius:17px;
+    background:var(--dark-slate); border:2px solid var(--gold);
+    color:var(--gold); font-family:'Cinzel',serif; font-weight:700; font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 2px 8px rgba(0,0,0,.6);
+  }
+  .pile .count.empty{border-color:var(--venetian-red); color:var(--venetian-red);}
+  .pile .pile-label{
+    position:absolute; left:50%; transform:translateX(-50%); bottom:-26px; white-space:nowrap;
+    font-family:'Cinzel',serif; font-size:12px; letter-spacing:1.5px; color:var(--parchment); opacity:.85;
+  }
+  /* decks color-keyed to owner */
+  .opp-deck{top:106px; left:118px;}
+  .opp-deck .stack{transform:rotate(-8deg);}
+  .opp-deck .card.back{box-shadow:0 3px 8px rgba(0,0,0,.55), inset 0 0 0 2px var(--venetian-red), inset 0 0 0 5px rgba(184,64,64,.3);}
+  .player-deck{bottom:150px; right:248px;}
+  .player-deck .stack{transform:rotate(7deg);}
+
+  .deck-peek{
+    position:absolute; left:-46px; top:18px; transform:rotate(-9deg); z-index:-1;
+    width:66px; height:95px; border-radius:6px; background:var(--card-cream);
+    box-shadow:0 2px 6px rgba(0,0,0,.5);
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    font-weight:700; color:var(--red-suit); font-size:17px;
+  }
+  .deck-peek .peek-tag{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; color:#7A6A4C; margin-top:3px;}
+
+  /* removed pile: off the felt (out of the game), top card face-up + ashen */
+  .removed-pile{top:84px; right:56px;}
+  .removed-pile .stack{transform:rotate(4deg);}
+  .removed-pile .stack .card{filter:grayscale(.75) brightness(.62);}
+  .removed-pile .stack .card.face-up{background:#C9C2B0;}
+  .removed-pile .count{border-color:var(--dusty-tan); color:var(--dusty-tan);}
+
+  /* ============ TRUMP — on the felt, mid right edge ============ */
+  .trump-panel{position:absolute; top:300px; right:128px; z-index:4; text-align:center;}
+  .trump-panel .card{transform:rotate(12deg); margin:0 auto;}
+  .trump-panel .trump-label{margin-top:16px; font-family:'Cinzel',serif; font-size:12px; letter-spacing:2px; color:var(--gold);}
+  .trump-panel .trump-rule{margin-top:3px; font-size:12.5px; font-style:italic; color:var(--dusty-tan); width:130px;}
+
+  /* ============ BOUT AREA with slot framing ============ */
+  .bout{position:absolute; left:50%; top:44%; transform:translate(-50%,-50%); display:flex; gap:64px; z-index:5;}
+  .bout .slot{
+    position:relative; width:168px; height:216px; border-radius:12px;
+    background:rgba(0,0,0,.18); box-shadow:inset 0 0 14px rgba(0,0,0,.35), inset 0 0 0 1px rgba(240,230,210,.13);
+    padding:8px;
+  }
+  .bout .slot .roleflag{
+    position:absolute; top:-11px; left:10px; z-index:6;
+    font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:1.5px;
+    padding:2px 9px; border-radius:3px; color:#FFF;
+  }
+  .roleflag.attack{background:var(--atk); border:1px solid #D88;}
+  .roleflag.defense{background:var(--def); border:1px solid #8AC;}
+  .bout .defense{position:absolute; top:64px; left:64px; transform:rotate(5deg); z-index:2;}
+
+  /* ============ PHASE RIBBON (secondary echo) ============ */
+  .phase-ribbon{
+    position:absolute; top:170px; left:50%; transform:translateX(-50%); z-index:7;
+    padding:5px 22px; border-radius:4px;
+    background:linear-gradient(180deg, rgba(20,28,40,.9), rgba(10,10,20,.9));
+    border:1px solid var(--sage); box-shadow:0 4px 14px rgba(0,0,0,.5);
+    font-family:'Cinzel',serif; font-size:13px; letter-spacing:2px; color:var(--sage);
+    display:flex; align-items:center; gap:12px;
+  }
+  .phase-ribbon .sub{font-family:'Crimson Pro',serif; font-size:13.5px; letter-spacing:.5px; color:var(--dusty-tan);}
+
+  /* ============ EVENT LOG (left edge, replaces blink-toast) ============ */
+  .event-log{
+    position:absolute; left:14px; top:296px; z-index:8; width:236px;
+    background:rgba(10,10,20,.82); border:1px solid var(--bronze); border-radius:6px;
+    padding:8px 11px;
+  }
+  .event-log .log-title{font-family:'Cinzel',serif; font-size:11px; letter-spacing:1.5px; color:var(--dusty-tan); margin-bottom:5px; display:flex; justify-content:space-between;}
+  .event-log .entry{font-size:13.5px; line-height:1.35; color:var(--dusty-tan); padding:2px 0;}
+  .event-log .entry b{color:var(--parchment); font-weight:600;}
+  .event-log .entry.latest{color:var(--gold);}
+  .event-log .entry.latest b{color:var(--gold);}
+
+  /* ============ IDENTITY PANELS ============ */
+  .panel{
+    position:absolute; z-index:8; width:264px;
+    background:linear-gradient(180deg, rgba(20,28,40,.94), rgba(10,10,20,.94));
+    border:1px solid var(--bronze); border-radius:6px; padding:10px 12px;
+    box-shadow:0 6px 18px rgba(0,0,0,.6);
+  }
+  .opp-panel{top:14px; left:14px; border-left:3px solid var(--venetian-red);}
+  .player-panel{bottom:60px; left:14px; border-left:3px solid var(--gold);}
+  .panel .row1{display:flex; gap:10px; align-items:center;}
+  .panel .portrait{
+    width:46px; height:46px; border-radius:4px; flex-shrink:0;
+    background:linear-gradient(135deg,#5A4830,#2A2018); border:1px solid var(--gold-dark);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel',serif; font-size:24px; font-weight:700; color:var(--gold);
+  }
+  .panel .pname{font-family:'Cinzel',serif; font-size:15px; color:var(--parchment); letter-spacing:.5px;}
+  .panel .ptitle{font-size:12.5px; font-style:italic; color:var(--dusty-tan);}
+  .panel .statline{display:flex; align-items:center; gap:14px; margin-top:9px;}
+  .stat{display:flex; align-items:center; gap:5px; font-size:14.5px; color:var(--parchment);}
+  .stat .ico{display:inline-block; width:11px; height:15px; border-radius:2px; background:var(--card-cream); border:1px solid var(--bronze); opacity:.9;}
+  .stat b{font-family:'Cinzel',serif; font-size:15px; color:var(--gold);}
+
+  /* race-to-zero meter: fills toward WIN; identical data renders identically */
+  .race{margin-top:9px;}
+  .race .race-label{display:flex; justify-content:space-between; align-items:baseline; font-size:11.5px; letter-spacing:1px; color:var(--dusty-tan); font-family:'Cinzel',serif;}
+  .race .race-label b{color:var(--gold); font-size:14px;}
+  .race .bar{position:relative; height:9px; border-radius:5px; background:#0C1018; margin-top:4px; margin-right:30px; border:1px solid rgba(90,72,48,.6);}
+  .race .bar i{display:block; height:100%; border-radius:5px; background:linear-gradient(90deg, #7A6224, var(--gold)); box-shadow:0 0 6px rgba(212,168,70,.4);}
+  .race .bar .win-cap{
+    position:absolute; right:-6px; top:50%; transform:translate(100%,-50%);
+    font-family:'Cinzel',serif; font-size:10px; letter-spacing:.5px; color:var(--dusty-tan);
+  }
+
+  .pips{display:flex; gap:4px; align-items:center;}
+  .pips .plabel{font-size:12.5px; color:var(--dusty-tan); margin-right:3px;}
+  .pip-dot{width:11px; height:11px; border-radius:50%; border:1.5px solid var(--bronze); background:transparent;}
+  .pip-dot.full.intel{background:var(--royal-blue); border-color:var(--royal-blue);}
+  .pip-dot.full.fury{background:var(--venetian-red); border-color:var(--venetian-red);}
+  /* pips pulse when the hovered card would spend them */
+  .pip-dot.cost{box-shadow:0 0 8px 2px rgba(255,233,168,.9); border-color:#FFE9A8;}
+
+  /* ============ ACTION ZONE (the phase lives here) ============ */
+  .action-zone{position:absolute; bottom:64px; right:30px; z-index:8; width:208px; text-align:center;}
+  .action-zone .phase-line{
+    font-family:'Cinzel',serif; font-size:12px; letter-spacing:1.5px; color:var(--sage); margin-bottom:7px;
+  }
+  .action-zone .bout-chip{
+    display:inline-block; margin-bottom:8px;
+    font-family:'Cinzel',serif; font-size:11.5px; letter-spacing:1.5px; color:var(--dusty-tan);
+    background:rgba(10,10,20,.7); border:1px solid var(--bronze); border-radius:4px; padding:4px 12px;
+  }
+  .action-zone .bout-chip b{color:var(--gold);}
+  .action-btn{
+    width:100%; padding:15px 0; text-align:center; border-radius:6px; cursor:pointer;
+    font-family:'Cinzel',serif; font-size:16px; font-weight:700; letter-spacing:2px;
+    background:linear-gradient(180deg,#7ECB7E,var(--sage)); color:#10240F;
+    border:1px solid #9FE09F; box-shadow:0 4px 14px rgba(0,0,0,.55);
+  }
+
+  /* ============ RUN BAR ============ */
+  .run-bar{
+    position:absolute; left:0; right:0; bottom:0; height:42px; z-index:9;
+    background:linear-gradient(180deg, rgba(10,10,20,.88), rgba(10,10,20,.97));
+    border-top:1px solid var(--bronze);
+    display:flex; align-items:center; padding:0 18px; gap:30px;
+    font-size:14.5px;
+  }
+  .run-bar .hearts{letter-spacing:2px;}
+  .run-bar .hearts .full{color:var(--venetian-red);}
+  .run-bar .hearts .lost{color:#3A2A2A;}
+  .run-bar .lbl{color:var(--dusty-tan); font-size:12px; font-family:'Cinzel',serif; letter-spacing:1px; margin-right:5px;}
+  .run-bar .grow{flex:1;}
+  .run-bar .florins{color:var(--gold);}
+  .auto-toggle,.menu-btn{
+    font-family:'Cinzel',serif; font-size:11px; letter-spacing:1.5px; color:var(--dusty-tan);
+    border:1px solid var(--bronze); border-radius:3px; padding:4px 12px; cursor:pointer;
+  }
+
+  /* tooltip: anchored, arrow touches the lifted card */
+  .tooltip{
+    position:absolute; bottom:200px; left:602px; transform:translateX(-50%); z-index:10;
+    width:236px; background:rgba(10,10,20,.95); border:1px solid var(--gold-dark); border-radius:5px;
+    padding:9px 12px; font-size:13.5px; line-height:1.35; color:var(--parchment);
+    box-shadow:0 6px 18px rgba(0,0,0,.7);
+  }
+  .tooltip .t-name{font-family:'Cinzel',serif; font-size:13px; color:var(--gold); margin-bottom:3px;}
+  .tooltip .t-cost{color:#7FA8D8;}
+  .tooltip::after{content:""; position:absolute; bottom:-8px; left:50%; transform:translateX(-50%); border:8px solid transparent; border-bottom:none; border-top-color:var(--gold-dark);}
+
+  /* ============ ANNOTATIONS ============ */
+  .anno{position:absolute; z-index:30; width:23px; height:23px; border-radius:4px;
+    background:var(--venetian-red); color:#FFF; font-family:'Cinzel',serif; font-weight:700; font-size:12px;
+    display:flex; align-items:center; justify-content:center; border:2px solid #F0C8C8;
+    box-shadow:0 0 10px rgba(184,64,64,.9); cursor:default;}
+  body.hide-annos .anno{display:none;}
+  .toggle-annos{position:fixed; top:14px; right:18px; z-index:99; background:var(--dark-slate); color:var(--gold);
+    border:1px solid var(--gold-dark); border-radius:4px; padding:7px 14px; font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px; cursor:pointer;}
+
+  /* ============ LEGEND / STATES ============ */
+  .legend{width:1280px; display:grid; grid-template-columns:1fr 1fr; gap:10px 30px; font-size:15px; line-height:1.45;}
+  .legend .item{display:flex; gap:10px;}
+  .legend .item .n{flex-shrink:0; width:22px; height:22px; border-radius:4px; background:var(--venetian-red); color:#FFF;
+    font-family:'Cinzel',serif; font-weight:700; font-size:12px; display:flex; align-items:center; justify-content:center; margin-top:2px;}
+  .legend b{color:var(--gold);}
+
+  .states{width:1280px; background:var(--deep-navy); border:1px solid var(--bronze); border-radius:6px; padding:18px 22px;}
+  .states .srow{display:flex; gap:26px; align-items:center; margin:14px 0; flex-wrap:wrap;}
+  .chip-demo{padding:13px 30px; border-radius:6px; font-family:'Cinzel',serif; font-size:14px; font-weight:700; letter-spacing:2px; text-align:center;}
+  .chip-end{background:linear-gradient(180deg,#7ECB7E,var(--sage)); color:#10240F; border:1px solid #9FE09F;}
+  .chip-take{background:linear-gradient(180deg,#D05858,var(--venetian-red)); color:#FFF; border:1px solid #E08888;}
+  .chip-dis{background:#222A36; color:#56606E; border:1px solid #333E4E;}
+  .ribbon-demo{padding:6px 22px; border-radius:4px; font-family:'Cinzel',serif; font-size:13px; letter-spacing:2px;
+    background:linear-gradient(180deg, rgba(20,28,40,.95), rgba(10,10,20,.95)); display:inline-flex; gap:12px; align-items:center;}
+  .ribbon-demo .sub{font-family:'Crimson Pro',serif; font-size:13px; color:var(--dusty-tan); letter-spacing:.5px;}
+  .r-attack{border:1px solid var(--sage); color:var(--sage);}
+  .r-defend{border:1px solid var(--venetian-red); color:var(--venetian-red);}
+  .r-wait{border:1px solid var(--dusty-tan); color:var(--dusty-tan);}
+  .small-note{font-size:13.5px; color:var(--dusty-tan); font-style:italic;}
+  .state-mock{
+    width:286px; border:1px solid var(--bronze); border-radius:6px; padding:12px 14px;
+    background:linear-gradient(180deg, #1A2418, #10160E); font-size:13.5px; line-height:1.4;
+  }
+  .state-mock h3{font-size:12px; color:var(--gold); letter-spacing:1.5px; margin-bottom:7px;}
+  .state-mock .mini-btn{display:inline-block; margin-top:8px; padding:9px 20px; border-radius:5px; font-family:'Cinzel',serif; font-size:12px; font-weight:700; letter-spacing:1.5px;}
+</style>
+</head>
+<body>
+<button class="toggle-annos" onclick="document.body.classList.toggle('hide-annos')">Toggle Annotations</button>
+
+<h1>WITS &amp; FOOLS — MATCH BOARD v4 (DUAL-DECK)</h1>
+<p class="note">Reference state: bout 3 vs Berto il Ratto, Act 1. Both sides brought 10 cards (collection = match total); two earlier bouts
+removed 2 cards from each (REMOVED = 4). This bout: my 8♣ Cipher is beaten by his 9♣ Quartermaster, and my Conquer-boosted A♠ Knight (+2)
+is trumped by his 7♥ — all parried, so END BOUT is live. Each side now holds 4 in hand with 2 in deck: race meters both read "6 left," 40% toward WIN.
+A♣ glows as the only legal follow-up (rank 14 is on the table); hovering it pulses the 3 Intel pips its Masterstroke would spend.</p>
+
+<div class="board">
+  <div class="table-oval"></div>
+
+  <!-- ===== Opponent identity panel ===== -->
+  <div class="panel opp-panel">
+    <div class="row1">
+      <div class="portrait">B</div>
+      <div>
+        <div class="pname">BERTO IL RATTO</div>
+        <div class="ptitle">The Brawler · Brute</div>
+      </div>
+    </div>
+    <div class="statline">
+      <div class="stat"><span class="ico"></span> Hand <b>4</b></div>
+      <div class="pips"><span class="plabel">Fury</span>
+        <span class="pip-dot full fury"></span><span class="pip-dot full fury"></span><span class="pip-dot"></span><span class="pip-dot"></span><span class="pip-dot"></span>
+      </div>
+    </div>
+    <div class="race">
+      <div class="race-label"><span>RACE TO ZERO</span><span><b>6</b> cards left</span></div>
+      <div class="bar"><i style="width:40%"></i><span class="win-cap">WIN</span></div>
+    </div>
+  </div>
+
+  <!-- ===== Foe deck (their side, red-keyed) ===== -->
+  <div class="pile opp-deck">
+    <div class="stack" style="width:66px;height:95px;">
+      <div class="card small back"></div>
+      <div class="card small back"></div>
+      <div class="card small back"></div>
+    </div>
+    <div class="count">2</div>
+    <div class="pile-label">FOE DECK</div>
+  </div>
+
+  <!-- ===== Opponent hand ===== -->
+  <div class="opp-hand">
+    <div class="card back"></div><div class="card back"></div>
+    <div class="card back"></div><div class="card back"></div>
+  </div>
+
+  <!-- ===== Phase ribbon (secondary echo of action zone) ===== -->
+  <div class="phase-ribbon">YOUR ATTACK <span class="sub">all attacks parried</span></div>
+
+  <!-- ===== Event log (replaces 1.2s toast) ===== -->
+  <div class="event-log">
+    <div class="log-title"><span>TABLE TALK</span><span>—</span></div>
+    <div class="entry"><b>You</b> attack: 8♣ The Cipher</div>
+    <div class="entry"><b>Berto</b> defends: 9♣ Quartermaster</div>
+    <div class="entry"><b>You</b> attack: A♠ Knight of the Order</div>
+    <div class="entry"><b>You</b>: Knight → Conquer (+2 rank)</div>
+    <div class="entry latest"><b>Berto</b> defends with trump: 7<span style="color:#E08888">♥</span></div>
+  </div>
+
+  <!-- ===== Bout area: framed slots with role flags ===== -->
+  <div class="bout">
+    <div class="slot">
+      <span class="roleflag attack">ATTACK</span>
+      <div class="card black">
+        <div class="corner">8♣</div>
+        <div class="cname">The Cipher</div>
+        <div class="pip">♣</div>
+        <div class="corner br">8♣</div>
+        <div class="abl util">Peek</div>
+      </div>
+      <div class="card black defense">
+        <span class="roleflag defense" style="top:-11px; left:auto; right:8px;">DEFENSE</span>
+        <div class="corner">9♣</div>
+        <div class="cname">The Quartermaster</div>
+        <div class="pip">♣</div>
+        <div class="corner br">9♣</div>
+        <div class="abl pas">Gain Fury</div>
+      </div>
+    </div>
+    <div class="slot">
+      <span class="roleflag attack">ATTACK</span>
+      <div class="card black">
+        <div class="bonus-chip">+2</div>
+        <div class="corner">A♠</div>
+        <div class="cname">Knight of the Order</div>
+        <div class="pip">♠</div>
+        <div class="corner br">A♠</div>
+        <div class="abl atk">Conquer</div>
+      </div>
+      <div class="card red defense trump-play">
+        <span class="roleflag defense" style="top:-11px; left:auto; right:8px;">DEFENSE</span>
+        <span class="trump-flag" style="top:auto; bottom:-9px;">♥ TRUMP</span>
+        <div class="corner">7♥</div>
+        <div class="cname">The Berserker</div>
+        <div class="pip">♥</div>
+        <div class="corner br">7♥</div>
+        <div class="abl atk">Twin Strike</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Removed pile: off the felt = out of the game ===== -->
+  <div class="pile removed-pile">
+    <div class="stack" style="width:66px;height:95px;">
+      <div class="card small back"></div>
+      <div class="card small face-up black">
+        <div class="corner" style="font-size:13px;">J♠</div>
+        <div class="pip">♠</div>
+      </div>
+    </div>
+    <div class="count">4</div>
+    <div class="pile-label">REMOVED</div>
+  </div>
+
+  <!-- ===== Trump on the felt, mid right edge ===== -->
+  <div class="trump-panel">
+    <div class="card small red">
+      <div class="corner">♥</div>
+      <div class="pip">♥</div>
+    </div>
+    <div class="trump-label">TRUMP ♥</div>
+    <div class="trump-rule">Hearts beat any other suit</div>
+  </div>
+
+  <!-- ===== Player deck + Spy's Monocle peek ===== -->
+  <div class="pile player-deck">
+    <div class="stack" style="width:66px;height:95px;">
+      <div class="deck-peek">10♦<span class="peek-tag">NEXT DRAW</span></div>
+      <div class="card small back"></div>
+      <div class="card small back"></div>
+      <div class="card small back"></div>
+    </div>
+    <div class="count">2</div>
+    <div class="pile-label">YOUR DECK</div>
+  </div>
+
+  <!-- ===== Player identity panel ===== -->
+  <div class="panel player-panel">
+    <div class="row1">
+      <div class="portrait">S</div>
+      <div>
+        <div class="pname">THE SCHEMER</div>
+        <div class="ptitle">You · Act 1 of 5</div>
+      </div>
+    </div>
+    <div class="statline">
+      <div class="stat"><span class="ico"></span> Hand <b>4</b></div>
+      <div class="pips"><span class="plabel">Intel</span>
+        <span class="pip-dot full intel cost"></span><span class="pip-dot full intel cost"></span><span class="pip-dot full intel cost"></span><span class="pip-dot"></span><span class="pip-dot"></span>
+      </div>
+    </div>
+    <div class="race">
+      <div class="race-label"><span>RACE TO ZERO</span><span><b>6</b> cards left</span></div>
+      <div class="bar"><i style="width:40%"></i><span class="win-cap">WIN</span></div>
+    </div>
+  </div>
+
+  <!-- ===== Player hand (5 cards) ===== -->
+  <div class="player-hand">
+    <div class="card red disabled">
+      <div class="corner">6♦</div><div class="cname">The Spyglass</div><div class="pip">♦</div><div class="corner br">6♦</div>
+      <div class="abl util">Sleight</div>
+    </div>
+    <div class="card black playable hover-glow">
+      <div class="corner">A♣</div><div class="cname">The Grand Inquisitor</div><div class="pip">♣</div><div class="corner br">A♣</div>
+      <div class="abl atk">Masterstroke</div>
+    </div>
+    <div class="card black disabled">
+      <div class="corner">10♠</div><div class="cname">The Interceptor</div><div class="pip">♠</div><div class="corner br">10♠</div>
+      <div class="abl def">Seize</div>
+    </div>
+    <div class="card black disabled">
+      <div class="corner">K♠</div><div class="cname">The Mastermind</div><div class="pip">♠</div><div class="corner br">K♠</div>
+      <div class="abl atk">Seize</div>
+    </div>
+  </div>
+
+  <!-- tooltip touches the hovered, lifted card -->
+  <div class="tooltip">
+    <div class="t-name">THE GRAND INQUISITOR — Masterstroke</div>
+    <span class="t-cost">Spend 3 Intel.</span> Opponent discards their 2 highest cards; you draw 1. <span class="small-note">(on attack)</span>
+  </div>
+
+  <!-- ===== Action zone: the phase lives where the decision is made ===== -->
+  <div class="action-zone">
+    <div class="phase-line">YOUR ATTACK · ALL PARRIED</div>
+    <span class="bout-chip">BOUT <b>3</b>/12 · tie → prestige</span>
+    <div class="action-btn">END BOUT</div>
+  </div>
+
+  <!-- ===== Run bar ===== -->
+  <div class="run-bar">
+    <span><span class="lbl">PRESTIGE</span><span class="hearts"><span class="full">♥♥♥♥♥♥♥♥</span><span class="lost">♥♥</span></span></span>
+    <span class="florins"><span class="lbl">FLORINS</span>24</span>
+    <span><span class="lbl">VENUE</span>The Bilge Rat Tavern</span>
+    <span class="grow"></span>
+    <span><span class="lbl">COLLECTION</span>10 cards</span>
+    <span class="auto-toggle">AUTO · OFF</span>
+    <span class="menu-btn">☰ MENU</span>
+  </div>
+
+  <!-- ===== Annotation markers ===== -->
+  <div class="anno" style="top:150px; left:96px;">1</div>
+  <div class="anno" style="bottom:268px; right:236px;">2</div>
+  <div class="anno" style="top:24px; left:286px;">3</div>
+  <div class="anno" style="bottom:120px; left:286px;">4</div>
+  <div class="anno" style="top:166px; left:486px;">5</div>
+  <div class="anno" style="top:296px; right:96px;">6</div>
+  <div class="anno" style="top:96px; right:36px;">7</div>
+  <div class="anno" style="top:238px; left:842px;">8</div>
+  <div class="anno" style="bottom:160px; right:14px;">9</div>
+  <div class="anno" style="bottom:14px; left:560px;">10</div>
+  <div class="anno" style="top:290px; left:262px;">11</div>
+  <div class="anno" style="bottom:336px; left:534px;">12</div>
+</div>
+
+<!-- ============ LEGEND ============ -->
+<div class="legend">
+  <h2 style="grid-column:1/-1;">ANNOTATIONS</h2>
+  <div class="item"><span class="n">1</span><div><b>Foe deck</b> — opponent's draw pile on their side of the felt, card backs edged in their crest red. Replaces the single shared deck.</div></div>
+  <div class="item"><span class="n">2</span><div><b>Your deck</b> — mirrored on your side, gold-edged badge. Spy's Monocle shows your next draw peeking from underneath. Empty pile: stack disappears, badge turns red "0".</div></div>
+  <div class="item"><span class="n">3</span><div><b>Opponent panel</b> — name, archetype, hand count, Fury pips, race meter. Red keyline ties panel ↔ their deck.</div></div>
+  <div class="item"><span class="n">4</span><div><b>Player panel</b> — same anatomy, gold keyline. <b>RACE TO ZERO</b>: the bar <i>fills toward WIN</i> as cards are shed (hand + deck). Fill = cards shed ÷ starting total (10 here): both sides have shed 4, so both bars sit at 40%. Identical data renders identically; gold encodes progress, never ownership.</div></div>
+  <div class="item"><span class="n">5</span><div><b>Phase ribbon</b> — secondary echo only; the authoritative phase lives in the action zone (9). Sage your-attack / red defend / tan waiting.</div></div>
+  <div class="item"><span class="n">6</span><div><b>Trump card</b> — on the felt at the table's edge with its rule spelled out ("Hearts beat any other suit"). Trump changes flip this card with a flash and a log entry.</div></div>
+  <div class="item"><span class="n">7</span><div><b>Removed pile</b> — physically OFF the felt: these cards are out of the game. Top card face-up and ash-toned so the pile can't be misread as a recoverable discard.</div></div>
+  <div class="item"><span class="n">8</span><div><b>Bout slots</b> — felt inlays with ATTACK/DEFENSE role flags; defense overlaps ≤35% so the attack's rank, name and ability stay readable. <b>+2 chip</b> = rank bonus (Conquer); the 7♥ that answered it wears a <b>♥ TRUMP</b> flag and red rim — the "why did my Ace lose" moment is self-explaining.</div></div>
+  <div class="item"><span class="n">9</span><div><b>Action zone</b> — phase line, bout counter with cap consequence ("tie → prestige"), and the single commit button: END BOUT / TAKE CARDS / disabled. One primary glow rule: hand-card glow marks options, button color marks the commit.</div></div>
+  <div class="item"><span class="n">10</span><div><b>Run bar</b> — prestige with visible maximum (8/10), florins, venue, collection size, auto toggle, menu (concede/settings).</div></div>
+  <div class="item"><span class="n">11</span><div><b>Table talk log</b> — last 5 actions, newest gold. Replaces the 1.2s toast as the record of ability triggers; expandable to full history.</div></div>
+  <div class="item"><span class="n">12</span><div><b>Tooltip</b> — anchored to the hovered card, arrow touching it; cost phrase tinted to match the resource pips, which pulse (3 Intel highlighted) while hovered. Flips above/below to avoid covering the bout.</div></div>
+</div>
+
+<!-- ============ COMPONENT STATES ============ -->
+<div class="states">
+  <h2>COMPONENT STATES</h2>
+  <div class="srow">
+    <span class="ribbon-demo r-attack">YOUR ATTACK <span class="sub">all attacks parried</span></span>
+    <span class="ribbon-demo r-defend">DEFEND! <span class="sub">2 attacks open</span></span>
+    <span class="ribbon-demo r-wait">BERTO IL RATTO THINKS…</span>
+    <span class="small-note">Phase ribbon (echo): attacker / defender / waiting — text never color-only</span>
+  </div>
+  <div class="srow">
+    <span class="chip-demo chip-end">END BOUT</span>
+    <span class="chip-demo chip-take">TAKE 3 CARDS</span>
+    <span class="chip-demo chip-dis">END BOUT</span>
+    <span class="small-note">Commit button: attacker ends bout / defender concedes the bout — label counts the cards about to be eaten / no legal action</span>
+  </div>
+  <div class="srow">
+    <div class="state-mock">
+      <h3>DEFENDER'S PUNISH (TAKE CARDS)</h3>
+      Undefended attacks tilt red; the button reads <b>TAKE 3 CARDS</b>. On press, every bout card flies to the defender's hand, their race meter <i>drains backwards</i> with a thud, and the log records "Berto eats 3."
+      <span class="mini-btn chip-take">TAKE 3 CARDS</span>
+    </div>
+    <div class="state-mock">
+      <h3>MATCH END</h3>
+      Full-board dim; center panel: "BERTO IL RATTO IS THE FOOL" / "YOU ARE THE FOOL," prestige hearts animate the loss, then CONTINUE. Bout-cap tie: "THE TABLE TIRES — prestige decides," meters compared center-screen.
+    </div>
+    <div class="state-mock">
+      <h3>OPPONENT ACTING</h3>
+      A back lifts from Berto's fan, hovers 300ms over the target slot, flips on landing. Their hand count and race meter tick at the moment of the flip — numbers never change invisibly.
+    </div>
+    <div class="state-mock">
+      <h3>EMPTY DECK / LAST CARD</h3>
+      Empty pile: stack art gone, badge red "0," label dims. A player on their final card gets a subtle gold rim on their panel — the whole table can feel the match point.
+    </div>
+  </div>
+  <div class="srow">
+    <div class="card black playable" style="position:relative;"><div class="corner">8♣</div><div class="pip">♣</div><div class="corner br">8♣</div></div>
+    <div class="card black" style="position:relative;"><div class="corner">8♣</div><div class="pip">♣</div><div class="corner br">8♣</div></div>
+    <div class="card black disabled" style="position:relative;"><div class="corner">8♣</div><div class="pip">♣</div><div class="corner br">8♣</div></div>
+    <div class="card black" style="position:relative;"><div class="bonus-chip">+2</div><div class="corner">A♠</div><div class="pip">♠</div><div class="corner br">A♠</div></div>
+    <div class="card red trump-play" style="position:relative;"><span class="trump-flag">♥ TRUMP</span><div class="corner">7♥</div><div class="pip">♥</div><div class="corner br">7♥</div></div>
+    <span class="small-note">Card states: playable / neutral / disabled / rank-boosted / trump play</span>
+  </div>
+  <div class="srow">
+    <span class="small-note" style="max-width:1150px;">
+      <b style="color:var(--gold)">Scaling strategy:</b> the felt and bout scale within a 16:10 safe area; panels, piles and the action zone anchor to corners; on 16:9 the wood margins absorb the difference, never the felt. Reading surfaces (ability strips, labels, log, tooltips) are ≥12px at the 1280-wide reference; micro-flags (role/trump/WIN caps) are ≥10px display capitals. The board scales proportionally above reference.
+      <b style="color:var(--gold)">Motion rules:</b>
+      ① fully defended bout → all cards fly to REMOVED, both race meters tick up;
+      ② defender eats → cards fly to their hand, their meter drains back;
+      ③ forced discards visibly slide under the owner's deck (recycled, not removed);
+      ④ trump change flips the trump card with a gold flash + log entry;
+      ⑤ deck empty → badge pulses red once;
+      ⑥ only one element glows gold at a time — options in hand, or the hovered card, never both at full intensity.
+    </span>
+  </div>
+</div>
+
+</body>
+</html>
