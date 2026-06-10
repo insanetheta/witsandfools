@@ -416,6 +416,10 @@ namespace WitsAndFools
             if (_config.RazorsEdge[AttackerIndex] && (int)attackCard.Rank < (int)Rank.Ace)
                 attackCard = new Card(attackCard.Suit, attackCard.Rank + 1, attackCard.Ability, attackCard.Trigger, attackCard.DefinitionId);
 
+            int slotBonus = _bout.BonusAt(slot);
+            if (slotBonus > 0)
+                attackCard = new Card(attackCard.Suit, attackCard.Rank + slotBonus, attackCard.Ability, attackCard.Trigger, attackCard.DefinitionId);
+
             bool canDefend;
             if (_config.EndgameSpecialist[playerIndex] && AnyDeckCount() <= 6)
                 canDefend = (int)card.Rank > (int)attackCard.Rank || (card.Suit == Trump && attackCard.Suit != Trump);
@@ -682,7 +686,7 @@ namespace WitsAndFools
                     return Phase == Phase.Defense;
                 case AbilityType.DoubleDefense:
                     int ddSlot = defenseSlot >= 0 ? defenseSlot : _bout.FirstUndefendedSlot();
-                    return Phase == Phase.Defense && ddSlot >= 0 && Rules.Beats(card, _bout.Attacks[ddSlot], Trump);
+                    return Phase == Phase.Defense && ddSlot >= 0 && Rules.CanDefendSlotWith(_bout, ddSlot, card, Trump);
                 case AbilityType.SeizeInitiative:
                     return true;
                 case AbilityType.PileOn:

@@ -359,9 +359,9 @@ namespace WitsAndFools
         static bool CanCoverTwoSlots(GameEngine engine, Card card)
         {
             int slot1 = engine.Bout.FirstUndefendedSlot();
-            if (slot1 < 0 || !Rules.Beats(card, engine.Bout.Attacks[slot1], engine.Trump)) return false;
+            if (slot1 < 0 || !Rules.CanDefendSlotWith(engine.Bout, slot1, card, engine.Trump)) return false;
             for (int i = slot1 + 1; i < engine.Bout.Defenses.Count; i++)
-                if (engine.Bout.Defenses[i] == null && Rules.Beats(card, engine.Bout.Attacks[i], engine.Trump))
+                if (engine.Bout.Defenses[i] == null && Rules.CanDefendSlotWith(engine.Bout, i, card, engine.Trump))
                     return true;
             return false;
         }
