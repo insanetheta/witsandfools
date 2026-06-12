@@ -82,3 +82,15 @@ bd close <id>         # Complete work
 - NEVER say "ready to push when you are" - YOU must push
 - If push fails, resolve and retry until it succeeds
 <!-- END BEADS INTEGRATION -->
+
+## Unity MCP (all AI agents)
+
+Unity editor access goes through MCP via **`scripts/unity-mcp-wrapper.py`** (configured in `.mcp.json`). Rules:
+
+1. **Never reconfigure MCP to launch the relay binary directly** (`Library/PackageCache/com.unity.ai.assistant@*/RelayApp~/...`). The wrapper exists because the raw relay crashes (notably on any `System.Reflection` usage in RunCommand scripts) and a direct connection then hangs permanently. The wrapper restarts dead relays in ~1s and turns in-flight failures into retryable errors.
+2. **If a Unity tool call returns "Unity relay restarted … please retry"** — retry that call once after ~2 seconds. That is normal self-healing, not a real failure.
+3. **Never use `System.Reflection` in `Unity_RunCommand` code** (including indirect uses like `Enum.GetValues()` / `Type.GetMethod()`). It crashes every MCP connection.
+4. **Never edit C# while Unity is in Play Mode** — domain reload breaks the running game and the bridge.
+5. For long-running operations, poll result files from a shell loop; don't block inside an MCP call.
+
+Details and design rationale: `docs/unity-mcp-wrapper.md`.

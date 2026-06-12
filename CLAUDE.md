@@ -66,8 +66,24 @@ _Add a brief overview of your project architecture_
 
 ## Unity MCP Rules
 
+### Connection: self-healing wrapper v2 (NEVER connect to the relay directly)
+This project's `.mcp.json` runs Unity MCP through **`scripts/unity-mcp-wrapper.py`** (wrapper v2), NOT the raw relay binary from the Unity package cache. The wrapper makes relay crashes self-healing:
+
+- If the relay dies, in-flight calls return a fast **retryable error** ("Unity relay restarted … please retry") instead of hanging — **retry the call once after ~2s** before involving the user.
+- Requests sent during a restart are queued and replayed, never dropped. Restart takes ~1s.
+- A 45s watchdog kills hung relays. Manual `/mcp` should almost never be needed — only if calls KEEP failing or the tools vanish entirely.
+- The wrapper pins the relay to THIS project (`--project-path`), so it cannot attach to another open Unity editor.
+
+Do NOT "fix" the config by pointing it back at `Library/PackageCache/com.unity.ai.assistant@*/RelayApp~/...` — that is the old direct-relay setup, and every relay crash then becomes a permanent hang requiring manual reconnection. Full background: `docs/unity-mcp-wrapper.md`.
+
 ### NEVER use System.Reflection in Unity_RunCommand
-When executing C# via `Unity_RunCommand`, **never** call methods that use `System.Reflection` internally (e.g., `Enum.GetValues()`, `Type.GetMethod()`, assembly scanning). Reflection calls inside `RunCommand` cause the MCP bridge to silently drop — console output disappears and the bridge disconnects, requiring a manual `/mcp` reconnect. Instead, call existing `[MenuItem]` methods via `Unity_ManageMenuItem`, or write non-reflective code in `RunCommand`.
+When executing C# via `Unity_RunCommand`, **never** call methods that use `System.Reflection` internally (e.g., `Enum.GetValues()`, `Type.GetMethod()`, assembly scanning) — the package's namespace validator crashes ALL MCP connections on every occurrence. With wrapper v2 this recovers in ~1s (retry once), but avoid triggering it: call existing `[MenuItem]` methods via `Unity_ManageMenuItem`, or write non-reflective code in `RunCommand`.
+
+### Never edit C# while Play Mode is active
+Unity auto-recompiles on save; the domain reload kills coroutines and the MCP bridge state. Always: Stop → Edit → Verify compilation → Clear console → Play.
+
+### Never hold an MCP call open for minutes
+For long waits (test runs, builds), poll an output/result file from a background shell loop instead of blocking inside an MCP call.
 
 ## Conventions & Patterns
 
