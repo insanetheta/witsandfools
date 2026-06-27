@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wits &amp; Fools — Mobile UI Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#0A0A14; --deep-navy:#141C28; --dark-slate:#1E2832; --warm-slate:#2A3442;
+    --bronze:#5A4830; --parchment:#F0E6D2; --dusty-tan:#A89B8C; --gold:#D4A846; --gold-dark:#B8922C;
+    --venetian-red:#B84040; --royal-blue:#4477AA; --sage:#66B866; --amber:#CC8833;
+    --felt:#21492E; --felt-dark:#173420; --card-cream:#F5F0E0; --crimson-card:#8C2020;
+    --red-suit:#B02020; --black-suit:#1A1A1A;
+    --atk:#A83232; --def:#33689C; --util:#7A5E1A; --pas:#3F7E3F;
+    --schemer:#1A8A7A; --brute:#A83333; --trickster:#7C3BEE; --hoarder:#B5540A;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased;}
+  body{background:#08080E; color:var(--parchment); font-family:'Crimson Pro',serif; padding:32px 20px 80px; line-height:1.5;}
+  h1,h2,h3,h4{font-family:'Cinzel',serif;}
+  .doc-head{max-width:1180px; margin:0 auto 14px;}
+  h1{font-size:26px; color:var(--gold); letter-spacing:2px;}
+  .sub{color:var(--dusty-tan); font-size:16px; max-width:900px; margin-top:6px;}
+  h2{font-size:19px; color:var(--gold); letter-spacing:1.5px; margin:46px 0 6px; border-bottom:1px solid var(--bronze); padding-bottom:8px; max-width:1180px; margin-left:auto; margin-right:auto;}
+  h2 .tag{font-family:'Crimson Pro',serif; font-size:14px; letter-spacing:0; color:var(--dusty-tan); font-style:italic;}
+  .intro{max-width:1180px; margin:0 auto 10px; color:#CFC5B2; font-size:15.5px;}
+  .intro b{color:var(--gold);}
+
+  /* ============ IA EXPLAINER CARDS ============ */
+  .ia-grid{max-width:1180px; margin:14px auto 0; display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  .ia{background:var(--deep-navy); border:1px solid var(--bronze); border-radius:8px; padding:14px 16px;}
+  .ia h4{color:var(--gold); font-size:14px; letter-spacing:1px; margin-bottom:6px;}
+  .ia p{font-size:14px; color:#C8BEAC;}
+  .ia .k{color:var(--gold);}
+
+  /* ============ GALLERY LAYOUT ============ */
+  .gallery{max-width:1280px; margin:18px auto 0; display:flex; flex-wrap:wrap; gap:34px 30px; justify-content:center;}
+  .frame-block{display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .frame-cap{font-size:14px; color:var(--dusty-tan); max-width:380px; text-align:center;}
+  .frame-cap b{color:var(--gold); font-family:'Cinzel',serif; font-size:13px; letter-spacing:.5px; display:block; margin-bottom:2px;}
+
+  /* ============ PHONE (landscape 19.5:9) ============ */
+  .phone{
+    position:relative; width:780px; height:360px; border-radius:42px; flex-shrink:0;
+    background:#000; padding:8px 10px;
+    box-shadow:0 0 0 2px #2A2A30, 0 0 0 11px #131319, 0 20px 50px rgba(0,0,0,.7);
+  }
+  .phone.tall{width:780px; height:360px;}
+  .screen{position:relative; width:100%; height:100%; border-radius:34px; overflow:hidden; background:var(--midnight);}
+  /* dynamic island on the left short-edge (landscape) */
+  .phone .island{position:absolute; left:3px; top:50%; transform:translateY(-50%); width:9px; height:78px; background:#000; border-radius:6px; z-index:60;}
+  /* home indicator along bottom */
+  .home-bar{position:absolute; bottom:5px; left:50%; transform:translateX(-50%); width:150px; height:5px; border-radius:3px; background:rgba(240,230,210,.55); z-index:60;}
+  /* safe-area insets honored by content via .safe */
+  .safe{position:absolute; inset:0; padding-left:26px; padding-right:14px; padding-bottom:14px;}
+
+  /* ============ FELT BACKGROUND ============ */
+  .felt{position:absolute; inset:0; background:
+      radial-gradient(ellipse 80% 70% at 50% 46%, #2B5C3A 0%, var(--felt) 48%, var(--felt-dark) 100%),
+      linear-gradient(180deg,#14100C,#0E0B08);}
+  .felt::after{content:""; position:absolute; left:50%; top:-4%; transform:translateX(-50%); width:230px; height:90px; border-radius:50%; background:radial-gradient(ellipse, rgba(255,200,110,.13), transparent 70%);}
+
+  /* ============ CARDS ============ */
+  .card{position:relative; border-radius:6px; background:var(--card-cream); box-shadow:0 2px 5px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,0,0,.15); flex-shrink:0;}
+  .card .cn{position:absolute; top:3px; left:4px; font-size:11px; font-weight:700; line-height:1; font-family:'Crimson Pro',serif;}
+  .card .pip{position:absolute; top:38%; left:50%; transform:translate(-50%,-50%); font-size:20px;}
+  .card .nm{position:absolute; top:15px; left:0; right:0; text-align:center; font-size:7px; font-style:italic; color:#5A4A32; font-family:'Crimson Pro',serif; padding:0 2px; line-height:1;}
+  .card .abl{position:absolute; bottom:0; left:0; right:0; height:13px; display:flex; align-items:center; justify-content:center; font-size:7.5px; font-weight:700; color:#fff; border-radius:0 0 5px 5px; letter-spacing:.2px;}
+  .card.red .cn,.card.red .pip{color:var(--red-suit);}
+  .card.black .cn,.card.black .pip{color:var(--black-suit);}
+  .abl.atk{background:var(--atk);} .abl.def{background:var(--def);} .abl.util{background:var(--util);} .abl.pas{background:var(--pas);}
+  .card.back{background:linear-gradient(135deg,#7A1C1C,var(--crimson-card) 55%,#6E1818); box-shadow:0 2px 5px rgba(0,0,0,.5), inset 0 0 0 1.5px #C8A040, inset 0 0 0 3px rgba(200,160,64,.22);}
+  .card.back::after{content:"❦"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:18px; color:rgba(200,160,64,.6);}
+  .card.playable{box-shadow:0 0 0 2px var(--gold), 0 0 12px rgba(212,168,70,.6), 0 2px 5px rgba(0,0,0,.5);}
+  .card.dim{filter:brightness(.62) saturate(.6);}
+  .card.sel{box-shadow:0 0 0 2.5px #FFE9A8, 0 0 22px rgba(255,233,168,.85), 0 6px 14px rgba(0,0,0,.6);}
+
+  .bonus{position:absolute; top:-7px; right:-7px; z-index:5; width:22px; height:22px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#E45A5A,var(--atk) 70%); border:1.5px solid #F0D9A0; color:#fff; font-family:'Cinzel',serif; font-weight:700; font-size:9px; display:flex; align-items:center; justify-content:center;}
+  .tflag{position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); z-index:6; background:var(--venetian-red); color:#fff; font-family:'Cinzel',serif; font-size:6.5px; font-weight:700; letter-spacing:.5px; padding:1px 5px; border-radius:3px; white-space:nowrap; border:1px solid #E8A0A0;}
+  .card.trumpdef{box-shadow:0 0 0 2px var(--venetian-red), 0 0 12px rgba(220,90,90,.6);}
+
+  /* ============ COMPACT IDENTITY STRIP ============ */
+  .idstrip{position:absolute; display:flex; align-items:center; gap:7px; padding:4px 8px; background:rgba(10,12,18,.82); border-radius:0 0 12px 0; z-index:30;}
+  .idstrip.top{top:0; left:0; border-left:3px solid var(--venetian-red);}
+  .idstrip.bottom{bottom:0; left:0; border-radius:0 12px 0 0; border-left:3px solid var(--gold);}
+  .av{width:28px; height:28px; border-radius:5px; background:linear-gradient(135deg,#5A4830,#2A2018); border:1px solid var(--gold-dark); display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:var(--gold); flex-shrink:0;}
+  .idmeta{display:flex; flex-direction:column; gap:2px;}
+  .idname{font-family:'Cinzel',serif; font-size:10px; color:var(--parchment); letter-spacing:.3px; line-height:1;}
+  .idrow{display:flex; align-items:center; gap:8px;}
+  .chip{display:flex; align-items:center; gap:3px; font-size:10px; color:var(--parchment);}
+  .chip .ci{width:9px; height:12px; border-radius:1.5px; background:var(--card-cream); border:1px solid var(--bronze);}
+  .chip .cd{width:13px; height:13px; border-radius:50%; background:var(--dark-slate); border:1.5px solid var(--gold); color:var(--gold); font-family:'Cinzel',serif; font-weight:700; font-size:8px; display:flex; align-items:center; justify-content:center;}
+  .chip.foe .cd{border-color:var(--venetian-red); color:var(--venetian-red);}
+  .pips{display:flex; gap:3px;}
+  .pd{width:8px; height:8px; border-radius:50%; border:1.2px solid var(--bronze);}
+  .pd.intel{background:var(--royal-blue); border-color:var(--royal-blue);} .pd.fury{background:var(--venetian-red); border-color:var(--venetian-red);}
+  /* race meter mini */
+  .race{width:74px;}
+  .race .rl{display:flex; justify-content:space-between; font-size:7px; letter-spacing:.5px; color:var(--dusty-tan); font-family:'Cinzel',serif;}
+  .race .rb{height:5px; border-radius:3px; background:#0C1018; border:1px solid rgba(90,72,48,.6); margin-top:1px; overflow:hidden;}
+  .race .rb i{display:block; height:100%; background:linear-gradient(90deg,#7A6224,var(--gold));}
+
+  /* deck pile mini */
+  .deckpile{position:absolute; width:40px; height:56px; z-index:20;}
+  .deckpile .pc{position:absolute; inset:0; border-radius:5px;}
+  .deckpile .pc:nth-child(1){transform:rotate(-4deg) translate(1px,2px);}
+  .deckpile .pc:nth-child(2){transform:rotate(2deg);}
+  .deckpile .cnt{position:absolute; right:-8px; bottom:-6px; width:20px; height:20px; border-radius:50%; background:var(--dark-slate); border:1.5px solid var(--gold); color:var(--gold); font-family:'Cinzel',serif; font-weight:700; font-size:10px; display:flex; align-items:center; justify-content:center; z-index:4;}
+  .deckpile .pl{position:absolute; left:50%; transform:translateX(-50%); bottom:-15px; font-family:'Cinzel',serif; font-size:6.5px; letter-spacing:.5px; color:var(--dusty-tan); white-space:nowrap;}
+
+  /* trump chip */
+  .trump{position:absolute; z-index:25; display:flex; flex-direction:column; align-items:center; gap:3px;}
+  .trump .tc{width:34px; height:48px; border-radius:5px; background:var(--card-cream); display:flex; align-items:center; justify-content:center; font-size:20px; box-shadow:0 2px 6px rgba(0,0,0,.5); transform:rotate(8deg);}
+  .trump .tl{font-family:'Cinzel',serif; font-size:8px; letter-spacing:1px; color:var(--gold);}
+
+  /* bout */
+  .bout{position:absolute; left:50%; top:43%; transform:translate(-50%,-50%); display:flex; gap:18px; z-index:15;}
+  .slot{position:relative; width:62px; height:96px; border-radius:8px; background:rgba(0,0,0,.2); box-shadow:inset 0 0 8px rgba(0,0,0,.35), inset 0 0 0 1px rgba(240,230,210,.12);}
+  .slot .rfa{position:absolute; top:-8px; left:6px; font-family:'Cinzel',serif; font-size:6.5px; font-weight:700; letter-spacing:.5px; padding:1px 5px; border-radius:2px; color:#fff; z-index:5;}
+  .rfa.atk{background:var(--atk);} .rfa.dfn{background:var(--def);}
+  .slot .atkc{position:absolute; top:5px; left:5px;}
+  .slot .defc{position:absolute; top:30px; left:24px; transform:rotate(5deg); z-index:2;}
+
+  /* phase ribbon / banner */
+  .ribbon{position:absolute; left:50%; top:9px; transform:translateX(-50%); z-index:28; padding:3px 14px; border-radius:4px; background:rgba(8,10,16,.85); border:1px solid var(--sage); font-family:'Cinzel',serif; font-size:9px; letter-spacing:1px; color:var(--sage); white-space:nowrap;}
+  .ribbon.defend{border-color:var(--venetian-red); color:var(--venetian-red);}
+  .ribbon .s{font-family:'Crimson Pro',serif; color:var(--dusty-tan); font-style:italic; margin-left:6px;}
+
+  /* opponent hand fan */
+  .ohand{position:absolute; top:-6px; left:50%; transform:translateX(-50%); display:flex; z-index:12;}
+  .ohand .card{width:30px; height:43px; margin:0 -8px;}
+  .ohand .card:nth-child(odd){transform:rotate(-3deg) translateY(2px);} .ohand .card:nth-child(even){transform:rotate(3deg);}
+
+  /* player hand fan */
+  .phand{position:absolute; bottom:6px; left:50%; transform:translateX(-50%); display:flex; align-items:flex-end; z-index:35;}
+  .phand .card{width:54px; height:78px; margin:0 -7px; transition:transform .12s;}
+  .phand .card .pip{font-size:22px;} .phand .card .nm{font-size:7px;}
+  .phand .card:nth-child(1){transform:rotate(-7deg) translateY(8px);}
+  .phand .card:nth-child(2){transform:rotate(-3.5deg) translateY(2px);}
+  .phand .card:nth-child(3){transform:rotate(0deg);}
+  .phand .card:nth-child(4){transform:rotate(3.5deg) translateY(2px);}
+  .phand .card:nth-child(5){transform:rotate(7deg) translateY(8px);}
+  .phand .card:nth-child(6){transform:rotate(10deg) translateY(16px);}
+
+  /* primary action button (thumb zone, bottom-right) */
+  .actbtn{position:absolute; bottom:10px; right:12px; z-index:40; min-width:120px; padding:11px 16px; border-radius:9px; text-align:center; font-family:'Cinzel',serif; font-weight:700; font-size:13px; letter-spacing:1px; box-shadow:0 4px 12px rgba(0,0,0,.5);}
+  .actbtn.end{background:linear-gradient(180deg,#7ECB7E,var(--sage)); color:#10240F; border:1px solid #9FE09F;}
+  .actbtn.take{background:linear-gradient(180deg,#D05858,var(--venetian-red)); color:#fff; border:1px solid #E08888;}
+  .actbtn.dis{background:#222A36; color:#5A6470; border:1px solid #333E4E;}
+  .actbtn .small{display:block; font-family:'Crimson Pro',serif; font-size:9px; font-weight:400; letter-spacing:0; opacity:.8; margin-top:1px;}
+
+  /* secondary round buttons (log, menu) top-right */
+  .roundbtn{position:absolute; z-index:40; width:30px; height:30px; border-radius:50%; background:rgba(10,12,18,.8); border:1px solid var(--bronze); color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:13px;}
+
+  /* bonus counters near decks */
+  .minitag{position:absolute; z-index:22; font-family:'Cinzel',serif; font-size:8px; letter-spacing:.5px; color:var(--dusty-tan); background:rgba(10,12,18,.7); padding:2px 6px; border-radius:10px; border:1px solid var(--bronze); display:flex; align-items:center; gap:3px;}
+
+  /* ============ CARD INSPECTOR (selected card) ============ */
+  .inspector{position:absolute; z-index:50; left:12px; bottom:96px; width:188px; background:rgba(8,10,16,.96); border:1px solid var(--gold-dark); border-radius:10px; padding:10px 12px; box-shadow:0 8px 22px rgba(0,0,0,.7);}
+  .inspector .it{font-family:'Cinzel',serif; font-size:12px; color:var(--gold); margin-bottom:2px;}
+  .inspector .ir{font-size:10px; color:var(--dusty-tan); margin-bottom:6px;}
+  .inspector .id{font-size:11px; color:var(--parchment); line-height:1.35; margin-bottom:4px;}
+  .inspector .ic{font-size:10px; color:#9FC3E8;}
+
+  /* contextual action pills above hand */
+  .ctxbar{position:absolute; bottom:92px; left:50%; transform:translateX(-50%); z-index:48; display:flex; gap:8px;}
+  .pill{padding:9px 16px; border-radius:22px; font-family:'Cinzel',serif; font-weight:700; font-size:12px; letter-spacing:.5px; box-shadow:0 4px 12px rgba(0,0,0,.5);}
+  .pill.go{background:linear-gradient(180deg,#7ECB7E,var(--sage)); color:#10240F; border:1px solid #9FE09F;}
+  .pill.alt{background:linear-gradient(180deg,#E0C060,var(--gold)); color:#241A06; border:1px solid #F0D98A;}
+  .pill.x{background:#222A36; color:#9aa; border:1px solid #333E4E; padding:9px 13px;}
+
+  /* bottom sheet (ability choice, etc.) */
+  .scrim{position:absolute; inset:0; background:rgba(4,4,9,.72); z-index:52;}
+  .sheet{position:absolute; left:0; right:0; bottom:0; z-index:54; background:linear-gradient(180deg,var(--deep-navy),#0C0F16); border-top:2px solid var(--gold-dark); border-radius:18px 18px 0 0; padding:14px 18px 22px;}
+  .sheet h4{font-family:'Cinzel',serif; font-size:13px; color:var(--gold); letter-spacing:.5px; text-align:center; margin-bottom:3px;}
+  .sheet .sd{font-size:11.5px; color:var(--dusty-tan); text-align:center; margin-bottom:11px;}
+  .sheet .btns{display:flex; gap:10px; justify-content:center;}
+  .sbtn{flex:1; max-width:200px; padding:12px; border-radius:9px; text-align:center; font-family:'Cinzel',serif; font-weight:700; font-size:12.5px; letter-spacing:.5px;}
+  .sbtn.primary{background:linear-gradient(180deg,#E0C060,var(--gold)); color:#241A06; border:1px solid #F0D98A;}
+  .sbtn.normal{background:var(--warm-slate); color:var(--parchment); border:1px solid var(--bronze);}
+  .sbtn.ghost{background:transparent; color:var(--dusty-tan); border:1px solid var(--bronze);}
+
+  /* toast */
+  .toast{position:absolute; top:30px; left:50%; transform:translateX(-50%); z-index:45; font-size:10px; font-style:italic; color:var(--gold); background:rgba(8,10,16,.8); padding:3px 12px; border-radius:11px;}
+
+  /* tap target highlight ring on slots */
+  .slot.target{box-shadow:inset 0 0 8px rgba(0,0,0,.35), 0 0 0 2px var(--gold), 0 0 14px rgba(212,168,70,.6); animation:pulse 1.1s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{box-shadow:inset 0 0 8px rgba(0,0,0,.35),0 0 0 2px var(--gold),0 0 8px rgba(212,168,70,.4);}50%{box-shadow:inset 0 0 8px rgba(0,0,0,.35),0 0 0 2.5px var(--gold),0 0 18px rgba(212,168,70,.8);}}
+
+  /* finger glyph */
+  .finger{position:absolute; z-index:58; font-size:30px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.6)); pointer-events:none;}
+
+  /* ============ NON-MATCH SCREEN PRIMITIVES ============ */
+  .vbg{position:absolute; inset:0;}
+  .vbg.tavern{background:linear-gradient(180deg,#2A2018 0%,#1A130D 60%,#100A06 100%);}
+  .vbg.map{background:radial-gradient(ellipse at 50% 40%,#3A2E1C,#1C1610 80%);}
+  .scr-title{position:absolute; top:14px; left:0; right:0; text-align:center; font-family:'Cinzel',serif; font-size:15px; color:var(--gold); letter-spacing:2px; z-index:5;}
+  .topbar{position:absolute; top:0; left:0; right:0; height:30px; display:flex; align-items:center; justify-content:space-between; padding:0 14px 0 28px; background:rgba(8,10,16,.7); z-index:8; font-size:10px;}
+  .topbar .tl{color:var(--venetian-red); letter-spacing:1px;} .topbar .tm{color:var(--gold);} .topbar .tr{color:var(--royal-blue); font-family:'Cinzel',serif;}
+  .botbar{position:absolute; bottom:0; left:0; right:0; height:30px; display:flex; align-items:center; justify-content:space-around; padding:0 14px; background:rgba(8,10,16,.85); border-top:1px solid var(--bronze); z-index:8; font-size:10px; color:var(--dusty-tan);}
+  .botbar b{color:var(--gold);} .botbar .heart{color:var(--venetian-red); letter-spacing:1px;}
+
+  /* big reward/shop card */
+  .bigcard{width:96px; height:138px; border-radius:8px; position:relative; background:#0E0B07; box-shadow:0 4px 12px rgba(0,0,0,.6);}
+  .bigcard .band{position:absolute; left:0; right:0; height:18px; background:rgba(18,14,9,.96);}
+  .bigcard .band.t{top:0; border-radius:8px 8px 0 0;} .bigcard .band.b{bottom:0; border-radius:0 0 8px 8px;}
+  .bigcard .bnm{position:absolute; top:2px; left:0; right:0; text-align:center; font-family:'Cinzel',serif; font-size:7.5px; font-weight:700; color:var(--gold);}
+  .bigcard .bart{position:absolute; top:18px; bottom:18px; left:0; right:0; display:flex; align-items:center; justify-content:center; font-size:40px;}
+  .bigcard .babl{position:absolute; bottom:3px; left:0; right:0; text-align:center; font-size:7px; color:var(--parchment);}
+  .bigcard.rare{box-shadow:0 0 0 1.5px var(--gold),0 4px 14px rgba(0,0,0,.6);}
+  .rlabel{font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:2px; text-align:center; margin-top:5px;}
+
+  /* map nodes */
+  .mnode{position:absolute; width:40px; height:40px; border-radius:50%; background:rgba(20,16,10,.85); border:2px solid var(--bronze); display:flex; align-items:center; justify-content:center; font-size:17px; z-index:4;}
+  .mnode.cur{border-color:var(--gold); box-shadow:0 0 12px rgba(212,168,70,.6);}
+  .mnode .lbl{position:absolute; top:42px; font-family:'Cinzel',serif; font-size:7px; letter-spacing:.5px; color:var(--dusty-tan); white-space:nowrap;}
+  .mpath{position:absolute; height:2px; background:rgba(120,96,56,.5); transform-origin:left center; z-index:2;}
+
+  /* shop/event rows */
+  .srow{display:flex; align-items:center; gap:10px; background:rgba(20,28,40,.7); border:1px solid var(--bronze); border-radius:8px; padding:8px 10px; margin-bottom:8px;}
+  .srow .price{margin-left:auto; color:var(--gold); font-family:'Cinzel',serif; font-size:12px;}
+  .srow .sn{font-family:'Cinzel',serif; font-size:11px; color:var(--parchment);} .srow .sdsc{font-size:10px; color:var(--dusty-tan);}
+
+  .legend{max-width:1180px; margin:14px auto 0; background:var(--deep-navy); border:1px solid var(--bronze); border-radius:8px; padding:16px 20px; font-size:14.5px; line-height:1.5;}
+  .legend h4{color:var(--gold); font-size:14px; letter-spacing:1px; margin:10px 0 4px;}
+  .legend b{color:var(--gold);} .legend code{background:#0C0F16; color:#C8B888; padding:1px 5px; border-radius:3px; font-size:13px;}
+  .legend ul{margin:4px 0 4px 18px;}
+</style>
+</head>
+<body>
+
+<div class="doc-head">
+  <h1>WITS &amp; FOOLS — MOBILE UI</h1>
+  <p class="sub">A touch-first redesign of every game screen, built landscape-primary around the dual-deck board. The hard problem is the match screen — two opposing hands, two draw piles, a bout, trump, a removed pile and progress meters — so the interaction model below is designed to keep that legible and tappable on a 6-inch phone.</p>
+</div>
+
+<!-- ============================ INFORMATION ARCHITECTURE ============================ -->
+<h2>How the information is organized <span class="tag">— the three decisions that shape everything</span></h2>
+<div class="ia-grid">
+  <div class="ia">
+    <h4>1 · LANDSCAPE, ONE ORIENTATION</h4>
+    <p>The board is a table with players facing each other — it only reads in <span class="k">landscape</span>, like Hearthstone, Slay the Spire and Balatro on phones. Portrait would push cards below the 44px tap minimum. The whole game stays landscape so there's <span class="k">no rotation friction</span> moving between map, shop and match.</p>
+  </div>
+  <div class="ia">
+    <h4>2 · HERO ZONES vs REFERENCE ZONES</h4>
+    <p>Only two things are touched constantly: <span class="k">your hand</span> (bottom) and the <span class="k">bout</span> (center). They get the space and the largest cards. Everything else — identity, decks, trump, removed pile, log — is <span class="k">reference</span>, compressed to the screen edges as chips, never competing with the play area.</p>
+  </div>
+  <div class="ia">
+    <h4>3 · TAP TO INSPECT, THEN ACT</h4>
+    <p>Touch has no hover, so a card's full text can't live on the card. <span class="k">Tap a card</span> → it lifts, an inspector shows its ability, and contextual <span class="k">action pills</span> rise into thumb reach. A second tap (or drag-up) commits. Every commit is two clear steps, never an accidental play.</p>
+  </div>
+  <div class="ia">
+    <h4>4 · PROGRESS IS ALWAYS VISIBLE</h4>
+    <p>The win condition (shed every card) is a <span class="k">race-to-zero bar</span> in each identity chip — the one number that matters, on screen at all times. Resource (Intel/Fury/Favor/Luck) shows as <span class="k">pips</span>, not text. Counts (hand, deck) are single digits in badges.</p>
+  </div>
+  <div class="ia">
+    <h4>5 · ONE PRIMARY ACTION, BOTTOM-RIGHT</h4>
+    <p>The phase's single commit — <span class="k">END BOUT</span> / <span class="k">TAKE CARDS</span> / disabled — lives under the right thumb and changes label + color with state. Secondary tools (log, menu) are small round buttons top-right, out of the play path.</p>
+  </div>
+  <div class="ia">
+    <h4>6 · REFERENCE EXPANDS ON DEMAND</h4>
+    <p>The event log, full deck, and removed pile collapse to <span class="k">tappable counters</span>; tapping opens a sheet. Transient events (ability fired, trump changed) flash as a <span class="k">toast</span> and append to the log, so nothing critical is hover-only or blink-and-miss.</p>
+  </div>
+</div>
+
+<!-- ============================ THE MATCH BOARD ============================ -->
+<h2>The Match Board <span class="tag">— landscape, mid-bout, your turn to attack</span></h2>
+<p class="intro">Reference state: vs Berto il Ratto, trump ♥. Two attacks on the board — 8♣ defended by 9♣, and a Conquer-boosted A♠ (+2) trumped by Berto's 7♥. END BOUT is live. Your A♣ glows as the only legal follow-up.</p>
+<div class="gallery">
+  <div class="frame-block">
+    <div class="phone">
+      <div class="island"></div><div class="home-bar"></div>
+      <div class="screen">
+        <div class="felt"></div>
+
+        <!-- opponent identity strip (top-left) -->
+        <div class="idstrip top">
+          <div class="av" style="border-color:var(--brute)">B</div>
+          <div class="idmeta">
+            <div class="idname">BERTO IL RATTO</div>
+            <div class="idrow">
+              <span class="chip foe"><span class="ci"></span>4</span>
+              <span class="chip foe"><span class="cd">2</span></span>
+              <span class="pips"><span class="pd fury"></span><span class="pd fury"></span><span class="pd"></span><span class="pd"></span><span class="pd"></span></span>
+            </div>
+            <div class="race"><div class="rl"><span>RACE</span><span>6</span></div><div class="rb"><i style="width:40%"></i></div></div>
+          </div>
+        </div>
+
+        <!-- opponent hand -->
+        <div class="ohand"><div class="card back"></div><div class="card back"></div><div class="card back"></div><div class="card back"></div></div>
+
+        <!-- secondary buttons top-right -->
+        <div class="roundbtn" style="top:6px; right:8px;">☰</div>
+        <div class="roundbtn" style="top:6px; right:44px;">🜊</div>
+
+        <!-- phase ribbon -->
+        <div class="ribbon">YOUR ATTACK <span class="s">all parried</span></div>
+
+        <!-- foe deck (their side, upper-left of felt) -->
+        <div class="deckpile" style="top:54px; left:118px;">
+          <div class="pc card back" style="box-shadow:inset 0 0 0 1.5px var(--venetian-red),inset 0 0 0 3px rgba(184,64,64,.25)"></div>
+          <div class="pc card back" style="box-shadow:inset 0 0 0 1.5px var(--venetian-red),inset 0 0 0 3px rgba(184,64,64,.25)"></div>
+          <div class="cnt foe" style="border-color:var(--venetian-red);color:var(--venetian-red)">2</div>
+          <div class="pl">FOE DECK</div>
+        </div>
+
+        <!-- removed pile counter (off felt, top-right) -->
+        <div class="minitag" style="top:40px; right:14px;">✦ REMOVED 4</div>
+
+        <!-- trump (right edge, on felt) -->
+        <div class="trump" style="top:120px; right:20px;">
+          <div class="tc red">♥</div><div class="tl">TRUMP ♥</div>
+        </div>
+
+        <!-- bout -->
+        <div class="bout">
+          <div class="slot">
+            <span class="rfa atk">ATK</span>
+            <div class="atkc card black" style="width:52px;height:74px"><span class="cn">8♣</span><span class="nm">Cipher</span><span class="pip">♣</span><span class="abl util">Peek</span></div>
+            <div class="defc card black" style="width:52px;height:74px"><span class="cn">9♣</span><span class="nm">Q'master</span><span class="pip">♣</span><span class="abl pas">Fury</span></div>
+          </div>
+          <div class="slot">
+            <span class="rfa atk">ATK</span>
+            <div class="atkc card black" style="width:52px;height:74px"><span class="bonus">+2</span><span class="cn">A♠</span><span class="nm">Knight</span><span class="pip">♠</span><span class="abl atk">Conquer</span></div>
+            <div class="defc card red trumpdef" style="width:52px;height:74px"><span class="tflag">♥ TRUMP</span><span class="cn">7♥</span><span class="nm">Berserker</span><span class="pip">♥</span></div>
+          </div>
+        </div>
+
+        <!-- your deck (your side, lower-right of felt) -->
+        <div class="deckpile" style="bottom:74px; right:96px;">
+          <div class="pc card back"></div><div class="pc card back"></div>
+          <div class="cnt">2</div><div class="pl">YOUR DECK</div>
+        </div>
+
+        <!-- player identity strip (bottom-left) -->
+        <div class="idstrip bottom">
+          <div class="av">S</div>
+          <div class="idmeta">
+            <div class="idname">THE SCHEMER</div>
+            <div class="idrow">
+              <span class="chip"><span class="ci"></span>4</span>
+              <span class="pips"><span class="pd intel"></span><span class="pd intel"></span><span class="pd intel"></span><span class="pd"></span><span class="pd"></span></span>
+            </div>
+            <div class="race"><div class="rl"><span>RACE</span><span>6</span></div><div class="rb"><i style="width:40%"></i></div></div>
+          </div>
+        </div>
+
+        <!-- player hand -->
+        <div class="phand">
+          <div class="card red dim"><span class="cn">6♦</span><span class="nm">Spyglass</span><span class="pip">♦</span><span class="abl util">Sleight</span></div>
+          <div class="card red dim"><span class="cn">6♥</span><span class="nm">Carto.</span><span class="pip">♥</span><span class="abl def">Draw</span></div>
+          <div class="card black playable"><span class="cn">A♣</span><span class="nm">G.Inquis.</span><span class="pip">♣</span><span class="abl atk">M'stroke</span></div>
+          <div class="card black dim"><span class="cn">10♠</span><span class="nm">Intercept</span><span class="pip">♠</span><span class="abl def">Seize</span></div>
+          <div class="card black dim"><span class="cn">K♠</span><span class="nm">M'mind</span><span class="pip">♠</span><span class="abl atk">Seize</span></div>
+        </div>
+
+        <!-- primary action -->
+        <div class="actbtn end">END BOUT<span class="small">bout 3/12 · tie→prestige</span></div>
+      </div>
+    </div>
+    <div class="frame-cap"><b>MATCH BOARD</b>Opponent chip top-left, your chip bottom-left — each carries avatar, hand-count, resource pips and a race-to-zero bar. Decks sit on each player's side; trump, removed-pile and log/menu hug the edges. The bout and your hand own the center.</div>
+  </div>
+</div>
+
+<!-- ============================ HAND INTERACTIONS ============================ -->
+<h2>Hand &amp; Board Interactions <span class="tag">— every touch the player can make in a match</span></h2>
+<p class="intro">Touch has no hover and no right-click, so each action is an explicit two-step: <b>select → commit</b>. Playable cards glow gold; illegal cards dim but still tap to inspect (so you learn <i>why</i> they're illegal). Drag-up is supported as a fast-path for players who prefer it.</p>
+<div class="gallery">
+
+  <!-- 1. SELECT / INSPECT -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="felt"></div>
+      <div class="ribbon">YOUR ATTACK <span class="s">open the bout</span></div>
+      <div class="bout"><div class="slot" style="opacity:.5"></div></div>
+      <!-- inspector -->
+      <div class="inspector">
+        <div class="it">THE GRAND INQUISITOR</div>
+        <div class="ir">A♣ · Schemer · Rare</div>
+        <div class="id">Masterstroke — opponent discards their 2 highest cards; you draw 1.</div>
+        <div class="ic">Spend 3 Intel · on attack</div>
+      </div>
+      <!-- contextual pills -->
+      <div class="ctxbar">
+        <div class="pill go">▲ Attack</div>
+        <div class="pill x">✕</div>
+      </div>
+      <!-- hand, A♣ lifted -->
+      <div class="phand">
+        <div class="card red dim"><span class="cn">6♦</span><span class="pip">♦</span></div>
+        <div class="card red dim"><span class="cn">6♥</span><span class="pip">♥</span></div>
+        <div class="card black sel" style="transform:translateY(-22px) scale(1.12)"><span class="cn">A♣</span><span class="nm">G.Inquis.</span><span class="pip">♣</span><span class="abl atk">M'stroke</span></div>
+        <div class="card black dim"><span class="cn">10♠</span><span class="pip">♠</span></div>
+        <div class="card black dim"><span class="cn">K♠</span><span class="pip">♠</span></div>
+      </div>
+      <div class="finger" style="bottom:30px; left:50%;">👆</div>
+    </div></div>
+    <div class="frame-cap"><b>1 · TAP TO SELECT</b>Tapping a card lifts it, opens the inspector (full ability, cost, trigger) and raises action pills into thumb reach. This replaces desktop hover. Illegal cards stay dimmed.</div>
+  </div>
+
+  <!-- 2. ATTACK COMMITTED -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="felt"></div>
+      <div class="ribbon defend">BERTO DEFENDS <span class="s">1 attack open</span></div>
+      <div class="toast">You: Grand Inquisitor → Masterstroke</div>
+      <div class="bout"><div class="slot"><span class="rfa atk">ATK</span>
+        <div class="atkc card black" style="width:52px;height:74px"><span class="cn">A♣</span><span class="nm">G.Inquis.</span><span class="pip">♣</span><span class="abl atk">M'stroke</span></div></div></div>
+      <div class="phand">
+        <div class="card red dim"><span class="cn">6♦</span><span class="pip">♦</span></div>
+        <div class="card red dim"><span class="cn">6♥</span><span class="pip">♥</span></div>
+        <div class="card black dim"><span class="cn">10♠</span><span class="pip">♠</span></div>
+        <div class="card black dim"><span class="cn">K♠</span><span class="pip">♠</span></div>
+      </div>
+      <div class="actbtn dis">WAITING<span class="small">Berto is thinking…</span></div>
+    </div></div>
+    <div class="frame-cap"><b>2 · ATTACK PLAYED</b>The card flies to a bout slot, its ability fires (toast + log entry), and control passes. The action button shows the wait state; the opponent's defense animates back in.</div>
+  </div>
+
+  <!-- 3. DEFEND MODE -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="felt"></div>
+      <div class="ribbon defend">DEFEND! <span class="s">tap a glowing slot</span></div>
+      <div class="bout">
+        <div class="slot target"><span class="rfa atk">ATK</span>
+          <div class="atkc card red" style="width:52px;height:74px"><span class="cn">9♦</span><span class="nm">Pillager</span><span class="pip">♦</span></div></div>
+        <div class="slot target"><span class="rfa atk">ATK</span>
+          <div class="atkc card black" style="width:52px;height:74px"><span class="cn">7♣</span><span class="nm">Sapper</span><span class="pip">♣</span></div></div>
+      </div>
+      <div class="ctxbar"><div class="pill alt">Defending with 10♠ — pick a slot</div><div class="pill x">✕</div></div>
+      <div class="phand">
+        <div class="card red dim"><span class="cn">6♦</span><span class="pip">♦</span></div>
+        <div class="card black sel" style="transform:translateY(-22px) scale(1.12)"><span class="cn">10♠</span><span class="nm">Intercept</span><span class="pip">♠</span><span class="abl def">Seize</span></div>
+        <div class="card black dim"><span class="cn">K♠</span><span class="pip">♠</span></div>
+      </div>
+      <div class="finger" style="top:120px; left:300px;">👆</div>
+    </div></div>
+    <div class="frame-cap"><b>3 · DEFEND — CHOOSE A SLOT</b>When defending, you pick the card first; only the attacks it can legally beat (rank/trump rules) glow as tap targets. Tap a slot to cover it — or drag the card straight onto it.</div>
+  </div>
+
+  <!-- 4. ABILITY CHOICE SHEET -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="felt"></div>
+      <div class="phand" style="filter:brightness(.5)">
+        <div class="card red"><span class="cn">7♥</span><span class="pip">♥</span></div>
+        <div class="card black"><span class="cn">6♣</span><span class="pip">♣</span></div>
+      </div>
+      <div class="scrim"></div>
+      <div class="sheet">
+        <h4>THE COURTESAN — Trump Changer</h4>
+        <div class="sd">Change trump to ♥ (once per match), or play the 7♥ as an ordinary card?</div>
+        <div class="btns">
+          <div class="sbtn primary">Use Ability</div>
+          <div class="sbtn normal">Play Normally</div>
+          <div class="sbtn ghost">Cancel</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="frame-cap"><b>4 · OPTIONAL ABILITY</b>The few cards with a player-activated ability (<code>TriggerTiming.None</code> — Trump Changer, Seize) raise a bottom sheet: use the ability, play it as a plain card, or cancel. Auto-trigger cards skip this.</div>
+  </div>
+
+  <!-- 5. TAKE CARDS -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="felt"></div>
+      <div class="ribbon defend">YOU CAN'T DEFEND <span class="s">2 attacks remain</span></div>
+      <div class="bout">
+        <div class="slot"><span class="rfa atk" style="background:var(--venetian-red)">ATK</span>
+          <div class="atkc card red" style="width:52px;height:74px;box-shadow:0 0 0 2px var(--venetian-red)"><span class="cn">K♦</span><span class="pip">♦</span></div></div>
+        <div class="slot"><span class="rfa atk" style="background:var(--venetian-red)">ATK</span>
+          <div class="atkc card black" style="width:52px;height:74px;box-shadow:0 0 0 2px var(--venetian-red)"><span class="cn">A♣</span><span class="pip">♣</span></div></div>
+      </div>
+      <div class="phand">
+        <div class="card red dim"><span class="cn">6♦</span><span class="pip">♦</span></div>
+        <div class="card black dim"><span class="cn">8♠</span><span class="pip">♠</span></div>
+        <div class="card red dim"><span class="cn">7♥</span><span class="pip">♥</span></div>
+      </div>
+      <div class="actbtn take">TAKE 2 CARDS<span class="small">they join your hand</span></div>
+    </div></div>
+    <div class="frame-cap"><b>5 · TAKE CARDS</b>If you can't (or won't) defend, undefended attacks tint red and the primary button becomes <b>TAKE N CARDS</b>. Pressing it pulls them into your hand and your race bar grows — the cost is legible.</div>
+  </div>
+
+  <!-- 6. STACK PUT-BACK -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="felt"></div>
+      <div class="ribbon">CHOOSE A CARD <span class="s">to put on top of your deck</span></div>
+      <div class="deckpile" style="bottom:74px; right:96px;"><div class="pc card back"></div><div class="pc card back"></div><div class="cnt">3</div><div class="pl">YOUR DECK</div></div>
+      <div class="phand">
+        <div class="card red playable"><span class="cn">6♦</span><span class="nm">Spyglass</span><span class="pip">♦</span></div>
+        <div class="card black playable"><span class="cn">8♠</span><span class="nm">Shadow</span><span class="pip">♠</span></div>
+        <div class="card red playable"><span class="cn">K♥</span><span class="nm">Mirror</span><span class="pip">♥</span></div>
+        <div class="card black playable"><span class="cn">9♣</span><span class="nm">Archivist</span><span class="pip">♣</span></div>
+      </div>
+      <div class="finger" style="bottom:42px; left:50%;">👆</div>
+    </div></div>
+    <div class="frame-cap"><b>6 · PUT-BACK SELECTION</b>Abilities like the Archivist's Stack-the-Deck enter a pick mode: the whole hand glows and a tap chooses which card goes on top of your draw pile (<code>OnStackPutBackRequired</code>). The card animates onto the deck.</div>
+  </div>
+
+  <!-- 7. PEEK / SCRY -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="felt" style="filter:brightness(.4)"></div>
+      <div class="scrim" style="background:rgba(4,4,9,.82)"></div>
+      <div style="position:absolute; inset:0; z-index:55; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+        <div style="font-family:'Cinzel',serif; font-size:13px; color:var(--gold); letter-spacing:1px;">TOP OF YOUR DECK</div>
+        <div style="display:flex; gap:14px;">
+          <div class="card red" style="width:58px;height:84px"><span class="cn">A♥</span><span class="nm">Ambass.</span><span class="pip">♥</span><span class="abl util">Block</span></div>
+          <div class="card black" style="width:58px;height:84px"><span class="cn">10♣</span><span class="nm">Smuggler</span><span class="pip">♣</span><span class="abl def">Brace</span></div>
+          <div class="card red" style="width:58px;height:84px"><span class="cn">6♦</span><span class="nm">Spyglass</span><span class="pip">♦</span><span class="abl util">Sleight</span></div>
+        </div>
+        <div style="font-size:10px; font-style:italic; color:var(--dusty-tan);">Next draw: A♥ — drag to reorder</div>
+        <div class="sbtn primary" style="margin-top:6px; padding:9px 28px; max-width:none;">Done</div>
+      </div>
+    </div></div>
+    <div class="frame-cap"><b>7 · PEEK / SCRY OVERLAY</b>Scry effects (Cipher, Cartographer) open a focused sheet of the real top cards. The player can reorder by dragging, then dismiss. Full-screen so small board cards aren't the reference.</div>
+  </div>
+
+  <!-- 8. LONG-PRESS INSPECT -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="felt" style="filter:brightness(.45)"></div>
+      <div class="scrim" style="background:rgba(4,4,9,.78)"></div>
+      <div style="position:absolute; inset:0; z-index:55; display:flex; align-items:center; justify-content:center; gap:16px;">
+        <div class="card black" style="width:150px;height:216px; box-shadow:0 0 0 2px var(--gold-dark),0 10px 30px rgba(0,0,0,.7)">
+          <span class="cn" style="font-size:24px">A♣</span><span class="nm" style="font-size:13px; top:42px">The Grand Inquisitor</span>
+          <span class="pip" style="font-size:54px">♣</span>
+          <span class="abl atk" style="height:30px; font-size:13px">ATK · Masterstroke</span>
+        </div>
+        <div style="max-width:190px;">
+          <div style="font-family:'Cinzel',serif; font-size:14px; color:var(--gold)">Masterstroke</div>
+          <div style="font-size:12px; color:var(--parchment); margin:6px 0; line-height:1.4">Spend 3 Intel. The opponent discards their two highest-rank cards, and you draw 1.</div>
+          <div style="font-size:11px; color:#9FC3E8">Triggers on attack · Schemer · Rare</div>
+          <div style="font-size:11px; font-style:italic; color:var(--dusty-tan); margin-top:8px">"His questions have only one answer."</div>
+        </div>
+      </div>
+    </div></div>
+    <div class="frame-cap"><b>8 · LONG-PRESS = STUDY</b>A long-press on any card anywhere (your hand, the bout, even peeking at a played card) opens a large read-only inspector with flavor text. It never commits a play — purely for reading dense ability text.</div>
+  </div>
+
+</div>
+
+<!-- ============================ ROGUELIKE / META SCREENS ============================ -->
+<h2>Run &amp; Meta Screens <span class="tag">— the loop around the matches</span></h2>
+<p class="intro">Outside matches the density drops, so these screens breathe: a persistent thin top bar (prestige · florins · act) and bottom bar carry run state everywhere, and content sits in the safe center.</p>
+<div class="gallery">
+
+  <!-- DOCTRINE SELECT -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="vbg tavern"></div>
+      <div class="scr-title">CHOOSE YOUR DOCTRINE</div>
+      <div style="position:absolute; inset:0; padding:38px 28px 14px; display:flex; gap:10px; align-items:center; justify-content:center;">
+        <div style="flex:1; max-width:150px; background:rgba(26,138,122,.16); border:1px solid var(--schemer); border-radius:10px; padding:10px; text-align:center;">
+          <div style="font-size:26px">🦊</div><div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold)">SCHEMER</div><div style="font-size:9.5px; color:var(--dusty-tan); margin-top:3px">Intel · disruption &amp; card advantage</div></div>
+        <div style="flex:1; max-width:150px; background:rgba(168,51,51,.16); border:1px solid var(--brute); border-radius:10px; padding:10px; text-align:center;">
+          <div style="font-size:26px">⚔️</div><div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold)">BRUTE</div><div style="font-size:9.5px; color:var(--dusty-tan); margin-top:3px">Fury · raw rank &amp; pressure</div></div>
+        <div style="flex:1; max-width:150px; background:rgba(124,59,238,.14); border:1px solid var(--trickster); border-radius:10px; padding:10px; text-align:center;">
+          <div style="font-size:26px">🎭</div><div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold)">TRICKSTER</div><div style="font-size:9.5px; color:var(--dusty-tan); margin-top:3px">Favor · trump &amp; tempo tricks</div></div>
+        <div style="flex:1; max-width:150px; background:rgba(181,84,10,.16); border:1px solid var(--hoarder); border-radius:10px; padding:10px; text-align:center;">
+          <div style="font-size:26px">💰</div><div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold)">HOARDER</div><div style="font-size:9.5px; color:var(--dusty-tan); margin-top:3px">Luck · big hands &amp; draw engines</div></div>
+      </div>
+    </div></div>
+    <div class="frame-cap"><b>DOCTRINE SELECT</b>Run start. Four large tap targets, each color-keyed to its resource — the same colors used for that doctrine's pips and cards in match.</div>
+  </div>
+
+  <!-- MAP -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="vbg map"></div>
+      <div class="topbar"><span class="tl">♥♥♥♥♥♥</span><span class="tm">⬥ 22</span><span class="tr">Act 2 · Merchant's Rest</span></div>
+      <!-- paths -->
+      <div class="mpath" style="left:120px; top:130px; width:120px; transform:rotate(-18deg)"></div>
+      <div class="mpath" style="left:120px; top:150px; width:120px; transform:rotate(14deg)"></div>
+      <div class="mpath" style="left:300px; top:96px; width:130px; transform:rotate(20deg)"></div>
+      <div class="mpath" style="left:300px; top:210px; width:130px; transform:rotate(-16deg)"></div>
+      <div class="mnode cur" style="left:90px; top:130px">⚔️<span class="lbl">Silvana</span></div>
+      <div class="mnode" style="left:270px; top:80px">★<span class="lbl">Elite</span></div>
+      <div class="mnode" style="left:270px; top:190px">🛏<span class="lbl">Rest</span></div>
+      <div class="mnode" style="left:450px; top:70px">🛒<span class="lbl">Shop</span></div>
+      <div class="mnode" style="left:450px; top:150px">💬<span class="lbl">Rumor</span></div>
+      <div class="mnode" style="left:450px; top:230px">⚔️<span class="lbl">Match</span></div>
+      <div class="mnode" style="left:620px; top:150px">👑<span class="lbl">Boss</span></div>
+      <div class="roundbtn" style="bottom:8px; right:10px;">🂠</div>
+    </div></div>
+    <div class="frame-cap"><b>MAP / VENUE</b>Branching node path, scrollable horizontally if an act is long. Current position glows gold; reachable nodes are bright, locked ones dim. The deck button (bottom-right) opens the deck viewer anywhere.</div>
+  </div>
+
+  <!-- CARD REWARD -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="vbg tavern"></div>
+      <div style="position:absolute; top:16px; left:0; right:0; text-align:center;">
+        <div style="font-family:'Cinzel',serif; font-size:17px; color:var(--gold); letter-spacing:2px;">VICTORY</div>
+        <div style="font-size:11px; color:var(--sage); margin-top:2px;">+12 Florins · choose a card</div>
+      </div>
+      <div style="position:absolute; top:64px; left:0; right:0; display:flex; gap:16px; justify-content:center;">
+        <div><div class="bigcard"><div class="band t"></div><div class="bnm">The Courser</div><div class="bart red">♥</div><div class="band b"></div><div class="babl">Peek</div></div><div class="rlabel" style="color:var(--dusty-tan)">COMMON</div></div>
+        <div><div class="bigcard"><div class="band t"></div><div class="bnm">The Cardinal</div><div class="bart red">♥</div><div class="band b"></div><div class="babl">Dbl Defense</div></div><div class="rlabel" style="color:var(--dusty-tan)">COMMON</div></div>
+        <div><div class="bigcard rare"><div class="band t"></div><div class="bnm" style="color:#F0D98A">Crown Jewel</div><div class="bart red">♦</div><div class="band b"></div><div class="babl">Fortify</div></div><div class="rlabel" style="color:var(--gold)">UNCOMMON</div></div>
+      </div>
+      <div class="botbar"><span>Tap a card to add it</span><span class="sbtn ghost" style="padding:5px 16px; font-size:10px;">Skip</span></div>
+    </div></div>
+    <div class="frame-cap"><b>CARD REWARD</b>Three offerings at full card size (tap to inspect, tap again to claim). Skip lives in the bottom bar. Same card frame as in-match, so a card looks identical everywhere.</div>
+  </div>
+
+  <!-- ABILITY / RELIC PICK (rest of PostMatch sequence) -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="vbg tavern"></div>
+      <div style="position:absolute; top:14px; left:0; right:0; text-align:center;">
+        <div style="font-family:'Cinzel',serif; font-size:14px; color:var(--gold); letter-spacing:1.5px;">CHOOSE AN ABILITY</div>
+        <div style="font-size:10px; color:var(--dusty-tan); margin-top:2px;">passive perks — then a boss relic on Elite/Boss wins</div>
+      </div>
+      <div style="position:absolute; top:54px; left:24px; right:14px; display:flex; gap:10px; justify-content:center;">
+        <div style="flex:1; max-width:200px; background:rgba(20,28,40,.8); border:1px solid var(--bronze); border-radius:10px; padding:11px; text-align:center;">
+          <div style="font-size:22px">🜂</div><div style="font-family:'Cinzel',serif; font-size:11px; color:var(--gold); margin-top:3px">Battle Hardened</div><div style="font-size:9.5px; color:var(--dusty-tan); margin-top:4px; line-height:1.3">+1 rank on attacks when you hold 3+ Fury.</div></div>
+        <div style="flex:1; max-width:200px; background:rgba(20,28,40,.8); border:1px solid var(--royal-blue); border-radius:10px; padding:11px; text-align:center;">
+          <div style="font-size:22px">🜄</div><div style="font-family:'Cinzel',serif; font-size:11px; color:var(--gold); margin-top:3px">Quick Hands</div><div style="font-size:9.5px; color:var(--dusty-tan); margin-top:4px; line-height:1.3">After a successful defense, cycle a card.</div></div>
+        <div style="flex:1; max-width:200px; background:rgba(124,59,238,.16); border:1px solid var(--trickster); border-radius:10px; padding:11px; text-align:center;">
+          <div style="font-size:22px">🜔</div><div style="font-family:'Cinzel',serif; font-size:11px; color:var(--gold); margin-top:3px">Shark Instinct</div><div style="font-size:9.5px; color:var(--dusty-tan); margin-top:4px; line-height:1.3">Gain 1 resource at the start of each bout.</div></div>
+      </div>
+      <div class="botbar"><span>One of three · tap to learn it</span><span class="sbtn ghost" style="padding:5px 16px; font-size:10px;">Skip</span></div>
+    </div></div>
+    <div class="frame-cap"><b>ABILITY / RELIC PICK</b>The PostMatch sequence after the card reward: pick 1 of 3 passive abilities, then (Elite/Boss only) 1 of 3 relics. Same three-up "choose one, or skip" layout as the card reward for a consistent reward rhythm.</div>
+  </div>
+
+  <!-- SHOP -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="vbg tavern"></div>
+      <div class="topbar"><span class="tl">♥♥♥♥♥♥</span><span class="tm">⬥ 22</span><span class="tr">The Fence</span></div>
+      <div style="position:absolute; top:38px; left:28px; right:14px; bottom:36px; display:flex; gap:14px;">
+        <div style="flex:1;">
+          <div style="font-family:'Cinzel',serif; font-size:10px; color:var(--gold); letter-spacing:1px; margin-bottom:6px;">CARDS</div>
+          <div style="display:flex; gap:8px;">
+            <div><div class="bigcard" style="width:70px;height:100px"><div class="band t"></div><div class="bnm" style="font-size:6px">Poisoner</div><div class="bart black" style="font-size:28px">♠</div><div class="band b"></div></div><div style="text-align:center;color:var(--gold);font-size:9px;margin-top:2px">8⬥</div></div>
+            <div><div class="bigcard" style="width:70px;height:100px"><div class="band t"></div><div class="bnm" style="font-size:6px">Smuggler</div><div class="bart black" style="font-size:28px">♣</div><div class="band b"></div></div><div style="text-align:center;color:var(--gold);font-size:9px;margin-top:2px">12⬥</div></div>
+          </div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-family:'Cinzel',serif; font-size:10px; color:var(--gold); letter-spacing:1px; margin-bottom:6px;">RELICS &amp; SERVICES</div>
+          <div class="srow"><span style="font-size:18px">💰</span><div><div class="sn">Merchant's Purse</div><div class="sdsc">+3 florins per win</div></div><span class="price">30⬥</span></div>
+          <div class="srow"><span style="font-size:18px">🗑</span><div><div class="sn">Remove a Card</div><div class="sdsc">thin your deck</div></div><span class="price">25⬥</span></div>
+        </div>
+      </div>
+      <div class="botbar"><span>The Fence haggles…</span><b>Leave →</b></div>
+    </div></div>
+    <div class="frame-cap"><b>SHOP</b>Two columns — cards left, relics/services right — so everything fits one screen without scrolling. Prices in florins; the deck-thinning service is a first-class row.</div>
+  </div>
+
+  <!-- REST -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="vbg tavern"></div>
+      <div class="scr-title">THE HEARTH · REST</div>
+      <div style="position:absolute; inset:0; padding:40px 28px 36px; display:flex; gap:12px; align-items:center; justify-content:center;">
+        <div style="flex:1; max-width:170px; background:rgba(184,64,64,.14); border:1px solid var(--venetian-red); border-radius:10px; padding:14px; text-align:center;"><div style="font-size:26px">❤️‍🩹</div><div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold); margin-top:4px">RECOVER</div><div style="font-size:10px; color:var(--dusty-tan); margin-top:3px">Heal 2 prestige</div></div>
+        <div style="flex:1; max-width:170px; background:rgba(68,119,170,.14); border:1px solid var(--royal-blue); border-radius:10px; padding:14px; text-align:center;"><div style="font-size:26px">📖</div><div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold); margin-top:4px">STUDY</div><div style="font-size:10px; color:var(--dusty-tan); margin-top:3px">Upgrade a card</div></div>
+        <div style="flex:1; max-width:170px; background:rgba(124,59,238,.12); border:1px solid var(--trickster); border-radius:10px; padding:14px; text-align:center;"><div style="font-size:26px">🗑</div><div style="font-family:'Cinzel',serif; font-size:12px; color:var(--gold); margin-top:4px">PURGE</div><div style="font-size:10px; color:var(--dusty-tan); margin-top:3px">Remove a card</div></div>
+      </div>
+      <div class="botbar"><span class="heart">♥♥♥♥♥♥</span><span>Choose one</span><span class="tr">Act 2</span></div>
+    </div></div>
+    <div class="frame-cap"><b>REST SITE</b>One choice among heal / upgrade / purge, as big mutually-exclusive cards. Picking one that needs a card target (Study, Purge) opens the deck viewer in select mode.</div>
+  </div>
+
+  <!-- RUMOR / EVENT -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="vbg tavern"></div>
+      <div style="position:absolute; top:30px; left:36px; right:24px;">
+        <div style="font-family:'Cinzel',serif; font-size:13px; color:var(--gold); letter-spacing:1px;">A WHISPERED DEAL</div>
+        <div style="font-size:11px; color:var(--parchment); margin-top:6px; line-height:1.4;">A hooded broker slides a purse across the table. "Three cards from your deck, and this relic is yours. No questions."</div>
+      </div>
+      <div style="position:absolute; bottom:40px; left:36px; right:24px; display:flex; flex-direction:column; gap:8px;">
+        <div class="srow" style="margin:0"><span class="sn">Accept the bargain</span><span class="sdsc" style="margin-left:auto">−3 cards, +1 relic</span></div>
+        <div class="srow" style="margin:0"><span class="sn">Refuse and leave</span><span class="sdsc" style="margin-left:auto">nothing ventured</span></div>
+      </div>
+    </div></div>
+    <div class="frame-cap"><b>RUMOR / EVENT</b>Narrative text up top, choices as full-width tappable rows with their outcome previewed inline. Each row's consequence is shown before commit — no blind picks.</div>
+  </div>
+
+  <!-- DECK VIEWER -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="vbg map"></div>
+      <div class="scr-title">YOUR DECK · 12 CARDS</div>
+      <div style="position:absolute; top:36px; left:28px; right:14px; bottom:10px; overflow:hidden; display:flex; flex-wrap:wrap; gap:7px; align-content:flex-start;">
+        <div class="card black" style="width:50px;height:72px"><span class="cn">7♠</span><span class="pip">♠</span><span class="abl atk">Rip.</span></div>
+        <div class="card red" style="width:50px;height:72px"><span class="cn">6♦</span><span class="pip">♦</span><span class="abl util">Slt.</span></div>
+        <div class="card black" style="width:50px;height:72px"><span class="cn">8♣</span><span class="pip">♣</span><span class="abl util">Peek</span></div>
+        <div class="card red" style="width:50px;height:72px"><span class="cn">6♥</span><span class="pip">♥</span><span class="abl def">Draw</span></div>
+        <div class="card black" style="width:50px;height:72px"><span class="cn">10♠</span><span class="pip">♠</span><span class="abl def">Seize</span></div>
+        <div class="card red" style="width:50px;height:72px"><span class="cn">8♥</span><span class="pip">♥</span><span class="abl atk">Agent</span></div>
+        <div class="card red" style="width:50px;height:72px"><span class="cn">10♥</span><span class="pip">♥</span><span class="abl util">Gain</span></div>
+        <div class="card black" style="width:50px;height:72px"><span class="cn">7♣</span><span class="pip">♣</span><span class="abl atk">Rip.</span></div>
+        <div class="card black" style="width:50px;height:72px"><span class="cn">A♣</span><span class="pip">♣</span><span class="abl atk">M'str</span></div>
+        <div class="card red" style="width:50px;height:72px"><span class="cn">Q♦</span><span class="pip">♦</span><span class="abl util">Gain</span></div>
+        <div class="card black" style="width:50px;height:72px"><span class="cn">K♠</span><span class="pip">♠</span><span class="abl atk">Seize</span></div>
+        <div class="card red" style="width:50px;height:72px"><span class="cn">A♥</span><span class="pip">♥</span><span class="abl util">Block</span></div>
+      </div>
+      <div class="roundbtn" style="top:6px; right:10px;">✕</div>
+    </div></div>
+    <div class="frame-cap"><b>DECK VIEWER</b>The whole deck as a wrapped grid, sorted by suit/rank, scrollable. Tap any card for the long-press inspector. Reused in select mode for Study/Purge/removal services.</div>
+  </div>
+
+  <!-- RUN OVER -->
+  <div class="frame-block">
+    <div class="phone"><div class="island"></div><div class="home-bar"></div><div class="screen">
+      <div class="vbg tavern" style="filter:brightness(.6)"></div>
+      <div style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+        <div style="font-family:'Cinzel',serif; font-size:24px; color:var(--venetian-red); letter-spacing:3px;">YOU ARE THE FOOL</div>
+        <div style="font-size:12px; color:var(--dusty-tan);">Defeated by Silvana la Volpe in Act 2</div>
+        <div style="display:flex; gap:22px; margin-top:8px; font-size:11px; color:var(--parchment); font-family:'Cinzel',serif;">
+          <span>5 matches won</span><span>·</span><span>22 florins</span><span>·</span><span>12-card deck</span>
+        </div>
+        <div class="sbtn primary" style="margin-top:14px; padding:11px 34px; max-width:none;">New Run</div>
+      </div>
+    </div></div>
+    <div class="frame-cap"><b>RUN OVER</b>Defeat (or the Act 5 victory variant) dims the venue, names who beat you and where, shows the run's stat line, and offers a single New Run button.</div>
+  </div>
+
+</div>
+
+<!-- ============================ INTERACTION LEGEND ============================ -->
+<div class="legend">
+  <h4>TOUCH GRAMMAR — the complete gesture set</h4>
+  <ul>
+    <li><b>Tap a hand card</b> → select + lift + inspector + action pills. Tap again on the card, or the pill, to commit. (Replaces desktop click-to-play and hover-tooltip.)</li>
+    <li><b>Tap an action pill</b> → <code>Attack</code> / <code>Use Ability</code> / <code>Play</code> / <code>✕ cancel</code>. Only legal pills appear (engine <code>CanAttackWith</code> / <code>AbilityValidForPhase</code>).</li>
+    <li><b>Drag a card up</b> → fast-path: into the bout = attack; onto a glowing slot = defend. Same legality rules; tap path remains for precision &amp; accessibility.</li>
+    <li><b>Defend</b> → select card first, legal attack slots pulse gold, tap one to cover (<code>CanDefendSlotWith</code> respects rank, trump and rank-bonus chips).</li>
+    <li><b>Primary button</b> → context-driven single commit: <code>END BOUT</code> (attacker, all parried) / <code>TAKE N CARDS</code> (defender) / disabled (waiting).</li>
+    <li><b>Long-press anything</b> → large read-only card inspector with flavor; never commits.</li>
+    <li><b>Bottom sheet</b> → optional-ability choice, stack put-back prompt, peek/scry reorder. Modal, dismissable.</li>
+    <li><b>Round buttons (top-right)</b> → ☰ menu/concede, 🜊 event log history. 🂠 deck viewer on meta screens.</li>
+  </ul>
+  <h4>WHAT MOVED, AND WHY</h4>
+  <ul>
+    <li>Desktop's hover tooltip → <b>tap-to-inspect</b> (touch has no hover).</li>
+    <li>Desktop's always-open event log panel → <b>collapsed to a toast + history button</b> (screen real estate).</li>
+    <li>Desktop's two identity panels + separate resource/deck labels → <b>two compact corner chips</b> fusing avatar, counts, pips and race bar.</li>
+    <li>Desktop's wide action zone → <b>one thumb-zone button</b> bottom-right; phase text rides on the ribbon + button subtitle.</li>
+    <li>Trump card, removed pile → <b>edge chips</b>; they're reference, not interactive during normal play.</li>
+  </ul>
+</div>
+
+</body>
+</html>
