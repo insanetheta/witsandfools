@@ -925,23 +925,22 @@ namespace WitsAndFools
                 btn.onClick.AddListener(() => OnNodeSelected(capturedNode, capturedRow));
             }
 
-            // Visited checkmark overlay
+            // Visited marker: a gold disc (Image, not a text glyph — the default font
+            // lacks U+2713 and rendered as a missing-glyph box).
             if (wasChosen)
             {
-                var checkGO = new GameObject("Check", typeof(RectTransform));
+                var checkGO = new GameObject("VisitedDot", typeof(RectTransform), typeof(Image));
                 checkGO.transform.SetParent(go.transform, false);
                 var checkRT = (RectTransform)checkGO.transform;
                 checkRT.anchorMin = new Vector2(1, 1);
                 checkRT.anchorMax = new Vector2(1, 1);
                 checkRT.pivot = new Vector2(1, 1);
-                checkRT.sizeDelta = new Vector2(22, 22);
-                checkRT.anchoredPosition = new Vector2(-2, -2);
-                var checkTMP = checkGO.AddComponent<TextMeshProUGUI>();
-                checkTMP.text = "✓";
-                checkTMP.alignment = TextAlignmentOptions.Center;
-                checkTMP.fontSize = 16;
-                checkTMP.color = ThemePalette.Gold;
-                checkTMP.raycastTarget = false;
+                checkRT.sizeDelta = new Vector2(16, 16);
+                checkRT.anchoredPosition = new Vector2(-4, -4);
+                checkRT.localRotation = Quaternion.Euler(0, 0, 45f); // diamond
+                var checkImg = checkGO.GetComponent<Image>();
+                checkImg.color = ThemePalette.Gold;
+                checkImg.raycastTarget = false;
             }
         }
 
@@ -3421,8 +3420,9 @@ namespace WitsAndFools
             var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
             if (FontAssets.Heading) nameTMP.font = FontAssets.Heading;
             nameTMP.text = def.Name;
-            nameTMP.fontSize = isSmall ? 7 : isLarge ? 11 : 8;
-            nameTMP.color = ThemePalette.Parchment;
+            nameTMP.fontSize = isSmall ? 8 : isLarge ? 13 : 9;
+            nameTMP.color = ThemePalette.Gold;
+            nameTMP.fontStyle = FontStyles.Bold;
             nameTMP.alignment = TextAlignmentOptions.Center;
             nameTMP.enableWordWrapping = false;
             nameTMP.overflowMode = TextOverflowModes.Ellipsis;
@@ -3474,9 +3474,27 @@ namespace WitsAndFools
             }
             else
             {
-                var artTint = docColor * 0.35f;
-                artTint.a = 1f;
-                artImg.color = artTint;
+                // No art for this card (e.g. neutral/trickster/hoarder): paint a parchment
+                // surface with a large translucent suit glyph so the card is never blank.
+                var parchment = Color.Lerp(ThemePalette.CardCream, docColor, 0.18f);
+                artImg.color = parchment;
+
+                var glyphGO = new GameObject("ArtGlyph", typeof(RectTransform));
+                glyphGO.transform.SetParent(artGO.transform, false);
+                var glyphRT = (RectTransform)glyphGO.transform;
+                glyphRT.anchorMin = Vector2.zero;
+                glyphRT.anchorMax = Vector2.one;
+                glyphRT.offsetMin = Vector2.zero;
+                glyphRT.offsetMax = Vector2.zero;
+                var glyphTMP = glyphGO.AddComponent<TextMeshProUGUI>();
+                if (FontAssets.Mono) glyphTMP.font = FontAssets.Mono;
+                glyphTMP.text = def.Suit.Glyph();
+                glyphTMP.fontSize = isSmall ? 36 : isLarge ? 120 : 64;
+                var glyphColor = def.Suit.IsRed() ? ThemePalette.RedSuit : ThemePalette.BlackSuit;
+                glyphColor.a = 0.22f;
+                glyphTMP.color = glyphColor;
+                glyphTMP.alignment = TextAlignmentOptions.Center;
+                glyphTMP.raycastTarget = false;
             }
             artImg.raycastTarget = false;
 
@@ -3526,9 +3544,10 @@ namespace WitsAndFools
                 abLabelRT.offsetMin = new Vector2(dotSize * 2 + 4, 0);
                 abLabelRT.offsetMax = Vector2.zero;
                 var abLabelTMP = abLabelGO.AddComponent<TextMeshProUGUI>();
+                if (FontAssets.Body) abLabelTMP.font = FontAssets.Body;
                 abLabelTMP.text = def.Ability.Value.DisplayName();
-                abLabelTMP.fontSize = isSmall ? 7 : isLarge ? 10 : 8;
-                abLabelTMP.color = ThemePalette.DustyTan;
+                abLabelTMP.fontSize = isSmall ? 8 : isLarge ? 11 : 9;
+                abLabelTMP.color = ThemePalette.Parchment;
                 abLabelTMP.alignment = TextAlignmentOptions.MidlineLeft;
                 abLabelTMP.enableWordWrapping = false;
                 abLabelTMP.overflowMode = TextOverflowModes.Ellipsis;
@@ -3574,7 +3593,7 @@ namespace WitsAndFools
                 frameImg.type = Image.Type.Sliced;
                 frameImg.fillCenter = false;
                 frameImg.pixelsPerUnitMultiplier = isSmall ? 4.5f : isLarge ? 1.8f : 3f;
-                frameImg.color = new Color(1f, 1f, 1f, isSmall ? 0.5f : 0.75f);
+                frameImg.color = new Color(1f, 1f, 1f, isSmall ? 0.4f : 0.55f);
                 frameImg.raycastTarget = false;
             }
 
@@ -3680,8 +3699,11 @@ namespace WitsAndFools
             rlRT.sizeDelta = new Vector2(0, labelH);
             var rlTMP = rarityLabelGO.AddComponent<TextMeshProUGUI>();
             rlTMP.text = def.Rarity.ToString().ToUpper();
-            rlTMP.fontSize = 14;
-            rlTMP.color = rarityColor;
+            rlTMP.fontSize = 17;
+            rlTMP.fontStyle = FontStyles.Bold;
+            rlTMP.characterSpacing = 4f;
+            // Brighten the rarity label so it reads against the dark venue background.
+            rlTMP.color = Color.Lerp(rarityColor, Color.white, 0.35f);
             rlTMP.alignment = TextAlignmentOptions.Center;
             rlTMP.raycastTarget = false;
             if (FontAssets.Heading) rlTMP.font = FontAssets.Heading;
