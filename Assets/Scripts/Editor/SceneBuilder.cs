@@ -73,7 +73,7 @@ namespace WitsAndFools.EditorTools
             // Radial focus comes from the vignette overlay; subtle per-act warmth from the felt tint below.
             var tableBg = NewChild(canvasRT, "TableBackground");
             var tableBgImg = tableBg.gameObject.AddComponent<Image>();
-            var feltSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Textures/felt_texture.png");
+            var feltSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Textures/felt_smooth.png");
             if (feltSprite) { tableBgImg.sprite = feltSprite; tableBgImg.color = Color.white; }
             else tableBgImg.color = ThemePalette.TableBg;
             tableBgImg.raycastTarget = false;
