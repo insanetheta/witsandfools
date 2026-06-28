@@ -1047,18 +1047,21 @@ namespace WitsAndFools
                 int undefended = Engine.UndefendedCount;
                 string sub = undefended == 0 ? "all attacks parried" : $"{undefended} open";
                 phase = yourTurn ? $"YOUR ATTACK · {sub}" : $"{OpponentName.ToUpper()} ATTACKS";
-                boutColor = yourTurn ? ThemePalette.Sage : ThemePalette.VenetianRed;
+                // Your turn = gold (your keyline); opponent acting = venetian red. (Sage retired —
+                // off-palette for the board chrome.)
+                boutColor = yourTurn ? ThemePalette.Gold : ThemePalette.VenetianRed;
             }
             else if (Engine.Phase == Phase.Defense)
             {
                 bool yourTurn = Engine.DefenderIndex == HumanPlayerIndex;
                 int undefended = Engine.UndefendedCount;
                 phase = yourTurn ? $"DEFEND! · {undefended} open" : $"{OpponentName.ToUpper()} DEFENDS";
-                boutColor = yourTurn ? ThemePalette.VenetianRed : ThemePalette.Sage;
+                boutColor = yourTurn ? ThemePalette.VenetianRed : ThemePalette.WarmSlate;
             }
             else { phase = "..."; boutColor = ThemePalette.WarmSlate; }
+            // Single phase indicator: the top-center ribbon. (The old bottom-right echo duplicated it —
+            // that was the "ghosted/doubled phase text" finding; the button area carries bout count.)
             Hud.SetBoutState(phase, boutColor);
-            Hud.SetActionZone(phase, boutColor);
 
             int playerCards = Engine.HandCount(HumanPlayerIndex);
             int oppCards = Engine.HandCount(1 - HumanPlayerIndex);

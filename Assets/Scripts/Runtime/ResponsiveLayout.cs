@@ -30,10 +30,13 @@ namespace WitsAndFools
         public int CompactMaxHeight = 520;
         public int SpaciousMinHeight = 700;
         public int SpaciousMinWidth = 1100;
-        // Above this aspect the play field is clamped & centered (16:9 desktop ~1.78 is unaffected;
-        // very wide / multi-monitor views re-center instead of stranding panels in far corners).
-        public float UltrawideAspect = 1.95f;
-        public float ClampWidthFactor = 1.85f;   // max play-field width = refHeight * this
+        // PlayRoot is the UI ContentRoot (the felt backdrop is a separate full-screen layer and is
+        // never clamped). Above ContentMaxAspect the content is clamped to a framed width and centered
+        // so widgets frame the felt instead of stranding in far corners. At ~1.62 even 16:9 (~1.78)
+        // gets a gentle inset; the felt still fills the screen edge-to-edge behind it.
+        public float ContentMaxAspect = 1.62f;
+        public float UltrawideAspect = 1.95f;     // retained for EvaluateFor()'s informational flag
+        public float ClampWidthFactor = 1.85f;    // (legacy) — clamp now uses ContentMaxAspect
 
         public LayoutTier Tier { get; private set; } = LayoutTier.Spacious;
         public bool IsPortrait { get; private set; }
@@ -138,15 +141,16 @@ namespace WitsAndFools
         void ApplyUltrawideClamp(float ar)
         {
             if (!PlayRoot) return;
-            if (ar >= UltrawideAspect)
+            if (ar >= ContentMaxAspect)
             {
-                // cap the play-field width and center it; sides pillarbox to the canvas bg so panels
-                // anchored to its edges pull inward instead of stranding across a huge felt void.
+                // Cap the UI content width and center it so edge-anchored widgets (trump, removed,
+                // decks, panels) frame the felt instead of stranding in far corners. The felt backdrop
+                // is a separate full-screen layer and keeps filling the viewport behind this.
                 PlayRoot.anchorMin = new Vector2(0.5f, 0f);
                 PlayRoot.anchorMax = new Vector2(0.5f, 1f);
                 PlayRoot.pivot = new Vector2(0.5f, 0.5f);
                 float refH = Scaler ? Scaler.referenceResolution.y : 1080f;
-                PlayRoot.sizeDelta = new Vector2(refH * ClampWidthFactor, 0f);
+                PlayRoot.sizeDelta = new Vector2(refH * ContentMaxAspect, 0f);
                 PlayRoot.anchoredPosition = Vector2.zero;
             }
             else

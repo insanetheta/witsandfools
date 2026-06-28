@@ -586,36 +586,42 @@ namespace WitsAndFools.EditorTools
             vignetteImg.raycastTarget = false;
             FillParent(vignette);
 
-            // ----- Wrap existing match UI in a MatchPanel group -----
+            // ----- Wrap match UI in a MatchPanel group -----
+            // The felt/vignette/frame are a full-screen backdrop that always fills the viewport. All
+            // interactive/info UI lives in a ContentRoot that ResponsiveLayout clamps to a framed width
+            // on wide screens — so the widgets frame the felt instead of stranding in far corners, while
+            // the felt itself stays edge-to-edge (no pillarboxing).
             var matchPanel = NewChild(canvasRT, "MatchPanel");
             FillParent(matchPanel);
-            // Reparent all match-specific UI under MatchPanel
             tableBg.SetParent(matchPanel, true);
             felt.SetParent(matchPanel, true);
             frame.SetParent(matchPanel, true);
-            vignette.SetParent(matchPanel, true); // behind HUD/cards so it doesn't obscure UI
-            oppPanel.SetParent(matchPanel, true);
-            actionZone.SetParent(matchPanel, true);
-            oppDeckSlot.SetParent(matchPanel, true);
-            playerDeckSlot.SetParent(matchPanel, true);
-            deckSlot.SetParent(matchPanel, true);
-            trumpPanel.SetParent(matchPanel, true);
-            discardSlot.SetParent(matchPanel, true);
-            boutArea.SetParent(matchPanel, true);   // bout wells are children of boutArea, move with it
-            playerHand.SetParent(matchPanel, true);
-            opponentHand.SetParent(matchPanel, true);
-            goPanel.SetParent(matchPanel, true);
-            acPanel.SetParent(matchPanel, true);
-            autoPlayBtn.SetParent(matchPanel, true);
-            ((RectTransform)tooltipLabel.transform).SetParent(matchPanel, true);
-            ((RectTransform)deckTopLabel.transform).SetParent(matchPanel, true);
-            ((RectTransform)infoLabel.transform).SetParent(matchPanel, true);
-            boutPanel.SetParent(matchPanel, true);
-            playerPanel.SetParent(matchPanel, true);
-            logPanel.SetParent(matchPanel, true);
-            logButton.SetParent(matchPanel, true);
-            feedbackPanel.SetParent(matchPanel, true);
-            peekPanel.SetParent(matchPanel, true);
+            vignette.SetParent(matchPanel, true); // behind content so it doesn't obscure UI
+
+            var contentRoot = NewChild(matchPanel, "ContentRoot");
+            FillParent(contentRoot);
+            oppPanel.SetParent(contentRoot, true);
+            actionZone.SetParent(contentRoot, true);
+            oppDeckSlot.SetParent(contentRoot, true);
+            playerDeckSlot.SetParent(contentRoot, true);
+            deckSlot.SetParent(contentRoot, true);
+            trumpPanel.SetParent(contentRoot, true);
+            discardSlot.SetParent(contentRoot, true);
+            boutArea.SetParent(contentRoot, true);   // bout wells are children of boutArea, move with it
+            playerHand.SetParent(contentRoot, true);
+            opponentHand.SetParent(contentRoot, true);
+            goPanel.SetParent(contentRoot, true);
+            acPanel.SetParent(contentRoot, true);
+            autoPlayBtn.SetParent(contentRoot, true);
+            ((RectTransform)tooltipLabel.transform).SetParent(contentRoot, true);
+            ((RectTransform)deckTopLabel.transform).SetParent(contentRoot, true);
+            ((RectTransform)infoLabel.transform).SetParent(contentRoot, true);
+            boutPanel.SetParent(contentRoot, true);
+            playerPanel.SetParent(contentRoot, true);
+            logPanel.SetParent(contentRoot, true);
+            logButton.SetParent(contentRoot, true);
+            feedbackPanel.SetParent(contentRoot, true);
+            peekPanel.SetParent(contentRoot, true);
             matchPanel.gameObject.SetActive(false);
 
             // ----- Map Panel (branching path layout) -----
@@ -1149,7 +1155,7 @@ namespace WitsAndFools.EditorTools
             // ----- Responsive + cheat components on the Canvas (persist across the whole run) -----
             var responsive = canvasGO.AddComponent<ResponsiveLayout>();
             responsive.Scaler = scaler;
-            responsive.PlayRoot = matchPanel;
+            responsive.PlayRoot = contentRoot;   // clamp the UI content; felt backdrop stays full-screen
             responsive.PortraitOverlay = portraitOverlay.gameObject;
             responsive.EventLogPanel = logPanel.gameObject;
             responsive.EventLogButton = logButton.gameObject;
