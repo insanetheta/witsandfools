@@ -92,7 +92,7 @@
   <p class="intro">The mobile design's discipline (compact identity chips, edge-docked reference, one thumb-zone action, the race meter always visible) is exactly what the crowded desktop board needed. So instead of maintaining two UIs, the <b>mobile layout becomes the base</b> and desktop is the <b>same layout with the breakpoints opened up</b> — chips expand into panels, the log undocks into a rail, cards and spacing grow. Everything below the layout — scene, prefabs, card art, fonts, data bindings — is shared verbatim.</p>
   <div class="ia-grid">
     <div class="ia"><h4>ONE SCENE, ONE ASSET PATH</h4><p>Same <span class="k">GameScene</span>, same <span class="k">CardView prefab</span>, same <code>Resources/CardArt</code>, frames and fonts on both platforms. There is no <code>/mobile</code> vs <code>/desktop</code> fork to keep in sync.</p></div>
-    <div class="ia"><h4>ASPECT DRIVES LAYOUT</h4><p>A single <span class="k">ResponsiveLayout</span> picks a tier — Compact / Comfortable / Spacious — from the live viewport aspect &amp; height, and nudges anchors, paddings and a few visibility toggles. Pure geometry, no content forks.</p></div>
+    <div class="ia"><h4>HEIGHT DRIVES LAYOUT</h4><p>A single <span class="k">ResponsiveLayout</span> picks a tier — Compact / Comfortable / Spacious — keyed on viewport <span class="k">height first</span> (a card game must stack opponent + bout + hand + action vertically); width only <i>gates</i> the desktop expansions. So a wide-but-short window stays Compact instead of cramming desktop chrome into 360px. Portrait is landscape-locked; ultrawide is clamped &amp; centered.</p></div>
     <div class="ia"><h4>POINTER DRIVES INPUT</h4><p>A single <span class="k">InputProfile</span> reads pointer capability: a fine pointer enables <span class="k">hover</span> tooltips &amp; lift; a coarse pointer enables <span class="k">tap-to-inspect</span>. Same CardView, same handlers — only which affordances are live differs.</p></div>
   </div>
 
@@ -161,8 +161,8 @@
     <div class="panel">
       <h4>RESPONSIVE LAYOUT (geometry)</h4>
       <ul>
-        <li><b>CanvasScaler</b>: <code>Scale With Screen Size</code>, reference 1280×720, <code>matchWidthOrHeight</code> biased to <b>height</b> — vertical space is the tight constraint (phone-landscape is only ~390pt tall), so the board scales to fit height and never clips top/bottom.</li>
-        <li><b>ResponsiveLayout</b> MonoBehaviour on the Canvas: on start and on <code>OnRectTransformDimensionsChange</code>, compute <code>tier = f(aspect, height)</code> → Compact / Comfortable / Spacious.</li>
+        <li><b>CanvasScaler</b>: <code>Scale With Screen Size</code>, reference 1280×720, <code>matchWidthOrHeight</code> biased to <b>height</b> — vertical space is the tight constraint (phone-landscape is only ~390pt tall), so the board scales to fit height and never clips top/bottom. Pair with a max play-width so ultrawide pillarboxes instead of stranding.</li>
+        <li><b>ResponsiveLayout</b> MonoBehaviour on the Canvas: on start and on <code>OnRectTransformDimensionsChange</code>, compute <code>tier</code> from <b>height first</b> (Compact ≤520, Comfortable ≤699, Spacious ≥700 <i>and</i> width ≥1100), lock to landscape when <code>width&lt;height</code>. Width only gates the Spacious expansions — never re-tiers a short window into desktop chrome.</li>
         <li>The tier sets a handful of values the existing widgets already read: card scale, edge padding, chip-vs-panel mode (toggle the subtitle + race label objects), log button vs docked <code>EventLogPanel</code>, bout slot spacing, safe-area insets.</li>
         <li>No new screens, no duplicated prefabs — it only moves/sizes/toggles what SceneBuilder already creates.</li>
       </ul>
@@ -181,9 +181,11 @@
   <h2>Breakpoints <span class="tag">— keyed on aspect &amp; height, not device names</span></h2>
   <table class="cmp">
     <tr><th>Tier</th><th>Triggers (viewport)</th><th>Layout</th><th>Input (typical)</th></tr>
-    <tr><td><b>Compact</b></td><td>short height (≲520pt) or very wide AR (≳2.0) — phone landscape</td><td>chips, log button, trump chip, tight padding, hand lifted off home strip, ≥44pt targets</td><td>Touch (tap)</td></tr>
-    <tr><td><b>Comfortable</b></td><td>~520–760pt height — tablet, small laptop, resized window</td><td>same structure, larger cards/type/padding; log still a button</td><td>either</td></tr>
-    <tr><td><b>Spacious</b></td><td>tall &amp; wide (≳760pt height, AR ~1.6–1.9) — desktop</td><td>full identity panels, event-log rail docked, trump rule shown, largest cards, wide bout</td><td>Pointer (hover)</td></tr>
+    <tr><td><b>Compact</b></td><td>height ≤ 520pt (phone landscape, or any short/wide-short window)</td><td>chips, log button, trump chip, tight padding, hand lifted off home strip, ≥44pt targets</td><td>Touch (tap)</td></tr>
+    <tr><td><b>Comfortable</b></td><td>height 521–699pt, <i>or</i> tall-but-narrow (height ≥700 &amp; width &lt;1100) — tablet, small/resized window</td><td>same structure, larger cards/type/padding; log still a button</td><td>either</td></tr>
+    <tr><td><b>Spacious</b></td><td>height ≥ 700pt <b>and</b> width ≥ 1100pt — desktop</td><td>full identity panels, event-log rail docked, trump rule shown, largest cards, wide bout</td><td>Pointer (hover)</td></tr>
+    <tr><td><b>Portrait</b></td><td>width &lt; height (AR &lt; 1)</td><td>landscape-lock prompt ("rotate device") — no second arrangement to maintain</td><td>—</td></tr>
+    <tr><td><b>Ultrawide</b></td><td>AR ≥ 2.5</td><td>play field clamped to a max width &amp; centered; pillarboxed sides (CanvasScaler match-height + max play-width)</td><td>Pointer</td></tr>
   </table>
   <p class="note">Tier and input are independent: a touchscreen laptop in a small window is Comfortable + Touch; a phone mirrored to a monitor with a mouse is Spacious + Pointer. They compose, they don't fork.</p>
 
