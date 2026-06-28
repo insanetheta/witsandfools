@@ -228,25 +228,49 @@ namespace WitsAndFools.EditorTools
             trumpRule.fontStyle = FontStyles.Italic;
             trumpRule.enableWordWrapping = true;
 
-            // Recessed "bout zone" backing so the contested center reads as the focal space
-            // (UX: a played card should sit in a defined well, not float on bare felt).
-            var boutZone = NewChild(canvasRT, "BoutZone");
-            boutZone.anchorMin = new Vector2(0.5f, 0.5f);
-            boutZone.anchorMax = new Vector2(0.5f, 0.5f);
-            boutZone.sizeDelta = new Vector2(620, 250);
-            boutZone.anchoredPosition = new Vector2(0, 40);
-            var boutZoneImg = boutZone.gameObject.AddComponent<Image>();
-            boutZoneImg.color = new Color(0f, 0f, 0f, 0.22f);
-            boutZoneImg.raycastTarget = false;
-            var boutZoneEdge = boutZone.gameObject.AddComponent<Outline>();
-            boutZoneEdge.effectColor = new Color(0.94f, 0.90f, 0.82f, 0.12f);
-            boutZoneEdge.effectDistance = new Vector2(2, -2);
-
             var boutArea = NewChild(canvasRT, "BoutArea");
             boutArea.anchorMin = new Vector2(0.5f, 0.5f);
             boutArea.anchorMax = new Vector2(0.5f, 0.5f);
             boutArea.sizeDelta = new Vector2(900, 280);
             boutArea.anchoredPosition = new Vector2(0, 40);
+
+            // Bout slot wells: a pool of recessed rounded wells, one per attacker/defender pair, so a
+            // played card seats in a defined well instead of floating on bare felt (per unified_board.html).
+            // GameManager positions + toggles them per bout. Each carries an "ATK" role tab (the slot is
+            // an attack being answered). Children of BoutArea and built first, so cards render on top.
+            var roundedSprite = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
+            var atkRed = new Color(0.66f, 0.20f, 0.20f, 0.95f);
+            var boutWells = new RectTransform[6];
+            for (int wi = 0; wi < boutWells.Length; wi++)
+            {
+                var well = NewChild(boutArea, "BoutWell" + wi);
+                well.anchorMin = well.anchorMax = new Vector2(0.5f, 0.5f);
+                well.pivot = new Vector2(0.5f, 0.5f);
+                well.sizeDelta = new Vector2(152, 214);
+                var wellImg = well.gameObject.AddComponent<Image>();
+                if (roundedSprite) { wellImg.sprite = roundedSprite; wellImg.type = Image.Type.Sliced; }
+                wellImg.color = new Color(0f, 0f, 0f, 0.26f);
+                wellImg.raycastTarget = false;
+                var wellEdge = well.gameObject.AddComponent<Outline>();
+                wellEdge.effectColor = new Color(0.94f, 0.90f, 0.82f, 0.10f);
+                wellEdge.effectDistance = new Vector2(1.5f, -1.5f);
+
+                var tab = NewChild(well, "RoleTab");
+                tab.anchorMin = tab.anchorMax = new Vector2(0, 1);
+                tab.pivot = new Vector2(0, 1);
+                tab.sizeDelta = new Vector2(42, 19);
+                tab.anchoredPosition = new Vector2(8, 7);
+                var tabImg = tab.gameObject.AddComponent<Image>();
+                tabImg.color = atkRed;
+                tabImg.raycastTarget = false;
+                var tabLbl = AddText(tab, "RoleTabLabel", "ATK",
+                    anchorMin: Vector2.zero, anchorMax: Vector2.one, pivot: new Vector2(0.5f, 0.5f),
+                    alignment: TextAlignmentOptions.Center, fontSize: 11, color: Color.white, font: HeadingFont);
+                tabLbl.fontStyle = FontStyles.Bold;
+
+                well.gameObject.SetActive(false);
+                boutWells[wi] = well;
+            }
 
             // ----- Hands -----
             var playerHand = NewChild(canvasRT, "PlayerHand");
@@ -280,6 +304,7 @@ namespace WitsAndFools.EditorTools
             table.DiscardSlot = discardSlot;
             table.DiscardCountLabel = discardCountLabel;
             table.BoutArea = boutArea;
+            table.BoutWells = boutWells;
             table.CardSpawnRoot = canvasRT;
             table.PlayerDeckSlot = playerDeckSlot;
             table.PlayerDeckCountBadge = playerDeckBadge;
@@ -576,8 +601,7 @@ namespace WitsAndFools.EditorTools
             deckSlot.SetParent(matchPanel, true);
             trumpPanel.SetParent(matchPanel, true);
             discardSlot.SetParent(matchPanel, true);
-            boutZone.SetParent(matchPanel, true);
-            boutArea.SetParent(matchPanel, true);
+            boutArea.SetParent(matchPanel, true);   // bout wells are children of boutArea, move with it
             playerHand.SetParent(matchPanel, true);
             opponentHand.SetParent(matchPanel, true);
             goPanel.SetParent(matchPanel, true);

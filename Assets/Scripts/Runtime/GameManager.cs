@@ -413,7 +413,7 @@ namespace WitsAndFools
             EnsureSlotList(_defenseViews, slot + 1);
             _defenseViews[slot] = view;
             view.OnClicked = null;
-            view.transform.localRotation = Quaternion.Euler(0, 0, -8f);
+            view.transform.localRotation = Quaternion.Euler(0, 0, 5f);   // overlap tilt over the attacker
             ((RectTransform)view.transform).anchoredPosition = Vector2.zero;
             RelayoutBout();
 
@@ -432,12 +432,27 @@ namespace WitsAndFools
         void RelayoutBout()
         {
             int n = _attackViews.Count;
+            LayoutBoutWells(n);
             for (int i = 0; i < n; i++)
             {
                 if (_attackViews[i])
                     StartCoroutine(MoveTo(_attackViews[i], Table.BoutAttackSlotPos(i, n), MoveSeconds));
                 if (i < _defenseViews.Count && _defenseViews[i])
                     StartCoroutine(MoveTo(_defenseViews[i], Table.BoutDefenseSlotPos(i, n), MoveSeconds));
+            }
+        }
+
+        // Show one recessed well per active bout pair (centered on the attacker/defender), hide the rest.
+        void LayoutBoutWells(int n)
+        {
+            var wells = Table != null ? Table.BoutWells : null;
+            if (wells == null) return;
+            for (int i = 0; i < wells.Length; i++)
+            {
+                if (!wells[i]) continue;
+                bool active = i < n;
+                if (wells[i].gameObject.activeSelf != active) wells[i].gameObject.SetActive(active);
+                if (active) wells[i].anchoredPosition = Table.BoutWellPos(i, n);
             }
         }
 
@@ -467,6 +482,7 @@ namespace WitsAndFools
             }
             _attackViews.Clear();
             _defenseViews.Clear();
+            LayoutBoutWells(0);   // hide the wells until the next bout
             UpdateHud();
         }
 

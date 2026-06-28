@@ -31,24 +31,27 @@ namespace WitsAndFools
         public TMP_Text TrumpGlyphLabel;         // big suit glyph on the trump card visual
 
         [Header("Bout layout")]
-        public float BoutSlotSpacing = 130f;
-        public float DefenseOffset = 28f;     // defense card offsets down-right relative to its attack
+        // Each bout pair seats in a defined well: the attacker sits in the well, the defender
+        // overlaps it offset down-right (per unified_board.html) — not far above/below.
+        public float BoutSlotSpacing = 170f;
+        public Vector2 DefenseOverlap = new Vector2(26f, -34f);  // defender offset over its attacker
+        public float BoutRowY = 8f;
 
-        public float AttackRowY = 80f;
-        public float DefenseRowY = -80f;
+        [Header("Bout slot wells (pooled, built by SceneBuilder)")]
+        public RectTransform[] BoutWells;        // dark recessed wells behind each attacker/defender pair
 
         public Vector2 BoutAttackSlotPos(int slot, int totalSlots)
         {
             int n = Mathf.Max(1, totalSlots);
             float startX = -(n - 1) * 0.5f * BoutSlotSpacing;
-            return new Vector2(startX + slot * BoutSlotSpacing, AttackRowY);
+            return new Vector2(startX + slot * BoutSlotSpacing, BoutRowY);
         }
 
         public Vector2 BoutDefenseSlotPos(int slot, int totalSlots)
-        {
-            int n = Mathf.Max(1, totalSlots);
-            float startX = -(n - 1) * 0.5f * BoutSlotSpacing;
-            return new Vector2(startX + slot * BoutSlotSpacing, DefenseRowY);
-        }
+            => BoutAttackSlotPos(slot, totalSlots) + DefenseOverlap;
+
+        // Well is centered on the attacker+defender pair (midway along the overlap offset).
+        public Vector2 BoutWellPos(int slot, int totalSlots)
+            => BoutAttackSlotPos(slot, totalSlots) + DefenseOverlap * 0.5f;
     }
 }
