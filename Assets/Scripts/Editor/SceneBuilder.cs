@@ -432,9 +432,11 @@ namespace WitsAndFools.EditorTools
             // Collapsed log button (shown at Compact/Comfortable; ResponsiveLayout swaps it with the
             // docked panel and wires its click to toggle the panel as a transient overlay).
             var logButton = AddButton(canvasRT, "EventLogButton", "LOG", secondary: true);
-            logButton.anchorMin = new Vector2(0, 0); logButton.anchorMax = new Vector2(0, 0); logButton.pivot = new Vector2(0, 0);
-            logButton.sizeDelta = new Vector2(64, 48);
-            logButton.anchoredPosition = new Vector2(16, 150);
+            // Left edge, vertically centered — the spot the docked log occupies at Spacious (free at
+            // Compact), clear of the opponent panel (top-left) and player panel (bottom-left).
+            logButton.anchorMin = new Vector2(0, 0.5f); logButton.anchorMax = new Vector2(0, 0.5f); logButton.pivot = new Vector2(0, 0.5f);
+            logButton.sizeDelta = new Vector2(70, 50);
+            logButton.anchoredPosition = new Vector2(16, 0);
             logButton.gameObject.SetActive(false);
 
             // ----- Phase ribbon (secondary echo, in the gap between foe hand and bout) -----

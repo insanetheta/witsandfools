@@ -59,6 +59,11 @@ namespace WitsAndFools
             GUILayout.EndHorizontal();
 
             GUILayout.Space(10);
+            if (GUILayout.Button("► JUMP INTO MATCH"))
+            {
+                var rm = FindFirstObjectByType<RunManager>(FindObjectsInactive.Include);
+                if (rm != null) rm.DebugJumpToMatch();
+            }
             GUILayout.Label("Match: press A to cycle auto-play.");
             GUILayout.EndArea();
         }

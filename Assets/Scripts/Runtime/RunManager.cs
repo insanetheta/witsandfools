@@ -1094,6 +1094,39 @@ namespace WitsAndFools
         PlayerDeck _pendingEnemyDeck;
         MapNode _pendingMatchNode;
 
+        /// <summary>Cheat: bootstrap a run if needed and jump straight into a match (for visual testing).</summary>
+        public void DebugJumpToMatch()
+        {
+            EnsureCatalogsLoaded();
+            if (_run == null || !_run.PlayerDoctrine.HasValue)
+            {
+                int seed = Environment.TickCount;
+                _rng = new System.Random(seed);
+                _run = new RunState { Seed = seed, CurrentAct = 0 };
+                _run.InitDoctrineDeck(DoctrineType.Schemer);
+            }
+            // Use the same path map generation uses so the opponent comes with a real deck.
+            OpponentProfile opp = DoctrineRoster.IsInitialized
+                ? DoctrineRoster.Pick(_run.CurrentAct, false, false, _rng)
+                : null;
+            if (opp == null)
+            {
+                var arr = OpponentRoster.AllForAct(_run.CurrentAct);
+                opp = (arr != null && arr.Length > 0) ? arr[0] : null;
+            }
+            if (opp == null) { Debug.LogError("[Cheat] No opponent for act."); return; }
+            if (opp.DeckCardIds == null || opp.DeckCardIds.Count == 0)
+            {
+                var doc = opp.Doctrine ?? DoctrineType.Brute;
+                opp.DeckCardIds = new List<string>();
+                foreach (var c in CardCatalog.StartingDeck(doc)) opp.DeckCardIds.Add(c.Id);
+            }
+            var node = new MapNode { Type = MapNodeType.RivalMatch, Opponent = opp };
+            _currentNode = node;
+            StartMatch(node);
+            Debug.Log($"[Cheat] Jumped into match vs {opp.Name} ({opp.DeckCardIds.Count} cards)");
+        }
+
         void StartMatch(MapNode node)
         {
             _boutsDefended = 0;
