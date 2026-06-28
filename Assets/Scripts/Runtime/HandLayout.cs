@@ -9,9 +9,9 @@ namespace WitsAndFools
     [RequireComponent(typeof(RectTransform))]
     public sealed class HandLayout : MonoBehaviour
     {
-        public float Spacing = 90f;        // px between card centers
-        public float MaxFanArc = 18f;      // total degrees of fan rotation across the hand
-        public float MaxArcLift = 10f;     // px the center cards lift from the ends
+        public float Spacing = 92f;        // px between card centers
+        public float MaxFanArc = 26f;      // total degrees of fan rotation across the hand (cleaner arc)
+        public float MaxArcLift = 18f;     // px the center cards lift from the ends
         public bool FaceUp = true;
         public bool ReverseOrder = false;  // for the opponent's hand (laid out top-down)
 
