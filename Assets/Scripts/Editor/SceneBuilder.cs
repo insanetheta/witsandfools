@@ -186,6 +186,18 @@ namespace WitsAndFools.EditorTools
             trumpPanel.sizeDelta = new Vector2(200, 240);
             trumpPanel.anchoredPosition = new Vector2(-200, 30);
 
+            // Dark backing plate behind the trump label + rule so the gold/tan text reads against the
+            // busy wood frame instead of floating low-contrast on the felt.
+            var trumpPlate = NewChild(trumpPanel, "TrumpPlate");
+            trumpPlate.anchorMin = new Vector2(0.5f, 0);
+            trumpPlate.anchorMax = new Vector2(0.5f, 0);
+            trumpPlate.pivot = new Vector2(0.5f, 0);
+            trumpPlate.sizeDelta = new Vector2(190, 74);
+            trumpPlate.anchoredPosition = new Vector2(0, -4);
+            var trumpPlateImg = trumpPlate.gameObject.AddComponent<Image>();
+            trumpPlateImg.color = new Color(0.04f, 0.04f, 0.08f, 0.82f);
+            trumpPlateImg.raycastTarget = false;
+
             var trumpSlot = NewChild(trumpPanel, "TrumpSlot");
             trumpSlot.anchorMin = new Vector2(0.5f, 1);
             trumpSlot.anchorMax = new Vector2(0.5f, 1);
@@ -776,6 +788,19 @@ namespace WitsAndFools.EditorTools
             journeyLayout.childControlHeight = false;
             journeyLayout.childForceExpandWidth = false;
             journeyLayout.childForceExpandHeight = false;
+
+            // Backing plate so the run summary reads as a card, not faint text floating on the lit venue.
+            var runOverStatsPlate = NewChild(runOverPanel, "RunOverStatsPlate");
+            runOverStatsPlate.anchorMin = new Vector2(0.30f, 0.30f);
+            runOverStatsPlate.anchorMax = new Vector2(0.70f, 0.59f);
+            runOverStatsPlate.offsetMin = Vector2.zero;
+            runOverStatsPlate.offsetMax = Vector2.zero;
+            var runOverStatsPlateImg = runOverStatsPlate.gameObject.AddComponent<Image>();
+            runOverStatsPlateImg.color = new Color(0.04f, 0.04f, 0.08f, 0.86f);
+            runOverStatsPlateImg.raycastTarget = false;
+            var runOverStatsPlateEdge = runOverStatsPlate.gameObject.AddComponent<Outline>();
+            runOverStatsPlateEdge.effectColor = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.35f);
+            runOverStatsPlateEdge.effectDistance = new Vector2(1.5f, -1.5f);
 
             var runOverStats = AddText(runOverPanel, "RunOverStats", "",
                 anchorMin: new Vector2(0.2f, 0.32f), anchorMax: new Vector2(0.8f, 0.58f),

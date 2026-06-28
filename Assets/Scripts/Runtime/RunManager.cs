@@ -811,9 +811,12 @@ namespace WitsAndFools
                     ? new Color(typeColor.r * 0.35f, typeColor.g * 0.35f, typeColor.b * 0.35f, 0.8f)
                     : new Color(0.12f, 0.12f, 0.12f, 0.45f);
             else if (current)
-                bgImg.color = new Color(typeColor.r * 0.25f, typeColor.g * 0.25f, typeColor.b * 0.25f, 0.92f);
+                // Neutral dark backing so the gold selection glow (added below) reads as the selection
+                // cue, instead of a type-tinted (e.g. magenta) fill competing with the palette.
+                bgImg.color = new Color(0.14f, 0.11f, 0.07f, 0.95f);
             else
-                bgImg.color = new Color(0.1f, 0.08f, 0.06f, 0.65f);
+                // More opaque so unvisited nodes lift off the busy parchment map instead of washing out.
+                bgImg.color = new Color(0.1f, 0.08f, 0.06f, 0.9f);
 
             // Colored top stripe (type indicator)
             var stripeGO = new GameObject("Stripe", typeof(RectTransform), typeof(Image));
@@ -3421,7 +3424,7 @@ namespace WitsAndFools
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
-            panelGO.GetComponent<Image>().color = ThemePalette.ModalOverlay;
+            panelGO.GetComponent<Image>().color = new Color(0.04f, 0.04f, 0.07f, 0.98f);
             panelGO.GetComponent<Button>().onClick.AddListener(HideCardDetail);
             CardDetailPanel = panelGO;
             panelGO.SetActive(false);
@@ -3980,7 +3983,7 @@ namespace WitsAndFools
             rt.anchorMax = Vector2.one;
             rt.offsetMin = Vector2.zero;
             rt.offsetMax = Vector2.zero;
-            panelGO.GetComponent<Image>().color = new Color(0.05f, 0.07f, 0.1f, 0.97f);
+            panelGO.GetComponent<Image>().color = new Color(0.05f, 0.07f, 0.1f, 1f);
 
             // Title
             var titleGO = new GameObject("Title", typeof(RectTransform));
