@@ -30,7 +30,10 @@ namespace WitsAndFools
         public int CompactMaxHeight = 520;
         public int SpaciousMinHeight = 700;
         public int SpaciousMinWidth = 1100;
-        public float UltrawideAspect = 2.5f;
+        // Above this aspect the play field is clamped & centered (16:9 desktop ~1.78 is unaffected;
+        // very wide / multi-monitor views re-center instead of stranding panels in far corners).
+        public float UltrawideAspect = 1.95f;
+        public float ClampWidthFactor = 1.85f;   // max play-field width = refHeight * this
 
         public LayoutTier Tier { get; private set; } = LayoutTier.Spacious;
         public bool IsPortrait { get; private set; }
@@ -53,6 +56,13 @@ namespace WitsAndFools
         /// <summary>Cheat hook: pass a tier to force it, or null to return to aspect-driven Auto.</summary>
         public void SetOverride(LayoutTier? tier) { Override = tier; Recompute(true); }
 
+        // Per-tier reference height (CanvasScaler is height-matched): a smaller reference => larger
+        // UI, so Compact gets bigger touch targets and the three tiers are genuinely distinct in size,
+        // not just in which chrome is shown.
+        public float CompactRefHeight = 760f;
+        public float ComfortableRefHeight = 920f;
+        public float SpaciousRefHeight = 1080f;
+
         public void Recompute(bool force)
         {
             int w = _lastW = Screen.width;
@@ -67,15 +77,18 @@ namespace WitsAndFools
                 if (PortraitOverlay) PortraitOverlay.SetActive(portrait);
             }
 
+            LayoutTier t = Override ?? ComputeTier(w, h);
+
             if (Scaler)
             {
-                // Bias scaling to height so the vertical card stack always fits and never clips.
+                // Bias scaling to height so the vertical card stack always fits and never clips,
+                // and set the per-tier reference height so element sizes differ by tier.
                 Scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
                 Scaler.matchWidthOrHeight = 1f;
+                Scaler.referenceResolution = new Vector2(Scaler.referenceResolution.x, RefHeightFor(t));
             }
-            ApplyUltrawideClamp(ar, h);
+            ApplyUltrawideClamp(ar);
 
-            LayoutTier t = Override ?? ComputeTier(w, h);
             if (force || !_applied || t != Tier)
             {
                 Tier = t;
@@ -84,6 +97,13 @@ namespace WitsAndFools
                 OnTierChanged?.Invoke(t);
             }
         }
+
+        float RefHeightFor(LayoutTier t) => t switch
+        {
+            LayoutTier.Compact => CompactRefHeight,
+            LayoutTier.Comfortable => ComfortableRefHeight,
+            _ => SpaciousRefHeight,
+        };
 
         LayoutTier ComputeTier(int w, int h)
         {
@@ -101,24 +121,32 @@ namespace WitsAndFools
                 foreach (var go in SpaciousOnly) if (go) go.SetActive(spacious);
         }
 
+        // Deterministic evaluation for QA (no Screen dependency): tier/portrait/ultrawide for any size.
+        public struct LayoutEval { public LayoutTier Tier; public bool Portrait; public bool Ultrawide; }
+        public LayoutEval EvaluateFor(int w, int h)
+        {
+            float ar = h > 0 ? (float)w / h : 1f;
+            return new LayoutEval { Tier = ComputeTier(w, h), Portrait = w < h, Ultrawide = ar >= UltrawideAspect };
+        }
+
         // Collapsed log button toggles the docked panel as a transient overlay.
         public void ToggleLog()
         {
             if (EventLogPanel) EventLogPanel.SetActive(!EventLogPanel.activeSelf);
         }
 
-        void ApplyUltrawideClamp(float ar, int h)
+        void ApplyUltrawideClamp(float ar)
         {
             if (!PlayRoot) return;
             if (ar >= UltrawideAspect)
             {
-                // cap width to ~the mock's 240vh and center; sides pillarbox to the canvas bg.
+                // cap the play-field width and center it; sides pillarbox to the canvas bg so panels
+                // anchored to its edges pull inward instead of stranding across a huge felt void.
                 PlayRoot.anchorMin = new Vector2(0.5f, 0f);
                 PlayRoot.anchorMax = new Vector2(0.5f, 1f);
                 PlayRoot.pivot = new Vector2(0.5f, 0.5f);
-                // sizeDelta.x is the explicit width when anchors are a vertical line; use reference height.
                 float refH = Scaler ? Scaler.referenceResolution.y : 1080f;
-                PlayRoot.sizeDelta = new Vector2(refH * 2.4f, 0f);
+                PlayRoot.sizeDelta = new Vector2(refH * ClampWidthFactor, 0f);
                 PlayRoot.anchoredPosition = Vector2.zero;
             }
             else

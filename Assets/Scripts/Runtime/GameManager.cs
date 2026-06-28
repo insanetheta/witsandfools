@@ -932,10 +932,14 @@ namespace WitsAndFools
 
         void ApplyHighlightForPhase()
         {
-            DeselectTouch();   // any board-state change invalidates a pending touch selection
             bool humanAttack = Engine.Phase == Phase.Attack && Engine.AttackerIndex == HumanPlayerIndex;
             bool humanDefense = Engine.Phase == Phase.Defense && Engine.DefenderIndex == HumanPlayerIndex;
             bool humanActive = humanAttack || humanDefense;
+
+            // Only drop a pending touch selection if it's gone stale — never mid-turn between the two
+            // taps (B1): clear when it's no longer the human's turn or the selected card left the hand.
+            if (_touchSelected == null || !humanActive || !_humanCardViews.ContainsValue(_touchSelected))
+                DeselectTouch();
 
             int defendSlot = humanDefense ? Engine.Bout.FirstUndefendedSlot() : -1;
 

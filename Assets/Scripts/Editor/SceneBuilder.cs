@@ -213,6 +213,20 @@ namespace WitsAndFools.EditorTools
             trumpRule.fontStyle = FontStyles.Italic;
             trumpRule.enableWordWrapping = true;
 
+            // Recessed "bout zone" backing so the contested center reads as the focal space
+            // (UX: a played card should sit in a defined well, not float on bare felt).
+            var boutZone = NewChild(canvasRT, "BoutZone");
+            boutZone.anchorMin = new Vector2(0.5f, 0.5f);
+            boutZone.anchorMax = new Vector2(0.5f, 0.5f);
+            boutZone.sizeDelta = new Vector2(620, 250);
+            boutZone.anchoredPosition = new Vector2(0, 40);
+            var boutZoneImg = boutZone.gameObject.AddComponent<Image>();
+            boutZoneImg.color = new Color(0f, 0f, 0f, 0.22f);
+            boutZoneImg.raycastTarget = false;
+            var boutZoneEdge = boutZone.gameObject.AddComponent<Outline>();
+            boutZoneEdge.effectColor = new Color(0.94f, 0.90f, 0.82f, 0.12f);
+            boutZoneEdge.effectDistance = new Vector2(2, -2);
+
             var boutArea = NewChild(canvasRT, "BoutArea");
             boutArea.anchorMin = new Vector2(0.5f, 0.5f);
             boutArea.anchorMax = new Vector2(0.5f, 0.5f);
@@ -547,6 +561,7 @@ namespace WitsAndFools.EditorTools
             deckSlot.SetParent(matchPanel, true);
             trumpPanel.SetParent(matchPanel, true);
             discardSlot.SetParent(matchPanel, true);
+            boutZone.SetParent(matchPanel, true);
             boutArea.SetParent(matchPanel, true);
             playerHand.SetParent(matchPanel, true);
             opponentHand.SetParent(matchPanel, true);
@@ -1086,7 +1101,17 @@ namespace WitsAndFools.EditorTools
             responsive.PortraitOverlay = portraitOverlay.gameObject;
             responsive.EventLogPanel = logPanel.gameObject;
             responsive.EventLogButton = logButton.gameObject;
-            responsive.SpaciousOnly = new[] { oppArchLabel.gameObject, playerTitleLabel.gameObject, trumpRule.gameObject };
+            // Spacious-only chrome: identity subtitles, trump rule, and the "RACE TO ZERO" labels
+            // (Compact keeps just the "N LEFT" value).
+            var spaciousOnly = new System.Collections.Generic.List<GameObject>
+            {
+                oppArchLabel.gameObject, playerTitleLabel.gameObject, trumpRule.gameObject
+            };
+            var oppRaceTitle = oppPanel.Find("RaceTitle");
+            if (oppRaceTitle) spaciousOnly.Add(oppRaceTitle.gameObject);
+            var playerRaceTitle = playerPanel.Find("RaceTitle");
+            if (playerRaceTitle) spaciousOnly.Add(playerRaceTitle.gameObject);
+            responsive.SpaciousOnly = spaciousOnly.ToArray();
             logButton.GetComponent<Button>().onClick.AddListener(responsive.ToggleLog);
             canvasGO.AddComponent<CheatMenu>();
 
