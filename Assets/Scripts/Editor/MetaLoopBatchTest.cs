@@ -220,6 +220,8 @@ namespace WitsAndFools.EditorTools
             int safety = 0;
             while (engine.Phase != Phase.GameOver && safety++ < 5000)
             {
+                if (engine.AwaitingStackPutBack(0)) { ai0.RequestAction(engine, 0); continue; }
+                if (engine.AwaitingStackPutBack(1)) { ai1.RequestAction(engine, 1); continue; }
                 int active = engine.Phase == Phase.Defense ? engine.DefenderIndex : engine.AttackerIndex;
                 if (active == 0)
                     ai0.RequestAction(engine, 0);

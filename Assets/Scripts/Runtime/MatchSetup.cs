@@ -82,7 +82,6 @@ namespace WitsAndFools
             foreach (var trinket in run.PlayerTrinkets)
                 ApplyTrinket(config, 0, trinket);
 
-            config.AnyRankAttack = true;
             config.AbilitiesCostResource = true;
             config.StartingResource = 2;
             config.DesperationDiscard = true;

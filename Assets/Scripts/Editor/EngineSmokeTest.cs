@@ -194,6 +194,13 @@ namespace WitsAndFools.EditorTools
 
         static void StepGreedy(GameEngine engine)
         {
+            for (int p = 0; p < 2; p++)
+            {
+                if (!engine.AwaitingStackPutBack(p)) continue;
+                var hand = engine.HandOf(p);
+                if (hand.Count > 0) engine.CompleteStackPutBack(p, hand.Cards[0]);
+                return;
+            }
             if (TryUseFirstAbility(engine)) return;
 
             switch (engine.Phase)
