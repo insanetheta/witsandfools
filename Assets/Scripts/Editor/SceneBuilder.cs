@@ -292,6 +292,10 @@ namespace WitsAndFools.EditorTools
             var opponentHandLayout = opponentHand.gameObject.AddComponent<HandLayout>();
             opponentHandLayout.FaceUp = false;
             opponentHandLayout.ReverseOrder = true;
+            // Flatter fan for the face-down foe hand — it carries no readable info, so a shallow arc
+            // keeps its vertical footprint small and leaves clean space between it and the bout well.
+            opponentHandLayout.MaxFanArc = 16f;
+            opponentHandLayout.MaxArcLift = 8f;
 
             // ----- TableView wiring -----
             var tableGO = new GameObject("TableView");
@@ -493,13 +497,15 @@ namespace WitsAndFools.EditorTools
             logButton.anchoredPosition = new Vector2(16, 0);
             logButton.gameObject.SetActive(false);
 
-            // ----- Phase ribbon (secondary echo, in the gap between foe hand and bout) -----
+            // ----- Phase ribbon (single phase indicator, pinned to the top strip per unified_board.html
+            // so it never collides with the foe fan or the bout well — at Compact the fan+bout fill the
+            // mid-band, so the ribbon must sit above them, not between). -----
             var boutPanel = NewChild(canvasRT, "BoutStatePanel");
             boutPanel.anchorMin = new Vector2(0.5f, 1);
             boutPanel.anchorMax = new Vector2(0.5f, 1);
             boutPanel.pivot = new Vector2(0.5f, 1);
-            boutPanel.sizeDelta = new Vector2(560, 38);
-            boutPanel.anchoredPosition = new Vector2(0, -262);
+            boutPanel.sizeDelta = new Vector2(520, 30);
+            boutPanel.anchoredPosition = new Vector2(0, -6);
             var boutPanelBg = boutPanel.gameObject.AddComponent<Image>();
             boutPanelBg.color = new Color(0.04f, 0.04f, 0.08f, 0.82f);
             boutPanelBg.raycastTarget = false;

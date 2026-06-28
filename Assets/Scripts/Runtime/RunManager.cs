@@ -3022,6 +3022,11 @@ namespace WitsAndFools
         {
             var cap = UIScreenCapture.Instance;
 
+            // Hide the full-screen run-over panel so the modal/overlay captures below render over the
+            // board/blank scrim (as they do in real play) instead of bleeding the run-over screen
+            // through their scrims. Re-activated before the run-end captures.
+            if (RunOverPanel) RunOverPanel.SetActive(false);
+
             // Deck browser overlay.
             ShowDeckBrowser();
             yield return new WaitForEndOfFrame();
@@ -3049,12 +3054,9 @@ namespace WitsAndFools
             var hud = FindFirstObjectByType<HudView>(FindObjectsInactive.Include);
             if (hud != null)
             {
-                // These overlays live under MatchPanel and are occluded by the full-screen RunOverPanel
-                // once the run ends. Re-show the match board behind them and hide the run-over screen
-                // for the capture, then restore both.
+                // These overlays live under MatchPanel — re-show the match board behind them for the
+                // capture (run-over panel is already hidden above), then restore the match panel state.
                 bool matchWasActive = MatchPanel && MatchPanel.activeSelf;
-                bool runOverWasActive = RunOverPanel && RunOverPanel.activeSelf;
-                if (RunOverPanel) RunOverPanel.SetActive(false);
                 if (MatchPanel) MatchPanel.SetActive(true);
 
                 hud.ShowAbilityChoice("Ability", "Sample of the in-match ability-choice prompt.", "Use Ability");
@@ -3070,8 +3072,10 @@ namespace WitsAndFools
                 hud.HidePeekOverlay();
 
                 if (MatchPanel) MatchPanel.SetActive(matchWasActive);
-                if (RunOverPanel) RunOverPanel.SetActive(runOverWasActive);
             }
+
+            // Restore the run-over panel for the run-end captures.
+            if (RunOverPanel) RunOverPanel.SetActive(true);
 
             // Both run-end screens, forced deterministically: a single run only ends one way, so render
             // the loss headline (RunFailed) and the victory headline (RunComplete) in turn.
