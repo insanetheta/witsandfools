@@ -429,6 +429,14 @@ namespace WitsAndFools.EditorTools
             logText.richText = true;
             hud.EventLogText = logText;
 
+            // Collapsed log button (shown at Compact/Comfortable; ResponsiveLayout swaps it with the
+            // docked panel and wires its click to toggle the panel as a transient overlay).
+            var logButton = AddButton(canvasRT, "EventLogButton", "LOG", secondary: true);
+            logButton.anchorMin = new Vector2(0, 0); logButton.anchorMax = new Vector2(0, 0); logButton.pivot = new Vector2(0, 0);
+            logButton.sizeDelta = new Vector2(64, 48);
+            logButton.anchoredPosition = new Vector2(16, 150);
+            logButton.gameObject.SetActive(false);
+
             // ----- Phase ribbon (secondary echo, in the gap between foe hand and bout) -----
             var boutPanel = NewChild(canvasRT, "BoutStatePanel");
             boutPanel.anchorMin = new Vector2(0.5f, 1);
@@ -549,6 +557,7 @@ namespace WitsAndFools.EditorTools
             boutPanel.SetParent(matchPanel, true);
             playerPanel.SetParent(matchPanel, true);
             logPanel.SetParent(matchPanel, true);
+            logButton.SetParent(matchPanel, true);
             feedbackPanel.SetParent(matchPanel, true);
             peekPanel.SetParent(matchPanel, true);
             matchPanel.gameObject.SetActive(false);
@@ -1047,6 +1056,37 @@ namespace WitsAndFools.EditorTools
             }
             rm.PortraitNames = portraitNames.ToArray();
             rm.PortraitSprites = portraitSprites.ToArray();
+
+            // ----- Portrait landscape-lock overlay (top-level, on top of everything) -----
+            var portraitOverlay = NewChild(canvasRT, "PortraitOverlay");
+            FillParent(portraitOverlay);
+            var poBg = portraitOverlay.gameObject.AddComponent<Image>();
+            poBg.color = new Color(0.04f, 0.04f, 0.08f, 1f);
+            var poIcon = AddText(portraitOverlay, "PoIcon", "↻",
+                anchorMin: new Vector2(0, 0.5f), anchorMax: new Vector2(1, 0.5f), pivot: new Vector2(0.5f, 0),
+                alignment: TextAlignmentOptions.Center, fontSize: 64, color: ThemePalette.Gold, font: HeadingFont);
+            ((RectTransform)poIcon.transform).anchoredPosition = new Vector2(0, 20);
+            var poText = AddText(portraitOverlay, "PoText", "ROTATE TO LANDSCAPE",
+                anchorMin: new Vector2(0, 0.5f), anchorMax: new Vector2(1, 0.5f), pivot: new Vector2(0.5f, 1),
+                alignment: TextAlignmentOptions.Center, fontSize: 26, color: ThemePalette.Gold, font: HeadingFont);
+            ((RectTransform)poText.transform).anchoredPosition = new Vector2(0, -6);
+            var poSub = AddText(portraitOverlay, "PoSub", "Wits & Fools is played at the table — turn your device sideways.",
+                anchorMin: new Vector2(0.1f, 0.5f), anchorMax: new Vector2(0.9f, 0.5f), pivot: new Vector2(0.5f, 1),
+                alignment: TextAlignmentOptions.Center, fontSize: 16, color: ThemePalette.DustyTan);
+            ((RectTransform)poSub.transform).anchoredPosition = new Vector2(0, -44);
+            poSub.enableWordWrapping = true;
+            portraitOverlay.gameObject.SetActive(false);
+
+            // ----- Responsive + cheat components on the Canvas (persist across the whole run) -----
+            var responsive = canvasGO.AddComponent<ResponsiveLayout>();
+            responsive.Scaler = scaler;
+            responsive.PlayRoot = matchPanel;
+            responsive.PortraitOverlay = portraitOverlay.gameObject;
+            responsive.EventLogPanel = logPanel.gameObject;
+            responsive.EventLogButton = logButton.gameObject;
+            responsive.SpaciousOnly = new[] { oppArchLabel.gameObject, playerTitleLabel.gameObject };
+            logButton.GetComponent<Button>().onClick.AddListener(responsive.ToggleLog);
+            canvasGO.AddComponent<CheatMenu>();
 
             // Save scene
             EditorSceneManager.SaveScene(scene, ScenePath);

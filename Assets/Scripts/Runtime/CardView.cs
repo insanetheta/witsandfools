@@ -169,7 +169,8 @@ namespace WitsAndFools
         }
 
         public void OnPointerClick(PointerEventData eventData) => OnClicked?.Invoke(this);
-        public void OnPointerEnter(PointerEventData eventData) { _hover = true; ApplyOutline(); OnHoverChanged?.Invoke(_faceUp ? (Card?)_card : null); }
-        public void OnPointerExit(PointerEventData eventData) { _hover = false; ApplyOutline(); OnHoverChanged?.Invoke(null); }
+        // Hover affordances only fire for a fine pointer; touch drives selection via click/tap.
+        public void OnPointerEnter(PointerEventData eventData) { if (!InputProfile.Hover) return; _hover = true; ApplyOutline(); OnHoverChanged?.Invoke(_faceUp ? (Card?)_card : null); }
+        public void OnPointerExit(PointerEventData eventData) { if (!InputProfile.Hover) return; _hover = false; ApplyOutline(); OnHoverChanged?.Invoke(null); }
     }
 }
