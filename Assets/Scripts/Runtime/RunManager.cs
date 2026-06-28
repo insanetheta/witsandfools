@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -273,7 +274,7 @@ namespace WitsAndFools
                         Time.timeScale = 1f;
                         Debug.Log($"[RunManager] Auto-run complete — {runResult}");
                         if (UIScreenCapture.Instance != null && UIScreenCapture.Instance.IsCapturing)
-                            UIScreenCapture.Instance.EndCapture();
+                            StartCoroutine(CoCaptureRemainingScreens());
                     }
                     break;
             }
@@ -3009,6 +3010,86 @@ namespace WitsAndFools
                 RunOverVenueBgImage.sprite = VenueBackgroundSprites[act];
             if (Camera.main)
                 Camera.main.backgroundColor = ThemePalette.ActBackgroundTint[act];
+        }
+
+        // After an audit auto-run finishes, the AI path has visited every phase-driven screen but
+        // never the player-only overlays (deck browser, card detail, the in-match ability modal) nor
+        // the win screen if the run was lost. Drive those four here so an audit captures all 18, then
+        // end the session. Each is shown for two frames so the end-of-frame capture lands before we
+        // tear it down.
+        IEnumerator CoCaptureRemainingScreens()
+        {
+            var cap = UIScreenCapture.Instance;
+
+            // Deck browser overlay.
+            ShowDeckBrowser();
+            yield return new WaitForEndOfFrame();
+            yield return null;
+            HideDeckBrowser();
+
+            // Card detail overlay (first resolvable card in the player's deck).
+            if (_run != null && _run.PlayerDeckCardIds != null)
+            {
+                foreach (var id in _run.PlayerDeckCardIds)
+                {
+                    if (CardCatalog.TryGet(id, out var def))
+                    {
+                        ShowCardDetail(def);
+                        yield return new WaitForEndOfFrame();
+                        yield return null;
+                        HideCardDetail();
+                        break;
+                    }
+                }
+            }
+
+            // In-match ability-choice modal (the auto-AI resolves choices without ever showing it)
+            // and the peek overlay (a probabilistic ability that may not have come up this run).
+            var hud = FindFirstObjectByType<HudView>(FindObjectsInactive.Include);
+            if (hud != null)
+            {
+                // These overlays live under MatchPanel and are occluded by the full-screen RunOverPanel
+                // once the run ends. Re-show the match board behind them and hide the run-over screen
+                // for the capture, then restore both.
+                bool matchWasActive = MatchPanel && MatchPanel.activeSelf;
+                bool runOverWasActive = RunOverPanel && RunOverPanel.activeSelf;
+                if (RunOverPanel) RunOverPanel.SetActive(false);
+                if (MatchPanel) MatchPanel.SetActive(true);
+
+                hud.ShowAbilityChoice("Ability", "Sample of the in-match ability-choice prompt.", "Use Ability");
+                cap?.NotifyModal(UIScreen.AbilityChoiceModal);
+                yield return new WaitForEndOfFrame();
+                yield return null;
+                hud.HideAbilityChoice();
+
+                hud.ShowPeekOverlay();
+                cap?.NotifyModal(UIScreen.PeekOverlay);
+                yield return new WaitForEndOfFrame();
+                yield return null;
+                hud.HidePeekOverlay();
+
+                if (MatchPanel) MatchPanel.SetActive(matchWasActive);
+                if (RunOverPanel) RunOverPanel.SetActive(runOverWasActive);
+            }
+
+            // Both run-end screens, forced deterministically: a single run only ends one way, so render
+            // the loss headline (RunFailed) and the victory headline (RunComplete) in turn.
+            if (_run != null)
+            {
+                _run.RunWon = false;
+                ShowRunOver();
+                cap?.NotifyPhaseChange(RunPhase.RunOver, false);
+                yield return new WaitForEndOfFrame();
+                yield return null;
+
+                _run.RunWon = true;
+                ShowRunOver();
+            }
+            cap?.NotifyPhaseChange(RunPhase.RunOver, true);
+            yield return new WaitForEndOfFrame();
+            yield return null;
+
+            cap?.EndCapture();
         }
 
         // ---------- Run Over ----------
