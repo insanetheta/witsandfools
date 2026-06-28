@@ -68,11 +68,13 @@ namespace WitsAndFools.EditorTools
 
             var canvasRT = (RectTransform)canvasGO.transform;
 
-            // ----- Table background (venue surface sprite, per-act) -----
+            // ----- Table background: clean green felt (replaces the busy per-act wood venue sprite) -----
+            // Venue identity lives on the map/event/rest screens now; the board reads as a card table.
+            // Radial focus comes from the vignette overlay; subtle per-act warmth from the felt tint below.
             var tableBg = NewChild(canvasRT, "TableBackground");
             var tableBgImg = tableBg.gameObject.AddComponent<Image>();
-            var tableBgSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Tables/table_tavern.png");
-            if (tableBgSprite) { tableBgImg.sprite = tableBgSprite; tableBgImg.color = Color.white; }
+            var feltSprite = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/Textures/felt_texture.png");
+            if (feltSprite) { tableBgImg.sprite = feltSprite; tableBgImg.color = Color.white; }
             else tableBgImg.color = ThemePalette.TableBg;
             tableBgImg.raycastTarget = false;
             tableBgImg.preserveAspect = false;
@@ -85,7 +87,8 @@ namespace WitsAndFools.EditorTools
             feltImg.raycastTarget = false;
             FillParent(felt);
 
-            // Thin decorative border frame (3px edges at 12px inset)
+            // Thin gold hairline frame (subtle edge so the clean felt isn't a bare rectangle —
+            // richness from a fine line, not a busy carved border). Per-act accent kept faint.
             var frame = NewChild(canvasRT, "TableFrame");
             frame.anchorMin = new Vector2(0, 0);
             frame.anchorMax = new Vector2(1, 1);
@@ -94,7 +97,7 @@ namespace WitsAndFools.EditorTools
             var frameColor = new Color(
                 ThemePalette.ActFrameColor[0].r,
                 ThemePalette.ActFrameColor[0].g,
-                ThemePalette.ActFrameColor[0].b, 0.6f);
+                ThemePalette.ActFrameColor[0].b, 0.25f);
             foreach (var (aMin, aMax, sd) in new[] {
                 (new Vector2(0,1), new Vector2(1,1), new Vector2(0,3)),   // top
                 (new Vector2(0,0), new Vector2(1,0), new Vector2(0,3)),   // bottom

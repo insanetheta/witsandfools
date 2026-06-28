@@ -2976,17 +2976,15 @@ namespace WitsAndFools
         void ApplyActTheme(int act)
         {
             act = Mathf.Clamp(act, 0, 4);
-            if (TableBackgroundImage && TableSurfaceSprites != null && act < TableSurfaceSprites.Length)
-            {
-                TableBackgroundImage.sprite = TableSurfaceSprites[act];
-                TableBackgroundImage.color = Color.white;
-            }
+            // Board background stays clean felt across all acts (the per-act wood venue sprite is no
+            // longer applied to the board — venue identity lives on the map/event/rest screens). The
+            // felt tint below carries a subtle per-act warmth instead.
             if (TableFeltImage)
                 TableFeltImage.color = ThemePalette.ActFeltTint[act];
             if (TableFrameImage)
             {
                 var fc = ThemePalette.ActFrameColor[act];
-                fc.a = 0.6f;
+                fc.a = 0.25f;
                 var parent = TableFrameImage.transform.parent;
                 for (int i = 0; i < parent.childCount; i++)
                 {
