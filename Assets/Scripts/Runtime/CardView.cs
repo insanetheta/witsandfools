@@ -38,6 +38,7 @@ namespace WitsAndFools
         bool _hover;
         Highlight _highlight = Highlight.None;
         CanvasGroup _canvasGroup;
+        float _baseAbilityFont;   // captured once; ability text grows when the name is dropped at Compact
 
         public Card Card => _card;
         public bool FaceUp => _faceUp;
@@ -56,7 +57,15 @@ namespace WitsAndFools
             if (BackColor == default) BackColor = ThemePalette.CrimsonCard;
             if (RedSuitColor == default) RedSuitColor = ThemePalette.RedSuit;
             if (BlackSuitColor == default) BlackSuitColor = ThemePalette.BlackSuit;
+            if (AbilityBadge) _baseAbilityFont = AbilityBadge.fontSize;
         }
+
+        // Re-render on tier change so the name shows/hides and the ability text rescales live.
+        void OnEnable()  { if (ResponsiveLayout.Instance != null) ResponsiveLayout.Instance.OnTierChanged += OnTierChanged; }
+        void OnDisable() { if (ResponsiveLayout.Instance != null) ResponsiveLayout.Instance.OnTierChanged -= OnTierChanged; }
+        void OnTierChanged(LayoutTier t) { if (_faceUp) RenderFace(); }
+
+        static bool IsCompact => ResponsiveLayout.Instance != null && ResponsiveLayout.Instance.Tier == LayoutTier.Compact;
 
         public void Bind(Card card, bool faceUp)
         {
@@ -111,9 +120,12 @@ namespace WitsAndFools
             if (RankTopLeft) { RankTopLeft.text = label; RankTopLeft.color = color; }
             if (RankBottomRight) { RankBottomRight.text = label; RankBottomRight.color = color; }
             if (CenterPip) { CenterPip.text = _card.Suit.Glyph(); CenterPip.color = color; }
+            // At Compact the card name is dropped (rank + suit + ability bar only) so the remaining
+            // glyphs stay legible at the smaller tier; names return at Comfortable+.
+            bool compact = IsCompact;
             if (NameLabel)
             {
-                if (_card.DefinitionId != null && CardCatalog.TryGet(_card.DefinitionId, out var def))
+                if (!compact && _card.DefinitionId != null && CardCatalog.TryGet(_card.DefinitionId, out var def))
                 {
                     NameLabel.gameObject.SetActive(true);
                     NameLabel.text = def.Name;
@@ -127,6 +139,8 @@ namespace WitsAndFools
                 {
                     AbilityBadge.gameObject.SetActive(true);
                     AbilityBadge.text = _card.Ability.Value.DisplayName();
+                    // With the name dropped at Compact, grow the ability text into the freed space.
+                    if (_baseAbilityFont > 0) AbilityBadge.fontSize = compact ? _baseAbilityFont * 1.25f : _baseAbilityFont;
                     if (AbilityBadgeBg)
                     {
                         // colored strip + white text (role comes from the bout slot, timing from the tooltip)

@@ -653,10 +653,11 @@ namespace WitsAndFools
             var nameTMP = nameGO.AddComponent<TextMeshProUGUI>();
             nameTMP.text = unlocked
                 ? $"{archetype.DisplayName()} — {archetype.Description()}"
-                : $"{archetype.DisplayName()} — Locked (requires {repNeeded} Rep)";
+                : $"{archetype.DisplayName()} — LOCKED · requires {repNeeded} Rep";
             nameTMP.alignment = TextAlignmentOptions.MidlineLeft;
             nameTMP.fontSize = 20;
-            nameTMP.color = unlocked ? Color.white : ThemePalette.DisabledText;
+            // Locked rows read as clearly-disabled, not invisible: dusty-tan on the dark locked bg.
+            nameTMP.color = unlocked ? Color.white : ThemePalette.DustyTan;
             nameTMP.raycastTarget = false;
 
             var descGO = new GameObject("Abilities", typeof(RectTransform));

@@ -34,7 +34,7 @@ namespace WitsAndFools
         // Each bout pair seats in a defined well: the attacker sits in the well, the defender
         // overlaps it offset down-right (per unified_board.html) — not far above/below.
         public float BoutSlotSpacing = 170f;
-        public Vector2 DefenseOverlap = new Vector2(26f, -34f);  // defender offset over its attacker
+        public Vector2 DefenseOverlap = new Vector2(36f, -46f);  // defender offset over its attacker (keeps attacker rank/suit visible)
         public float BoutRowY = 8f;
 
         [Header("Bout slot wells (pooled, built by SceneBuilder)")]
