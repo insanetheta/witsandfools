@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unified Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bronze:#5A4830; --parchment:#F0E6D2; --dusty-tan:#A89B8C; --gold:#D4A846; --gold-dark:#B8922C;
+    --venetian-red:#B84040; --royal-blue:#4477AA; --sage:#66B866;
+    --felt:#21492E; --felt-dark:#173420; --card-cream:#F5F0E0; --crimson-card:#8C2020;
+    --red-suit:#B02020; --black-suit:#1A1A1A; --atk:#A83232; --def:#33689C; --util:#7A5E1A; --pas:#3F7E3F;
+    --brute:#A83333;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased;}
+  html,body{height:100%; font-family:'Crimson Pro',serif;}
+
+  /* ===== layout tier knobs — the ONLY things that change across aspect ratios ===== */
+  .board{
+    --cw:56px; --ch:80px;        /* hand card */
+    --bcw:50px; --bch:72px;      /* bout card */
+    --pad:10px;                  /* edge padding */
+    --namef:9px; --ablf:9.5px;   /* card text */
+    --chipscale:1;               /* identity chip scale */
+    --boutgap:18px;
+    --safe-l:24px; --safe-b:24px;/* notch + home insets (touch) */
+    position:absolute; inset:0; overflow:hidden;
+    background:
+      radial-gradient(ellipse 80% 70% at 50% 44%, #2B5C3A 0%, var(--felt) 48%, var(--felt-dark) 100%),
+      linear-gradient(180deg,#14100C,#0E0B08);
+  }
+  /* COMFORTABLE (laptop / tablet) */
+  @media (min-width:820px){ .board{ --cw:70px; --ch:100px; --bcw:64px; --bch:92px; --pad:16px; --namef:10px; --ablf:11px; --chipscale:1.18; --boutgap:30px; --safe-l:16px; --safe-b:16px; } }
+  /* SPACIOUS (desktop widescreen) */
+  @media (min-width:1180px){ .board{ --cw:92px; --ch:132px; --bcw:84px; --bch:120px; --pad:26px; --namef:13px; --ablf:12px; --chipscale:1.5; --boutgap:54px; --safe-l:20px; --safe-b:20px; } }
+
+  .felt-glow{position:absolute; left:50%; top:-4%; transform:translateX(-50%); width:30%; height:24%; border-radius:50%; background:radial-gradient(ellipse, rgba(255,200,110,.13), transparent 70%);}
+
+  /* ===== CARD (one component, scales by var) ===== */
+  .card{position:relative; border-radius:6px; background:var(--card-cream); box-shadow:0 2px 5px rgba(0,0,0,.5), inset 0 0 0 1px rgba(0,0,0,.15); flex-shrink:0;}
+  .card .cn{position:absolute; top:3px; left:4px; font-size:calc(var(--namef) + 3px); font-weight:700; line-height:1;}
+  .card .pip{position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); font-size:calc(var(--ch) * .28);}
+  .card .nm{position:absolute; top:17%; left:0; right:0; text-align:center; font-size:var(--namef); font-style:italic; color:#5A4A32; padding:0 2px; line-height:1;}
+  .card .abl{position:absolute; bottom:0; left:0; right:0; height:19%; min-height:14px; display:flex; align-items:center; justify-content:center; font-size:var(--ablf); font-weight:700; color:#fff; border-radius:0 0 5px 5px;}
+  .card.red .cn,.card.red .pip{color:var(--red-suit);} .card.black .cn,.card.black .pip{color:var(--black-suit);}
+  .abl.atk{background:var(--atk);} .abl.def{background:var(--def);} .abl.util{background:var(--util);} .abl.pas{background:var(--pas);}
+  .card.back{background:linear-gradient(135deg,#7A1C1C,var(--crimson-card) 55%,#6E1818); box-shadow:0 2px 5px rgba(0,0,0,.5), inset 0 0 0 1.5px #C8A040, inset 0 0 0 3px rgba(200,160,64,.22);}
+  .card.back::after{content:"❦"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:calc(var(--ch)*.24); color:rgba(200,160,64,.6);}
+  .card.playable{box-shadow:0 0 0 2px var(--gold), 0 0 12px rgba(212,168,70,.6), 0 2px 5px rgba(0,0,0,.5); cursor:pointer;}
+  .card.dim{filter:brightness(.62) saturate(.6);}
+  .bonus{position:absolute; top:-7px; right:-7px; z-index:5; width:22px; height:22px; border-radius:50%; background:radial-gradient(circle at 35% 30%,#E45A5A,var(--atk) 70%); border:1.5px solid #F0D9A0; color:#fff; font-family:'Cinzel',serif; font-weight:700; font-size:9px; display:flex; align-items:center; justify-content:center;}
+  .tflag{position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); z-index:6; background:var(--venetian-red); color:#fff; font-family:'Cinzel',serif; font-size:8px; font-weight:700; padding:1px 5px; border-radius:3px; white-space:nowrap; border:1px solid #E8A0A0;}
+  .card.trumpdef{box-shadow:0 0 0 2px var(--venetian-red), 0 0 12px rgba(220,90,90,.6);}
+
+  /* ===== IDENTITY CHIP → PANEL (same element, grows with --chipscale, gains detail when spacious) ===== */
+  .chip{position:absolute; display:flex; align-items:center; gap:calc(7px*var(--chipscale)); padding:calc(5px*var(--chipscale)) calc(9px*var(--chipscale)); background:rgba(10,12,18,.86); z-index:30;}
+  .chip.opp{top:0; left:var(--pad); border-radius:0 0 12px 12px; border-left:3px solid var(--venetian-red);}
+  .chip.you{bottom:var(--safe-b); left:var(--pad); border-radius:12px; border-left:3px solid var(--gold);}
+  .av{width:calc(28px*var(--chipscale)); height:calc(28px*var(--chipscale)); border-radius:5px; background:linear-gradient(135deg,#5A4830,#2A2018); border:1px solid var(--gold-dark); display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-weight:700; font-size:calc(14px*var(--chipscale)); color:var(--gold); flex-shrink:0;}
+  .meta{display:flex; flex-direction:column; gap:2px;}
+  .nm2{font-family:'Cinzel',serif; font-size:calc(10px*var(--chipscale)); color:var(--parchment); line-height:1;}
+  .sub2{font-family:'Crimson Pro',serif; font-style:italic; font-size:calc(8px*var(--chipscale)); color:var(--dusty-tan); display:none;} /* shown spacious */
+  .row{display:flex; align-items:center; gap:calc(7px*var(--chipscale));}
+  .ct{display:flex; align-items:center; gap:3px; font-size:calc(10px*var(--chipscale)); color:var(--parchment);}
+  .ct .ci{width:calc(9px*var(--chipscale)); height:calc(12px*var(--chipscale)); border-radius:1.5px; background:var(--card-cream); border:1px solid var(--bronze);}
+  .pips{display:flex; gap:3px;}
+  .pd{width:calc(8px*var(--chipscale)); height:calc(8px*var(--chipscale)); border-radius:50%; border:1.2px solid var(--bronze);}
+  .pd.intel{background:var(--royal-blue); border-color:var(--royal-blue);} .pd.fury{background:var(--venetian-red); border-color:var(--venetian-red);}
+  .race{width:calc(74px*var(--chipscale));}
+  .race .rl{display:flex; justify-content:space-between; font-size:calc(8px*var(--chipscale)); color:var(--dusty-tan); font-family:'Cinzel',serif;}
+  .race .rl .lbl{display:none;} .race .rl .lbl.always{display:inline;}
+  .race .rb{height:calc(5px*var(--chipscale)); border-radius:3px; background:#0C1018; border:1px solid rgba(90,72,48,.6); margin-top:1px; overflow:hidden;}
+  .race .rb i{display:block; height:100%; background:linear-gradient(90deg,#7A6224,var(--gold));}
+
+  /* ===== DECKS ===== */
+  .deck{position:absolute; z-index:20;}
+  .deck .pc{position:absolute; border-radius:5px; width:calc(var(--bcw)*.82); height:calc(var(--bch)*.82);}
+  .deck .pc:nth-child(1){transform:rotate(-4deg) translate(1px,2px);} .deck .pc:nth-child(2){transform:rotate(2deg);}
+  .deck .cnt{position:absolute; right:-8px; bottom:-6px; width:20px; height:20px; border-radius:50%; background:#1E2832; border:1.5px solid var(--gold); color:var(--gold); font-family:'Cinzel',serif; font-weight:700; font-size:10px; display:flex; align-items:center; justify-content:center; z-index:4;}
+  .deck .pl{position:absolute; left:50%; transform:translateX(-50%); bottom:-15px; font-family:'Cinzel',serif; font-size:8px; color:var(--dusty-tan); white-space:nowrap;}
+  .foe-deck{top:calc(var(--pad) + 46px); left:calc(var(--pad) + 96px);}
+  .you-deck{bottom:calc(var(--safe-b) + 50px); right:calc(var(--pad) + 92px);}
+
+  /* ===== TRUMP / REMOVED ===== */
+  .trump{position:absolute; right:var(--pad); top:50%; transform:translateY(-50%); z-index:25; display:flex; flex-direction:column; align-items:center; gap:3px;}
+  .trump .tc{width:calc(var(--bcw)*.7); height:calc(var(--bch)*.7); border-radius:5px; background:var(--card-cream); display:flex; align-items:center; justify-content:center; font-size:calc(var(--bch)*.24); box-shadow:0 2px 6px rgba(0,0,0,.5); transform:rotate(8deg);}
+  .trump .tl{font-family:'Cinzel',serif; font-size:9px; color:var(--gold);}
+  .trump .trule{font-family:'Crimson Pro',serif; font-style:italic; font-size:10px; color:var(--dusty-tan); display:none; text-align:center; width:120px;} /* spacious */
+  .removed{position:absolute; top:calc(var(--pad) + 12px); right:calc(var(--pad) + 52px); z-index:22; font-family:'Cinzel',serif; font-size:9px; color:var(--dusty-tan); background:rgba(10,12,18,.7); padding:3px 8px; border-radius:11px; border:1px solid var(--bronze); white-space:nowrap;}
+
+  /* ===== RIBBON / BOUT / HANDS / ACTION ===== */
+  .ribbon{position:absolute; left:50%; top:var(--pad); transform:translateX(-50%); z-index:28; padding:4px 16px; border-radius:4px; background:rgba(8,10,16,.85); border:1px solid var(--sage); font-family:'Cinzel',serif; font-size:calc(9px*var(--chipscale)); letter-spacing:1px; color:var(--sage); white-space:nowrap;}
+  .ribbon .s{font-family:'Crimson Pro',serif; color:var(--dusty-tan); font-style:italic; margin-left:6px;}
+
+  .ohand{position:absolute; top:calc(var(--pad) - 4px); left:50%; transform:translateX(-50%); display:flex; z-index:12;}
+  .ohand .card{width:calc(var(--bcw)*.62); height:calc(var(--bch)*.62); margin:0 -8px;}
+  .ohand .card:nth-child(odd){transform:rotate(-3deg) translateY(2px);} .ohand .card:nth-child(even){transform:rotate(3deg);}
+
+  .bout{position:absolute; left:50%; top:44%; transform:translate(-50%,-50%); display:flex; gap:var(--boutgap); z-index:15;}
+  .slot{position:relative; width:calc(var(--bcw) + 12px); height:calc(var(--bch) + 22px); border-radius:8px; background:rgba(0,0,0,.2); box-shadow:inset 0 0 8px rgba(0,0,0,.35), inset 0 0 0 1px rgba(240,230,210,.12);}
+  .slot .rfa{position:absolute; top:-8px; left:6px; font-family:'Cinzel',serif; font-size:8px; font-weight:700; padding:1px 5px; border-radius:2px; color:#fff; z-index:5; background:var(--atk);}
+  .slot .atkc{position:absolute; top:5px; left:5px; width:var(--bcw); height:var(--bch);}
+  .slot .defc{position:absolute; top:38%; left:38%; transform:rotate(5deg); z-index:2; width:var(--bcw); height:var(--bch);}
+
+  .phand{position:absolute; bottom:var(--safe-b); left:50%; transform:translateX(-50%); display:flex; align-items:flex-end; z-index:35;}
+  .phand .card{width:var(--cw); height:var(--ch); margin:0 calc(var(--cw) * -.13); transition:transform .12s;}
+  .phand .card:nth-child(1){transform:rotate(-7deg) translateY(5px);}
+  .phand .card:nth-child(2){transform:rotate(-3.5deg) translateY(1px);}
+  .phand .card:nth-child(3){transform:rotate(0);}
+  .phand .card:nth-child(4){transform:rotate(3.5deg) translateY(1px);}
+  .phand .card:nth-child(5){transform:rotate(7deg) translateY(5px);}
+  /* DESKTOP: hover lifts the card and reveals a tooltip (pointer:fine only) */
+  @media (hover:hover) and (pointer:fine){
+    .phand .card.playable:hover{transform:translateY(-16px) scale(1.06); z-index:40;}
+    .phand .card[data-tip]:hover::after{content:attr(data-tip); position:absolute; bottom:108%; left:50%; transform:translateX(-50%); width:180px; background:rgba(8,10,16,.96); border:1px solid var(--gold-dark); border-radius:8px; padding:8px 10px; font-family:'Crimson Pro',serif; font-style:normal; font-size:12px; color:var(--parchment); z-index:60; box-shadow:0 6px 18px rgba(0,0,0,.7); pointer-events:none;}
+    .phand .card[data-tip]:hover::before{content:""; position:absolute; bottom:104%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--gold-dark); z-index:60;}
+  }
+
+  .action{position:absolute; bottom:var(--safe-b); right:var(--pad); z-index:40; min-width:120px; padding:12px 16px; border-radius:9px; text-align:center; font-family:'Cinzel',serif; font-weight:700; font-size:calc(12px*var(--chipscale)); letter-spacing:1px; background:linear-gradient(180deg,#7ECB7E,var(--sage)); color:#10240F; border:1px solid #9FE09F; box-shadow:0 4px 12px rgba(0,0,0,.5);}
+  .action .sm{display:block; font-family:'Crimson Pro',serif; font-size:10px; font-weight:400; letter-spacing:0; opacity:.85; margin-top:1px;}
+
+  .roundbtn{position:absolute; z-index:40; width:44px; height:44px; border-radius:50%; background:rgba(10,12,18,.8); border:1px solid var(--bronze); color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:18px;}
+  .menu{top:var(--pad); right:var(--pad);}
+  .logbtn{bottom:calc(var(--safe-b) + 70px); left:var(--pad);}
+
+  /* ===== EVENT LOG: collapsed button (compact/comfortable) → docked rail (spacious) ===== */
+  .logdock{display:none;}
+
+  @media (min-width:1180px){
+    .sub2{display:block;}                 /* chips become full panels */
+    .race .rl .lbl{display:inline;}        /* "RACE TO ZERO" spelled out */
+    .trump .trule{display:block;}          /* trump rule spelled out */
+    .logbtn{display:none;}                 /* collapse button hidden */
+    .logdock{display:block; position:absolute; left:var(--pad); top:96px; bottom:170px; width:210px; z-index:18; background:rgba(8,10,16,.78); border:1px solid var(--bronze); border-radius:10px; padding:9px 11px;}
+    .logdock h5{font-family:'Cinzel',serif; font-size:11px; color:var(--dusty-tan); letter-spacing:1px; margin-bottom:5px;}
+    .logdock .e{font-size:12px; color:var(--dusty-tan); line-height:1.5;} .logdock .e b{color:var(--parchment);} .logdock .e.hot{color:var(--gold);} .logdock .e.hot b{color:var(--gold);}
+    .you-deck{right:calc(var(--pad) + 150px);}  /* nudge deck off the wider action button */
+  }
+</style>
+</head>
+<body>
+<div class="board">
+  <div class="felt-glow"></div>
+
+  <!-- opponent chip/panel -->
+  <div class="chip opp">
+    <div class="av" style="border-color:var(--brute)">B</div>
+    <div class="meta">
+      <div class="nm2">BERTO IL RATTO</div>
+      <div class="sub2">The Brawler · Brute</div>
+      <div class="row"><span class="ct"><span class="ci"></span>4</span>
+        <span class="pips"><span class="pd fury"></span><span class="pd fury"></span><span class="pd"></span><span class="pd"></span><span class="pd"></span></span></div>
+      <div class="race"><div class="rl"><span class="lbl">RACE TO ZERO</span><span>6 left</span></div><div class="rb"><i style="width:40%"></i></div></div>
+    </div>
+  </div>
+
+  <!-- player chip/panel -->
+  <div class="chip you">
+    <div class="av">S</div>
+    <div class="meta">
+      <div class="nm2">THE SCHEMER</div>
+      <div class="sub2">You · Act 1 of 5</div>
+      <div class="row"><span class="ct"><span class="ci"></span>4</span>
+        <span class="pips"><span class="pd intel"></span><span class="pd intel"></span><span class="pd intel"></span><span class="pd"></span><span class="pd"></span></span></div>
+      <div class="race"><div class="rl"><span class="lbl">RACE TO ZERO</span><span>6 left</span></div><div class="rb"><i style="width:40%"></i></div></div>
+    </div>
+  </div>
+
+  <!-- decks -->
+  <div class="deck foe-deck"><div class="pc card back" style="box-shadow:inset 0 0 0 1.5px var(--venetian-red),inset 0 0 0 3px rgba(184,64,64,.25)"></div><div class="pc card back" style="box-shadow:inset 0 0 0 1.5px var(--venetian-red),inset 0 0 0 3px rgba(184,64,64,.25)"></div><div class="cnt" style="border-color:var(--venetian-red);color:var(--venetian-red)">2</div><div class="pl">FOE DECK</div></div>
+  <div class="deck you-deck"><div class="pc card back"></div><div class="pc card back"></div><div class="cnt">2</div><div class="pl">YOUR DECK</div></div>
+
+  <!-- trump + removed -->
+  <div class="trump"><div class="tc red">♥</div><div class="tl">TRUMP ♥</div><div class="trule">Hearts beat any other suit</div></div>
+  <div class="removed">✦ REMOVED 4</div>
+
+  <!-- edge buttons -->
+  <div class="roundbtn menu">☰</div>
+  <div class="roundbtn logbtn">📜</div>
+
+  <!-- docked log (spacious only) -->
+  <div class="logdock">
+    <h5>TABLE TALK</h5>
+    <div class="e"><b>You</b> attack — 8♣ Cipher</div>
+    <div class="e"><b>Berto</b> defends — 9♣ Q'master</div>
+    <div class="e"><b>You</b> attack — A♠ Knight</div>
+    <div class="e hot"><b>You</b> — Knight → Conquer +2</div>
+    <div class="e hot"><b>Berto</b> defends w/ trump — 7♥</div>
+  </div>
+
+  <!-- ribbon -->
+  <div class="ribbon">YOUR ATTACK <span class="s">all parried</span></div>
+
+  <!-- opponent hand -->
+  <div class="ohand"><div class="card back"></div><div class="card back"></div><div class="card back"></div><div class="card back"></div></div>
+
+  <!-- bout -->
+  <div class="bout">
+    <div class="slot"><span class="rfa">ATK</span>
+      <div class="atkc card black"><span class="cn">8♣</span><span class="nm">Cipher</span><span class="pip">♣</span><span class="abl util">Peek</span></div>
+      <div class="defc card black"><span class="cn">9♣</span><span class="nm">Q'master</span><span class="pip">♣</span><span class="abl pas">Fury</span></div></div>
+    <div class="slot"><span class="rfa">ATK</span>
+      <div class="atkc card black"><span class="bonus">+2</span><span class="cn">A♠</span><span class="nm">Knight</span><span class="pip">♠</span><span class="abl atk">Conquer</span></div>
+      <div class="defc card red trumpdef"><span class="tflag">♥ TRUMP</span><span class="cn">7♥</span><span class="nm">Berserker</span><span class="pip">♥</span></div></div>
+  </div>
+
+  <!-- player hand (data-tip drives the desktop hover tooltip) -->
+  <div class="phand">
+    <div class="card red dim"><span class="cn">6♦</span><span class="nm">Spyglass</span><span class="pip">♦</span><span class="abl util">Sleight</span></div>
+    <div class="card red dim"><span class="cn">6♥</span><span class="nm">Carto.</span><span class="pip">♥</span><span class="abl def">Draw</span></div>
+    <div class="card black playable" data-tip="The Grand Inquisitor — Masterstroke: spend 3 Intel, opponent discards their 2 highest, you draw 1."><span class="cn">A♣</span><span class="nm">G.Inquis.</span><span class="pip">♣</span><span class="abl atk">M'stroke</span></div>
+    <div class="card black dim"><span class="cn">10♠</span><span class="nm">Intercept</span><span class="pip">♠</span><span class="abl def">Seize</span></div>
+    <div class="card black dim"><span class="cn">K♠</span><span class="nm">M'mind</span><span class="pip">♠</span><span class="abl atk">Seize</span></div>
+  </div>
+
+  <!-- action -->
+  <div class="action">END BOUT<span class="sm">bout 3/12 · tie→prestige</span></div>
+</div>
+</body>
+</html>

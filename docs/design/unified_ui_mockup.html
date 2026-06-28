@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wits &amp; Fools — Unified Responsive UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#0A0A14; --deep-navy:#141C28; --dark-slate:#1E2832; --bronze:#5A4830;
+    --parchment:#F0E6D2; --dusty-tan:#A89B8C; --gold:#D4A846; --gold-dark:#B8922C;
+    --venetian-red:#B84040; --royal-blue:#4477AA; --sage:#66B866; --card-cream:#F5F0E0;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:#08080E; color:var(--parchment); font-family:'Crimson Pro',serif; padding:32px 20px 80px; line-height:1.5;}
+  h1,h2,h3,h4{font-family:'Cinzel',serif;}
+  .wrap{max-width:1240px; margin:0 auto;}
+  h1{font-size:26px; color:var(--gold); letter-spacing:2px;}
+  .sub{color:var(--dusty-tan); font-size:16px; max-width:960px; margin-top:6px;}
+  h2{font-size:19px; color:var(--gold); letter-spacing:1.5px; margin:44px 0 6px; border-bottom:1px solid var(--bronze); padding-bottom:8px;}
+  h2 .tag{font-family:'Crimson Pro',serif; font-size:14px; letter-spacing:0; color:var(--dusty-tan); font-style:italic;}
+  .intro{color:#CFC5B2; font-size:15.5px; margin-bottom:8px;}
+  .intro b{color:var(--gold);}
+
+  .ia-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px;}
+  .ia{background:var(--deep-navy); border:1px solid var(--bronze); border-radius:8px; padding:14px 16px;}
+  .ia h4{color:var(--gold); font-size:14px; letter-spacing:1px; margin-bottom:6px;}
+  .ia p{font-size:14px; color:#C8BEAC;} .ia .k{color:var(--gold);}
+
+  /* device frames around the SAME embedded board */
+  .devices{display:flex; flex-wrap:wrap; gap:30px; align-items:flex-start; margin-top:16px;}
+  .device{display:flex; flex-direction:column; gap:9px;}
+  .dcap{font-size:13.5px; color:var(--dusty-tan); max-width:var(--fw); text-align:center;}
+  .dcap b{display:block; color:var(--gold); font-family:'Cinzel',serif; font-size:12.5px; letter-spacing:.5px; margin-bottom:2px;}
+  .bezel{position:relative; background:#000; border-radius:20px; padding:9px; box-shadow:0 0 0 2px #2A2A30, 0 14px 40px rgba(0,0,0,.6);}
+  .bezel.phone{border-radius:34px; padding:8px 9px;}
+  .bezel iframe{display:block; border:0; border-radius:10px; background:#0E0B08;}
+  .bezel.phone iframe{border-radius:26px;}
+  .badge{display:inline-block; font-family:'Cinzel',serif; font-size:11px; letter-spacing:1px; color:var(--midnight); background:var(--gold); border-radius:10px; padding:2px 9px; margin-bottom:2px;}
+
+  table.cmp{width:100%; border-collapse:collapse; margin-top:14px; font-size:14px;}
+  table.cmp th,table.cmp td{border:1px solid var(--bronze); padding:8px 11px; text-align:left; vertical-align:top;}
+  table.cmp th{background:var(--deep-navy); color:var(--gold); font-family:'Cinzel',serif; font-size:12.5px; letter-spacing:.5px;}
+  table.cmp td b{color:var(--gold);}
+  table.cmp tr:nth-child(even) td{background:rgba(20,28,40,.4);}
+  .shared{color:var(--sage);} .flex{color:var(--amber,#CC8833);}
+
+  .twocol{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:14px;}
+  .panel{background:var(--deep-navy); border:1px solid var(--bronze); border-radius:8px; padding:16px 18px;}
+  .panel h4{color:var(--gold); font-size:14px; letter-spacing:.5px; margin-bottom:8px;}
+  .panel ul{margin:0 0 0 16px; font-size:14px; color:#C8BEAC;} .panel li{margin:5px 0;}
+  .panel code,.legend code,.intro code{background:#0C0F16; color:#C8B888; padding:1px 5px; border-radius:3px; font-size:13px;}
+
+  /* hover-vs-tap demo cards */
+  .inputdemo{display:flex; gap:30px; flex-wrap:wrap; margin-top:14px;}
+  .idcol{flex:1; min-width:300px; background:var(--deep-navy); border:1px solid var(--bronze); border-radius:10px; padding:16px 18px;}
+  .idcol h4{font-size:14px; letter-spacing:.5px; margin-bottom:4px;} .idcol .m{font-size:13px; color:var(--dusty-tan); margin-bottom:14px;}
+  .idcol.desktop{border-top:3px solid var(--royal-blue);} .idcol.mobile{border-top:3px solid var(--gold);}
+  .stagecard{position:relative; height:230px; background:radial-gradient(ellipse at 50% 60%, #2B5C3A,#173420); border-radius:8px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:18px; overflow:hidden;}
+  .mc{position:relative; width:78px; height:112px; border-radius:7px; background:var(--card-cream); box-shadow:0 0 0 2px var(--gold),0 0 14px rgba(212,168,70,.6),0 4px 10px rgba(0,0,0,.5);}
+  .mc .cn{position:absolute; top:5px; left:6px; font-size:15px; font-weight:700; color:#1A1A1A;} .mc .pip{position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); font-size:30px; color:#1A1A1A;}
+  .mc .nm{position:absolute; top:22px; left:0; right:0; text-align:center; font-size:9px; font-style:italic; color:#5A4A32;}
+  .mc .abl{position:absolute; bottom:0; left:0; right:0; height:18px; background:#A83232; color:#fff; font-size:9.5px; font-weight:700; display:flex; align-items:center; justify-content:center; border-radius:0 0 6px 6px;}
+  /* desktop: tooltip floats above on hover (no commit) */
+  .tip{position:absolute; bottom:150px; left:50%; transform:translateX(-50%); width:200px; background:rgba(8,10,16,.96); border:1px solid var(--gold-dark); border-radius:8px; padding:9px 11px; font-size:12px; color:var(--parchment);}
+  .tip .tn{font-family:'Cinzel',serif; color:var(--gold); font-size:12px; margin-bottom:3px;}
+  .tip::after{content:""; position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); border:7px solid transparent; border-top-color:var(--gold-dark);}
+  .cursor{position:absolute; bottom:30px; left:54%; font-size:22px;}
+  /* mobile: lifted card + inspector + pills */
+  .mc.lift{transform:translateY(-26px) scale(1.08);}
+  .insp{position:absolute; left:14px; bottom:80px; width:180px; background:rgba(8,10,16,.96); border:1px solid var(--gold-dark); border-radius:9px; padding:9px 11px; font-size:11px; color:var(--parchment); text-align:left;}
+  .insp .tn{font-family:'Cinzel',serif; color:var(--gold); font-size:11.5px; margin-bottom:2px;}
+  .pills{position:absolute; bottom:80px; right:14px; display:flex; gap:6px;}
+  .pl{padding:9px 13px; border-radius:20px; font-family:'Cinzel',serif; font-weight:700; font-size:11px;}
+  .pl.go{background:linear-gradient(180deg,#7ECB7E,var(--sage)); color:#10240F;} .pl.x{background:#222A36; color:#bcc;}
+  .finger{position:absolute; bottom:24px; left:50%; font-size:24px;}
+
+  .legend{background:var(--deep-navy); border:1px solid var(--bronze); border-radius:8px; padding:16px 20px; margin-top:14px; font-size:14.5px;}
+  .legend h4{color:var(--gold); font-size:14px; letter-spacing:.5px; margin:8px 0 4px;}
+  .legend ul{margin:4px 0 4px 18px;} .legend b{color:var(--gold);}
+  .note{font-size:13px; color:var(--dusty-tan); font-style:italic; margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>WITS &amp; FOOLS — ONE UI, EVERY SCREEN</h1>
+  <p class="sub">A single responsive layout and one asset set for desktop and mobile. The board is built once; the layout reflows by aspect ratio, and the input layer (hover vs tap) is chosen at runtime by pointer capability — not by a separate codebase.</p>
+
+  <h2>The unification thesis <span class="tag">— why one layout, not two</span></h2>
+  <p class="intro">The mobile design's discipline (compact identity chips, edge-docked reference, one thumb-zone action, the race meter always visible) is exactly what the crowded desktop board needed. So instead of maintaining two UIs, the <b>mobile layout becomes the base</b> and desktop is the <b>same layout with the breakpoints opened up</b> — chips expand into panels, the log undocks into a rail, cards and spacing grow. Everything below the layout — scene, prefabs, card art, fonts, data bindings — is shared verbatim.</p>
+  <div class="ia-grid">
+    <div class="ia"><h4>ONE SCENE, ONE ASSET PATH</h4><p>Same <span class="k">GameScene</span>, same <span class="k">CardView prefab</span>, same <code>Resources/CardArt</code>, frames and fonts on both platforms. There is no <code>/mobile</code> vs <code>/desktop</code> fork to keep in sync.</p></div>
+    <div class="ia"><h4>ASPECT DRIVES LAYOUT</h4><p>A single <span class="k">ResponsiveLayout</span> picks a tier — Compact / Comfortable / Spacious — from the live viewport aspect &amp; height, and nudges anchors, paddings and a few visibility toggles. Pure geometry, no content forks.</p></div>
+    <div class="ia"><h4>POINTER DRIVES INPUT</h4><p>A single <span class="k">InputProfile</span> reads pointer capability: a fine pointer enables <span class="k">hover</span> tooltips &amp; lift; a coarse pointer enables <span class="k">tap-to-inspect</span>. Same CardView, same handlers — only which affordances are live differs.</p></div>
+  </div>
+
+  <h2>One board, three aspect ratios <span class="tag">— the exact same file, embedded at three sizes</span></h2>
+  <p class="intro">Each frame below is the <b>same <code>unified_board.html</code></b> in an iframe at a different width. Nothing is duplicated — the CSS breakpoints reflow it. Watch the identity blocks (chips → panels), the event log (button → docked rail), the trump rule (hidden → spelled out) and the card sizes change with the room available.</p>
+  <div class="devices">
+    <div class="device" style="--fw:760px">
+      <span class="badge">COMPACT · phone landscape ~19.5:9</span>
+      <div class="bezel phone"><iframe src="unified_board.html" width="760" height="352"></iframe></div>
+      <div class="dcap"><b>PHONE</b>Identity = chips, log = 📜 button, trump = chip, hand lifted off the home strip, ≥44px targets. Tap to inspect.</div>
+    </div>
+    <div class="device" style="--fw:560px">
+      <span class="badge">COMFORTABLE · tablet / small laptop ~16:10</span>
+      <div class="bezel"><iframe src="unified_board.html" width="560" height="350"></iframe></div>
+      <div class="dcap"><b>TABLET / LAPTOP</b>Same chips, but cards, type and padding step up; still log-as-button. The midpoint tier.</div>
+    </div>
+  </div>
+  <div class="devices" style="margin-top:26px">
+    <div class="device" style="--fw:1180px">
+      <span class="badge">SPACIOUS · desktop widescreen ~16:9</span>
+      <div class="bezel"><iframe src="unified_board.html" width="1180" height="664"></iframe></div>
+      <div class="dcap"><b>DESKTOP</b>The decluttered version of the old board: chips become full <b>panels</b> (portrait subtitle, "RACE TO ZERO" spelled out), the event log <b>undocks into a left rail</b>, the trump rule is spelled out, cards and the bout breathe. Hover to inspect.</div>
+    </div>
+  </div>
+  <p class="note">Resize this browser window and the frames reflow live — there is no "switch to mobile" toggle; it's a continuum keyed on the viewport.</p>
+
+  <h2>Input: hover (desktop) and tap (mobile) on one component <span class="tag">— chosen at runtime, not built twice</span></h2>
+  <p class="intro">The same CardView answers both. The difference is only <i>which affordance fires</i>: a fine pointer reveals the card's detail on <b>hover</b> and plays on click; a coarse pointer reveals it on <b>tap</b> (the hover-equivalent) and commits on a second tap or an action pill. Inspect-before-commit is preserved on both — desktop just gets it for free via hover.</p>
+  <div class="inputdemo">
+    <div class="idcol desktop">
+      <h4 style="color:var(--royal-blue)">DESKTOP · POINTER : FINE</h4>
+      <div class="m"><code>@media (hover:hover) and (pointer:fine)</code> — hover reveals, click plays.</div>
+      <div class="stagecard">
+        <div class="tip"><div class="tn">The Grand Inquisitor — Masterstroke</div>Spend 3 Intel. Opponent discards their 2 highest; you draw 1.</div>
+        <div class="mc"><span class="cn">A♣</span><span class="nm">G. Inquisitor</span><span class="pip">♣</span><span class="abl">Masterstroke</span></div>
+        <div class="cursor">🖱️</div>
+      </div>
+      <div class="m" style="margin-top:10px">Hovering lifts the card and floats its tooltip — no modal, no extra tap. A click plays it. Right-click could long-inspect.</div>
+    </div>
+    <div class="idcol mobile">
+      <h4>MOBILE · POINTER : COARSE</h4>
+      <div class="m"><code>(hover:none) and (pointer:coarse)</code> — tap reveals, second tap / pill commits.</div>
+      <div class="stagecard">
+        <div class="insp"><div class="tn">Grand Inquisitor</div>Masterstroke — opp discards 2 highest, you draw 1. <span style="color:#9FC3E8">3 Intel</span></div>
+        <div class="pills"><span class="pl go">▲ Attack</span><span class="pl x">✕</span></div>
+        <div class="mc lift"><span class="cn">A♣</span><span class="nm">G. Inquisitor</span><span class="pip">♣</span><span class="abl">Masterstroke</span></div>
+        <div class="finger">👆</div>
+      </div>
+      <div class="m" style="margin-top:10px">Tapping lifts the card, opens the inspector and raises action pills into thumb reach. A second tap (or the pill) commits.</div>
+    </div>
+  </div>
+
+  <h2>What's shared vs what flexes <span class="tag">— the maintenance answer</span></h2>
+  <table class="cmp">
+    <tr><th style="width:24%">Layer</th><th style="width:38%"><span class="shared">Shared (built once)</span></th><th><span class="flex">Flexes by tier / input</span></th></tr>
+    <tr><td><b>Scene &amp; objects</b></td><td class="shared">One GameScene; Canvas, TableView, HudView, GameManager, RunManager — identical.</td><td class="flex">Nothing forks. A <code>ResponsiveLayout</code> component re-anchors existing objects.</td></tr>
+    <tr><td><b>Cards</b></td><td class="shared">One <code>CardView</code> prefab + <code>PrefabBuilder</code>; one <code>Resources/CardArt</code> set, frames, SDF fonts.</td><td class="flex">Card <i>scale</i> only (a layout var), set per tier. Same art everywhere.</td></tr>
+    <tr><td><b>Data bindings</b></td><td class="shared">Race meters, resource pips, counts, trump, bout, log — all from the same HudView/engine events.</td><td class="flex">Nothing.</td></tr>
+    <tr><td><b>Layout</b></td><td class="shared">Zone model (opp top, you bottom, bout center, decks on sides, action bottom-right) is constant.</td><td class="flex"><b>Tier:</b> chip↔panel, log button↔docked rail, paddings, card scale, safe-area insets, bout gap.</td></tr>
+    <tr><td><b>Input</b></td><td class="shared">One set of pointer handlers on CardView (<code>OnPointerEnter/Exit/Click</code>).</td><td class="flex"><b>Profile:</b> hover tooltips &amp; lift ON for fine pointers; tap-to-inspect + pills ON for coarse.</td></tr>
+    <tr><td><b>Meta screens</b></td><td class="shared">Map, shop, rest, rumor, reward, deck viewer — same prefabs &amp; flow.</td><td class="flex">Grid column counts &amp; spacing reflow; the deck-viewer card grid wraps to fit.</td></tr>
+  </table>
+
+  <h2>How it maps to Unity <span class="tag">— concrete implementation</span></h2>
+  <div class="twocol">
+    <div class="panel">
+      <h4>RESPONSIVE LAYOUT (geometry)</h4>
+      <ul>
+        <li><b>CanvasScaler</b>: <code>Scale With Screen Size</code>, reference 1280×720, <code>matchWidthOrHeight</code> biased to <b>height</b> — vertical space is the tight constraint (phone-landscape is only ~390pt tall), so the board scales to fit height and never clips top/bottom.</li>
+        <li><b>ResponsiveLayout</b> MonoBehaviour on the Canvas: on start and on <code>OnRectTransformDimensionsChange</code>, compute <code>tier = f(aspect, height)</code> → Compact / Comfortable / Spacious.</li>
+        <li>The tier sets a handful of values the existing widgets already read: card scale, edge padding, chip-vs-panel mode (toggle the subtitle + race label objects), log button vs docked <code>EventLogPanel</code>, bout slot spacing, safe-area insets.</li>
+        <li>No new screens, no duplicated prefabs — it only moves/sizes/toggles what SceneBuilder already creates.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h4>INPUT PROFILE (interaction)</h4>
+      <ul>
+        <li><b>Detect once</b>: <code>Application.isMobilePlatform || (Input.touchSupported &amp;&amp; !Input.mousePresent)</code> → <code>Touch</code>; else <code>Pointer</code>. Re-evaluate if a mouse appears (hybrid devices).</li>
+        <li><b>CardView</b> keeps its <code>OnPointerEnter/Exit</code> (hover) and <code>OnPointerClick</code> handlers. In <code>Pointer</code> mode, enter→show tooltip+lift, click→play. In <code>Touch</code> mode, enter is ignored, first click→select+inspector+pills, pill/second tap→commit.</li>
+        <li><b>Hit targets</b>: the Touch profile applies the Compact/Comfortable tier minimums (≥44pt) automatically via the layout tier; Pointer mode can pack tighter.</li>
+        <li>Both paths funnel into the same <code>TryAttack/TryDefend/TryUseAbility</code> — the engine never knows which input drove it.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Breakpoints <span class="tag">— keyed on aspect &amp; height, not device names</span></h2>
+  <table class="cmp">
+    <tr><th>Tier</th><th>Triggers (viewport)</th><th>Layout</th><th>Input (typical)</th></tr>
+    <tr><td><b>Compact</b></td><td>short height (≲520pt) or very wide AR (≳2.0) — phone landscape</td><td>chips, log button, trump chip, tight padding, hand lifted off home strip, ≥44pt targets</td><td>Touch (tap)</td></tr>
+    <tr><td><b>Comfortable</b></td><td>~520–760pt height — tablet, small laptop, resized window</td><td>same structure, larger cards/type/padding; log still a button</td><td>either</td></tr>
+    <tr><td><b>Spacious</b></td><td>tall &amp; wide (≳760pt height, AR ~1.6–1.9) — desktop</td><td>full identity panels, event-log rail docked, trump rule shown, largest cards, wide bout</td><td>Pointer (hover)</td></tr>
+  </table>
+  <p class="note">Tier and input are independent: a touchscreen laptop in a small window is Comfortable + Touch; a phone mirrored to a monitor with a mouse is Spacious + Pointer. They compose, they don't fork.</p>
+
+  <div class="legend">
+    <h4>WHAT THIS FIXES FROM THE OLD DESKTOP BOARD</h4>
+    <ul>
+      <li><b>Crowding</b> → the mobile chip discipline removes the scattered labels; desktop spends its extra room on spacing and a docked log, not more widgets.</li>
+      <li><b>Two code paths</b> → collapsed to one layout + two small policy objects (ResponsiveLayout, InputProfile).</li>
+      <li><b>Asset duplication</b> → none; a card is one prefab and one art file, scaled by a layout variable.</li>
+      <li><b>Hover-only information</b> on desktop → also reachable by tap on mobile (the inspector is the hover tooltip's touch twin), so no platform loses information.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
