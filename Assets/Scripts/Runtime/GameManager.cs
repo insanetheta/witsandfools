@@ -508,10 +508,52 @@ namespace WitsAndFools
 
         CardView _pendingAbilityView;
 
+        CardView _touchSelected;
+
         void OnHumanCardClicked(CardView view)
         {
             if (Hud && Hud.AbilityChoiceVisible) return;
 
+            // Touch: first tap selects + inspects (no commit); a second tap on the same card commits.
+            // Pointer: hover already inspects, so a click commits immediately.
+            if (!InputProfile.Hover)
+            {
+                if (_touchSelected != view)
+                {
+                    SelectForTouch(view);
+                    return;
+                }
+                DeselectTouch();   // second tap on the same card falls through to commit
+            }
+
+            CommitCardAction(view);
+        }
+
+        void SelectForTouch(CardView view)
+        {
+            if (_touchSelected && _touchSelected != view) _touchSelected.SetSelected(false);
+            _touchSelected = view;
+            view.SetSelected(true);
+            if (Hud)
+            {
+                if (view.Card.HasAbility)
+                {
+                    var a = view.Card.Ability.Value;
+                    Hud.ShowTooltip($"{a.DisplayName()} — {a.Description()}");
+                }
+                else Hud.ShowTooltip(view.Card.ToString());
+            }
+        }
+
+        void DeselectTouch()
+        {
+            if (_touchSelected) _touchSelected.SetSelected(false);
+            _touchSelected = null;
+            Hud?.HideTooltip();
+        }
+
+        void CommitCardAction(CardView view)
+        {
             if (view.Card.HasAbility && view.Card.Trigger == TriggerTiming.None)
             {
                 bool canPlay = CanPlayCardNormally(view.Card);
@@ -890,6 +932,7 @@ namespace WitsAndFools
 
         void ApplyHighlightForPhase()
         {
+            DeselectTouch();   // any board-state change invalidates a pending touch selection
             bool humanAttack = Engine.Phase == Phase.Attack && Engine.AttackerIndex == HumanPlayerIndex;
             bool humanDefense = Engine.Phase == Phase.Defense && Engine.DefenderIndex == HumanPlayerIndex;
             bool humanActive = humanAttack || humanDefense;

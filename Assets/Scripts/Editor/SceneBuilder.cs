@@ -1084,7 +1084,7 @@ namespace WitsAndFools.EditorTools
             responsive.PortraitOverlay = portraitOverlay.gameObject;
             responsive.EventLogPanel = logPanel.gameObject;
             responsive.EventLogButton = logButton.gameObject;
-            responsive.SpaciousOnly = new[] { oppArchLabel.gameObject, playerTitleLabel.gameObject };
+            responsive.SpaciousOnly = new[] { oppArchLabel.gameObject, playerTitleLabel.gameObject, trumpRule.gameObject };
             logButton.GetComponent<Button>().onClick.AddListener(responsive.ToggleLog);
             canvasGO.AddComponent<CheatMenu>();
 

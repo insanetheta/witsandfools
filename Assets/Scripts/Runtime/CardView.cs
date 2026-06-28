@@ -95,6 +95,14 @@ namespace WitsAndFools
             ApplyOutline();
         }
 
+        // Touch select: lift + enlarge the card while it's the pending selection (tap-to-inspect).
+        public void SetSelected(bool on)
+        {
+            transform.localScale = on ? Vector3.one * 1.12f : Vector3.one;
+            _hover = on;          // reuse the playable-glow path for the selected outline
+            ApplyOutline();
+        }
+
         void RenderFace()
         {
             if (Background) Background.color = FaceColor;
