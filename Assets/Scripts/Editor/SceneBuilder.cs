@@ -1088,6 +1088,7 @@ namespace WitsAndFools.EditorTools
             rm.EventContinueButton = eventContinueBtn.GetComponent<Button>();
 
             // Match table theme
+            rm.CardViewPrefab = cardPrefab;   // reward/deck/detail spawn the same B-frame card, open
             rm.TableBackgroundImage = tableBgImg;
             rm.TableFeltImage = feltImg;
             rm.TableFrameImage = frameEdgeImg;

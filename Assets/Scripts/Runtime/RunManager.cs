@@ -83,6 +83,7 @@ namespace WitsAndFools
         public Image TableBackgroundImage;
         public Image TableFeltImage;
         public Image TableFrameImage;
+        public GameObject CardViewPrefab;   // same B-frame card used in-match; shown open for reward/deck/detail
         public Image VignetteImage;
         public Sprite[] TableSurfaceSprites;
         public Sprite[] VenueBackgroundSprites;
@@ -3290,7 +3291,7 @@ namespace WitsAndFools
             if (borderGO) { borderGO.effectColor = new Color(0.35f, 0.28f, 0.19f); borderGO.effectDistance = new Vector2(1, -1); }
 
             // Card visual (left side)
-            var cardGO = CreateMiniCard(def, container.transform, 130, 186);
+            var cardGO = SpawnDetailCard(def, container.transform, 130, 186);
             var cardRT = (RectTransform)cardGO.transform;
             cardRT.anchorMin = new Vector2(0, 0);
             cardRT.anchorMax = new Vector2(0, 1);
@@ -3466,6 +3467,31 @@ namespace WitsAndFools
             DoctrineType.Hoarder => "#B45309",
             _ => "#6B7280"
         };
+
+        // Reward / deck / detail use the SAME Design-B CardView as the hand, shown open (drawer up,
+        // full body text). Returns a wrapper sized width x height (callers anchor/layout/click it);
+        // the CardView is centered + uniformly scaled to fit, so its proportions never distort.
+        GameObject SpawnDetailCard(CardDefinition def, Transform parent, float width, float height)
+        {
+            if (CardViewPrefab == null) return CreateMiniCard(def, parent, width, height);  // fallback
+            var wrapper = new GameObject("DetailCard_" + def.Id, typeof(RectTransform), typeof(Image));
+            wrapper.transform.SetParent(parent, false);
+            var wrt = (RectTransform)wrapper.transform;
+            wrt.sizeDelta = new Vector2(width, height);
+            var wimg = wrapper.GetComponent<Image>();
+            wimg.color = new Color(0, 0, 0, 0);   // invisible, but a raycast target so a Button on the wrapper works
+            wimg.raycastTarget = true;
+
+            var cv = Instantiate(CardViewPrefab, wrapper.transform).GetComponent<CardView>();
+            var crt = (RectTransform)cv.transform;
+            crt.anchorMin = crt.anchorMax = new Vector2(0.5f, 0.5f);
+            crt.pivot = new Vector2(0.5f, 0.5f);
+            crt.anchoredPosition = Vector2.zero;
+            crt.localScale = Vector3.one * Mathf.Min(width / 110f, height / 160f);
+            cv.Bind(def.ToRuntimeCard(), faceUp: true);
+            cv.SetDetail(true);   // drawer open by default, ignores hover
+            return wrapper;
+        }
 
         GameObject CreateMiniCard(CardDefinition def, Transform parent, float width, float height)
         {
@@ -3821,7 +3847,7 @@ namespace WitsAndFools
             le.preferredWidth = cardW;
             le.preferredHeight = cardH + labelH;
 
-            var miniCard = CreateMiniCard(def, wrapper.transform, cardW, cardH);
+            var miniCard = SpawnDetailCard(def, wrapper.transform, cardW, cardH);
             var miniRT = (RectTransform)miniCard.transform;
             miniRT.anchorMin = new Vector2(0.5f, 1);
             miniRT.anchorMax = new Vector2(0.5f, 1);
@@ -4182,7 +4208,7 @@ namespace WitsAndFools
 
                 foreach (var cardDef in suitCards)
                 {
-                    var miniCard = CreateMiniCard(cardDef, rowGO.transform, 88, 126);
+                    var miniCard = SpawnDetailCard(cardDef, rowGO.transform, 88, 126);
                     var mcLE = miniCard.AddComponent<LayoutElement>();
                     mcLE.preferredWidth = 88;
                     mcLE.preferredHeight = 126;

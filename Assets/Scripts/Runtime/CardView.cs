@@ -155,8 +155,8 @@ namespace WitsAndFools
         {
             if (Drawer) Drawer.sizeDelta = new Vector2(Drawer.sizeDelta.x, Mathf.Lerp(DrawerCollapsedH, DrawerOpenH, k));
             if (BodyGroup) { BodyGroup.alpha = Mathf.Clamp01(k * 1.4f - 0.2f); BodyGroup.gameObject.SetActive(k > 0.01f); }
-            // Don't fight the highlight scale (SetSelected); only lift when not otherwise scaled by play.
-            transform.localScale = _baseScale * Mathf.Lerp(1f, ExpandLift, _expandLocked ? 0f : k);
+            // Hover-lift only in hand; a locked detail card keeps whatever scale its spawner set.
+            if (!_expandLocked) transform.localScale = _baseScale * Mathf.Lerp(1f, ExpandLift, k);
         }
 
         void RenderFace()
