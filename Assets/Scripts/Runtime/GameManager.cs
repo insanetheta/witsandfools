@@ -285,19 +285,6 @@ namespace WitsAndFools
             UpdateAutoPlayLabel();
 
             CardView.OnHoverChanged = OnCardHover;
-            CardView.OnHoverViewChanged = OnCardHoverView;
-        }
-
-        // Anchor the ability tooltip just above the hovered card (kf4u) so it tracks the card the
-        // player is inspecting instead of sitting at a fixed spot.
-        void OnCardHoverView(CardView view)
-        {
-            if (view == null || Hud == null || Hud.TooltipLabel == null) return;
-            var tipRT = (RectTransform)Hud.TooltipLabel.transform;
-            var cardRT = (RectTransform)view.transform;
-            tipRT.pivot = new Vector2(0.5f, 0f);   // bottom-center sits above the card top
-            float halfH = cardRT.rect.height * cardRT.lossyScale.y * 0.5f;
-            tipRT.position = cardRT.position + new Vector3(0f, halfH + 12f, 0f);
         }
 
         void OnSetupComplete()
@@ -563,16 +550,7 @@ namespace WitsAndFools
         {
             if (_touchSelected && _touchSelected != view) _touchSelected.SetSelected(false);
             _touchSelected = view;
-            view.SetSelected(true);
-            if (Hud)
-            {
-                if (view.Card.HasAbility)
-                {
-                    var a = view.Card.Ability.Value;
-                    Hud.ShowTooltip($"{a.DisplayName()} — {a.Description()}");
-                }
-                else Hud.ShowTooltip(view.Card.ToString());
-            }
+            view.SetSelected(true);   // expands the card's own info drawer (full ability text)
         }
 
         void DeselectTouch()
@@ -924,15 +902,9 @@ namespace WitsAndFools
             _ => false
         };
 
-        void OnCardHover(Card? card)
-        {
-            if (card.HasValue && card.Value.HasAbility)
-            {
-                var a = card.Value.Ability.Value;
-                Hud?.ShowTooltip($"{a.DisplayName()} — {a.Description()}");
-            }
-            else Hud?.HideTooltip();
-        }
+        // The card now reveals its own detail on hover (CardView slide-up drawer); just clear any
+        // stale HUD tooltip. Kept subscribed so engine-side hover hooks still fire if needed.
+        void OnCardHover(Card? card) { Hud?.HideTooltip(); }
 
         void OnTrumpChanged(Suit newSuit)
         {
