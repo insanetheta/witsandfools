@@ -13,6 +13,7 @@ namespace WitsAndFools
         [Header("References (set by CardPrefabBuilder)")]
         public Image Background;
         public Image Outline;          // a slightly larger Image behind Background, for highlight color
+        public Image ArtImage;         // character portrait (Resources/CardArt) — same art as reward/deck views
         public RectTransform FaceRoot;
         public TMP_Text RankTopLeft;
         public TMP_Text RankBottomRight;
@@ -121,6 +122,16 @@ namespace WitsAndFools
             if (RankTopLeft) { RankTopLeft.text = label; RankTopLeft.color = color; }
             if (RankBottomRight) { RankBottomRight.text = label; RankBottomRight.color = color; }
             if (CenterPip) { CenterPip.text = _card.Suit.Glyph(); CenterPip.color = color; }
+
+            // Show the character art (same portrait as the reward/deck views); the big center suit
+            // glyph is only the fallback for cards without art.
+            Sprite art = _card.DefinitionId != null ? Resources.Load<Sprite>("CardArt/" + _card.DefinitionId) : null;
+            if (ArtImage)
+            {
+                if (art != null) { ArtImage.sprite = art; ArtImage.color = Color.white; ArtImage.gameObject.SetActive(true); }
+                else ArtImage.gameObject.SetActive(false);
+            }
+            if (CenterPip) CenterPip.gameObject.SetActive(art == null);
             // At Compact the card name is dropped (rank + suit + ability bar only) so the remaining
             // glyphs stay legible at the smaller tier; names return at Comfortable+.
             bool compact = IsCompact;

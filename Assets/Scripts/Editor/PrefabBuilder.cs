@@ -45,6 +45,21 @@ namespace WitsAndFools.EditorTools
             faceRT.offsetMin = Vector2.zero;
             faceRT.offsetMax = Vector2.zero;
 
+            // Character art window (center band). Filled from Resources/CardArt at render time; the
+            // rank/name sit above it on the cream and the ability strip below, so a card reads the
+            // same in hand, reward, and deck views (yy0r). First child = behind the text.
+            var artGO = new GameObject("ArtImage", typeof(RectTransform), typeof(Image));
+            artGO.transform.SetParent(faceRoot.transform, false);
+            var artImgRT = (RectTransform)artGO.transform;
+            artImgRT.anchorMin = new Vector2(0.05f, 0.135f);
+            artImgRT.anchorMax = new Vector2(0.95f, 0.78f);
+            artImgRT.offsetMin = Vector2.zero;
+            artImgRT.offsetMax = Vector2.zero;
+            var artImg = artGO.GetComponent<Image>();
+            artImg.raycastTarget = false;
+            artImg.preserveAspect = false;
+            artGO.SetActive(false);   // enabled at render time when the card has art
+
             var rankTL = CreateChildText(faceRoot.transform, "RankTopLeft", "A♥",
                 anchorMin: new Vector2(0, 1), anchorMax: new Vector2(0, 1),
                 pivot: new Vector2(0, 1),
@@ -189,6 +204,7 @@ namespace WitsAndFools.EditorTools
             var view = go.AddComponent<CardView>();
             view.Background = background;
             view.Outline = outline;
+            view.ArtImage = artImg;
             view.FaceRoot = faceRT;
             view.RankTopLeft = rankTL;
             view.RankBottomRight = rankBR;
