@@ -1378,6 +1378,17 @@ namespace WitsAndFools.EditorTools
                 color: dimmed ? ThemePalette.DustyTan : ThemePalette.Gold, font: HeadingFont);
             countBadge.fontStyle = FontStyles.Bold;
 
+            // Dark backing chip so the pile label reads as panel chrome on the felt, not bare text.
+            var pileLabelBg = NewChild(pile, "PileLabelBg");
+            pileLabelBg.anchorMin = new Vector2(0.5f, 0); pileLabelBg.anchorMax = new Vector2(0.5f, 0);
+            pileLabelBg.pivot = new Vector2(0.5f, 1);
+            pileLabelBg.sizeDelta = new Vector2(104, 20);
+            pileLabelBg.anchoredPosition = new Vector2(0, -9);
+            pileLabelBg.localRotation = Quaternion.Euler(0, 0, -rotation);
+            var pileLabelBgImg = pileLabelBg.gameObject.AddComponent<Image>();
+            pileLabelBgImg.color = new Color(0.04f, 0.04f, 0.08f, 0.72f);
+            pileLabelBgImg.raycastTarget = false;
+
             var pileLabel = AddText(pile, "PileLabel", label,
                 anchorMin: new Vector2(0.5f, 0), anchorMax: new Vector2(0.5f, 0), pivot: new Vector2(0.5f, 1),
                 alignment: TextAlignmentOptions.Center, fontSize: 14,

@@ -1461,7 +1461,11 @@ namespace WitsAndFools
                 _ => ThemePalette.LockedGray
             };
             var img = btnGO.GetComponent<Image>();
-            img.color = new Color(bgColor.r * 0.7f, bgColor.g * 0.7f, bgColor.b * 0.7f, 0.9f);
+            img.color = new Color(bgColor.r * 0.62f, bgColor.g * 0.62f, bgColor.b * 0.62f, 1f);
+            // Bronze card edge so the choice reads as a solid card, not a flat translucent rect.
+            var pickEdge = btnGO.AddComponent<Outline>();
+            pickEdge.effectColor = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.45f);
+            pickEdge.effectDistance = new Vector2(1.5f, -1.5f);
 
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 104;
@@ -1687,7 +1691,10 @@ namespace WitsAndFools
             btnGO.transform.SetParent(AbilityPickContainer, false);
 
             var img = btnGO.GetComponent<Image>();
-            img.color = new Color(0.25f, 0.18f, 0.12f, 0.9f);
+            img.color = new Color(0.22f, 0.16f, 0.10f, 1f);
+            var relicEdge = btnGO.AddComponent<Outline>();
+            relicEdge.effectColor = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.45f);
+            relicEdge.effectDistance = new Vector2(1.5f, -1.5f);
 
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 104;
@@ -1911,7 +1918,7 @@ namespace WitsAndFools
             btnGO.transform.SetParent(ShopItemContainer, false);
 
             var img = btnGO.GetComponent<Image>();
-            img.color = canBuy ? new Color(0.12f, 0.22f, 0.30f, 0.85f) : ThemePalette.LockedGray;
+            img.color = canBuy ? new Color(0.12f, 0.22f, 0.30f, 0.96f) : ThemePalette.LockedGray;
 
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 85;
@@ -2072,7 +2079,7 @@ namespace WitsAndFools
 
             var btnGO = new GameObject("CardRemoval", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(ShopItemContainer, false);
-            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.35f, 0.12f, 0.12f, 0.85f) : ThemePalette.LockedGray;
+            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.35f, 0.12f, 0.12f, 0.96f) : ThemePalette.LockedGray;
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 70;
             le.preferredWidth = 550;
@@ -2132,7 +2139,7 @@ namespace WitsAndFools
 
             var btnGO = new GameObject("CardTransform", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(ShopItemContainer, false);
-            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.18f, 0.12f, 0.30f, 0.85f) : ThemePalette.LockedGray;
+            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.18f, 0.12f, 0.30f, 0.96f) : ThemePalette.LockedGray;
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 70;
             le.preferredWidth = 550;
@@ -2297,7 +2304,7 @@ namespace WitsAndFools
 
             var btnGO = new GameObject("CardUpgrade", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(ShopItemContainer, false);
-            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.18f, 0.14f, 0.10f, 0.85f) : ThemePalette.LockedGray;
+            btnGO.GetComponent<Image>().color = canBuy ? new Color(0.18f, 0.14f, 0.10f, 0.96f) : ThemePalette.LockedGray;
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 70;
             le.preferredWidth = 550;
@@ -3193,7 +3200,10 @@ namespace WitsAndFools
                 var rt = pill.GetComponent<RectTransform>();
                 rt.sizeDelta = new Vector2(130, 32);
                 var bg = pill.GetComponent<Image>();
-                bg.color = new Color(color.r, color.g, color.b, 0.25f);
+                bg.color = new Color(color.r * 0.85f, color.g * 0.85f, color.b * 0.85f, 0.95f);
+                var pillEdge = pill.AddComponent<Outline>();
+                pillEdge.effectColor = new Color(0f, 0f, 0f, 0.5f);
+                pillEdge.effectDistance = new Vector2(1f, -1f);
 
                 var textGO = new GameObject("Text", typeof(RectTransform));
                 textGO.transform.SetParent(pill.transform, false);
@@ -3206,7 +3216,7 @@ namespace WitsAndFools
                 txt.text = ability.DisplayName();
                 txt.fontSize = 16;
                 txt.alignment = TextAlignmentOptions.Center;
-                txt.color = color;
+                txt.color = Color.white;
                 txt.enableAutoSizing = false;
                 txt.overflowMode = TextOverflowModes.Ellipsis;
             }
@@ -3595,8 +3605,9 @@ namespace WitsAndFools
             else
             {
                 // No art for this card (e.g. neutral/trickster/hoarder): paint a parchment
-                // surface with a large translucent suit glyph so the card is never blank.
-                var parchment = Color.Lerp(ThemePalette.CardCream, docColor, 0.18f);
+                // surface with a bold suit emblem so the card reads as an intentional minimalist
+                // design, not a blank/unfinished card.
+                var parchment = Color.Lerp(ThemePalette.CardCream, docColor, 0.28f);
                 artImg.color = parchment;
 
                 var glyphGO = new GameObject("ArtGlyph", typeof(RectTransform));
@@ -3611,7 +3622,7 @@ namespace WitsAndFools
                 glyphTMP.text = def.Suit.Glyph();
                 glyphTMP.fontSize = isSmall ? 36 : isLarge ? 120 : 64;
                 var glyphColor = def.Suit.IsRed() ? ThemePalette.RedSuit : ThemePalette.BlackSuit;
-                glyphColor.a = 0.22f;
+                glyphColor.a = 0.5f;   // bold enough to read as a deliberate emblem, not a blank card
                 glyphTMP.color = glyphColor;
                 glyphTMP.alignment = TextAlignmentOptions.Center;
                 glyphTMP.raycastTarget = false;
@@ -4196,7 +4207,7 @@ namespace WitsAndFools
 
                 var btnGO = new GameObject($"ShopCard_{cardDef.Id}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
                 btnGO.transform.SetParent(ShopItemContainer, false);
-                btnGO.GetComponent<Image>().color = canBuy ? new Color(0.07f, 0.22f, 0.18f, 0.85f) : ThemePalette.LockedGray;
+                btnGO.GetComponent<Image>().color = canBuy ? new Color(0.07f, 0.22f, 0.18f, 0.96f) : ThemePalette.LockedGray;
                 btnGO.GetComponent<LayoutElement>().preferredHeight = 90;
                 btnGO.GetComponent<LayoutElement>().preferredWidth = 550;
 
