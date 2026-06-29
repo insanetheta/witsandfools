@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wits &amp; Fools — Card Frame Mockups</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cinzel+Decorative:wght@700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#0A0A14; --ink:#14100C; --parchment:#F0E6D2; --dusty:#A89B8C;
+    --gold:#D4A846; --gold-lt:#E8C766; --gold-dk:#9A7A28; --bronze:#5A4830;
+    --red-suit:#B02020; --black-suit:#1A1A1A;
+    --schemer:#2E8B9E; --brute:#A83333; --trickster:#8A4FA0; --hoarder:#C08A2A;
+    --atk:#A83232; --def:#33689C; --util:#7A5E1A; --pas:#3F7E3F;
+    --common:#8A7860; --uncommon:#5A8FB0; --rare:#D4A846;
+    --cardW:236px; --cardH:336px;
+    --art:url('../../Assets/Resources/CardArt/'); /* base path note */
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Crimson Pro',serif; color:var(--parchment);
+    background:
+      radial-gradient(ellipse 70% 55% at 50% 0%, #1c2433 0%, #0c0e16 55%, #07080d 100%);
+    padding:40px 28px 80px; -webkit-font-smoothing:antialiased;
+  }
+  h1{font-family:'Cinzel',serif; color:var(--gold); text-align:center; font-size:30px; letter-spacing:1px;}
+  .sub{text-align:center; color:var(--dusty); max-width:780px; margin:10px auto 8px; font-size:15px; line-height:1.5;}
+  .brief{text-align:center; color:#8E96A6; max-width:820px; margin:0 auto 30px; font-size:13px; font-style:italic;}
+  .design{max-width:1180px; margin:0 auto 46px; background:rgba(10,12,20,.55); border:1px solid #232a38; border-radius:14px; padding:26px 28px 30px;}
+  .design > h2{font-family:'Cinzel',serif; color:var(--gold-lt); font-size:21px; letter-spacing:.5px; margin-bottom:4px;}
+  .design > .tag{color:var(--dusty); font-size:13px; margin-bottom:6px;}
+  .design > .why{color:#B9C0CC; font-size:13.5px; line-height:1.55; max-width:980px; margin-bottom:20px;}
+  .row{display:flex; gap:22px; flex-wrap:wrap; align-items:flex-end;}
+  .label{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; color:var(--dusty); text-align:center; margin-top:8px;}
+  .col{display:flex; flex-direction:column; align-items:center;}
+  .states{margin-top:26px; padding-top:20px; border-top:1px dashed #2b3342;}
+  .states h3{font-family:'Cinzel',serif; font-size:12px; letter-spacing:1px; color:var(--dusty); margin-bottom:14px;}
+
+  /* ================= shared card shell ================= */
+  .card{position:relative; width:var(--cardW); height:var(--cardH); border-radius:12px; overflow:hidden;
+        flex-shrink:0; user-select:none;}
+  .art-img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 22%;}
+  .suit-red{color:var(--red-suit);} .suit-black{color:var(--black-suit);}
+
+  /* ============================================================
+     DESIGN A — "GILT CARTOUCHE": the art is a framed gallery portrait.
+     Carved-gold inner frame, corner rank roundel, engraved nameplate.
+     ============================================================ */
+  .a{background:linear-gradient(160deg,#241b10,#15100a); padding:12px 12px 0;
+     box-shadow:0 8px 22px rgba(0,0,0,.6), inset 0 0 0 2px var(--gold-dk), inset 0 0 0 4px #2a1f12;}
+  .a .frame{position:relative; height:212px; border-radius:6px; overflow:hidden;
+     box-shadow:0 0 0 3px var(--gold-dk), 0 0 0 5px #3a2c18, inset 0 0 14px rgba(0,0,0,.6);
+     border:1px solid var(--gold-lt);}
+  .a .frame .art-img{object-position:50% 18%;}
+  .a .frame::after{content:""; position:absolute; inset:0; box-shadow:inset 0 -40px 38px rgba(8,6,4,.7); pointer-events:none;}
+  .a .rank{position:absolute; top:6px; left:6px; z-index:4; width:42px; height:42px; border-radius:50%;
+     background:radial-gradient(circle at 38% 32%, var(--gold-lt), var(--gold-dk));
+     border:2px solid #3a2c18; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:.9;
+     font-family:'Cinzel',serif; font-weight:700; color:#241b10; box-shadow:0 2px 5px rgba(0,0,0,.5);}
+  .a .rank .r{font-size:17px;} .a .rank .s{font-size:13px;}
+  .a .doc{position:absolute; top:8px; right:8px; z-index:4; width:18px; height:18px; border-radius:50%; border:2px solid var(--gold-lt); box-shadow:0 1px 3px rgba(0,0,0,.6);}
+  .a .plate{position:relative; margin:9px 4px 0; text-align:center;}
+  .a .nameplate{display:inline-block; padding:3px 18px; background:linear-gradient(180deg,#2a2014,#1a130b);
+     border:1px solid var(--gold-dk); border-radius:3px; font-family:'Cinzel',serif; font-size:13px; color:var(--gold-lt);
+     box-shadow:inset 0 0 6px rgba(0,0,0,.6); position:relative; top:-22px;}
+  .a .abl{margin:-12px 10px 0; padding:5px 8px 7px; border-radius:4px; text-align:center;
+     font-family:'Crimson Pro',serif; font-size:11.5px; line-height:1.25; color:#f3ead6;
+     background:linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.34)); border-top:1px solid var(--gold-dk);}
+  .a .abl b{display:block; font-family:'Cinzel',serif; font-size:10px; letter-spacing:.5px; margin-bottom:1px;}
+
+  /* ============================================================
+     DESIGN B — "FULL-BLEED CINEMATIC": art IS the card. UI floats on
+     gradient scrims; gem rank, filigree corners, doctrine title bar.
+     ============================================================ */
+  .b{box-shadow:0 8px 22px rgba(0,0,0,.6), inset 0 0 0 2px rgba(212,168,70,.55), inset 0 0 0 4px rgba(10,8,4,.9);}
+  .b .scrim-top{position:absolute; top:0; left:0; right:0; height:74px; z-index:2;
+     background:linear-gradient(180deg, rgba(6,5,9,.78), rgba(6,5,9,0));}
+  .b .scrim-bot{position:absolute; bottom:0; left:0; right:0; height:46%; z-index:2;
+     background:linear-gradient(0deg, rgba(6,5,9,.93) 38%, rgba(6,5,9,.55) 68%, rgba(6,5,9,0));}
+  .b .rank{position:absolute; top:9px; left:10px; z-index:4; display:flex; align-items:baseline; gap:2px;
+     font-family:'Cinzel',serif; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,.9);}
+  .b .rank .r{font-size:26px; color:#fff;} .b .rank .s{font-size:18px;}
+  .b .gem{position:absolute; top:11px; right:11px; z-index:4; width:16px; height:16px; transform:rotate(45deg);
+     border:1.5px solid rgba(255,255,255,.5); box-shadow:0 0 8px rgba(0,0,0,.7);}
+  .b .name{position:absolute; left:0; right:0; bottom:42px; z-index:4; text-align:center;
+     font-family:'Cinzel',serif; font-size:16px; color:var(--gold-lt); letter-spacing:.5px; text-shadow:0 2px 5px rgba(0,0,0,.9);}
+  .b .name .ds{display:block; font-family:'Crimson Pro',serif; font-style:italic; font-size:10px; color:var(--dusty); letter-spacing:0; margin-top:1px;}
+  .b .abl{position:absolute; left:0; right:0; bottom:0; z-index:4; padding:7px 10px; text-align:center;
+     font-family:'Crimson Pro',serif; font-size:11.5px; line-height:1.25; color:#fff;}
+  .b .abl b{font-family:'Cinzel',serif; font-size:10px; letter-spacing:.5px;}
+  .b .fil{position:absolute; z-index:3; color:var(--gold); opacity:.7; font-size:15px;}
+  .b .fil.tl{top:2px; left:5px;} .b .fil.tr{top:2px; right:5px;} .b .fil.bl{bottom:0; left:5px;} .b .fil.br{bottom:0; right:5px;}
+
+  /* ============================================================
+     DESIGN C — "VENETIAN ENGRAVING": aged parchment, printed double-rule
+     border + corner flourishes, arched portrait niche, heraldic ability banner.
+     ============================================================ */
+  .c{background:
+       radial-gradient(ellipse 80% 70% at 50% 40%, #efe3c8 0%, #e3d3ad 60%, #c9b485 100%);
+     padding:10px; box-shadow:0 8px 22px rgba(0,0,0,.6);}
+  .c .rule{position:absolute; inset:6px; border:1px solid var(--gold-dk); border-radius:8px; pointer-events:none; z-index:5;}
+  .c .rule::before{content:""; position:absolute; inset:3px; border:1px solid rgba(122,94,48,.5); border-radius:6px;}
+  .c .flo{position:absolute; z-index:6; color:var(--gold-dk); font-size:16px; line-height:1;}
+  .c .flo.tl{top:8px; left:11px;} .c .flo.tr{top:8px; right:11px; transform:scaleX(-1);}
+  .c .flo.bl{bottom:8px; left:11px; transform:scaleY(-1);} .c .flo.br{bottom:8px; right:11px; transform:scale(-1,-1);}
+  .c .niche{position:relative; margin:22px 14px 0; height:188px; border-radius:64px 64px 8px 8px; overflow:hidden;
+     box-shadow:0 0 0 2px var(--gold-dk), inset 0 0 16px rgba(60,40,16,.5);}
+  .c .niche .art-img{filter:sepia(.32) saturate(.92) contrast(1.02); object-position:50% 14%;}
+  .c .rank{position:absolute; top:14px; left:16px; z-index:7; font-family:'Cinzel Decorative','Cinzel',serif; font-weight:700; line-height:.85; text-align:center;}
+  .c .rank .r{font-size:22px; display:block;} .c .rank .s{font-size:16px;}
+  .c .rank.br{top:auto; left:auto; bottom:14px; right:16px; transform:rotate(180deg);}
+  .c .name{margin:12px 16px 0; text-align:center; font-family:'Cinzel',serif; font-size:14px; color:#3a2c18;
+     padding:4px 0; border-top:1px solid var(--gold-dk); border-bottom:1px solid rgba(122,94,48,.5);}
+  .c .name .ds{display:block; font-family:'Crimson Pro',serif; font-style:italic; font-size:10px; color:#6b5736; border:0; margin-top:1px;}
+  .c .abl{position:absolute; left:18px; right:18px; bottom:20px; z-index:7; text-align:center; color:#fff;
+     padding:5px 6px; border-radius:3px; font-family:'Crimson Pro',serif; font-size:10.5px; line-height:1.2;
+     box-shadow:0 2px 5px rgba(0,0,0,.4); border:1px solid rgba(255,255,255,.25);}
+  .c .abl b{font-family:'Cinzel',serif; font-size:9.5px; letter-spacing:.5px;}
+
+  /* ===== shared state chrome (used in states rows) ===== */
+  .playable{box-shadow:0 0 0 3px var(--gold), 0 0 18px 3px rgba(212,168,70,.6) !important;}
+  .bonus{position:absolute; top:-9px; right:-9px; z-index:9; width:30px; height:30px; border-radius:50%;
+     background:radial-gradient(circle at 36% 30%,#e35b5b,var(--atk) 72%); border:2px solid #f0d9a0; color:#fff;
+     font-family:'Cinzel',serif; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.6);}
+  .tflag{position:absolute; bottom:-10px; left:50%; transform:translateX(-50%); z-index:9; white-space:nowrap;
+     background:var(--brute); color:#fff; font-family:'Cinzel',serif; font-size:10px; font-weight:700; padding:3px 10px; border-radius:4px; border:1px solid #e8a0a0; box-shadow:0 2px 6px rgba(0,0,0,.6);}
+  .wrap{position:relative;}  /* so bonus/tflag can overflow the card */
+  footer{max-width:1180px; margin:30px auto 0; color:#8E96A6; font-size:13px; line-height:1.6; border-top:1px solid #232a38; padding-top:20px;}
+  footer b{color:var(--gold-lt);}
+</style>
+</head>
+<body>
+  <h1>Card Frame — Three Directions</h1>
+  <p class="sub">The current cards paste the portrait into a plain rectangle between two flat bands — rank, name and
+  ability read as stickers on top. These three frames each <em>integrate</em> the art and the UI into one object,
+  in the Venetian / candlelit-Caravaggio theme.</p>
+  <p class="brief">Same five cards in every design (Courtesan 7♥ · Gladiator K♥ · Poisoner 6♠ · Dragon's Hoard A♣ · Transmuter J♦) so you can compare directly. Real generated art.</p>
+
+  <!-- ===================== DESIGN A ===================== -->
+  <section class="design">
+    <h2>A · Gilt Cartouche</h2>
+    <div class="tag">The portrait as a framed gallery painting</div>
+    <p class="why">The art lives inside a carved-gold picture frame (beveled, inset-shadowed) — it reads as a hung
+    Renaissance portrait, not a pasted image. The rank is a struck-gold coin in the corner, the name is an engraved
+    nameplate overlapping the frame's base, and the ability sits on a recessed parchment shelf. Richest / most
+    ornate; best on larger surfaces (reward, deck view, card detail).</p>
+    <div class="row" id="rowA"></div>
+    <div class="states"><h3>STATES — The Courtesan</h3><div class="row" id="stateA"></div></div>
+  </section>
+
+  <!-- ===================== DESIGN B ===================== -->
+  <section class="design">
+    <h2>B · Full-Bleed Cinematic</h2>
+    <div class="tag">The art <em>is</em> the card; UI floats on candlelight scrims</div>
+    <p class="why">The portrait fills the whole card edge-to-edge (no window, nothing to look "slapped on"). A soft
+    dark gradient rises from the bottom so the name + ability sit on the art legibly, and the rank is a corner gem.
+    Gold filigree corners + a thin inner gold line tie it to the theme. Reads cleanly even at hand size — best for
+    the in-match cards and the cleanest fit with the new felt board.</p>
+    <div class="row" id="rowB"></div>
+    <div class="states"><h3>STATES — The Courtesan (playable glow · trump defense · rank bonus)</h3><div class="row" id="stateB"></div></div>
+  </section>
+
+  <!-- ===================== DESIGN C ===================== -->
+  <section class="design">
+    <h2>C · Venetian Engraving</h2>
+    <div class="tag">A hand-printed 16th-century playing/tarot card</div>
+    <p class="why">Aged parchment with a printed double-rule border and corner flourishes; the portrait sits in an
+    arched niche and is lightly sepia-toned so it reads as an engraving rather than a photo drop-in. Rank as struck
+    numerals in opposing corners, name on a ruled plaque, ability on a heraldic banner in the doctrine's colour. Most
+    "period" and tactile; the warmest tonal match to the parchment map &amp; event screens.</p>
+    <div class="row" id="rowC"></div>
+    <div class="states"><h3>STATES — The Courtesan</h3><div class="row" id="stateC"></div></div>
+  </section>
+
+  <footer>
+    <b>How states attach (all three):</b> playable = gold outer glow; trump defense = red “♥ TRUMP” tab at the card
+    foot; rank bonus = red “+N” coin at the top-right; dimmed/unplayable = desaturate + 60% brightness. Doctrine is the
+    small colour accent (Schemer teal · Brute red · Trickster violet · Hoarder amber); rarity tints the rank coin / gem
+    (Common bronze · Uncommon steel · Rare gold).<br><br>
+    <b>Suggestion:</b> <b>B</b> for the in-match hand (clean at small size, fits the felt), <b>A</b> for reward / deck /
+    detail (room for ornament), with <b>C</b> as an alternate skin if we want a more antique whole-game tone. They can
+    share one builder — the difference is the frame layer, not the data.
+  </footer>
+
+<script>
+  const BASE = '../../Assets/Resources/CardArt/';
+  const SUIT = {Hearts:['♥','red'],Diamonds:['♦','red'],Clubs:['♣','black'],Spades:['♠','black']};
+  const RANK = {6:'6',7:'7',11:'J',13:'K',14:'A'};
+  const DOC  = {Schemer:'var(--schemer)',Brute:'var(--brute)',Trickster:'var(--trickster)',Hoarder:'var(--hoarder)'};
+  const ABLC = {atk:'var(--atk)',def:'var(--def)',util:'var(--util)',pas:'var(--pas)'};
+
+  const CARDS = [
+    {id:'trickster_courtesan', name:'The Courtesan', rank:7,  suit:'Hearts',   doc:'Trickster', abl:'Trump Changer', ablT:'util', desc:'Reroute the trump'},
+    {id:'brute_gladiator',     name:'The Gladiator', rank:13, suit:'Hearts',   doc:'Brute',     abl:'Fury',          ablT:'pas',  desc:'Gain 1 Fury'},
+    {id:'schemer_poisoner',    name:'The Poisoner',  rank:6,  suit:'Spades',   doc:'Schemer',   abl:'Riposte',       ablT:'def',  desc:'Foe discards 1'},
+    {id:'hoarder_dragons_hoard',name:"Dragon's Hoard",rank:14,suit:'Clubs',   doc:'Hoarder',   abl:'Windfall',      ablT:'util', desc:'Gain 2 Luck'},
+    {id:'trickster_transmuter',name:'The Transmuter',rank:11, suit:'Diamonds', doc:'Trickster', abl:'Transmute',     ablT:'util', desc:'Reorder & upgrade'},
+  ];
+
+  function suitHtml(c){const[g,col]=SUIT[c.suit]; return `<span class="suit-${col}">${RANK[c.rank]}${g}</span>`;}
+  function glyph(c){return SUIT[c.suit][0];}
+  function col(c){return SUIT[c.suit][1];}
+
+  function cardA(c){return `
+    <div class="card a">
+      <div class="doc" style="background:${DOC[c.doc]}"></div>
+      <div class="frame">
+        <img class="art-img" src="${BASE}${c.id}.png" alt="">
+        <div class="rank"><span class="r suit-${col(c)}">${RANK[c.rank]}</span><span class="s suit-${col(c)}">${glyph(c)}</span></div>
+      </div>
+      <div class="plate"><span class="nameplate">${c.name}</span></div>
+      <div class="abl" style="background:linear-gradient(180deg,rgba(0,0,0,.18),${ABLC[c.ablT]}44);border-top-color:${ABLC[c.ablT]}">
+        <b style="color:${ABLC[c.ablT]==='var(--util)'?'var(--gold-lt)':'#fff'}">${c.abl}</b>${c.desc}</div>
+    </div>`;}
+
+  function cardB(c){return `
+    <div class="card b">
+      <img class="art-img" src="${BASE}${c.id}.png" alt="">
+      <div class="scrim-top"></div><div class="scrim-bot"></div>
+      <span class="fil tl">❦</span><span class="fil tr">❦</span><span class="fil bl">❦</span><span class="fil br">❦</span>
+      <div class="rank"><span class="r">${RANK[c.rank]}</span><span class="s suit-${col(c)}">${glyph(c)}</span></div>
+      <div class="gem" style="background:${DOC[c.doc]}"></div>
+      <div class="name">${c.name}<span class="ds">${c.doc}</span></div>
+      <div class="abl" style="background:${ABLC[c.ablT]}"><b>${c.abl}</b> · ${c.desc}</div>
+    </div>`;}
+
+  function cardC(c){return `
+    <div class="card c">
+      <div class="rule"></div>
+      <span class="flo tl">❧</span><span class="flo tr">❧</span><span class="flo bl">❧</span><span class="flo br">❧</span>
+      <div class="niche">
+        <img class="art-img" src="${BASE}${c.id}.png" alt="">
+        <div class="rank"><span class="r suit-${col(c)}">${RANK[c.rank]}</span><span class="s suit-${col(c)}">${glyph(c)}</span></div>
+        <div class="rank br"><span class="r suit-${col(c)}">${RANK[c.rank]}</span><span class="s suit-${col(c)}">${glyph(c)}</span></div>
+        <div class="abl" style="background:${ABLC[c.ablT]}"><b>${c.abl}</b> · ${c.desc}</div>
+      </div>
+      <div class="name">${c.name}<span class="ds">${c.doc}</span></div>
+    </div>`;}
+
+  const render=(id,fn)=>document.getElementById(id).innerHTML =
+    CARDS.map(c=>`<div class="col"><div class="wrap">${fn(c)}</div></div>`).join('');
+  render('rowA',cardA); render('rowB',cardB); render('rowC',cardC);
+
+  // States rows (Courtesan)
+  const cz = CARDS[0];
+  document.getElementById('stateA').innerHTML =
+    `<div class="col"><div class="wrap">${cardA(cz)}</div><div class="label">DEFAULT</div></div>`+
+    `<div class="col"><div class="wrap">${cardA(cz).replace('card a','card a playable')}</div><div class="label">PLAYABLE</div></div>`+
+    `<div class="col"><div class="wrap">${cardA(cz)}<span class="tflag">♥ TRUMP</span></div><div class="label">TRUMP DEFENSE</div></div>`+
+    `<div class="col"><div class="wrap">${cardA(cz)}<span class="bonus">+2</span></div><div class="label">RANK BONUS</div></div>`;
+  document.getElementById('stateB').innerHTML =
+    `<div class="col"><div class="wrap">${cardB(cz)}</div><div class="label">DEFAULT</div></div>`+
+    `<div class="col"><div class="wrap">${cardB(cz).replace('card b','card b playable')}</div><div class="label">PLAYABLE</div></div>`+
+    `<div class="col"><div class="wrap">${cardB(cz)}<span class="tflag">♥ TRUMP</span></div><div class="label">TRUMP DEFENSE</div></div>`+
+    `<div class="col"><div class="wrap">${cardB(cz)}<span class="bonus">+2</span></div><div class="label">RANK BONUS</div></div>`;
+  document.getElementById('stateC').innerHTML =
+    `<div class="col"><div class="wrap">${cardC(cz)}</div><div class="label">DEFAULT</div></div>`+
+    `<div class="col"><div class="wrap">${cardC(cz).replace('card c','card c playable')}</div><div class="label">PLAYABLE</div></div>`+
+    `<div class="col"><div class="wrap">${cardC(cz)}<span class="tflag">♥ TRUMP</span></div><div class="label">TRUMP DEFENSE</div></div>`+
+    `<div class="col"><div class="wrap">${cardC(cz)}<span class="bonus">+2</span></div><div class="label">RANK BONUS</div></div>`;
+</script>
+</body>
+</html>
