@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wits &amp; Fools — Card Frame B (refined)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --midnight:#0A0A14; --parchment:#F0E6D2; --dusty:#A89B8C;
+    --gold:#D4A846; --gold-lt:#E8C766; --gold-dk:#9A7A28;
+    --red-suit:#E06A6A; --black-suit:#E8E2D2;
+    --schemer:#2E8B9E; --brute:#A83333; --trickster:#8A4FA0; --hoarder:#C08A2A;
+    --atk:#A83232; --def:#33689C; --util:#7A5E1A; --pas:#3F7E3F;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Crimson Pro',serif; color:var(--parchment);
+    background:radial-gradient(ellipse 70% 55% at 50% 0%, #1c2433 0%, #0c0e16 55%, #07080d 100%);
+    padding:40px 28px 90px; -webkit-font-smoothing:antialiased;}
+  h1{font-family:'Cinzel',serif; color:var(--gold); text-align:center; font-size:28px; letter-spacing:1px;}
+  .sub{text-align:center; color:var(--dusty); max-width:820px; margin:10px auto 4px; font-size:15px; line-height:1.55;}
+  section{max-width:1180px; margin:0 auto 40px; background:rgba(10,12,20,.55); border:1px solid #232a38; border-radius:14px; padding:24px 28px 30px;}
+  h2{font-family:'Cinzel',serif; color:var(--gold-lt); font-size:19px; margin-bottom:4px;}
+  .why{color:#B9C0CC; font-size:13.5px; line-height:1.55; max-width:980px; margin-bottom:20px;}
+  .why em{color:var(--gold-lt); font-style:normal;}
+  .row{display:flex; gap:24px; flex-wrap:wrap; align-items:flex-start;}
+  .col{display:flex; flex-direction:column; align-items:center;}
+  .label{font-family:'Cinzel',serif; font-size:10px; letter-spacing:1px; color:var(--dusty); text-align:center; margin-top:10px;}
+
+  /* ===================== CARD (Design B base) ===================== */
+  .card{position:relative; width:208px; height:296px; border-radius:12px; overflow:hidden; flex-shrink:0;
+        box-shadow:0 8px 22px rgba(0,0,0,.6), inset 0 0 0 2px rgba(212,168,70,.55), inset 0 0 0 4px rgba(10,8,4,.9);}
+  .art{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:50% 20%;
+       transition:transform .3s ease, filter .3s ease;}
+  .scrim-top{position:absolute; top:0; left:0; right:0; height:70px; z-index:2;
+       background:linear-gradient(180deg, rgba(6,5,9,.72), rgba(6,5,9,0));}
+  .fil{position:absolute; z-index:3; color:var(--gold); opacity:.65; font-size:14px;}
+  .fil.tl{top:2px; left:6px;} .fil.tr{top:2px; right:6px;} .fil.bl{bottom:2px; left:6px;} .fil.br{bottom:2px; right:6px;}
+  .suit-red{color:var(--red-suit);} .suit-black{color:var(--black-suit);}
+
+  /* rank + SUBTLE engraved cartouche behind it (borrowed from A, low-opacity) */
+  .rank{position:absolute; top:8px; left:9px; z-index:5; width:46px; height:54px;
+        display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:.86;
+        font-family:'Cinzel',serif; font-weight:700; text-shadow:0 2px 4px rgba(0,0,0,.95);}
+  .rank .engrave{position:absolute; inset:0; z-index:-1; opacity:.42;}
+  .rank .r{font-size:23px; color:#fff;} .rank .s{font-size:15px;}
+  .gem{position:absolute; top:11px; right:11px; z-index:5; width:15px; height:15px; transform:rotate(45deg);
+       border:1.5px solid rgba(255,255,255,.55); box-shadow:0 0 8px rgba(0,0,0,.7);}
+
+  /* ===== info drawer: collapsed = name + ability label; opens (slides up) to full body text ===== */
+  .info{position:absolute; left:0; right:0; bottom:0; z-index:4; display:flex; flex-direction:column; justify-content:flex-end;
+        padding:0 0 0 0; max-height:54px; overflow:hidden; transition:max-height .30s cubic-bezier(.22,.61,.36,1);
+        background:linear-gradient(0deg, rgba(6,5,9,.96) 55%, rgba(6,5,9,.82) 78%, rgba(6,5,9,0));}
+  .info .body{padding:8px 12px 4px; color:#E7DFCE; font-size:12px; line-height:1.34;
+        opacity:0; transform:translateY(6px); transition:opacity .2s .10s ease, transform .26s .06s ease;}
+  .info .body .flav{display:block; font-style:italic; color:var(--dusty); font-size:11px; margin-top:4px;}
+  .info .nm{text-align:center; font-family:'Cinzel',serif; font-size:14px; color:var(--gold-lt); letter-spacing:.4px;
+        text-shadow:0 2px 5px rgba(0,0,0,.9); padding:0 8px;}
+  .info .nm .ds{display:block; font-family:'Crimson Pro',serif; font-style:italic; font-size:9.5px; color:var(--dusty); letter-spacing:0;}
+  .info .abl{margin-top:5px; padding:5px 10px; text-align:center; color:#fff; font-family:'Crimson Pro',serif; font-size:11px;}
+  .info .abl b{font-family:'Cinzel',serif; font-size:10px; letter-spacing:.5px;}
+
+  /* OPEN state — by hover (in-match) OR .open (reward/deck/detail). Drawer slides up, art recedes. */
+  .card:hover .info, .card.open .info{max-height:64%;}
+  .card:hover .info .body, .card.open .info .body{opacity:1; transform:translateY(0);}
+  .card:hover .art, .card.open .art{transform:scale(1.0) translateY(-6%);}   /* image effectively shrinks behind the panel */
+  .card.open{cursor:default;}
+
+  /* state chrome */
+  .wrap{position:relative;}
+  .playable{box-shadow:0 0 0 3px var(--gold), 0 0 18px 3px rgba(212,168,70,.6) !important;}
+  .bonus{position:absolute; top:-9px; right:-9px; z-index:9; width:30px; height:30px; border-radius:50%;
+     background:radial-gradient(circle at 36% 30%,#e35b5b,var(--atk) 72%); border:2px solid #f0d9a0; color:#fff;
+     font-family:'Cinzel',serif; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.6);}
+  .tflag{position:absolute; bottom:-10px; left:50%; transform:translateX(-50%); z-index:9; white-space:nowrap;
+     background:var(--brute); color:#fff; font-family:'Cinzel',serif; font-size:10px; font-weight:700; padding:3px 10px; border-radius:4px; border:1px solid #e8a0a0; box-shadow:0 2px 6px rgba(0,0,0,.6);}
+  footer{max-width:1180px; margin:8px auto 0; color:#8E96A6; font-size:13px; line-height:1.6; border-top:1px solid #232a38; padding-top:18px;}
+  footer b{color:var(--gold-lt);}
+  .hintbar{display:inline-block; margin-left:8px; font-size:12px; color:var(--gold-lt); font-style:italic;}
+</style>
+</head>
+<body>
+  <h1>Card Frame B — refined</h1>
+  <p class="sub">One card component. Full-bleed art (Design B) with a <em>subtle engraved cartouche</em> behind the
+  upper-left rank/suit. A bottom <em>info drawer</em> shows just the name + ability label in hand, and <em>slides up</em>
+  to reveal the full body text — that open state IS the reward / deck / detail view. <span class="hintbar">▸ hover any card below to see the slide-up.</span></p>
+
+  <section>
+    <h2>In hand (compact)</h2>
+    <p class="why">The drawer is collapsed: rank + suit (with the faint gold engraving behind), name, and the colour-coded
+    ability label. Clean at hand size on the felt. <em>Hover to preview the detail slide-up</em> (this is the hover/tap detail view).</p>
+    <div class="row" id="rowCompact"></div>
+  </section>
+
+  <section>
+    <h2>Reward / Deck / Detail (drawer open)</h2>
+    <p class="why">Exactly the same frame &amp; elements as B — the drawer is simply open by default: the image recedes
+    to the top and the <em>full ability text</em> (plus flavour) shows in the text box, like A's body panel but in B's
+    language. The hover/tap detail view animates into this same state.</p>
+    <div class="row" id="rowOpen"></div>
+  </section>
+
+  <section>
+    <h2>States (compact)</h2>
+    <p class="why">Playable = gold glow · trump defense = red tab at the foot · rank bonus = red coin top-right. Same on the open view.</p>
+    <div class="row" id="rowStates"></div>
+  </section>
+
+  <footer>
+    <b>One component, two presentations:</b> the only difference between the hand card and the reward/deck/detail card is
+    whether the drawer is open. In Unity: <b>CardView</b> renders the B frame + collapsed drawer; the reward/deck builders
+    spawn the same CardView with <b>open=true</b>; and hover/tap (pointer or touch) toggles <b>open</b> with the slide-up
+    animation. Body text + flavour come from the card definition.
+  </footer>
+
+<script>
+  const BASE='../../Assets/Resources/CardArt/';
+  const SUIT={Hearts:['♥','red'],Diamonds:['♦','red'],Clubs:['♣','black'],Spades:['♠','black']};
+  const RANK={6:'6',7:'7',11:'J',13:'K',14:'A'};
+  const DOC={Schemer:'var(--schemer)',Brute:'var(--brute)',Trickster:'var(--trickster)',Hoarder:'var(--hoarder)'};
+  const ABLC={atk:'var(--atk)',def:'var(--def)',util:'var(--util)',pas:'var(--pas)'};
+  // subtle engraved cartouche behind the rank (gold strokes, low opacity via CSS)
+  const ENGRAVE=`<svg class="engrave" viewBox="0 0 60 72" fill="none" stroke="#E8C766" stroke-width="1.1">
+    <path d="M30 3 C19 3 11 11 11 25 C11 41 20 55 30 68 C40 55 49 41 49 25 C49 11 41 3 30 3 Z"/>
+    <path d="M30 8 C22 8 16 14 16 25 C16 39 23 50 30 60" opacity=".7"/>
+    <path d="M30 8 C38 8 44 14 44 25 C44 39 37 50 30 60" opacity=".7"/>
+    <path d="M24 3 q6 -4 12 0 M24 68 q6 4 12 0" opacity=".8"/></svg>`;
+
+  const CARDS=[
+    {id:'trickster_courtesan',name:'The Courtesan',rank:7,suit:'Hearts',doc:'Trickster',abl:'Trump Changer',ablT:'util',
+     body:'Change the trump suit to this card’s suit. Once per match.',flav:'A smile is the sharpest blade.'},
+    {id:'brute_gladiator',name:'The Gladiator',rank:13,suit:'Hearts',doc:'Brute',abl:'Fury',ablT:'pas',
+     body:'Gain 1 Fury when this card is played.',flav:'The crowd wants blood. He obliges.'},
+    {id:'schemer_poisoner',name:'The Poisoner',rank:6,suit:'Spades',doc:'Schemer',abl:'Riposte',ablT:'def',
+     body:'Spend 1 Intel: the opponent discards 1 random card.',flav:'A drop in the cup, a name off the ledger.'},
+    {id:'hoarder_dragons_hoard',name:"Dragon's Hoard",rank:14,suit:'Clubs',doc:'Hoarder',abl:'Windfall',ablT:'util',
+     body:'When you successfully defend a bout, gain 2 Luck.',flav:'Every coin remembers its master.'},
+    {id:'trickster_transmuter',name:'The Transmuter',rank:11,suit:'Diamonds',doc:'Trickster',abl:'Transmute',ablT:'util',
+     body:'Spend 1 Favor: reorder the top 3 of your deck and draw 1.',flav:'Lead today, gold tomorrow.'},
+  ];
+
+  const g=c=>SUIT[c.suit][0], col=c=>SUIT[c.suit][1];
+  function card(c, open){return `
+    <div class="card${open?' open':''}">
+      <img class="art" src="${BASE}${c.id}.png" alt="">
+      <div class="scrim-top"></div>
+      <span class="fil tl">❦</span><span class="fil tr">❦</span><span class="fil bl">❦</span><span class="fil br">❦</span>
+      <div class="rank">${ENGRAVE}<span class="r">${RANK[c.rank]}</span><span class="s suit-${col(c)}">${g(c)}</span></div>
+      <div class="gem" style="background:${DOC[c.doc]}"></div>
+      <div class="info">
+        <div class="body">${c.body}<span class="flav">${c.flav}</span></div>
+        <div class="nm">${c.name}<span class="ds">${c.doc}</span></div>
+        <div class="abl" style="background:${ABLC[c.ablT]}"><b>${c.abl}</b></div>
+      </div>
+    </div>`;}
+
+  const place=(id,html)=>document.getElementById(id).innerHTML=html;
+  place('rowCompact', CARDS.map(c=>`<div class="col"><div class="wrap">${card(c,false)}</div><div class="label">${c.name.toUpperCase()}</div></div>`).join(''));
+  place('rowOpen',    CARDS.map(c=>`<div class="col"><div class="wrap">${card(c,true)}</div></div>`).join(''));
+
+  const cz=CARDS[0];
+  place('rowStates',
+    `<div class="col"><div class="wrap">${card(cz,false)}</div><div class="label">DEFAULT</div></div>`+
+    `<div class="col"><div class="wrap">${card(cz,false).replace('class="card"','class="card playable"')}</div><div class="label">PLAYABLE</div></div>`+
+    `<div class="col"><div class="wrap">${card(cz,false)}<span class="tflag">♥ TRUMP</span></div><div class="label">TRUMP DEFENSE</div></div>`+
+    `<div class="col"><div class="wrap">${card(cz,false)}<span class="bonus">+2</span></div><div class="label">RANK BONUS</div></div>`);
+</script>
+</body>
+</html>
