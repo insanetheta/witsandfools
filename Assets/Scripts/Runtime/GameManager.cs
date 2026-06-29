@@ -526,9 +526,10 @@ namespace WitsAndFools
             Debug.Log($"[GameManager] GAME OVER: fool={foolIndex} boutCount={Engine?.BoutCount} matchFrames={_matchFrames} " +
                 $"stack={StackTraceUtility.ExtractStackTrace()}");
             int winnerIndex = 1 - foolIndex;
+            // Dramatic match-end banner per the mockup's MATCH END state (caps headline + a sub-line).
             string msg = foolIndex == HumanPlayerIndex
-                ? "You are the Fool."
-                : $"You won! {OpponentName} is the Fool.";
+                ? "YOU ARE THE FOOL\n<size=45%><color=#A89B8C>Your reputation suffers.</color></size>"
+                : $"{OpponentName.ToUpper()} IS THE FOOL\n<size=45%><color=#A89B8C>Victory is yours.</color></size>";
             Hud?.ShowGameOver(msg);
             OnMatchComplete?.Invoke(winnerIndex);
         }
@@ -1010,13 +1011,22 @@ namespace WitsAndFools
                 else if (humanDefense)
                 {
                     Hud.SetEndBoutEnabled(true);
-                    SetEndBoutLabel("Take cards");
+                    int toTake = _attackViews.Count + _defenseViews.Count;
+                    SetEndBoutLabel(toTake > 0 ? $"Take {toTake} card{(toTake == 1 ? "" : "s")}" : "Take cards");
                 }
                 else
                 {
                     Hud.SetEndBoutEnabled(false);
                     SetEndBoutLabel("End bout");
                 }
+            }
+
+            // DEFENDER'S PUNISH (mockup): undefended attacks glow red while you must answer them.
+            for (int i = 0; i < _attackViews.Count; i++)
+            {
+                if (!_attackViews[i]) continue;
+                bool undefended = humanDefense && (i >= _defenseViews.Count || _defenseViews[i] == null);
+                _attackViews[i].SetHighlight(undefended ? CardView.Highlight.Threat : CardView.Highlight.None);
             }
         }
 

@@ -44,7 +44,7 @@ namespace WitsAndFools
         public Card Card => _card;
         public bool FaceUp => _faceUp;
 
-        public enum Highlight { None, Playable, Disabled }
+        public enum Highlight { None, Playable, Disabled, Threat }
 
         // Click delegate so HUD/Hand wiring can route clicks through one funnel.
         public System.Action<CardView> OnClicked;
@@ -195,6 +195,7 @@ namespace WitsAndFools
                 {
                     case Highlight.Playable: Outline.color = ThemePalette.PlayableGlow; break;
                     case Highlight.Disabled: Outline.color = ThemePalette.DisabledOutline; break;
+                    case Highlight.Threat: Outline.color = ThemePalette.VenetianRed; break;   // undefended attack
                     default: Outline.color = ThemePalette.OutlineNone; break;
                 }
             }
