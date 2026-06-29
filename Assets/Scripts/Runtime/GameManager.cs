@@ -285,6 +285,19 @@ namespace WitsAndFools
             UpdateAutoPlayLabel();
 
             CardView.OnHoverChanged = OnCardHover;
+            CardView.OnHoverViewChanged = OnCardHoverView;
+        }
+
+        // Anchor the ability tooltip just above the hovered card (kf4u) so it tracks the card the
+        // player is inspecting instead of sitting at a fixed spot.
+        void OnCardHoverView(CardView view)
+        {
+            if (view == null || Hud == null || Hud.TooltipLabel == null) return;
+            var tipRT = (RectTransform)Hud.TooltipLabel.transform;
+            var cardRT = (RectTransform)view.transform;
+            tipRT.pivot = new Vector2(0.5f, 0f);   // bottom-center sits above the card top
+            float halfH = cardRT.rect.height * cardRT.lossyScale.y * 0.5f;
+            tipRT.position = cardRT.position + new Vector3(0f, halfH + 12f, 0f);
         }
 
         void OnSetupComplete()

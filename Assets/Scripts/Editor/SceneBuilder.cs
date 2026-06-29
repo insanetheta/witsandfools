@@ -393,12 +393,14 @@ namespace WitsAndFools.EditorTools
             acPanel.gameObject.SetActive(false);
 
             // ----- Auto-play button (bottom-left, above run HUD) -----
+            // Dev auto-play toggle — top-right corner so it never hides behind the player identity
+            // panel (bottom-left) or the docked log rail (left edge). Small/secondary styling.
             var autoPlayBtn = AddButton(canvasRT, "AutoPlayButton", "Auto: OFF", secondary: true);
-            autoPlayBtn.anchorMin = new Vector2(0, 0);
-            autoPlayBtn.anchorMax = new Vector2(0, 0);
-            autoPlayBtn.pivot = new Vector2(0, 0);
-            autoPlayBtn.sizeDelta = new Vector2(140, 46);
-            autoPlayBtn.anchoredPosition = new Vector2(16, 80);
+            autoPlayBtn.anchorMin = new Vector2(1, 1);
+            autoPlayBtn.anchorMax = new Vector2(1, 1);
+            autoPlayBtn.pivot = new Vector2(1, 1);
+            autoPlayBtn.sizeDelta = new Vector2(120, 38);
+            autoPlayBtn.anchoredPosition = new Vector2(-12, -12);
             hud.AutoPlayButton = autoPlayBtn.GetComponent<Button>();
 
             // ----- Tooltip label (bottom-left, above resource label) -----

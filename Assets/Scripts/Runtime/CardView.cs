@@ -48,6 +48,7 @@ namespace WitsAndFools
         // Click delegate so HUD/Hand wiring can route clicks through one funnel.
         public System.Action<CardView> OnClicked;
         public static System.Action<Card?> OnHoverChanged;
+        public static System.Action<CardView> OnHoverViewChanged;   // carries the view so the tooltip can anchor to it
 
         void Awake()
         {
@@ -192,7 +193,7 @@ namespace WitsAndFools
 
         public void OnPointerClick(PointerEventData eventData) => OnClicked?.Invoke(this);
         // Hover affordances only fire for a fine pointer; touch drives selection via click/tap.
-        public void OnPointerEnter(PointerEventData eventData) { if (!InputProfile.Hover) return; _hover = true; ApplyOutline(); OnHoverChanged?.Invoke(_faceUp ? (Card?)_card : null); }
-        public void OnPointerExit(PointerEventData eventData) { if (!InputProfile.Hover) return; _hover = false; ApplyOutline(); OnHoverChanged?.Invoke(null); }
+        public void OnPointerEnter(PointerEventData eventData) { if (!InputProfile.Hover) return; _hover = true; ApplyOutline(); OnHoverChanged?.Invoke(_faceUp ? (Card?)_card : null); OnHoverViewChanged?.Invoke(this); }
+        public void OnPointerExit(PointerEventData eventData) { if (!InputProfile.Hover) return; _hover = false; ApplyOutline(); OnHoverChanged?.Invoke(null); OnHoverViewChanged?.Invoke(null); }
     }
 }
