@@ -817,7 +817,7 @@ namespace WitsAndFools
                 bgImg.color = new Color(0.14f, 0.11f, 0.07f, 0.95f);
             else
                 // More opaque so unvisited nodes lift off the busy parchment map instead of washing out.
-                bgImg.color = new Color(0.1f, 0.08f, 0.06f, 0.9f);
+                bgImg.color = new Color(0.09f, 0.07f, 0.05f, 0.97f);
 
             // Colored top stripe (type indicator)
             var stripeGO = new GameObject("Stripe", typeof(RectTransform), typeof(Image));
@@ -832,7 +832,9 @@ namespace WitsAndFools
                 Mathf.Min(typeColor.r * 1.6f, 1f),
                 Mathf.Min(typeColor.g * 1.6f, 1f),
                 Mathf.Min(typeColor.b * 1.6f, 1f));
-            var stripeColor = current ? brightType : (visited && wasChosen ? typeColor * 0.6f : typeColor * 0.4f);
+            // Current node's stripe is GOLD (the selection cue stays in-palette); other nodes keep a
+            // muted type-color stripe. (Was brightType, which read as a magenta border on Shop/Rumor.)
+            var stripeColor = current ? ThemePalette.Gold : (visited && wasChosen ? typeColor * 0.6f : typeColor * 0.4f);
             stripeColor.a = visited && !wasChosen ? 0.3f : 1f;
             stripeGO.GetComponent<Image>().color = stripeColor;
             stripeGO.GetComponent<Image>().raycastTarget = false;
@@ -898,8 +900,8 @@ namespace WitsAndFools
             var labelTMP = labelGO.AddComponent<TextMeshProUGUI>();
             labelTMP.text = title;
             labelTMP.alignment = TextAlignmentOptions.Center;
-            labelTMP.fontSize = 18;
-            labelTMP.enableWordWrapping = false;
+            labelTMP.fontSize = 15;                       // smaller + wrapping so titles fit instead of truncating
+            labelTMP.enableWordWrapping = true;
             labelTMP.overflowMode = TextOverflowModes.Ellipsis;
             labelTMP.raycastTarget = false;
             if (future) labelTMP.color = new Color(ThemePalette.Parchment.r, ThemePalette.Parchment.g, ThemePalette.Parchment.b, 0.35f);
@@ -1058,6 +1060,15 @@ namespace WitsAndFools
             MapNodeType.Rest => ThemePalette.NodeRest,
             _ => Color.gray
         };
+
+        // Gold card edge for purchasable choice rows (matches the ability/relic pick treatment).
+        static void GoldCardEdge(GameObject go)
+        {
+            var o = go.GetComponent<UnityEngine.UI.Outline>();
+            if (o == null) o = go.AddComponent<UnityEngine.UI.Outline>();
+            o.effectColor = new Color(ThemePalette.Gold.r, ThemePalette.Gold.g, ThemePalette.Gold.b, 0.4f);
+            o.effectDistance = new Vector2(1.5f, -1.5f);
+        }
 
         void OnNodeSelected(MapNode node, int row = -1)
         {
@@ -2080,6 +2091,7 @@ namespace WitsAndFools
             var btnGO = new GameObject("CardRemoval", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(ShopItemContainer, false);
             btnGO.GetComponent<Image>().color = canBuy ? new Color(0.35f, 0.12f, 0.12f, 0.96f) : ThemePalette.LockedGray;
+            if (canBuy) GoldCardEdge(btnGO);
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 70;
             le.preferredWidth = 550;
@@ -2140,6 +2152,7 @@ namespace WitsAndFools
             var btnGO = new GameObject("CardTransform", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(ShopItemContainer, false);
             btnGO.GetComponent<Image>().color = canBuy ? new Color(0.18f, 0.12f, 0.30f, 0.96f) : ThemePalette.LockedGray;
+            if (canBuy) GoldCardEdge(btnGO);
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 70;
             le.preferredWidth = 550;
@@ -2226,6 +2239,7 @@ namespace WitsAndFools
             var btnGO = new GameObject("TrinketItem", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(ShopItemContainer, false);
             btnGO.GetComponent<Image>().color = canBuy ? ThemePalette.ShopAbilityBg : ThemePalette.LockedGray;
+            if (canBuy) GoldCardEdge(btnGO);
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 90;
             le.preferredWidth = 550;
@@ -2305,6 +2319,7 @@ namespace WitsAndFools
             var btnGO = new GameObject("CardUpgrade", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
             btnGO.transform.SetParent(ShopItemContainer, false);
             btnGO.GetComponent<Image>().color = canBuy ? new Color(0.18f, 0.14f, 0.10f, 0.96f) : ThemePalette.LockedGray;
+            if (canBuy) GoldCardEdge(btnGO);
             var le = btnGO.GetComponent<LayoutElement>();
             le.preferredHeight = 70;
             le.preferredWidth = 550;
@@ -4208,6 +4223,7 @@ namespace WitsAndFools
                 var btnGO = new GameObject($"ShopCard_{cardDef.Id}", typeof(RectTransform), typeof(Image), typeof(Button), typeof(LayoutElement));
                 btnGO.transform.SetParent(ShopItemContainer, false);
                 btnGO.GetComponent<Image>().color = canBuy ? new Color(0.07f, 0.22f, 0.18f, 0.96f) : ThemePalette.LockedGray;
+                if (canBuy) GoldCardEdge(btnGO);
                 btnGO.GetComponent<LayoutElement>().preferredHeight = 90;
                 btnGO.GetComponent<LayoutElement>().preferredWidth = 550;
 
