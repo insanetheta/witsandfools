@@ -19,7 +19,7 @@ CATALOG = os.path.join(ASSETS, "Data", "card_catalog.json")
 PROMPT_DOC = os.path.join(HERE, "nanobanana_art_prompts.md")
 OUT_DIR = os.path.join(ASSETS, "Resources", "CardArt")
 
-API_KEY = os.environ.get("OPENROUTER_API_KEY", "")   # export OPENROUTER_API_KEY=... before running
+API_KEY = (lambda _p: open(_p).read().strip() if os.path.exists(_p) else os.environ.get("OPENROUTER_API_KEY", ""))(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".openrouter_key"))  # key read from untracked Assets/Art/.openrouter_key (never committed)
 MODEL = "google/gemini-2.5-flash-image"
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 

@@ -104,3 +104,8 @@ InitTestScene*.unity*
 .beads-credential-key
 docs/design/walkthrough/generate_assets.py
 docs/design/walkthrough/gen_image.sh
+
+# Secret: OpenRouter API key — never commit (scripts read it at runtime)
+.openrouter_key
+Assets/Art/.openrouter_key
+*.openrouter_key
