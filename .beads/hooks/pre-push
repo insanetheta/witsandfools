@@ -1,18 +1,26 @@
 #!/usr/bin/env sh
+# core.hooksPath points here (.beads/hooks), so this single pre-push hook must
+# drive BOTH beads sync AND git-lfs object upload. git-lfs could not install its
+# own hook because of the custom hooksPath, so its pre-push step is merged below.
+#
+# The pre-push hook receives the ref list on stdin; capture it once so both
+# beads and git-lfs get the same input (stdin can only be read once).
+_prepush_stdin="$(cat)"
+
 # --- BEGIN BEADS INTEGRATION v1.0.3 ---
 # This section is managed by beads. Do not remove these markers.
 if command -v bd >/dev/null 2>&1; then
   export BD_GIT_HOOK=1
   _bd_timeout=${BEADS_HOOK_TIMEOUT:-300}
   if command -v timeout >/dev/null 2>&1; then
-    timeout "$_bd_timeout" bd hooks run pre-push "$@"
+    printf '%s\n' "$_prepush_stdin" | timeout "$_bd_timeout" bd hooks run pre-push "$@"
     _bd_exit=$?
     if [ $_bd_exit -eq 124 ]; then
       echo >&2 "beads: hook 'pre-push' timed out after ${_bd_timeout}s — continuing without beads"
       _bd_exit=0
     fi
   else
-    bd hooks run pre-push "$@"
+    printf '%s\n' "$_prepush_stdin" | bd hooks run pre-push "$@"
     _bd_exit=$?
   fi
   if [ $_bd_exit -eq 3 ]; then
@@ -22,3 +30,13 @@ if command -v bd >/dev/null 2>&1; then
   if [ $_bd_exit -ne 0 ]; then exit $_bd_exit; fi
 fi
 # --- END BEADS INTEGRATION v1.0.3 ---
+
+# --- BEGIN GIT LFS INTEGRATION (managed manually; see comment at top) ---
+# Uploads LFS objects to the remote. Without this, `git push` would send only
+# the pointer files and the real binaries would never reach GitHub.
+if command -v git-lfs >/dev/null 2>&1; then
+  printf '%s\n' "$_prepush_stdin" | git lfs pre-push "$@"
+else
+  echo >&2 "git-lfs not found on PATH; skipping LFS pre-push (LFS objects will NOT upload)"
+fi
+# --- END GIT LFS INTEGRATION ---
