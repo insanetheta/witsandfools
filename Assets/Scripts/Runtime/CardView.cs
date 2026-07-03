@@ -36,7 +36,7 @@ namespace WitsAndFools
         public TMP_Text TrumpFlagLabel;
 
         [Header("Info drawer (slide-up)")]
-        public RectTransform Drawer;   // bottom drawer (RectMask2D); height animates
+        public RectTransform Drawer;   // bottom drawer (stencil Mask); height animates
         public Image DrawerScrim;      // gradient that darkens the art behind the drawer
         public CanvasGroup BodyGroup;  // body-text panel (faded in on expand)
         public TMP_Text BodyText;      // full ability description + flavour
@@ -220,7 +220,9 @@ namespace WitsAndFools
 
         void RenderBack()
         {
-            if (Background) Background.color = (BackImage && BackImage.sprite) ? Color.white : BackColor;
+            // Dark edge behind the back sprite (matches the face's dark border); white here
+            // reads as a glitchy white slab around every face-down card.
+            if (Background) Background.color = (BackImage && BackImage.sprite) ? new Color(0.06f, 0.05f, 0.08f, 1f) : BackColor;
             ApplyOutline();
         }
 

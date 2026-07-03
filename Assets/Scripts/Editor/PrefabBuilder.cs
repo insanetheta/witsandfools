@@ -92,11 +92,16 @@ namespace WitsAndFools.EditorTools
             center.gameObject.SetActive(false);
 
             // ---- info drawer (clipped, slides up) ----
-            var drawerGO = new GameObject("Drawer", typeof(RectTransform), typeof(RectMask2D));
+            // Stencil Mask, NOT RectMask2D: hand cards are rotated by the fan layout, and
+            // RectMask2D clips in axis-aligned canvas space, slicing drawer content diagonally
+            // on rotated cards (and leaking the body panel outside the drawer).
+            var drawerGO = new GameObject("Drawer", typeof(RectTransform), typeof(Image), typeof(Mask));
             drawerGO.transform.SetParent(faceRoot.transform, false);
             var drawerRT = (RectTransform)drawerGO.transform;
             drawerRT.anchorMin = new Vector2(0,0); drawerRT.anchorMax = new Vector2(1,0); drawerRT.pivot = new Vector2(0.5f,0);
             drawerRT.sizeDelta = new Vector2(0, 38); drawerRT.anchoredPosition = Vector2.zero;
+            drawerGO.GetComponent<Image>().raycastTarget = false;
+            drawerGO.GetComponent<Mask>().showMaskGraphic = false;
 
             var dScrimGO = new GameObject("DrawerScrim", typeof(RectTransform), typeof(Image));
             dScrimGO.transform.SetParent(drawerGO.transform, false);
