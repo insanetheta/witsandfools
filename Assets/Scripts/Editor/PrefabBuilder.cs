@@ -122,10 +122,11 @@ namespace WitsAndFools.EditorTools
                 anchorMin:Vector2.zero, anchorMax:Vector2.one, pivot:new Vector2(0.5f,0.5f),
                 position:Vector2.zero, size:Vector2.zero, alignment:TextAlignmentOptions.Center, fontSize:9);
             abilityBadge.fontStyle = FontStyles.Bold; abilityBadge.color = Color.white; if (HeadingFont) abilityBadge.font = HeadingFont;
-            abilityBadge.enableAutoSizing = true; abilityBadge.fontSizeMin = 7; abilityBadge.fontSizeMax = 10;
-            // keep the centered label clear of the timing glyph on the left
+            abilityBadge.enableAutoSizing = true; abilityBadge.fontSizeMin = 6; abilityBadge.fontSizeMax = 10;
+            abilityBadge.overflowMode = TextOverflowModes.Ellipsis;
+            // clear the timing glyph on the left; keep the right inset minimal so long names fit
             var abRT = (RectTransform)abilityBadge.transform;
-            abRT.offsetMin = new Vector2(16, 0); abRT.offsetMax = new Vector2(-16, 0);
+            abRT.offsetMin = new Vector2(16, 0); abRT.offsetMax = new Vector2(-4, 0);
 
             // trigger-timing glyph (sword = on attack, shield = on defend, sunburst = passive)
             var trigGO = new GameObject("TriggerIcon", typeof(RectTransform), typeof(Image));
