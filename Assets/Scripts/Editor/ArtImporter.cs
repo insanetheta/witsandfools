@@ -33,6 +33,11 @@ namespace WitsAndFools.EditorTools
             }
             else if (assetPath.Contains("/Portraits/"))
                 importer.maxTextureSize = 512;
+            else if (assetPath.Contains("/Icons/"))
+            {
+                importer.alphaIsTransparency = true;
+                importer.maxTextureSize = 128;
+            }
             else
                 importer.maxTextureSize = 512;
         }

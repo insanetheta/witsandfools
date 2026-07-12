@@ -30,6 +30,10 @@ namespace WitsAndFools
         public TMP_Text DoctrineSubLabel;
         public TMP_Text AbilityBadge;
         public Image AbilityBadgeBg;   // colored strip behind the ability word
+        public Image TriggerIcon;      // timing glyph on the badge: sword/shield/sunburst
+        public Sprite TriggerAttackSprite;   // OnAttack
+        public Sprite TriggerDefendSprite;   // OnDefend
+        public Sprite TriggerPassiveSprite;  // Passive
         public GameObject BonusChip;   // "+2" rank-bonus chip (top-right)
         public TMP_Text BonusChipLabel;
         public GameObject TrumpFlag;   // "♥ TRUMP" flag shown on trump defenses
@@ -196,6 +200,13 @@ namespace WitsAndFools
                 else { AbilityBadge.gameObject.SetActive(false); if (AbilityBadgeBg) AbilityBadgeBg.gameObject.SetActive(false); }
             }
 
+            if (TriggerIcon)
+            {
+                var timing = _card.HasAbility ? TriggerSprite(_card.Trigger) : null;
+                TriggerIcon.sprite = timing;
+                TriggerIcon.gameObject.SetActive(timing != null);
+            }
+
             if (BodyText)
             {
                 string body = hasDef && !string.IsNullOrEmpty(def.AbilityText) ? def.AbilityText
@@ -208,6 +219,14 @@ namespace WitsAndFools
         }
 
         static Color AbilityBadgeColor(AbilityType ability) => ThemePalette.AbilityBadgeColor(ability);
+
+        Sprite TriggerSprite(TriggerTiming timing) => timing switch
+        {
+            TriggerTiming.OnAttack => TriggerAttackSprite,
+            TriggerTiming.OnDefend => TriggerDefendSprite,
+            TriggerTiming.Passive  => TriggerPassiveSprite,
+            _ => null   // active abilities get the Use Ability modal instead
+        };
 
         static Color DoctrineColor(DoctrineType d) => d switch
         {

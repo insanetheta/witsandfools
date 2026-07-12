@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wits &amp; Fools — Trigger Timing Icons (Set A vs Set B)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --felt: #1c4030;
+    --felt-deep: #143024;
+    --panel: #0f281c;
+    --line: rgba(212, 180, 120, 0.22);
+    --gold: #CC9933;
+    --gold-bright: #E8C15A;
+    --parchment: #EFE3CC;
+    --tan: #A89B8C;
+    --ink: #10261b;
+    --atk: #CC4444;
+    --def: #4488BB;
+    --util: #CC9933;
+    --pas: #55AA55;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Crimson Pro', serif;
+    color: var(--parchment);
+    background:
+      radial-gradient(ellipse 120% 90% at 50% -10%, rgba(255, 230, 170, 0.07), transparent 60%),
+      radial-gradient(ellipse 140% 120% at 50% 115%, var(--felt-deep), transparent 70%),
+      var(--felt);
+    min-height: 100vh;
+    margin: 0;
+    padding: 48px 24px 72px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 960px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+
+  .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--gold-bright); margin: 0 0 10px;
+  }
+  h1 { font-family: 'Cinzel', serif; font-size: 27px; font-weight: 600; margin: 0 0 10px; text-wrap: balance; letter-spacing: 0.01em; }
+  .lede { color: var(--tan); font-size: 16.5px; line-height: 1.55; max-width: 58ch; margin: 0; }
+  .lede strong { color: var(--parchment); font-weight: 600; }
+
+  h2 {
+    font-family: 'Cinzel', serif;
+    font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold-bright); font-weight: 600; margin: 0 0 4px;
+  }
+  .section-note { color: var(--tan); font-size: 14.5px; margin: 0 0 18px; line-height: 1.5; }
+
+  /* ---- Set panels ---- */
+  .sets { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 720px) { .sets { grid-template-columns: 1fr; } }
+  .set-panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.14));
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 22px 20px;
+  }
+  .set-name { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600; margin: 0 0 2px; }
+  .set-name .tag {
+    display: inline-block; width: 24px; height: 24px; border-radius: 50%;
+    background: var(--gold); color: var(--ink); font-size: 13px; font-weight: 700;
+    text-align: center; line-height: 24px; margin-right: 9px; vertical-align: 2px;
+  }
+  .set-desc { color: var(--tan); font-size: 14.5px; line-height: 1.5; margin: 0 0 18px; }
+  .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .tile {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 8px 12px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+  .tile svg { width: 52px; height: 52px; display: block; }
+  .tile-label {
+    font-family: 'Cinzel', serif;
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--parchment);
+  }
+  .tile-sub { font-size: 12px; color: var(--tan); margin-top: -6px; font-style: italic; }
+
+  /* ---- Card mocks ---- */
+  .cards { display: flex; gap: 40px; flex-wrap: wrap; align-items: flex-end; }
+  .card-col { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  .card {
+    width: 168px; height: 235px; border-radius: 10px; overflow: hidden;
+    position: relative;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 30%, #4a3826, #241a10 75%);
+    border: 1px solid rgba(232, 193, 90, 0.35);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.45);
+  }
+  .card .rankpip {
+    position: absolute; top: 8px; left: 8px;
+    width: 34px; height: 44px; border: 1.5px solid rgba(232,193,90,0.7); border-radius: 6px;
+    color: #fff; font-size: 17px; text-align: center; line-height: 42px;
+    background: rgba(0,0,0,0.35);
+  }
+  .card .portrait {
+    position: absolute; top: 34px; left: 50%; transform: translateX(-50%);
+    width: 96px; height: 110px; border-radius: 50% 50% 42% 42%;
+    background: radial-gradient(ellipse at 50% 32%, #7a6247, #3a2b1c 70%);
+    opacity: 0.85;
+  }
+  .card .nameplate {
+    position: absolute; left: 0; right: 0; bottom: 24px;
+    text-align: center; color: #fff;
+    font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.06em;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+  }
+  .badge {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 24px;
+    background: var(--util);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    color: #fff;
+  }
+  .badge svg { width: 15px; height: 15px; flex: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.35)); }
+  .badge .btxt {
+    font-family: 'Cinzel', serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  }
+  .card-caption { font-size: 13px; color: var(--tan); letter-spacing: 0.04em; font-style: italic; }
+
+  /* ---- Legibility matrix ---- */
+  .matrix { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 720px) { .matrix { grid-template-columns: 1fr; } }
+  .matrix-panel {
+    border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px 14px;
+    background: rgba(0,0,0,0.12);
+  }
+  .matrix-title { font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--parchment); margin: 0 0 12px; }
+  table.swatches { border-collapse: separate; border-spacing: 6px; margin: 0 auto; }
+  .swatches td {
+    width: 74px; height: 26px; border-radius: 4px;
+    text-align: center; vertical-align: middle;
+  }
+  .swatches td svg { width: 14px; height: 14px; vertical-align: middle; margin-right: 3px; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.35)); }
+  .swatches td .mini {
+    font-family: 'Cinzel', serif;
+    font-size: 8.5px; font-weight: 700; letter-spacing: 0.1em; color: #fff; vertical-align: middle;
+  }
+  .swatches .rowlab {
+    width: auto; font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--tan); text-align: right; padding-right: 6px;
+  }
+  .bg-atk { background: var(--atk); } .bg-def { background: var(--def); }
+  .bg-util { background: var(--util); } .bg-pas { background: var(--pas); }
+
+  /* ---- Tradeoffs ---- */
+  .tradeoffs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 720px) { .tradeoffs { grid-template-columns: 1fr; } }
+  .tradeoffs p { margin: 0; color: var(--tan); font-size: 15px; line-height: 1.6; }
+  .tradeoffs p strong { color: var(--parchment); }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- ============ SET A — ARMORY (heraldic objects) ============ -->
+    <symbol id="a-atk" viewBox="0 0 24 24">
+      <path d="M12 1.8 L14.1 6 L14.1 13 L9.9 13 L9.9 6 Z" fill="currentColor"/>
+      <rect x="6.8" y="13" width="10.4" height="2.3" rx="1.1" fill="currentColor"/>
+      <rect x="10.9" y="15.5" width="2.2" height="3.1" fill="currentColor"/>
+      <circle cx="12" cy="20.2" r="1.6" fill="currentColor"/>
+    </symbol>
+    <symbol id="a-def" viewBox="0 0 24 24">
+      <path d="M12 2.4 C14.8 4.1 17.9 4.8 19.6 4.9 C19.6 11.8 17.3 17.7 12 21.6 C6.7 17.7 4.4 11.8 4.4 4.9 C6.1 4.8 9.2 4.1 12 2.4 Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="a-pas" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3.4" fill="currentColor"/>
+      <g stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="17.6" y1="12" x2="20.4" y2="12"/>
+        <line x1="3.6" y1="12" x2="6.4" y2="12"/>
+        <line x1="12" y1="17.6" x2="12" y2="20.4"/>
+        <line x1="12" y1="3.6" x2="12" y2="6.4"/>
+        <line x1="15.96" y1="15.96" x2="17.94" y2="17.94"/>
+        <line x1="6.06" y1="6.06" x2="8.04" y2="8.04"/>
+        <line x1="15.96" y1="8.04" x2="17.94" y2="6.06"/>
+        <line x1="6.06" y1="17.94" x2="8.04" y2="15.96"/>
+      </g>
+    </symbol>
+
+    <!-- ============ SET B — SIGILS (abstract marks) ============ -->
+    <symbol id="b-atk" viewBox="0 0 24 24">
+      <g stroke="currentColor" stroke-width="2.7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5.8 12.2 L12 6 L18.2 12.2"/>
+        <path d="M5.8 18.6 L12 12.4 L18.2 18.6"/>
+      </g>
+    </symbol>
+    <symbol id="b-def" viewBox="0 0 24 24">
+      <path d="M4.6 15.2 A7.4 7.4 0 0 1 19.4 15.2" stroke="currentColor" stroke-width="2.7" fill="none" stroke-linecap="round"/>
+      <circle cx="12" cy="18.2" r="1.9" fill="currentColor"/>
+    </symbol>
+    <symbol id="b-pas" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="6.2" stroke="currentColor" stroke-width="2.5" fill="none"/>
+      <circle cx="12" cy="12" r="1.7" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="page">
+
+  <header>
+    <p class="eyebrow">Wits &amp; Fools · Card UI</p>
+    <h1>Trigger timing icons — two sets to compare</h1>
+    <p class="lede">A small glyph on the ability badge tells you <strong>when</strong> a card's ability fires:
+    on attack, on defend, or passively. Covers all 109 triggered cards without adding text to any of them.
+    Icons render white on the badge strip, same as the badge text.
+    <strong>Decision (2026-07): Set A — Armory</strong> — easier to recognize immediately. Shipped as
+    <code>Assets/Art/Icons/trigger_*.png</code>, generated by <code>Assets/Art/generate_trigger_icons.py</code>.</p>
+  </header>
+
+  <section>
+    <div class="sets">
+      <div class="set-panel">
+        <p class="set-name"><span class="tag">A</span>Armory <span style="color:var(--pas); font-size:13px; letter-spacing:0.08em;">✓ CHOSEN</span></p>
+        <p class="set-desc">Literal heraldic objects — reads instantly with zero learning: sword strikes, shield guards, the sun is always shining.</p>
+        <div class="tiles">
+          <div class="tile" style="color:#EFE3CC"><svg><use href="#a-atk"/></svg><span class="tile-label">On Attack</span><span class="tile-sub">sword</span></div>
+          <div class="tile" style="color:#EFE3CC"><svg><use href="#a-def"/></svg><span class="tile-label">On Defend</span><span class="tile-sub">heater shield</span></div>
+          <div class="tile" style="color:#EFE3CC"><svg><use href="#a-pas"/></svg><span class="tile-label">Passive</span><span class="tile-sub">sunburst</span></div>
+        </div>
+      </div>
+      <div class="set-panel">
+        <p class="set-name"><span class="tag">B</span>Sigils</p>
+        <p class="set-desc">Abstract engraved marks — quieter and cleaner at badge size: chevrons advance, the arc shelters, the ring never turns off.</p>
+        <div class="tiles">
+          <div class="tile" style="color:#EFE3CC"><svg><use href="#b-atk"/></svg><span class="tile-label">On Attack</span><span class="tile-sub">strike chevrons</span></div>
+          <div class="tile" style="color:#EFE3CC"><svg><use href="#b-def"/></svg><span class="tile-label">On Defend</span><span class="tile-sub">guard arc</span></div>
+          <div class="tile" style="color:#EFE3CC"><svg><use href="#b-pas"/></svg><span class="tile-label">Passive</span><span class="tile-sub">constant ring</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>On the card</h2>
+    <p class="section-note">The Cartographer's badge as it renders in game — icon sits left of the ability name at roughly 15&nbsp;px.</p>
+    <div class="cards">
+      <div class="card-col">
+        <div class="card">
+          <div class="rankpip">6♥</div>
+          <div class="portrait"></div>
+          <div class="nameplate">The Cartographer</div>
+          <div class="badge" style="color:#fff">
+            <svg><use href="#a-def"/></svg>
+            <span class="btxt">Extra Draw</span>
+          </div>
+        </div>
+        <span class="card-caption">Set A · shield = fires on defend</span>
+      </div>
+      <div class="card-col">
+        <div class="card">
+          <div class="rankpip">6♥</div>
+          <div class="portrait"></div>
+          <div class="nameplate">The Cartographer</div>
+          <div class="badge" style="color:#fff">
+            <svg><use href="#b-def"/></svg>
+            <span class="btxt">Extra Draw</span>
+          </div>
+        </div>
+        <span class="card-caption">Set B · arc = fires on defend</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Legibility across badge colors</h2>
+    <p class="section-note">Any timing can appear on any badge color (the strip is colored by ability category, not by timing). Each cell is icon at 14&nbsp;px, actual badge height.</p>
+    <div class="matrix">
+      <div class="matrix-panel">
+        <p class="matrix-title">Set A — Armory</p>
+        <table class="swatches">
+          <tr>
+            <td class="rowlab">Attack</td>
+            <td class="bg-atk" style="color:#fff"><svg><use href="#a-atk"/></svg><span class="mini">ATK</span></td>
+            <td class="bg-def" style="color:#fff"><svg><use href="#a-atk"/></svg><span class="mini">ATK</span></td>
+            <td class="bg-util" style="color:#fff"><svg><use href="#a-atk"/></svg><span class="mini">ATK</span></td>
+            <td class="bg-pas" style="color:#fff"><svg><use href="#a-atk"/></svg><span class="mini">ATK</span></td>
+          </tr>
+          <tr>
+            <td class="rowlab">Defend</td>
+            <td class="bg-atk" style="color:#fff"><svg><use href="#a-def"/></svg><span class="mini">DEF</span></td>
+            <td class="bg-def" style="color:#fff"><svg><use href="#a-def"/></svg><span class="mini">DEF</span></td>
+            <td class="bg-util" style="color:#fff"><svg><use href="#a-def"/></svg><span class="mini">DEF</span></td>
+            <td class="bg-pas" style="color:#fff"><svg><use href="#a-def"/></svg><span class="mini">DEF</span></td>
+          </tr>
+          <tr>
+            <td class="rowlab">Passive</td>
+            <td class="bg-atk" style="color:#fff"><svg><use href="#a-pas"/></svg><span class="mini">PAS</span></td>
+            <td class="bg-def" style="color:#fff"><svg><use href="#a-pas"/></svg><span class="mini">PAS</span></td>
+            <td class="bg-util" style="color:#fff"><svg><use href="#a-pas"/></svg><span class="mini">PAS</span></td>
+            <td class="bg-pas" style="color:#fff"><svg><use href="#a-pas"/></svg><span class="mini">PAS</span></td>
+          </tr>
+        </table>
+      </div>
+      <div class="matrix-panel">
+        <p class="matrix-title">Set B — Sigils</p>
+        <table class="swatches">
+          <tr>
+            <td class="rowlab">Attack</td>
+            <td class="bg-atk" style="color:#fff"><svg><use href="#b-atk"/></svg><span class="mini">ATK</span></td>
+            <td class="bg-def" style="color:#fff"><svg><use href="#b-atk"/></svg><span class="mini">ATK</span></td>
+            <td class="bg-util" style="color:#fff"><svg><use href="#b-atk"/></svg><span class="mini">ATK</span></td>
+            <td class="bg-pas" style="color:#fff"><svg><use href="#b-atk"/></svg><span class="mini">ATK</span></td>
+          </tr>
+          <tr>
+            <td class="rowlab">Defend</td>
+            <td class="bg-atk" style="color:#fff"><svg><use href="#b-def"/></svg><span class="mini">DEF</span></td>
+            <td class="bg-def" style="color:#fff"><svg><use href="#b-def"/></svg><span class="mini">DEF</span></td>
+            <td class="bg-util" style="color:#fff"><svg><use href="#b-def"/></svg><span class="mini">DEF</span></td>
+            <td class="bg-pas" style="color:#fff"><svg><use href="#b-def"/></svg><span class="mini">DEF</span></td>
+          </tr>
+          <tr>
+            <td class="rowlab">Passive</td>
+            <td class="bg-atk" style="color:#fff"><svg><use href="#b-pas"/></svg><span class="mini">PAS</span></td>
+            <td class="bg-def" style="color:#fff"><svg><use href="#b-pas"/></svg><span class="mini">PAS</span></td>
+            <td class="bg-util" style="color:#fff"><svg><use href="#b-pas"/></svg><span class="mini">PAS</span></td>
+            <td class="bg-pas" style="color:#fff"><svg><use href="#b-pas"/></svg><span class="mini">PAS</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tradeoffs</h2>
+    <div class="tradeoffs">
+      <p><strong>Set A</strong> needs no tutorial — sword and shield are universal, and they echo the game's attack/defend vocabulary directly. The cost: the sword and sunburst carry fine detail that softens below ~14&nbsp;px, and a shield glyph could be misread as "this card is good at defending" rather than "fires when defending".</p>
+      <p><strong>Set B</strong> stays crisp at any size — pure strokes, no fine detail — and reads as timing notation rather than a combat stat. The cost: players must learn the marks once (a line in the how-to-play or a tooltip covers it), and the ring is the least self-evident of the six.</p>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

@@ -28,6 +28,9 @@ namespace WitsAndFools.EditorTools
             var scrimTop       = LoadSprite("Assets/Art/Textures/card_scrim_top.png");
             var scrimBottom    = LoadSprite("Assets/Art/Textures/card_scrim_bottom.png");
             var engraveSprite  = LoadSprite("Assets/Art/Textures/card_engrave.png");
+            var trigAttack     = LoadSprite("Assets/Art/Icons/trigger_attack.png");
+            var trigDefend     = LoadSprite("Assets/Art/Icons/trigger_defend.png");
+            var trigPassive    = LoadSprite("Assets/Art/Icons/trigger_passive.png");
             var rounded        = AssetDatabase.GetBuiltinExtraResource<Sprite>("UI/Skin/Background.psd");
 
             var go = new GameObject("CardView", typeof(RectTransform));
@@ -120,6 +123,18 @@ namespace WitsAndFools.EditorTools
                 position:Vector2.zero, size:Vector2.zero, alignment:TextAlignmentOptions.Center, fontSize:9);
             abilityBadge.fontStyle = FontStyles.Bold; abilityBadge.color = Color.white; if (HeadingFont) abilityBadge.font = HeadingFont;
             abilityBadge.enableAutoSizing = true; abilityBadge.fontSizeMin = 7; abilityBadge.fontSizeMax = 10;
+            // keep the centered label clear of the timing glyph on the left
+            var abRT = (RectTransform)abilityBadge.transform;
+            abRT.offsetMin = new Vector2(16, 0); abRT.offsetMax = new Vector2(-16, 0);
+
+            // trigger-timing glyph (sword = on attack, shield = on defend, sunburst = passive)
+            var trigGO = new GameObject("TriggerIcon", typeof(RectTransform), typeof(Image));
+            trigGO.transform.SetParent(badgeBgGO.transform, false);
+            var trigRT = (RectTransform)trigGO.transform;
+            trigRT.anchorMin = new Vector2(0, 0.5f); trigRT.anchorMax = new Vector2(0, 0.5f); trigRT.pivot = new Vector2(0, 0.5f);
+            trigRT.sizeDelta = new Vector2(12, 12); trigRT.anchoredPosition = new Vector2(3, 0);
+            var trigImg = trigGO.GetComponent<Image>(); trigImg.color = Color.white; trigImg.raycastTarget = false;
+            trigGO.SetActive(false);
 
             // name (above the ability strip)
             var nameLabel = CreateChildText(drawerGO.transform, "NameLabel", "",
@@ -203,6 +218,10 @@ namespace WitsAndFools.EditorTools
             view.DoctrineSubLabel = null;
             view.AbilityBadge = abilityBadge;
             view.AbilityBadgeBg = badgeBgImg;
+            view.TriggerIcon = trigImg;
+            view.TriggerAttackSprite = trigAttack;
+            view.TriggerDefendSprite = trigDefend;
+            view.TriggerPassiveSprite = trigPassive;
             view.Drawer = drawerRT;
             view.DrawerScrim = dScrim;
             view.BodyGroup = bodyGroup;
