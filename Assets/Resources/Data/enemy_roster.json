@@ -1,0 +1,1316 @@
+{
+  "enemies": [
+    {
+      "id": "act1_regular_1",
+      "name": "Berto il Ratto",
+      "act": 1,
+      "tier": "regular",
+      "doctrine": "Brute",
+      "aiPersonality": "Brawler",
+      "randomMoveChance": 0.35,
+      "description": "A wiry dockhand who learned cards in the hold of a grain ship. Plays fast, hits hard, thinks never.",
+      "visualHook": "Rat-bitten ear, rope-burned hands, a single gold tooth",
+      "deckSize": 11,
+      "deckComposition": {
+        "doctrine": 7,
+        "neutral": 4,
+        "cardIds": [
+          "brute_mercenary_captain",
+          "brute_cannon_master",
+          "brute_sapper",
+          "brute_vanguard",
+          "brute_condottiero",
+          "brute_berserker",
+          "brute_enforcer",
+          "brute_pit_fighter",
+          "brute_arsonist",
+          "brute_siege_tower",
+          "brute_quartermaster"
+        ]
+      },
+      "relics": [],
+      "houseRule": null,
+      "signatureMechanic": "Reckless swings \u2014 attacks fast with whatever he has, no regard for defense",
+      "gimmickDescription": "A dockhand who plays fast and sloppy. Expect wild attacks with no strategy behind them.",
+      "difficulty": 1
+    },
+    {
+      "id": "act1_regular_2",
+      "name": "Lucia la Fiamma",
+      "act": 1,
+      "tier": "regular",
+      "doctrine": "Hoarder",
+      "aiPersonality": "Miser",
+      "randomMoveChance": 0.35,
+      "description": "A fishwife who hoards cards the way she hoards grudges \u2014 patiently, and with interest.",
+      "visualHook": "Flame-red hair under a dirty kerchief, calloused fingers, shrewd squint",
+      "deckSize": 12,
+      "deckComposition": {
+        "doctrine": 7,
+        "neutral": 5,
+        "cardIds": [
+          "hoarder_antiquarian",
+          "hoarder_packrat",
+          "hoarder_miser",
+          "hoarder_collector",
+          "hoarder_treasure_hunter",
+          "hoarder_merchant",
+          "hoarder_warehouse_keeper",
+          "hoarder_tax_collector",
+          "hoarder_squirrel",
+          "hoarder_usurer",
+          "hoarder_apothecary",
+          "hoarder_auctioneer"
+        ]
+      },
+      "relics": [],
+      "houseRule": null,
+      "signatureMechanic": "Hoards cards then dumps late \u2014 refuses to play until her hand is overflowing",
+      "gimmickDescription": "She hoards cards like grudges. She will wait you out, then bury you under a mountain of plays.",
+      "difficulty": 1
+    },
+    {
+      "id": "act1_regular_3",
+      "name": "Tomaso il Grasso",
+      "act": 1,
+      "tier": "regular",
+      "doctrine": "Brute",
+      "aiPersonality": "Brawler",
+      "randomMoveChance": 0.35,
+      "description": "An enormous cook who smells of garlic and cheap wine. Slams cards on the table like he's tenderizing meat.",
+      "visualHook": "Enormous belly, stained apron he never removes, a cleaver scar across his knuckles",
+      "deckSize": 13,
+      "deckComposition": {
+        "doctrine": 8,
+        "neutral": 5,
+        "cardIds": [
+          "brute_condottiero",
+          "brute_cannon_master",
+          "brute_sapper",
+          "brute_berserker",
+          "brute_enforcer",
+          "brute_pit_fighter",
+          "brute_mercenary_captain",
+          "brute_vanguard",
+          "brute_arsonist",
+          "brute_siege_tower",
+          "brute_quartermaster",
+          "brute_executioner"
+        ]
+      },
+      "relics": [],
+      "houseRule": "No Trumps Before Dusk",
+      "signatureMechanic": "Slow starter \u2014 builds momentum and hits hardest in the late game",
+      "gimmickDescription": "The big cook plays by old rules \u2014 no trumps until bout 3. He is slow to start, but devastating once he gets going.",
+      "difficulty": 2
+    },
+    {
+      "id": "act1_elite_1",
+      "name": "Capitano Ferro",
+      "act": 1,
+      "tier": "elite",
+      "doctrine": "Brute",
+      "aiPersonality": "Brawler",
+      "randomMoveChance": 0.3,
+      "description": "A retired mercenary captain who plays cards the way he fought \u2014 overwhelming force, no quarter given.",
+      "visualHook": "Iron prosthetic hand, military medals pinned to a threadbare doublet, deep voice",
+      "deckSize": 13,
+      "deckComposition": {
+        "doctrine": 8,
+        "neutral": 5,
+        "cardIds": [
+          "brute_executioner",
+          "brute_siege_tower",
+          "brute_quartermaster",
+          "brute_condottiero",
+          "brute_vanguard",
+          "neutral_courser",
+          "brute_cannon_master",
+          "brute_sapper",
+          "brute_berserker",
+          "brute_enforcer",
+          "brute_pit_fighter",
+          "brute_mercenary_captain",
+          "brute_arsonist"
+        ]
+      },
+      "relics": [],
+      "houseRule": "The Gauntlet",
+      "signatureMechanic": "Relentless attacker \u2014 never lets up, forcing you to defend every round",
+      "gimmickDescription": "The Captain fights like he commands \u2014 one side attacks, one side defends. He has chosen to attack. Good luck.",
+      "difficulty": 3
+    },
+    {
+      "id": "act1_elite_2",
+      "name": "Donna Serpente",
+      "act": 1,
+      "tier": "elite",
+      "doctrine": "Schemer",
+      "aiPersonality": "Fox",
+      "randomMoveChance": 0.3,
+      "description": "A dockside fortune teller who always seems to know what you're holding. Her smile never reaches her eyes.",
+      "visualHook": "Green headscarf, kohl-lined eyes, silver serpent ring on every finger",
+      "deckSize": 12,
+      "deckComposition": {
+        "doctrine": 7,
+        "neutral": 5,
+        "cardIds": [
+          "schemer_forger",
+          "schemer_archivist",
+          "schemer_interceptor",
+          "schemer_cartographer",
+          "neutral_footman",
+          "schemer_spyglass",
+          "schemer_librarian",
+          "schemer_informant",
+          "schemer_cipher",
+          "schemer_double_agent",
+          "schemer_poisoner",
+          "schemer_scribe"
+        ]
+      },
+      "relics": [],
+      "houseRule": "Heavy Hands",
+      "signatureMechanic": "Reads your hand \u2014 always seems to know what you are holding",
+      "gimmickDescription": "The fortune teller deals with heavy hands \u2014 8-card starting hands. More cards means more options for her schemes.",
+      "difficulty": 3
+    },
+    {
+      "id": "act1_boss_1",
+      "name": "Il Padrone \u2014 Vittorio Scoglio",
+      "act": 1,
+      "tier": "boss",
+      "doctrine": "Brute",
+      "aiPersonality": "Brawler",
+      "randomMoveChance": 0.25,
+      "description": "The undisputed king of the Bilge Rat Tavern. A former galley slave who bought this dive with his winnings and rules it with an iron fist. Nobody leaves his table without paying \u2014 one way or another.",
+      "visualHook": "Massive scarred forearms, a necklace of lucky coins, permanent scowl, missing two fingers on his left hand",
+      "deckSize": 13,
+      "deckComposition": {
+        "doctrine": 8,
+        "neutral": 5,
+        "cardIds": [
+          "brute_siege_tower",
+          "brute_executioner",
+          "brute_cannon_master",
+          "brute_sapper",
+          "brute_vanguard",
+          "brute_condottiero",
+          "brute_berserker",
+          "brute_enforcer",
+          "brute_pit_fighter",
+          "brute_mercenary_captain",
+          "brute_arsonist",
+          "brute_quartermaster"
+        ]
+      },
+      "relics": [],
+      "houseRule": "The Gauntlet",
+      "signatureMechanic": "Tavern King's Wrath \u2014 When Vittorio picks up cards, his next attack plays two cards simultaneously. The player must beat both or eat the entire pile.",
+      "gimmickDescription": "The king of this tavern fights on the front foot \u2014 he attacks all game. And when he picks up cards, his next strike hits twice as hard.",
+      "difficulty": 4
+    },
+    {
+      "id": "act2_regular_1",
+      "name": "Marco il Bilancio",
+      "act": 2,
+      "tier": "regular",
+      "doctrine": "Hoarder",
+      "aiPersonality": "Miser",
+      "randomMoveChance": 0.2,
+      "description": "A spice merchant who counts cards the way he counts peppercorns \u2014 obsessively. Never wastes a single play.",
+      "visualHook": "Thick spectacles, ink-stained fingers, a ledger he consults between rounds",
+      "deckSize": 13,
+      "deckComposition": {
+        "doctrine": 8,
+        "neutral": 5,
+        "cardIds": [
+          "hoarder_tax_collector",
+          "hoarder_merchant",
+          "hoarder_squirrel",
+          "hoarder_packrat",
+          "neutral_courser",
+          "neutral_squire",
+          "neutral_herald",
+          "hoarder_collector",
+          "hoarder_treasure_hunter",
+          "hoarder_miser",
+          "hoarder_warehouse_keeper",
+          "hoarder_antiquarian",
+          "hoarder_usurer"
+        ]
+      },
+      "relics": [],
+      "houseRule": "Double or Nothing",
+      "signatureMechanic": "Greedy collector \u2014 eating cards feeds his engine, drawing him even more",
+      "gimmickDescription": "The spice merchant plays double or nothing \u2014 every card eaten draws him extras. The more you feed him, the stronger he grows.",
+      "difficulty": 3
+    },
+    {
+      "id": "act2_regular_2",
+      "name": "Silvana la Volpe",
+      "act": 2,
+      "tier": "regular",
+      "doctrine": "Schemer",
+      "aiPersonality": "Fox",
+      "randomMoveChance": 0.2,
+      "description": "A traveling silk trader who plays cards in every inn from Venice to Naples. Reads opponents like contracts.",
+      "visualHook": "Fox-fur collar, quick darting eyes, a beauty mark painted on her cheek",
+      "deckSize": 14,
+      "deckComposition": {
+        "doctrine": 9,
+        "neutral": 5,
+        "cardIds": [
+          "schemer_interceptor",
+          "schemer_cipher",
+          "schemer_spyglass",
+          "schemer_scribe",
+          "schemer_cartographer",
+          "schemer_double_agent",
+          "neutral_merchant_prince",
+          "neutral_squire",
+          "schemer_librarian",
+          "schemer_poisoner",
+          "schemer_informant",
+          "schemer_forger",
+          "schemer_envoy",
+          "schemer_inquisitor"
+        ]
+      },
+      "relics": [],
+      "houseRule": "The Gauntlet",
+      "signatureMechanic": "Persistent pressure \u2014 locks in as attacker and probes for weaknesses",
+      "gimmickDescription": "The fox chooses her role and never switches. She will attack relentlessly, reading you like a contract.",
+      "difficulty": 3
+    },
+    {
+      "id": "act2_regular_3",
+      "name": "Rinaldo il Coltello",
+      "act": 2,
+      "tier": "regular",
+      "doctrine": "Trickster",
+      "aiPersonality": "Assassin",
+      "randomMoveChance": 0.2,
+      "description": "A lean, quiet cutpurse who picked up cards in prison. Waits for one perfect moment, then strikes.",
+      "visualHook": "Thin knife-scar from ear to chin, nervous fingers always shuffling a coin, worn leather gloves",
+      "deckSize": 13,
+      "deckComposition": {
+        "doctrine": 8,
+        "neutral": 5,
+        "cardIds": [
+          "trickster_illusionist",
+          "trickster_alchemist",
+          "trickster_charlatan",
+          "trickster_smuggler",
+          "trickster_jester",
+          "trickster_pickpocket",
+          "trickster_courtesan",
+          "trickster_mask_maker",
+          "trickster_fortune_teller",
+          "trickster_card_sharp",
+          "trickster_acrobat",
+          "trickster_doppelganger",
+          "trickster_con_artist"
+        ]
+      },
+      "relics": [],
+      "houseRule": "The Mirror",
+      "signatureMechanic": "Copycat blade \u2014 mirrors your best plays and turns them against you",
+      "gimmickDescription": "The cutpurse steals more than coin \u2014 he copies your abilities. Every trick you play, he plays right back.",
+      "difficulty": 3
+    },
+    {
+      "id": "act2_elite_1",
+      "name": "Messer Argento",
+      "act": 2,
+      "tier": "elite",
+      "doctrine": "Schemer",
+      "aiPersonality": "Scholar",
+      "randomMoveChance": 0.15,
+      "description": "A retired banker who ruined three noble families at the card table. Plays with the cold precision of a man foreclosing on a loan.",
+      "visualHook": "Silver hair swept back, immaculate black doublet, a signet ring he taps when thinking",
+      "deckSize": 15,
+      "deckComposition": {
+        "doctrine": 10,
+        "neutral": 5,
+        "cardIds": [
+          "schemer_forger",
+          "schemer_puppeteer",
+          "schemer_cartographer",
+          "schemer_envoy",
+          "schemer_interceptor",
+          "schemer_scribe",
+          "schemer_venetian_mirror",
+          "neutral_herald",
+          "neutral_merchant_prince",
+          "neutral_courser",
+          "schemer_spyglass",
+          "schemer_informant",
+          "schemer_cipher",
+          "schemer_librarian",
+          "schemer_double_agent"
+        ]
+      },
+      "relics": [
+        "merchants_scale"
+      ],
+      "houseRule": "Cutthroat",
+      "signatureMechanic": "Precision strikes \u2014 attacks with any rank, exploiting every opening",
+      "gimmickDescription": "The banker plays cutthroat rules \u2014 max four attacks per bout, but any rank can strike. No card is safe in his hands.",
+      "difficulty": 5
+    },
+    {
+      "id": "act2_elite_2",
+      "name": "Madre Cenere",
+      "act": 2,
+      "tier": "elite",
+      "doctrine": "Hoarder",
+      "aiPersonality": "Miser",
+      "randomMoveChance": 0.15,
+      "description": "An elderly midwife who has delivered half the babies in the merchant quarter. She plays with infinite patience \u2014 and an impossibly large hand.",
+      "visualHook": "Ash-grey shawl, warm but calculating eyes, rosary beads wrapped around her wrist like armor",
+      "deckSize": 15,
+      "deckComposition": {
+        "doctrine": 10,
+        "neutral": 5,
+        "cardIds": [
+          "hoarder_usurer",
+          "hoarder_tax_collector",
+          "hoarder_warehouse_keeper",
+          "hoarder_antiquarian",
+          "hoarder_apothecary",
+          "neutral_courser",
+          "neutral_squire",
+          "neutral_merchant_prince",
+          "hoarder_collector",
+          "hoarder_miser",
+          "hoarder_merchant",
+          "hoarder_packrat",
+          "hoarder_squirrel",
+          "hoarder_auctioneer",
+          "hoarder_treasure_hunter"
+        ]
+      },
+      "relics": [
+        "lucky_coin"
+      ],
+      "houseRule": "Heavy Hands",
+      "signatureMechanic": "Infinite patience \u2014 builds an impossibly large hand and overwhelms late",
+      "gimmickDescription": "The midwife deals heavy hands \u2014 8-card starting hands. She waits with infinite patience, then buries you under her reserves.",
+      "difficulty": 5
+    },
+    {
+      "id": "act2_boss_1",
+      "name": "Il Capitano \u2014 Enzo Maraviglia",
+      "act": 2,
+      "tier": "boss",
+      "doctrine": "Trickster",
+      "aiPersonality": "Fox",
+      "randomMoveChance": 0.1,
+      "description": "A legendary merchant captain who has sailed every trade route in the Mediterranean. He treats cards the way he treats business \u2014 the rules are whatever he says they are. They say he once won a ship in a single hand by changing the trump suit mid-play.",
+      "visualHook": "Magnificent feathered hat, waxed mustache, a compass rose tattooed on the back of his hand, always smells of exotic spices",
+      "deckSize": 15,
+      "deckComposition": {
+        "doctrine": 10,
+        "neutral": 5,
+        "cardIds": [
+          "trickster_doppelganger",
+          "trickster_pickpocket",
+          "trickster_escape_artist",
+          "trickster_courtesan",
+          "trickster_charlatan",
+          "neutral_merchant_prince",
+          "neutral_courser",
+          "neutral_squire",
+          "trickster_alchemist",
+          "trickster_jester",
+          "trickster_mask_maker",
+          "trickster_illusionist",
+          "trickster_fortune_teller",
+          "trickster_card_sharp",
+          "trickster_smuggler"
+        ]
+      },
+      "relics": [
+        "captains_compass"
+      ],
+      "houseRule": "No Trumps Before Dusk",
+      "signatureMechanic": "Captain's Gambit \u2014 Once per match, Enzo can declare a 'new port of call,' changing the trump suit to any suit of his choice AND drawing 2 cards. Forces the player to completely reassess their hand.",
+      "gimmickDescription": "The Captain bans trumps until bout 3 \u2014 and when they finally arrive, he changes the trump suit to whatever he wants. His table, his rules.",
+      "difficulty": 6
+    },
+    {
+      "id": "act3_regular_1",
+      "name": "Gilda Ferravecchi",
+      "act": 3,
+      "tier": "regular",
+      "doctrine": "Schemer",
+      "aiPersonality": "Scholar",
+      "randomMoveChance": 0.1,
+      "description": "The guild's official record-keeper. She has memorized every card played in this hall for the last decade. Never forgets a discard.",
+      "visualHook": "Round spectacles on a brass chain, quill perpetually tucked behind her ear, ink-stained sleeves",
+      "deckSize": 15,
+      "deckComposition": {
+        "doctrine": 10,
+        "neutral": 5,
+        "cardIds": [
+          "schemer_cryptanalyst",
+          "schemer_interceptor",
+          "schemer_librarian",
+          "schemer_spyglass",
+          "schemer_envoy",
+          "schemer_inquisitor",
+          "neutral_treasurer",
+          "neutral_footman",
+          "schemer_cartographer",
+          "schemer_informant",
+          "schemer_cipher",
+          "schemer_forger",
+          "schemer_double_agent",
+          "schemer_poisoner",
+          "schemer_scribe"
+        ]
+      },
+      "relics": [
+        "scriveners_quill"
+      ],
+      "houseRule": "The Gauntlet",
+      "signatureMechanic": "Perfect memory \u2014 never forgets a discard, always knows what remains in the deck",
+      "gimmickDescription": "The record-keeper locks you into defending while she attacks with perfect knowledge of every card played.",
+      "difficulty": 5
+    },
+    {
+      "id": "act3_regular_2",
+      "name": "Orso Martello",
+      "act": 3,
+      "tier": "regular",
+      "doctrine": "Brute",
+      "aiPersonality": "Brawler",
+      "randomMoveChance": 0.1,
+      "description": "The blacksmith guild's champion player. Plays with the relentless rhythm of a hammer on an anvil \u2014 strike, strike, strike.",
+      "visualHook": "Arms like tree trunks, a leather apron over fine clothes, burn scars on both hands",
+      "deckSize": 16,
+      "deckComposition": {
+        "doctrine": 11,
+        "neutral": 5,
+        "cardIds": [
+          "brute_siege_tower",
+          "brute_executioner",
+          "brute_warmonger",
+          "brute_siege_ram",
+          "brute_quartermaster",
+          "brute_berserker",
+          "brute_iron_duke",
+          "brute_pillager",
+          "neutral_herald",
+          "neutral_footman",
+          "neutral_treasurer",
+          "brute_condottiero",
+          "brute_enforcer",
+          "brute_pit_fighter",
+          "brute_cannon_master",
+          "brute_mercenary_captain"
+        ]
+      },
+      "relics": [
+        "smiths_hammer"
+      ],
+      "houseRule": "Double or Nothing",
+      "signatureMechanic": "Anvil rhythm \u2014 every picked-up card fuels his next devastating strike",
+      "gimmickDescription": "The blacksmith plays double or nothing \u2014 every card he eats draws him more. His hammer only swings harder.",
+      "difficulty": 5
+    },
+    {
+      "id": "act3_regular_3",
+      "name": "Fiorella Ambra",
+      "act": 3,
+      "tier": "regular",
+      "doctrine": "Hoarder",
+      "aiPersonality": "Noble",
+      "randomMoveChance": 0.1,
+      "description": "A jeweler's daughter who plays with the patience of someone who has watched gems cut one facet at a time. Her hand grows while yours shrinks.",
+      "visualHook": "Amber pendant at her throat, meticulously manicured nails, a velvet card case",
+      "deckSize": 17,
+      "deckComposition": {
+        "doctrine": 13,
+        "neutral": 4,
+        "cardIds": [
+          "hoarder_warehouse_keeper",
+          "hoarder_collector",
+          "hoarder_cartels_don",
+          "hoarder_treasure_hunter",
+          "hoarder_usurer",
+          "hoarder_merchant",
+          "hoarder_packrat",
+          "hoarder_miser",
+          "hoarder_reliquary",
+          "hoarder_apothecary",
+          "hoarder_tax_collector",
+          "hoarder_antiquarian",
+          "hoarder_squirrel",
+          "hoarder_auctioneer",
+          "hoarder_fence",
+          "hoarder_vault_keeper",
+          "hoarder_speculator"
+        ]
+      },
+      "relics": [
+        "jewelers_loupe"
+      ],
+      "houseRule": "The Mirror",
+      "signatureMechanic": "Gemcutter's eye \u2014 copies your best ability and polishes it to perfection",
+      "gimmickDescription": "The jeweler mirrors your every move. Whatever ability you play, she reflects it right back at you, cut to perfection.",
+      "difficulty": 6
+    },
+    {
+      "id": "act3_elite_1",
+      "name": "Il Giudice \u2014 Prospero Legge",
+      "act": 3,
+      "tier": "elite",
+      "doctrine": "Schemer",
+      "aiPersonality": "Scholar",
+      "randomMoveChance": 0.08,
+      "description": "A guild arbitrator who adjudicates trade disputes by day and destroys opponents at cards by night. Knows every rule and exploits every loophole.",
+      "visualHook": "Fur-trimmed judicial robes, a gavel he uses as a card weight, piercing grey eyes behind half-moon spectacles",
+      "deckSize": 16,
+      "deckComposition": {
+        "doctrine": 12,
+        "neutral": 4,
+        "cardIds": [
+          "schemer_archivist",
+          "schemer_forger",
+          "schemer_venetian_mirror",
+          "schemer_cipher",
+          "schemer_spyglass",
+          "schemer_inquisitor",
+          "schemer_scribe",
+          "schemer_cryptanalyst",
+          "schemer_librarian",
+          "neutral_squire",
+          "neutral_footman",
+          "schemer_informant",
+          "schemer_cartographer",
+          "schemer_interceptor",
+          "schemer_double_agent",
+          "schemer_poisoner"
+        ]
+      },
+      "relics": [
+        "scales_of_justice",
+        "magistrates_seal"
+      ],
+      "houseRule": "Cutthroat",
+      "signatureMechanic": "Loophole master \u2014 exploits every rule, attacking with any rank at will",
+      "gimmickDescription": "The Judge plays cutthroat \u2014 any rank can attack, up to four per bout. He knows every loophole and will use them all.",
+      "difficulty": 7
+    },
+    {
+      "id": "act3_elite_2",
+      "name": "La Mantide \u2014 Isadora Nera",
+      "act": 3,
+      "tier": "elite",
+      "doctrine": "Trickster",
+      "aiPersonality": "Assassin",
+      "randomMoveChance": 0.08,
+      "description": "A courtesan who plays cards in the private rooms above the guild hall. She lures opponents into false confidence, then devours their hand.",
+      "visualHook": "Black lace mask, emerald-green dress, a stiletto she uses as a letter opener, jasmine perfume",
+      "deckSize": 16,
+      "deckComposition": {
+        "doctrine": 12,
+        "neutral": 4,
+        "cardIds": [
+          "trickster_escape_artist",
+          "trickster_doppelganger",
+          "trickster_pickpocket",
+          "trickster_acrobat",
+          "trickster_con_artist",
+          "trickster_mountebank",
+          "trickster_fortune_teller",
+          "trickster_card_sharp",
+          "trickster_charlatan",
+          "neutral_queen_regent",
+          "neutral_courser",
+          "neutral_squire",
+          "neutral_herald",
+          "trickster_courtesan",
+          "trickster_alchemist",
+          "trickster_jester"
+        ]
+      },
+      "relics": [
+        "poisoned_ring",
+        "silk_fan"
+      ],
+      "houseRule": "No Trumps Before Dusk",
+      "signatureMechanic": "False confidence \u2014 lures you in early, then devours your hand when trumps arrive",
+      "gimmickDescription": "The Mantis bans trumps until bout 3, luring you into false security. When they arrive, she strikes without mercy.",
+      "difficulty": 7
+    },
+    {
+      "id": "act3_boss_1",
+      "name": "Il Maestro \u2014 Domenico Aureliano",
+      "act": 3,
+      "tier": "boss",
+      "doctrine": "Hoarder",
+      "aiPersonality": "Noble",
+      "randomMoveChance": 0.05,
+      "description": "The Guildmaster himself. A self-made man who rose from apprentice to master of the most powerful guild in the city. He has never lost at his own table \u2014 his hand always seems impossibly full, and just when you think you have him cornered, he reveals reserves you never knew existed.",
+      "visualHook": "Gold chain of office, hands covered in guild rings, a magnificent carved chair that functions as a throne, silver-streaked beard kept immaculate",
+      "deckSize": 17,
+      "deckComposition": {
+        "doctrine": 13,
+        "neutral": 4,
+        "cardIds": [
+          "hoarder_usurer",
+          "hoarder_vault_keeper",
+          "hoarder_reliquary",
+          "hoarder_cartels_don",
+          "hoarder_apothecary",
+          "hoarder_collector",
+          "hoarder_packrat",
+          "hoarder_antiquarian",
+          "hoarder_speculator",
+          "hoarder_auctioneer",
+          "neutral_treasurer",
+          "hoarder_miser",
+          "hoarder_merchant",
+          "hoarder_warehouse_keeper",
+          "hoarder_tax_collector",
+          "hoarder_squirrel",
+          "hoarder_treasure_hunter"
+        ]
+      },
+      "relics": [
+        "guildmasters_chain",
+        "treasury_key"
+      ],
+      "houseRule": "Heavy Hands",
+      "signatureMechanic": "The Guild's Coffers \u2014 Domenico begins the match with 2 extra cards in hand. Additionally, whenever the draw pile is reshuffled, he draws 3 bonus cards. The longer the match goes, the more overwhelming his advantage becomes. Beat him fast or drown in his wealth.",
+      "gimmickDescription": "The Guildmaster deals heavy hands and starts with extra cards. The longer you let him play, the more he buries you. Beat him fast or not at all.",
+      "difficulty": 8
+    },
+    {
+      "id": "act4_regular_1",
+      "name": "Fra' Silenzio",
+      "act": 4,
+      "tier": "regular",
+      "doctrine": "Schemer",
+      "aiPersonality": "Assassin",
+      "randomMoveChance": 0.04,
+      "description": "A monk who has taken a vow of silence \u2014 but his cards speak volumes. He knows what you hold before you play it.",
+      "visualHook": "Brown Franciscan robes, a hood perpetually shadowing his face, unnervingly still hands",
+      "deckSize": 17,
+      "deckComposition": {
+        "doctrine": 13,
+        "neutral": 4,
+        "cardIds": [
+          "schemer_archivist",
+          "schemer_interceptor",
+          "schemer_puppeteer",
+          "schemer_cipher",
+          "schemer_double_agent",
+          "schemer_mastermind",
+          "schemer_inquisitor",
+          "schemer_doge_spymaster",
+          "schemer_cryptanalyst",
+          "schemer_shadow_courier",
+          "schemer_cartographer",
+          "schemer_scribe",
+          "neutral_magistrate",
+          "neutral_squire",
+          "neutral_courser",
+          "schemer_informant",
+          "schemer_spyglass"
+        ]
+      },
+      "relics": [
+        "illuminated_manuscript",
+        "confession_box"
+      ],
+      "houseRule": "Cutthroat",
+      "signatureMechanic": "Silent judgment \u2014 strikes with any card, any time, without warning",
+      "gimmickDescription": "The silent monk plays cutthroat \u2014 any rank can attack. His vow of silence does not extend to his cards.",
+      "difficulty": 7
+    },
+    {
+      "id": "act4_regular_2",
+      "name": "Contessa Viola Tempesta",
+      "act": 4,
+      "tier": "regular",
+      "doctrine": "Trickster",
+      "aiPersonality": "Fox",
+      "randomMoveChance": 0.04,
+      "description": "A minor noblewoman exiled from court for cheating at primero. She didn't cheat \u2014 she simply played a different game than everyone else.",
+      "visualHook": "Violet silk gloves, a monocle on a chain, a beauty mark that changes position each time you see her",
+      "deckSize": 18,
+      "deckComposition": {
+        "doctrine": 14,
+        "neutral": 4,
+        "cardIds": [
+          "trickster_puppet_master",
+          "trickster_charlatan",
+          "trickster_mirror_mage",
+          "trickster_fortune_teller",
+          "trickster_mountebank",
+          "trickster_mask_maker",
+          "trickster_escape_artist",
+          "trickster_con_artist",
+          "trickster_venetian_noble",
+          "trickster_acrobat",
+          "trickster_smuggler",
+          "trickster_doppelganger",
+          "neutral_castellan",
+          "neutral_treasurer",
+          "neutral_courser",
+          "neutral_duke",
+          "trickster_grand_masquerader",
+          "trickster_courtesan"
+        ]
+      },
+      "relics": [
+        "loaded_dice",
+        "forged_papers"
+      ],
+      "houseRule": "No Trumps Before Dusk",
+      "signatureMechanic": "Rule bender \u2014 thrives in no-trump chaos, then dominates when trumps unlock",
+      "gimmickDescription": "The Contessa bans trumps until bout 3. She was exiled for playing a different game \u2014 now you must play hers.",
+      "difficulty": 7
+    },
+    {
+      "id": "act4_regular_3",
+      "name": "Don Sangue",
+      "act": 4,
+      "tier": "regular",
+      "doctrine": "Brute",
+      "aiPersonality": "Brawler",
+      "randomMoveChance": 0.04,
+      "description": "A papal enforcer who collects debts and broken fingers with equal enthusiasm. At the card table, he plays with the same philosophy \u2014 make them fear you.",
+      "visualHook": "Blood-red doublet, a heavy gold crucifix, hands like sides of beef, a quiet menace in every gesture",
+      "deckSize": 17,
+      "deckComposition": {
+        "doctrine": 14,
+        "neutral": 3,
+        "cardIds": [
+          "brute_cannon_master",
+          "brute_war_elephant",
+          "brute_condottiero",
+          "brute_iron_duke",
+          "brute_gladiator",
+          "brute_warmonger",
+          "brute_battering_shield",
+          "brute_arsonist",
+          "brute_executioner",
+          "brute_pit_fighter",
+          "brute_sapper",
+          "brute_enforcer",
+          "neutral_squire",
+          "neutral_merchant_prince",
+          "neutral_herald",
+          "brute_siege_ram",
+          "brute_berserker"
+        ]
+      },
+      "relics": [
+        "knuckle_dusters",
+        "bloodstained_ledger"
+      ],
+      "houseRule": "The Gauntlet",
+      "signatureMechanic": "Enforcer's discipline \u2014 attacks all game with overwhelming, punishing force",
+      "gimmickDescription": "The enforcer fights under the gauntlet \u2014 one side attacks, one defends. He chose violence.",
+      "difficulty": 8
+    },
+    {
+      "id": "act4_elite_1",
+      "name": "L'Ombra \u2014 Caterina Velo",
+      "act": 4,
+      "tier": "elite",
+      "doctrine": "Schemer",
+      "aiPersonality": "Assassin",
+      "randomMoveChance": 0.02,
+      "description": "The Cardinal's personal spymaster. No one knows her real name. She plays cards the way she runs agents \u2014 invisibly, until the trap is already sprung.",
+      "visualHook": "Plain grey dress that makes her forgettable, unremarkable face, but her eyes miss nothing \u2014 a single black pearl earring is her only tell",
+      "deckSize": 18,
+      "deckComposition": {
+        "doctrine": 15,
+        "neutral": 3,
+        "cardIds": [
+          "schemer_puppeteer",
+          "schemer_forger",
+          "schemer_doge_spymaster",
+          "schemer_archivist",
+          "schemer_mastermind",
+          "schemer_venetian_mirror",
+          "schemer_cipher",
+          "schemer_spyglass",
+          "schemer_cartographer",
+          "schemer_envoy",
+          "schemer_inquisitor",
+          "schemer_poisoner",
+          "schemer_librarian",
+          "neutral_footman",
+          "neutral_queen_regent",
+          "schemer_informant",
+          "schemer_interceptor",
+          "schemer_double_agent"
+        ]
+      },
+      "relics": [
+        "invisible_ink",
+        "cipher_wheel",
+        "hollow_ring"
+      ],
+      "houseRule": "The Mirror",
+      "signatureMechanic": "Invisible hand \u2014 copies your abilities and turns your own strategy against you",
+      "gimmickDescription": "The Shadow mirrors everything you do. Your best abilities become her weapons. Trust nothing you see at her table.",
+      "difficulty": 9
+    },
+    {
+      "id": "act4_elite_2",
+      "name": "Il Flagello \u2014 Brother Torquato",
+      "act": 4,
+      "tier": "elite",
+      "doctrine": "Brute",
+      "aiPersonality": "Brawler",
+      "randomMoveChance": 0.02,
+      "description": "A Dominican inquisitor who views card games as trials by ordeal. Every attack is a judgment. Every forced pickup is a penance.",
+      "visualHook": "White robes with black mantle, a scourge hanging from his belt, sunken fanatical eyes, tonsured head",
+      "deckSize": 19,
+      "deckComposition": {
+        "doctrine": 15,
+        "neutral": 4,
+        "cardIds": [
+          "brute_battering_shield",
+          "brute_cannon_master",
+          "brute_siege_tower",
+          "brute_executioner",
+          "brute_iron_duke",
+          "brute_gladiator",
+          "brute_berserker",
+          "brute_enforcer",
+          "brute_war_elephant",
+          "brute_sapper",
+          "brute_vanguard",
+          "brute_pit_fighter",
+          "brute_warmonger",
+          "neutral_treasurer",
+          "neutral_duke",
+          "neutral_merchant_prince",
+          "brute_condottiero",
+          "brute_siege_ram",
+          "brute_mercenary_captain"
+        ]
+      },
+      "relics": [
+        "iron_scourge",
+        "book_of_judgments",
+        "inquisitors_seal"
+      ],
+      "houseRule": "Double or Nothing",
+      "signatureMechanic": "Trial by ordeal \u2014 every card eaten fuels his righteous punishment",
+      "gimmickDescription": "The Inquisitor plays double or nothing. Every card you force him to eat draws him more \u2014 penance only makes him stronger.",
+      "difficulty": 9
+    },
+    {
+      "id": "act4_boss_1",
+      "name": "Il Cardinale \u2014 Augusto Sforza",
+      "act": 4,
+      "tier": "boss",
+      "doctrine": "Schemer",
+      "aiPersonality": "Scholar",
+      "randomMoveChance": 0.02,
+      "description": "The Cardinal himself. A prince of the Church who treats the card table as another battlefield in the eternal war for power. He has spies in every court, agents in every guild, and informants in every tavern. When he plays, he already knows your entire hand \u2014 the game is merely a formality.",
+      "visualHook": "Scarlet robes and biretta, ruby ring of office, manicured hands that never tremble, a faint smile that suggests he knows something you don't \u2014 because he always does",
+      "deckSize": 19,
+      "deckComposition": {
+        "doctrine": 15,
+        "neutral": 4,
+        "cardIds": [
+          "schemer_doge_spymaster",
+          "schemer_forger",
+          "schemer_archivist",
+          "schemer_puppeteer",
+          "schemer_mastermind",
+          "schemer_cryptanalyst",
+          "schemer_cartographer",
+          "schemer_informant",
+          "schemer_shadow_courier",
+          "schemer_scribe",
+          "schemer_interceptor",
+          "schemer_librarian",
+          "schemer_envoy",
+          "schemer_poisoner",
+          "neutral_treasurer",
+          "neutral_magistrate",
+          "neutral_queen_regent",
+          "schemer_spyglass",
+          "schemer_cipher"
+        ]
+      },
+      "relics": [
+        "papal_ring",
+        "cipher_codex",
+        "confessional_key"
+      ],
+      "houseRule": "The Mirror",
+      "signatureMechanic": "Divine Omniscience \u2014 The Cardinal can see the top 3 cards of the draw pile at all times. Once per match, he may 'Excommunicate' \u2014 forcing the player to discard their entire hand and redraw, losing all built-up synergies. The player keeps the same number of cards but loses all strategic positioning.",
+      "gimmickDescription": "The Cardinal mirrors your abilities and sees what you cannot. He may Excommunicate you once \u2014 discarding your entire hand. The game is merely a formality.",
+      "difficulty": 9
+    },
+    {
+      "id": "act5_regular_1",
+      "name": "Marchese Falcone di Lupo",
+      "act": 5,
+      "tier": "regular",
+      "doctrine": "Trickster",
+      "aiPersonality": "Fox",
+      "randomMoveChance": 0.0,
+      "description": "A hawk-faced nobleman who breeds falcons and plays cards with the same predatory patience. Circles, circles, then a devastating strike.",
+      "visualHook": "A live falcon on a jeweled gauntlet beside him, aquiline nose, eyes like a raptor, silver-grey hair",
+      "deckSize": 15,
+      "deckComposition": {
+        "doctrine": 13,
+        "neutral": 2,
+        "cardIds": [
+          "trickster_pickpocket",
+          "trickster_alchemist",
+          "trickster_smuggler",
+          "trickster_mirror_mage",
+          "trickster_card_sharp",
+          "trickster_maestro",
+          "trickster_contessa",
+          "trickster_fortune_teller",
+          "trickster_puppet_master",
+          "trickster_escape_artist",
+          "trickster_venetian_noble",
+          "trickster_mask_maker",
+          "neutral_merchant_prince",
+          "neutral_guild_knight",
+          "trickster_grand_masquerader"
+        ]
+      },
+      "relics": [
+        "falcon_talon",
+        "hunters_patience",
+        "nobles_pride"
+      ],
+      "houseRule": "The Mirror",
+      "signatureMechanic": "Predator's patience \u2014 circles and copies your strategy before striking with lethal precision",
+      "gimmickDescription": "The Marchese mirrors your abilities like a falcon studying its prey. He circles, copies, then dives for the kill.",
+      "difficulty": 8
+    },
+    {
+      "id": "act5_regular_2",
+      "name": "Principessa Bianca Nieve",
+      "act": 5,
+      "tier": "regular",
+      "doctrine": "Hoarder",
+      "aiPersonality": "Noble",
+      "randomMoveChance": 0.0,
+      "description": "A princess from a minor house who compensates for her lack of political power with an overwhelming card game. She buries opponents in resources they cannot match.",
+      "visualHook": "Snow-white dress with gold embroidery, a tiara of small diamonds, impossibly composed expression, pearl-drop earrings",
+      "deckSize": 16,
+      "deckComposition": {
+        "doctrine": 15,
+        "neutral": 1,
+        "cardIds": [
+          "hoarder_miser",
+          "hoarder_fence",
+          "hoarder_tax_collector",
+          "hoarder_banker",
+          "hoarder_vault_keeper",
+          "hoarder_guild_master",
+          "hoarder_dynasty_heir",
+          "hoarder_merchant",
+          "hoarder_treasure_hunter",
+          "hoarder_cartels_don",
+          "hoarder_collector",
+          "hoarder_warehouse_keeper",
+          "hoarder_speculator",
+          "hoarder_packrat",
+          "neutral_magistrate",
+          "hoarder_monopolist"
+        ]
+      },
+      "relics": [
+        "diamond_tiara",
+        "royal_treasury",
+        "patience_of_saints"
+      ],
+      "houseRule": "Heavy Hands",
+      "signatureMechanic": "Royal treasury \u2014 starts with a massive hand and buries opponents in sheer volume",
+      "gimmickDescription": "The Princess deals heavy hands \u2014 8-card starting hands. She buries opponents under resources no commoner can match.",
+      "difficulty": 9
+    },
+    {
+      "id": "act5_regular_3",
+      "name": "Condottiero Ruggero il Nero",
+      "act": 5,
+      "tier": "regular",
+      "doctrine": "Brute",
+      "aiPersonality": "Assassin",
+      "randomMoveChance": 0.0,
+      "description": "A mercenary general who conquered three city-states before retiring to the card table. Unlike common brutes, he saves his overwhelming force for the exact right moment.",
+      "visualHook": "Black plate armor worn even at the card table, a war-hammer leaning against his chair, a livid scar bisecting his left eyebrow",
+      "deckSize": 17,
+      "deckComposition": {
+        "doctrine": 15,
+        "neutral": 2,
+        "cardIds": [
+          "brute_pillager",
+          "brute_battering_shield",
+          "brute_sapper",
+          "brute_quartermaster",
+          "brute_warlord",
+          "brute_cannon_master",
+          "brute_warmonger",
+          "brute_executioner",
+          "brute_mercenary_captain",
+          "brute_enforcer",
+          "brute_iron_duke",
+          "brute_vanguard",
+          "brute_arsonist",
+          "brute_siege_tower",
+          "neutral_treasurer",
+          "neutral_cardinal",
+          "brute_titan"
+        ]
+      },
+      "relics": [
+        "war_hammer",
+        "battle_standard",
+        "iron_resolve"
+      ],
+      "houseRule": "Double or Nothing",
+      "signatureMechanic": "Strategic reserves \u2014 absorbs cards to fuel one perfectly timed overwhelming assault",
+      "gimmickDescription": "The Condottiero plays double or nothing. He absorbs punishment like a general absorbs losses \u2014 then counterattacks with devastating force.",
+      "difficulty": 9
+    },
+    {
+      "id": "act5_elite_1",
+      "name": "L'Architetto \u2014 Leonardo Ombrato",
+      "act": 5,
+      "tier": "elite",
+      "doctrine": "Schemer",
+      "aiPersonality": "Scholar",
+      "randomMoveChance": 0.0,
+      "description": "A genius polymath who designs fortresses, war machines, and card strategies with equal brilliance. He sees twelve moves ahead and builds his victory like a cathedral \u2014 one perfectly placed stone at a time.",
+      "visualHook": "Paint-stained fingers, wild unkempt hair, sketches on scraps of paper scattered around him, a bronze astrolabe he fidgets with",
+      "deckSize": 16,
+      "deckComposition": {
+        "doctrine": 15,
+        "neutral": 1,
+        "cardIds": [
+          "schemer_puppeteer",
+          "schemer_doge_spymaster",
+          "schemer_archivist",
+          "schemer_mastermind",
+          "schemer_forger",
+          "schemer_cartographer",
+          "schemer_venetian_mirror",
+          "schemer_spyglass",
+          "schemer_shadow_courier",
+          "schemer_informant",
+          "schemer_inquisitor",
+          "schemer_librarian",
+          "schemer_poisoner",
+          "schemer_double_agent",
+          "neutral_knight",
+          "schemer_grand_inquisitor"
+        ]
+      },
+      "relics": [
+        "bronze_astrolabe",
+        "architects_compass",
+        "mirror_of_truth",
+        "codex_of_secrets"
+      ],
+      "houseRule": "Cutthroat",
+      "signatureMechanic": "Twelve moves ahead \u2014 attacks with surgical precision using any card as a weapon",
+      "gimmickDescription": "The Architect plays cutthroat \u2014 any rank attacks, up to four per bout. He builds his victory like a cathedral, one perfect strike at a time.",
+      "difficulty": 10
+    },
+    {
+      "id": "act5_elite_2",
+      "name": "La Strega \u2014 Maddalena Fuoco",
+      "act": 5,
+      "tier": "elite",
+      "doctrine": "Trickster",
+      "aiPersonality": "Assassin",
+      "randomMoveChance": 0.0,
+      "description": "They call her the Witch, and no one is sure if it's a metaphor. She breaks every rule of the game \u2014 not by cheating, but by playing in ways no one thought possible. Cards change suits in her hands. Trumps appear from nowhere. Reality bends at her table.",
+      "visualHook": "Wild black hair streaked with silver, mismatched eyes (one green, one amber), a deck of cards that seems to shimmer, rings carved from bone",
+      "deckSize": 15,
+      "deckComposition": {
+        "doctrine": 15,
+        "neutral": 0,
+        "cardIds": [
+          "trickster_doppelganger",
+          "trickster_pickpocket",
+          "trickster_escape_artist",
+          "trickster_contessa",
+          "trickster_mirror_mage",
+          "trickster_acrobat",
+          "trickster_charlatan",
+          "trickster_mask_maker",
+          "trickster_alchemist",
+          "trickster_jester",
+          "trickster_illusionist",
+          "trickster_con_artist",
+          "trickster_card_sharp",
+          "trickster_venetian_noble",
+          "trickster_grand_masquerader"
+        ]
+      },
+      "relics": [
+        "bone_dice",
+        "witchs_familiar",
+        "cloak_of_illusions",
+        "third_eye"
+      ],
+      "houseRule": "No Trumps Before Dusk",
+      "signatureMechanic": "Reality bender \u2014 thrives without trumps, warping the game into something unrecognizable",
+      "gimmickDescription": "The Witch bans trumps until bout 3. In that chaos, she thrives \u2014 cards change suits in her hands, and reality bends at her table.",
+      "difficulty": 10
+    },
+    {
+      "id": "act5_boss_1",
+      "name": "Il Doge \u2014 Alessandro Magnifico",
+      "act": 5,
+      "tier": "boss",
+      "doctrine": "hybrid_brute_schemer",
+      "aiPersonality": "Fox",
+      "randomMoveChance": 0.0,
+      "description": "The Duke himself. The most powerful man in the city and the greatest card player in all of Italy. He is both the iron fist and the velvet glove \u2014 a Brute's overwhelming force guided by a Schemer's perfect information. They say he has never lost a match in his own salon. They say the last person who beat him disappeared. You are here to prove them wrong.",
+      "visualHook": "Ermine-trimmed crimson robe, the ducal crown resting casually on the table beside him, fingers heavy with rings of state, a calm expression that never changes whether winning or losing \u2014 because he never loses",
+      "deckSize": 17,
+      "deckComposition": {
+        "doctrine": 16,
+        "neutral": 0,
+        "doctrineBreakdown": {
+          "brute": 8,
+          "schemer": 8
+        },
+        "cardIds": [
+          "brute_executioner",
+          "brute_siege_tower",
+          "brute_cannon_master",
+          "brute_battering_shield",
+          "brute_iron_duke",
+          "brute_war_elephant",
+          "brute_berserker",
+          "brute_warlord",
+          "schemer_doge_spymaster",
+          "schemer_forger",
+          "schemer_archivist",
+          "schemer_mastermind",
+          "schemer_puppeteer",
+          "schemer_ambassador",
+          "schemer_shadow_courier",
+          "schemer_inquisitor",
+          "brute_titan"
+        ]
+      },
+      "relics": [
+        "ducal_crown",
+        "scepter_of_command",
+        "ring_of_state",
+        "lions_mane"
+      ],
+      "houseRule": "The Gauntlet",
+      "signatureMechanic": "The Doge's Mandate \u2014 Alessandro plays with BOTH Brute and Schemer passive abilities active simultaneously. He has two unique legendary cards: 'Doge's Judgment' (Brute \u2014 forces opponent to reveal their entire hand AND pick up 2 cards from the discard) and 'Doge's Decree' (Schemer \u2014 look at opponent's hand, then rearrange the top 5 cards of the draw pile in any order). Once per match, he can invoke 'Absolute Authority' \u2014 canceling any ability the player activates and turning it back on them.",
+      "gimmickDescription": "The Duke attacks all game with the force of a Brute and the cunning of a Schemer. He can cancel your abilities and turn them against you. They say he has never lost.",
+      "difficulty": 10
+    }
+  ],
+  "meta": {
+    "totalEnemies": 30,
+    "perAct": {
+      "regular": 3,
+      "elite": 2,
+      "boss": 1
+    },
+    "doctrineDistribution": {
+      "act1": {
+        "regular": [
+          "Brute",
+          "Hoarder",
+          "Brute"
+        ],
+        "elite": [
+          "Brute",
+          "Schemer"
+        ],
+        "boss": [
+          "Brute"
+        ]
+      },
+      "act2": {
+        "regular": [
+          "Hoarder",
+          "Schemer",
+          "Trickster"
+        ],
+        "elite": [
+          "Schemer",
+          "Hoarder"
+        ],
+        "boss": [
+          "Trickster"
+        ]
+      },
+      "act3": {
+        "regular": [
+          "Schemer",
+          "Brute",
+          "Hoarder"
+        ],
+        "elite": [
+          "Schemer",
+          "Trickster"
+        ],
+        "boss": [
+          "Hoarder"
+        ]
+      },
+      "act4": {
+        "regular": [
+          "Schemer",
+          "Trickster",
+          "Brute"
+        ],
+        "elite": [
+          "Schemer",
+          "Brute"
+        ],
+        "boss": [
+          "Schemer"
+        ]
+      },
+      "act5": {
+        "regular": [
+          "Trickster",
+          "Hoarder",
+          "Brute"
+        ],
+        "elite": [
+          "Schemer",
+          "Trickster"
+        ],
+        "boss": [
+          "hybrid_brute_schemer"
+        ]
+      }
+    },
+    "difficultyProgression": "1-4 (Act 1) \u2192 3-6 (Act 2) \u2192 5-8 (Act 3) \u2192 7-9 (Act 4) \u2192 8-10 (Act 5)",
+    "designNotes": [
+      "Act 1 is Brute-heavy to teach players the core attack/defend loop before introducing manipulation",
+      "Act 2 introduces all four doctrines so players understand the full strategic landscape",
+      "Act 3 onward, every enemy has a fully synergistic doctrine deck",
+      "Elite opponents always have house rules to force adaptation",
+      "Boss signature mechanics escalate from simple (extra attack) to game-warping (dual doctrine + ability cancellation)",
+      "The Doge is the only hybrid-doctrine enemy in the game, making him feel truly unique",
+      "AI personality types are matched to doctrines: Brutes tend toward Brawler, Schemers toward Scholar/Assassin, etc.",
+      "Visual hooks are designed for instant recognition in card-game portrait frames"
+    ]
+  }
+}

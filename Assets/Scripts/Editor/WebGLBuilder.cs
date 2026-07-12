@@ -1,3 +1,4 @@
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,6 +9,10 @@ namespace WitsAndFools.EditorTools
         [MenuItem("Wits and Fools/Build/WebGL (docs)")]
         public static void BuildWebGL()
         {
+            // Assets/Data is the canonical source but is not bundled into the build,
+            // so mirror the runtime JSON into Resources/Data (which WebGL can load).
+            SyncDataToResources();
+
             PlayerSettings.productName = "Wits and Fools";
             PlayerSettings.WebGL.template = "PROJECT:WitsAndFools";
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
@@ -41,6 +46,21 @@ namespace WitsAndFools.EditorTools
                 Debug.Log($"[WebGL] Build succeeded: {outputPath} ({report.summary.totalSize / (1024*1024)}MB)");
             else
                 Debug.LogError($"[WebGL] Build failed: {report.summary.result}");
+        }
+
+        // Mirrors the runtime data JSON from the canonical Assets/Data into
+        // Resources/Data so it gets bundled and is loadable on WebGL.
+        static void SyncDataToResources()
+        {
+            string srcDir = Path.Combine(Application.dataPath, "Data");
+            string dstDir = Path.Combine(Application.dataPath, "Resources", "Data");
+            Directory.CreateDirectory(dstDir);
+            foreach (var name in new[] { "card_catalog.json", "enemy_roster.json" })
+            {
+                string src = Path.Combine(srcDir, name);
+                if (File.Exists(src)) File.Copy(src, Path.Combine(dstDir, name), true);
+            }
+            AssetDatabase.Refresh();
         }
     }
 }

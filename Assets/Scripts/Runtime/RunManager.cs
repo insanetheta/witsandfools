@@ -469,28 +469,45 @@ namespace WitsAndFools
         {
             if (!CardCatalog.IsInitialized)
             {
-                string path = Path.Combine(Application.dataPath, "Data", "card_catalog.json");
-                if (File.Exists(path))
+                string json = LoadDataJson("card_catalog");
+                if (!string.IsNullOrEmpty(json))
                 {
-                    CardCatalogLoader.LoadFromJson(File.ReadAllText(path));
+                    CardCatalogLoader.LoadFromJson(json);
                     Debug.Log($"[RunManager] Loaded {CardCatalog.Count} cards from catalog.");
                 }
+                else
+                    Debug.LogError("[RunManager] card_catalog data not found (Assets/Data or Resources/Data).");
             }
             if (!DoctrineRoster.IsInitialized)
             {
-                string path = Path.Combine(Application.dataPath, "Data", "enemy_roster.json");
-                if (File.Exists(path))
+                string json = LoadDataJson("enemy_roster");
+                if (!string.IsNullOrEmpty(json))
                 {
-                    var enemies = DoctrineRoster.ParseJson(File.ReadAllText(path));
+                    var enemies = DoctrineRoster.ParseJson(json);
                     DoctrineRoster.RegisterAll(enemies);
                     Debug.Log($"[RunManager] Loaded {DoctrineRoster.Count} enemies from roster.");
                 }
+                else
+                    Debug.LogError("[RunManager] enemy_roster data not found (Assets/Data or Resources/Data).");
             }
             if (!RelicPool.IsInitialized)
             {
                 RelicPool.RegisterAll(RelicDefinitions.All());
                 Debug.Log($"[RunManager] Registered {RelicPool.Count} relic definitions.");
             }
+        }
+
+        // Loads a Data JSON cross-platform. Editor/standalone read the canonical file
+        // under Assets/Data via File IO; player builds (notably WebGL, which has no
+        // synchronous file IO and does not bundle Assets/Data) fall back to the copy
+        // bundled under Resources/Data. WebGLBuilder keeps Resources/Data in sync.
+        static string LoadDataJson(string name)
+        {
+            string path = Path.Combine(Application.dataPath, "Data", name + ".json");
+            if (File.Exists(path))
+                return File.ReadAllText(path);
+            var ta = Resources.Load<TextAsset>("Data/" + name);
+            return ta != null ? ta.text : null;
         }
 
         void OnArchetypeSelected(ArchetypeType archetype)
