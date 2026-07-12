@@ -3883,6 +3883,13 @@ namespace WitsAndFools
             var btn = wrapper.AddComponent<Button>();
             var captured = def;
             btn.onClick.AddListener(() => OnCardRewardPicked(captured));
+            // The mini card is a CardView, which implements IPointerClickHandler and
+            // swallows the pointer click before it can bubble up to this wrapper Button
+            // (Unity routes clicks to the nearest IPointerClickHandler ancestor of the hit
+            // graphic). Wire the CardView's own click event so reward selection fires.
+            // The Button above still serves the CreateMiniCard fallback (no CardView).
+            var cv = miniCard.GetComponentInChildren<CardView>();
+            if (cv != null) cv.OnClicked = _ => OnCardRewardPicked(captured);
         }
 
         void OnCardRewardPicked(CardDefinition def)
@@ -4216,6 +4223,11 @@ namespace WitsAndFools
                     var btn = miniCard.AddComponent<Button>();
                     var captured = cardDef;
                     btn.onClick.AddListener(() => ShowCardDetail(captured));
+                    // CardView swallows the pointer click (IPointerClickHandler) before it
+                    // reaches this wrapper Button, so wire its own event too (same bug as
+                    // the card-reward slots).
+                    var cvBrowse = miniCard.GetComponentInChildren<CardView>();
+                    if (cvBrowse != null) cvBrowse.OnClicked = _ => ShowCardDetail(captured);
                 }
             }
         }
